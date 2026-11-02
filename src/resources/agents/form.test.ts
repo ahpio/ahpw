@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EngineRow } from '../../bridges/agents.js';
 import { idFor } from '../connectors/form.js';
-import { agentConfigForForm, agentConfigForPut, agentWanted, engineSchema, startOf } from './form.js';
+import { agentConfigForForm, agentConfigForPut, agentWanted, engineSchema, hasSecrets, startOf } from './form.js';
 
 const ENGINE: EngineRow = {
   name: 'claude',
@@ -24,6 +24,14 @@ const ENGINE: EngineRow = {
 const KEPT = { $secret: 'host/agent/claude/env.ANTHROPIC_API_KEY' };
 
 describe('engineSchema', () => {
+  it('draws a secret field as a password, and leaves one marked secret: false in the record', () => {
+    const engine: EngineRow = { ...ENGINE, schema: { type: 'object', properties: { token: { type: 'string', secret: true }, shown: { type: 'string', writeOnly: true, secret: false } } } };
+    const drawn = engineSchema(engine, {}, 'host', 'Kept') as { properties: Record<string, Record<string, unknown>> };
+    expect(drawn.properties.token?.format).toBe('password');
+    expect(drawn.properties.shown?.format).toBeUndefined();
+    expect(hasSecrets(engine)).toBe(true);
+  });
+
   it('draws the schema in its own shape, each writeOnly field a password, and says a stored one is kept', () => {
     const drawn = engineSchema(ENGINE, { apiKey: { $secret: 'x' }, env: { ANTHROPIC_API_KEY: KEPT } }, 'host', 'Kept') as { properties: Record<string, Record<string, unknown>> };
     expect(Object.keys(drawn.properties)).toEqual(['outputStyle', 'apiKey', 'env', 'extraArgs']);

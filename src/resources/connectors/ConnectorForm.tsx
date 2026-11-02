@@ -14,7 +14,7 @@ import { HostIcon } from '../../shell/HostIcon.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { meOn } from './actions.js';
 import { AdapterPicker } from './AdapterPicker.js';
-import { adapterSchema, configForForm, configForPut, configForSignIn, ID_PATTERN, idFor, ownerChoices, topSchema, type TopValues } from './form.js';
+import { adapterSchema, configForForm, configForPut, configForSignIn, ID_PATTERN, idFor, ownerChoices, signInFills, topSchema, type TopValues } from './form.js';
 import { SignInStep } from './SignInStep.js';
 import { newConnectorTab } from './state.js';
 
@@ -71,6 +71,8 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
   const [failure, setFailure] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [jsonValid, setJsonValid] = useState(true);
+  /** The adapter whose sign-in fields the person chose to type by hand; null while none is. */
+  const [byHandOf, setByHandOf] = useState<string | null>(null);
 
   // What the host holds now, whenever it changes.
   useEffect(() => { setTop(heldTop); setConfig(heldConfig); }, [heldTop, heldConfig]);
@@ -102,6 +104,9 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
   }, [editing, owners.map((one) => one.value).join('\n'), top.owner]);
 
   const adapter = adapters.find((one) => one.name === top.adapter);
+  // The fields a device sign-in fills stay hidden, unless the person chose to type them for this adapter.
+  const byHand = byHandOf === top.adapter;
+  const hidden = adapter?.signIn === undefined || byHand ? [] : signInFills(adapter.schema, adapter.signIn);
   const head = topSchema(owners, editing, {
     id: t('connectors/form/id'),
     idHint: t('connectors/form/idHint'),
@@ -109,7 +114,7 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
     titleHint: t('connectors/form/titleHint'),
     owner: t('connectors/form/owner'),
   });
-  const fields: JsonSchemaObject | undefined = adapter === undefined ? undefined : adapterSchema(adapter.schema, connector?.config ?? {}, t('connectors/form/secretKept'));
+  const fields: JsonSchemaObject | undefined = adapter === undefined ? undefined : adapterSchema(adapter.schema, connector?.config ?? {}, t('connectors/form/secretKept'), hidden);
 
   // Without connector:list the host lists no adapters, so a new connector has nothing to be made from.
   if (adaptersRead.error !== null && !editing) return <PageAlert tone="warning" title={t('connectors/form/noAdapters')} message={adaptersRead.error} />;
@@ -165,9 +170,12 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
               key={top.adapter}
               host={host}
               signIn={adapter!.signIn}
+              {...(connector === undefined ? {} : { held: connector })}
               provider={adapter!.title}
               wanted={wantedWith(configForSignIn(config, adapter!.schema, adapter!.signIn.field))}
               disabled={!ready || busy}
+              byHand={byHand}
+              onByHand={(on) => setByHandOf(on ? top.adapter : null)}
               // A made connector's step says it is signed in, so the form does not say "Saved." too.
               onDone={(row) => { if (!editing) afterPut(row); }}
             />

@@ -2567,10 +2567,12 @@
     },
     "states": {
       "ready": "Ready",
+      "unauthorized": "Unauthorized",
       "invalid": "Invalid",
       "unavailable": "Unavailable"
     },
     "stateNotes": {
+      "unauthorized": "The provider refused its credential at the last check. Sign in again, or update its settings.",
       "invalid": "Its settings don't match its adapter, or the adapter couldn't open it. Update its settings to open it again.",
       "unavailable": "No plugin provides its adapter right now. Enable the plugin that offers {adapter} to open it again."
     },
@@ -2613,11 +2615,19 @@
       "orType": "Sign in, or type the key above.",
       "step": "Sign in on the page that opened, then copy the code it shows and paste it here.",
       "openAgain": "Open the page again",
+      "device": "Type this code on the provider's page, then approve the sign-in there.",
+      "openPage": "Open the page",
+      "copyLink": "Copy the link",
+      "copyCode": "Copy the code",
+      "waiting": "Waiting for your approval.",
+      "byHand": "Type the sign-in values by hand",
       "code": "Code",
       "finish": "Finish",
       "cancel": "Cancel",
       "failed": "Sign-in didn't finish",
-      "done": "Signed in with {provider}. State: {state}.",
+      "with": "Signed in with {provider}.",
+      "as": "Signed in as {account}.",
+      "lastCheck": "Last check: {result}, {at}.",
       "again": "Sign in again"
     },
     "page": {

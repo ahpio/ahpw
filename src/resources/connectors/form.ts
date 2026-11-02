@@ -1,13 +1,13 @@
 /**
  * What the connector form draws and sends. The top is ahpw's own: the
  * adapter, the id, the title and the owner. Below it, the adapter's own
- * schema, as the host lists it. scena's `SchemaForm` knows no `writeOnly`, so
+ * schema, as the host lists it. scena's `SchemaForm` knows no `secret`, so
  * a secret field is drawn as a password, empty: the host never lists a secret
  * back, and an empty one sent as `""` keeps what it stores.
  */
 
 import type { EnumOption, JsonSchemaObject } from '@softov/scena/ui';
-import { isSecretRef, type AdapterRow, type Capability, type ConnectorOwner } from '../../bridges/connectors.js';
+import { isSecret, isSecretRef, type AdapterRow, type Capability, type ConnectorOwner, type SignInRow } from '../../bridges/connectors.js';
 import { EVERY, grantParts } from '../../bridges/grants.js';
 import type { ListedUser } from '../../bridges/people.js';
 import { membershipParts } from '../users/memberships.js';
@@ -202,26 +202,49 @@ export function ownerChoices(me: ConnectorOwner | undefined, user: ListedUser | 
 }
 
 
-/** The fields an adapter's schema marks `writeOnly`: its secrets. */
+/** The fields an adapter's schema marks as secrets, as `isSecret` says. */
 export function secretFields(schema: Bag): string[] {
   return Object.entries(bagOf(schema.properties))
-    .filter(([, field]) => bagOf(field).writeOnly === true)
+    .filter(([, field]) => isSecret(field))
     .map(([name]) => name);
+}
+
+/** The fields a device sign-in fills: every secret, and the account. A pasted code fills only what a person may also type. */
+export function signInFills(schema: Bag, signIn: SignInRow): string[] {
+  if (signIn.flow !== 'device') return [];
+  return [...secretFields(schema), ...(signIn.account === undefined ? [] : [signIn.account])];
+}
+
+/**
+ * What a made connector holds of its device sign-in: undefined while the field
+ * the sign-in fills is empty, otherwise the account it names when the adapter
+ * names one. A pasted code fills a field a person may also type, so only a
+ * device sign-in is read this way.
+ */
+export function signedInOf(config: Bag, signIn: SignInRow): { account?: string } | undefined {
+  if (signIn.flow !== 'device') return undefined;
+  const held = config[signIn.field];
+  if (held === undefined || held === null || held === '') return undefined;
+  const account = signIn.account === undefined ? undefined : config[signIn.account];
+  return typeof account === 'string' && account !== '' ? { account } : {};
 }
 
 /**
  * An adapter's schema as the form draws it: each secret a password, and, where the
- * connector holds one, a description that says it is kept.
+ * connector holds one, a description that says it is kept. The hidden fields are
+ * left out, and are not required.
  */
-export function adapterSchema(schema: Bag, held: Bag, keptWord: string): JsonSchemaObject {
+export function adapterSchema(schema: Bag, held: Bag, keptWord: string, hidden: string[] = []): JsonSchemaObject {
   const secrets = secretFields(schema);
-  if (secrets.length === 0) return schema as JsonSchemaObject;
+  if (secrets.length === 0 && hidden.length === 0) return schema as JsonSchemaObject;
   const properties = { ...bagOf(schema.properties) };
   for (const name of secrets) {
     const field = bagOf(properties[name]);
     properties[name] = { ...field, format: 'password', ...(isSecretRef(held[name]) ? { description: keptWord } : {}) };
   }
-  return { ...schema, properties } as JsonSchemaObject;
+  for (const name of hidden) delete properties[name];
+  const required = Array.isArray(schema.required) ? schema.required.filter((name) => !hidden.includes(name as string)) : undefined;
+  return { ...schema, properties, ...(required === undefined ? {} : { required }) } as JsonSchemaObject;
 }
 
 /** A held config as the form shows it: each kept secret empty, since the host never lists its value. */

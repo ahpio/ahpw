@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { RpcTimeoutError } from '@microsoft/agent-host-protocol/client';
 import { NO_OFFERS } from './offers.js';
 import {
   ADAPTERS,
   adaptersReducer,
+  awaitSignIn,
   CONNECTORS,
   connectorsReducer,
   finishSignIn,
@@ -75,7 +77,7 @@ describe('sign-in', () => {
 
   it('start sends what a put sends and answers the url and the state', async () => {
     request.mockResolvedValue({ url: 'https://idp/auth', state: 's1' });
-    await expect(startSignIn('h', WANTED)).resolves.toEqual({ url: 'https://idp/auth', state: 's1' });
+    await expect(startSignIn('h', WANTED)).resolves.toEqual({ flow: 'code', url: 'https://idp/auth', state: 's1' });
     expect(request).toHaveBeenLastCalledWith(CONNECTORS.signin, { id: 'or', adapter: 'openrouter', owner: 'user:ana', title: 'Mine', config: { endpoint: 'https://x' } });
   });
 
@@ -97,6 +99,42 @@ describe('sign-in', () => {
     const caught = await finishSignIn('h', 's1', CODE).catch((error: unknown) => error);
     expect(String((caught as Error).message)).toContain('answered no connector');
     expect(String((caught as Error).message)).not.toContain(CODE);
+  });
+
+  it('start answers a device sign-in with its code and expiry', async () => {
+    request.mockResolvedValue({ state: 's1', code: 'ABCD-1234', url: 'https://github.com/login/device', expires: 900 });
+    await expect(startSignIn('h', WANTED)).resolves.toEqual({ flow: 'device', url: 'https://github.com/login/device', state: 's1', code: 'ABCD-1234', expires: 900 });
+  });
+
+  it('start refuses a device answer with an empty code or no expiry', async () => {
+    request.mockResolvedValue({ state: 's1', code: '', url: 'https://github.com/login/device', expires: 900 });
+    await expect(startSignIn('h', WANTED)).rejects.toThrow('answered no sign-in');
+    request.mockResolvedValue({ state: 's1', code: 'ABCD-1234', url: 'https://github.com/login/device' });
+    await expect(startSignIn('h', WANTED)).rejects.toThrow('answered no sign-in');
+  });
+
+  it('a device finish sends the state alone', async () => {
+    request.mockResolvedValue(HOOK);
+    await expect(finishSignIn('h', 's1')).resolves.toEqual(HOOK);
+    expect(request).toHaveBeenLastCalledWith(CONNECTORS.signinFinish, { state: 's1' });
+  });
+
+  it('the device wait asks again after a timeout, until the row', async () => {
+    request.mockRejectedValueOnce(new RpcTimeoutError(CONNECTORS.signinFinish, 30_000)).mockResolvedValueOnce(HOOK);
+    await expect(awaitSignIn('h', 's1', 1_000, () => 0)).resolves.toEqual(HOOK);
+    expect(request).toHaveBeenCalledTimes(2);
+  });
+
+  it('the device wait stops at the code\'s expiry', async () => {
+    request.mockRejectedValue(new RpcTimeoutError(CONNECTORS.signinFinish, 30_000));
+    await expect(awaitSignIn('h', 's1', 1_000, () => 1_000)).rejects.toBeInstanceOf(RpcTimeoutError);
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  it('the device wait answers the host\'s refusal at once', async () => {
+    request.mockRejectedValue(new Error('signed in as other, this connector is ana'));
+    await expect(awaitSignIn('h', 's1', 1_000, () => 0)).rejects.toThrow('signed in as other');
+    expect(request).toHaveBeenCalledTimes(1);
   });
 });
 

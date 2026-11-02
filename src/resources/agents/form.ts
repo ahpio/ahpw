@@ -1,14 +1,14 @@
 /**
  * What the agent form draws and sends. The top is ahpw's own: the name, the
  * id, the owner, the description and the model. Below it, the engine's schema,
- * as the host lists it, in its own shape, each `writeOnly` field a password. A
+ * as the host lists it, in its own shape, each secret field a password. A
  * secret the host stores is never listed back: its field is empty, and an empty
  * one sent as `""` keeps it.
  */
 
 import type { EnumOption, JsonSchemaObject } from '@softov/scena/ui';
 import type { EngineRow, AgentOwner, AgentRow, AgentWanted } from '../../bridges/agents.js';
-import { isSecretRef } from '../../bridges/connectors.js';
+import { isSecret, isSecretRef } from '../../bridges/connectors.js';
 import type { Icon } from '../../bridges/icons.js';
 import { configForPut } from '../connectors/form.js';
 
@@ -69,13 +69,13 @@ export function topOf(record: AgentRow | undefined, owner: string): AgentTop {
 }
 
 /**
- * A schema with each `writeOnly` field, at any depth and as a map's values,
+ * A schema with each secret field, as `isSecret` says, at any depth and as a map's values,
  * drawn as a password. Where `held` keeps a secret at that field, its
  * description says it is kept.
  */
 function passwords(schema: Bag, held: unknown, keptWord: string): Bag {
   const out: Bag = { ...schema };
-  if (schema.writeOnly === true) {
+  if (isSecret(schema)) {
     out.format = 'password';
     if (isSecretRef(held)) out.description = keptWord;
   }
@@ -90,7 +90,7 @@ function passwords(schema: Bag, held: unknown, keptWord: string): Bag {
 
 /**
  * The engine's schema as the form draws it: as the host lists it, with each
- * `writeOnly` field a password. A `hostOnly` field is left out of a record the
+ * secret field a password. A `hostOnly` field is left out of a record the
  * host does not own.
  */
 export function engineSchema(engine: EngineRow, held: Bag, owner: string, keptWord: string): JsonSchemaObject {
@@ -129,7 +129,7 @@ function keepSecrets(form: Bag, held: Bag): Bag {
 }
 
 /**
- * The config a put sends, in the shape the form holds. A top `writeOnly` field
+ * The config a put sends, in the shape the form holds. A top secret field
  * left empty goes as `""`, and so does each secret the record keeps at any
  * depth, which keeps the one stored. A `hostOnly` field is left out of a record
  * the host does not own.
@@ -143,7 +143,7 @@ export function agentConfigForPut(engine: EngineRow, form: Bag, held: Bag, owner
 /** Whether an engine's form has a secret field, so its Settings say how a kept one is shown. */
 export function hasSecrets(engine: EngineRow): boolean {
   const any = (schema: Bag): boolean =>
-    schema.writeOnly === true
+    isSecret(schema)
     || Object.values(bagOf(schema.properties)).some((field) => any(bagOf(field)))
     || (typeof schema.additionalProperties === 'object' && schema.additionalProperties !== null && any(schema.additionalProperties as Bag));
   return any(engine.schema);

@@ -8,8 +8,8 @@
  * `connector:list`, which reads the caller's own connectors, their teams' and
  * the host's; `connector:all` reads every connector.
  *
- * A field an adapter's schema marks `writeOnly` is a secret: the host keeps
- * it in its vault and lists `{ "$secret": "<name>" }` in its place, and a put
+ * A field an adapter's schema marks `secret` is a secret, as `isSecret` says:
+ * the host keeps it in its vault and lists `{ "$secret": "<name>" }` in its place, and a put
  * that sends it as `""` keeps the one stored.
  *
  * The rows are written here rather than imported: `@ahpd/sdk` 0.13 has no
@@ -17,6 +17,7 @@
  * to the SDK's once it carries them.
  */
 
+import { RpcTimeoutError } from '@microsoft/agent-host-protocol/client';
 import { hostBridge } from './data.js';
 import type { Icon } from './icons.js';
 import type { Offers } from './offers.js';
@@ -62,6 +63,14 @@ export interface SignInRow {
   title: string;
   /** The secret field of the adapter's schema that the sign-in fills. */
   field: string;
+  /**
+   * How the person signs in: a code they paste here, or a code the host shows
+   * while it waits for their approval on another device. Absent from a host
+   * that has only the pasted code.
+   */
+  flow?: 'code' | 'device';
+  /** The plain field a device sign-in writes the account to, when the adapter names one. */
+  account?: string;
 }
 
 /** One adapter a plugin registers, as `x-ahpd-adapters` lists it under its name. */
@@ -81,13 +90,14 @@ export interface AdapterRow {
 }
 
 /**
- * Where a connector is: `ready` answers, `invalid` no longer fits its
- * adapter's schema or its adapter refused to open it, `unavailable` has no
+ * Where a connector is: `ready` answers, `unauthorized` is open but its
+ * provider refused its credential at the last check, `invalid` no longer fits
+ * its adapter's schema or its adapter refused to open it, `unavailable` has no
  * plugin registering its adapter.
  */
-export type ConnectorState = 'ready' | 'invalid' | 'unavailable';
+export type ConnectorState = 'ready' | 'unauthorized' | 'invalid' | 'unavailable';
 
-export const CONNECTOR_STATES: readonly ConnectorState[] = ['unavailable', 'invalid', 'ready'];
+export const CONNECTOR_STATES: readonly ConnectorState[] = ['unavailable', 'invalid', 'unauthorized', 'ready'];
 
 /** What a connector's last check found. */
 export type CheckOutcome = 'ok' | 'denied' | 'unreachable' | 'failed';
@@ -138,6 +148,19 @@ export function servesAdapters(offers: Offers): boolean {
   return offers.channels.includes(ADAPTERS.scheme);
 }
 
+/**
+ * Whether a schema node is a secret the host keeps in its vault, by the host's
+ * own rule: `secret: true` is one, and so is `writeOnly: true` with nothing
+ * said about `secret`, which a plugin older than `secret` marks its vault
+ * fields with. `secret: false` beside `writeOnly` keeps the value in the record.
+ */
+export function isSecret(node: unknown): boolean {
+  if (typeof node !== 'object' || node === null) return false;
+  const held = node as { secret?: unknown; writeOnly?: unknown };
+  if (held.secret === true) return true;
+  return held.secret === undefined && held.writeOnly === true;
+}
+
 /** Whether a config value is the reference a host lists in place of a secret. */
 export function isSecretRef(value: unknown): value is { $secret: string } {
   return typeof value === 'object' && value !== null && typeof (value as { $secret?: unknown }).$secret === 'string';
@@ -173,32 +196,61 @@ export async function putConnector(host: string, wanted: ConnectorWanted): Promi
   return answer;
 }
 
-/** A started sign-in: the provider's page, and the state its finish names. */
-export interface SignInStarted {
-  url: string;
-  state: string;
-}
+/**
+ * A started sign-in: the provider's page, and the state its finish names. A
+ * device sign-in also has the code the person types on that page, and how
+ * many seconds it lasts.
+ */
+export type SignInStarted =
+  | { flow: 'code'; url: string; state: string }
+  | { flow: 'device'; url: string; state: string; code: string; expires: number };
 
 const nonEmpty = (value: unknown): value is string => typeof value === 'string' && value !== '';
 
 /**
  * Starts a sign-in for the connector a put would make, without the field the
- * sign-in fills. Answers the page a person opens and the state to finish with.
+ * sign-in fills. Answers the page a person opens and the state to finish with,
+ * and the code to type there when the host answers one.
  */
 export async function startSignIn(host: string, wanted: ConnectorWanted): Promise<SignInStarted> {
   const answer = await hostBridge(host).request(CONNECTORS.signin as never, putParams(wanted) as never) as unknown;
-  const held = answer as Partial<SignInStarted> | null;
+  const held = answer as { url?: unknown; state?: unknown; code?: unknown; expires?: unknown } | null;
   if (typeof held !== 'object' || held === null || !nonEmpty(held.url) || !nonEmpty(held.state)) {
     throw new Error(`${CONNECTORS.signin} answered no sign-in`);
   }
-  return { url: held.url, state: held.state };
+  if (held.code === undefined) return { flow: 'code', url: held.url, state: held.state };
+  if (!nonEmpty(held.code) || typeof held.expires !== 'number' || !(held.expires > 0)) {
+    throw new Error(`${CONNECTORS.signin} answered no sign-in`);
+  }
+  return { flow: 'device', url: held.url, state: held.state, code: held.code, expires: held.expires };
 }
 
-/** Finishes a sign-in with the code the provider showed. Answers the row the host now lists. */
-export async function finishSignIn(host: string, state: string, code: string): Promise<ConnectorRow> {
-  const answer = await hostBridge(host).request(CONNECTORS.signinFinish as never, { state, code } as never) as unknown;
+/**
+ * Finishes a sign-in. A pasted sign-in sends the code the provider showed; a
+ * device sign-in sends the state alone, and the host answers once the person
+ * approved. Answers the row the host now lists.
+ */
+export async function finishSignIn(host: string, state: string, code?: string): Promise<ConnectorRow> {
+  const params = code === undefined ? { state } : { state, code };
+  const answer = await hostBridge(host).request(CONNECTORS.signinFinish as never, params as never) as unknown;
   if (!isRow(answer)) throw new Error(`${CONNECTORS.signinFinish} answered no connector`);
   return answer;
+}
+
+/**
+ * Waits for a device sign-in's approval. The host holds the finish until the
+ * person approves, which may outlast the client's request timeout, and answers
+ * the same outcome to each finish until the code expires. So a finish that
+ * timed out is sent again, until the code's expiry.
+ */
+export async function awaitSignIn(host: string, state: string, until: number, now: () => number = Date.now): Promise<ConnectorRow> {
+  for (;;) {
+    try {
+      return await finishSignIn(host, state);
+    } catch (caught) {
+      if (!(caught instanceof RpcTimeoutError) || now() >= until) throw caught;
+    }
+  }
 }
 
 /** One model a provider connector serves, as `x-ahpd/connectors/models` answers it. */

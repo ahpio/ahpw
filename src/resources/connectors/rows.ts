@@ -11,6 +11,7 @@ export const CONNECTOR_GROUPINGS: readonly ConnectorGrouping[] = ['adapter', 'ow
 const DOT: Record<ConnectorState, Dot> = {
   unavailable: 'failed',
   invalid: 'attention',
+  unauthorized: 'attention',
   ready: 'ok',
 };
 

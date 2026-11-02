@@ -4946,6 +4946,19 @@
   color: var(--oo-color-success);
 }
 
+.web-connector-form__device-code {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}
+
+.web-connector-form__device-code > code {
+  font-family: var(--oo-font-mono, monospace);
+  font-size: 1.5em;
+  letter-spacing: 0.1em;
+  user-select: all;
+}
+
 .web-connector-form__pick {
   display: flex;
   flex-direction: column;

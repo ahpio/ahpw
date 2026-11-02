@@ -2567,10 +2567,12 @@
     },
     "states": {
       "ready": "Listo",
+      "unauthorized": "No autorizado",
       "invalid": "Inválido",
       "unavailable": "No disponible"
     },
     "stateNotes": {
+      "unauthorized": "El proveedor rechazó su credencial en la última comprobación. Inicia sesión de nuevo, o actualiza su configuración.",
       "invalid": "Su configuración no coincide con su adaptador, o el adaptador no pudo abrirlo. Actualiza su configuración para abrirlo de nuevo.",
       "unavailable": "Ningún plugin proporciona su adaptador en este momento. Activa el plugin que ofrece {adapter} para abrirlo de nuevo."
     },
@@ -2613,11 +2615,19 @@
       "orType": "Inicia sesión, o escribe la clave arriba.",
       "step": "Inicia sesión en la página que se abrió, luego copia el código que muestra y pégalo aquí.",
       "openAgain": "Abrir la página otra vez",
+      "device": "Escribe este código en la página del proveedor y aprueba el inicio de sesión allí.",
+      "openPage": "Abrir la página",
+      "copyLink": "Copiar el enlace",
+      "copyCode": "Copiar el código",
+      "waiting": "Esperando tu aprobación.",
+      "byHand": "Escribir a mano los valores de inicio de sesión",
       "code": "Código",
       "finish": "Terminar",
       "cancel": "Cancelar",
       "failed": "No se completó el inicio de sesión",
-      "done": "Sesión iniciada con {provider}. Estado: {state}.",
+      "with": "Sesión iniciada con {provider}.",
+      "as": "Sesión iniciada como {account}.",
+      "lastCheck": "Última comprobación: {result}, {at}.",
       "again": "Iniciar sesión de nuevo"
     },
     "page": {
