@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { AdapterRow } from '../../bridges/connectors.js';
 import type { ListedUser } from '../../bridges/people.js';
-import { adapterGroups, adapterSchema, capabilityGroups, configForForm, configForPut, configForSignIn, holds, ID_PATTERN, idFor, ownerChoices, secretFields, slugOf, topSchema } from './form.js';
+import { adapterGroups, adapterSchema, capabilityGroups, configForForm, configForPut, configForSignIn, holds, ID_PATTERN, idFor, ownerChoices, secretFields, signInFills, slugOf, topSchema } from './form.js';
 
 const SCHEMA = { type: 'object', properties: { bot: { type: 'string' }, secret: { type: 'string', writeOnly: true } }, required: ['secret'] };
 const WEBHOOK: AdapterRow = { name: 'webhook', title: 'Webhook', description: 'Calls in.', schema: SCHEMA, capabilities: [], plugin: 'webhook' };
@@ -152,6 +152,40 @@ describe('secrets', () => {
     expect(configForForm({ bot: 'bot://a', secret: { $secret: 'x' } })).toEqual({ bot: 'bot://a', secret: '' });
     expect(configForPut({ bot: 'bot://a' }, SCHEMA)).toEqual({ bot: 'bot://a', secret: '' });
     expect(configForPut({ secret: 'new' }, SCHEMA)).toEqual({ secret: 'new' });
+  });
+});
+
+describe('secretFields', () => {
+  it('takes the host\'s rule: secret, or writeOnly with nothing said about secret', () => {
+    const schema = { type: 'object', properties: {
+      token: { type: 'string', secret: true },
+      key: { type: 'string', writeOnly: true },
+      shown: { type: 'string', writeOnly: true, secret: false },
+      account: { type: 'string' },
+    } };
+    expect(secretFields(schema)).toEqual(['token', 'key']);
+  });
+});
+
+describe('the fields a sign-in fills', () => {
+  const DEVICE = { type: 'object', required: ['token', 'refresh', 'account', 'region'], properties: {
+    token: { type: 'string', secret: true },
+    refresh: { type: 'string', secret: true },
+    account: { type: 'string' },
+    region: { type: 'string' },
+  } };
+
+  it('are every secret and the account for a device sign-in, and none for a pasted code', () => {
+    expect(signInFills(DEVICE, { title: 'Sign in', field: 'token', flow: 'device', account: 'account' })).toEqual(['token', 'refresh', 'account']);
+    expect(signInFills(DEVICE, { title: 'Sign in', field: 'token', flow: 'device' })).toEqual(['token', 'refresh']);
+    expect(signInFills(DEVICE, { title: 'Sign in', field: 'token', flow: 'code' })).toEqual([]);
+    expect(signInFills(DEVICE, { title: 'Sign in', field: 'token' })).toEqual([]);
+  });
+
+  it('are left out of the drawn schema and its required list', () => {
+    const drawn = adapterSchema(DEVICE, {}, 'Kept', ['token', 'refresh', 'account']) as { properties: Record<string, unknown>; required: string[] };
+    expect(Object.keys(drawn.properties)).toEqual(['region']);
+    expect(drawn.required).toEqual(['region']);
   });
 });
 

@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button, TextField } from '@softov/scena/ui';
-import { finishSignIn, startSignIn, type ConnectorRow, type ConnectorState, type ConnectorWanted, type SignInRow, type SignInStarted } from '../../bridges/connectors.js';
+import { Alert, Button, CheckBox, TextField } from '@softov/scena/ui';
+import { awaitSignIn, finishSignIn, startSignIn, type ConnectorRow, type ConnectorState, type ConnectorWanted, type SignInRow, type SignInStarted } from '../../bridges/connectors.js';
 import { hostSaid } from '../../bridges/said.js';
+import { CopyButton } from '../../shell/controls/CopyButton.js';
 
 /**
  * The sign-in under an adapter's fields: a button labelled by the host, then a
- * step where the person pastes the code the provider's page shows. Once it
- * finishes, the step says it is signed in and the connector's state, and
- * offers to sign in again. The code and the started sign-in live only in this
- * component's state, and are cleared when the step ends, however it ends.
+ * step that depends on the flow. A pasted sign-in opens the provider's page and
+ * takes the code it shows. A device sign-in shows the code the host answered,
+ * for the person to type on the provider's page, and waits for the approval.
+ * Once it finishes, the step says it is signed in and the connector's state,
+ * and offers to sign in again. The code and the started sign-in live only in
+ * this component's state, and are cleared when the step ends, however it ends.
  */
-export function SignInStep({ host, signIn, provider, wanted, disabled, onDone }: {
+export function SignInStep({ host, signIn, provider, wanted, disabled, byHand, onByHand, onDone }: {
   host: string;
   signIn: SignInRow;
   /** What the done step names as the provider: the adapter's title. */
@@ -19,6 +22,9 @@ export function SignInStep({ host, signIn, provider, wanted, disabled, onDone }:
   /** The put the sign-in finishes as, with the config from `configForSignIn`. */
   wanted: ConnectorWanted;
   disabled: boolean;
+  /** Whether the fields a device sign-in fills are drawn, for a person to type them. */
+  byHand: boolean;
+  onByHand: (on: boolean) => void;
   onDone: (row: ConnectorRow) => void;
 }): ReactElement {
   const { t } = useI18n();
@@ -32,29 +38,43 @@ export function SignInStep({ host, signIn, provider, wanted, disabled, onDone }:
   // An answer that comes after the form closed is dropped, so a closed step finishes nothing.
   const live = useRef(true);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
+  // Which sign-in is current. Ending the step moves it, so a device wait that answers after a cancel finishes nothing.
+  const attempt = useRef(0);
 
-  const end = (): void => { setStarted(null); setCode(''); setBusy(false); };
+  const end = (): void => { attempt.current += 1; setStarted(null); setCode(''); setBusy(false); };
+
+  const finished = (row: ConnectorRow): void => { end(); setSignedIn(row.state); onDone(row); };
+  const failed = (caught: unknown): void => { end(); setFailure(hostSaid(caught)); };
 
   const start = (): void => {
+    const mine = attempt.current;
     setBusy(true);
     setFailure(null);
     startSignIn(host, wanted).then(
       (next) => {
-        if (!live.current) return;
+        if (!live.current || attempt.current !== mine) return;
         setBusy(false);
         setStarted(next);
-        window.open(next.url, '_blank', 'noopener');
+        if (next.flow === 'code') {
+          window.open(next.url, '_blank', 'noopener');
+          return;
+        }
+        awaitSignIn(host, next.state, Date.now() + next.expires * 1000).then(
+          (row) => { if (live.current && attempt.current === mine) finished(row); },
+          (caught: unknown) => { if (live.current && attempt.current === mine) failed(caught); },
+        );
       },
-      (caught: unknown) => { if (live.current) { end(); setFailure(hostSaid(caught)); } },
+      (caught: unknown) => { if (live.current && attempt.current === mine) failed(caught); },
     );
   };
 
   const finish = (): void => {
     if (started === null) return;
+    const mine = attempt.current;
     setBusy(true);
     finishSignIn(host, started.state, code).then(
-      (row) => { if (live.current) { end(); setSignedIn(row.state); onDone(row); } },
-      (caught: unknown) => { if (live.current) { end(); setFailure(hostSaid(caught)); } },
+      (row) => { if (live.current && attempt.current === mine) finished(row); },
+      (caught: unknown) => { if (live.current && attempt.current === mine) failed(caught); },
     );
   };
 
@@ -72,7 +92,26 @@ export function SignInStep({ host, signIn, provider, wanted, disabled, onDone }:
           <div className="web-connector-form__signin-start">
             <Button label={signIn.title} disabled={disabled || busy} onClick={start} />
           </div>
-          <p className="web-note">{t('connectors/signIn/orType')}</p>
+          {signIn.flow === 'device'
+            ? <CheckBox label={t('connectors/signIn/byHand')} value={byHand} onChange={onByHand} />
+            : <p className="web-note">{t('connectors/signIn/orType')}</p>}
+        </>
+      ) : started.flow === 'device' ? (
+        <>
+          <span className="web-connector-form__label">{signIn.title}</span>
+          <p className="web-note">
+            {t('connectors/signIn/device')}{' '}
+            <a href={started.url} target="_blank" rel="noopener noreferrer">{t('connectors/signIn/openPage')}</a>{' '}
+            <CopyButton text={started.url} label={t('connectors/signIn/copyLink')} />
+          </p>
+          <div className="web-connector-form__device-code">
+            <code>{started.code}</code>
+            <CopyButton text={started.code} label={t('connectors/signIn/copyCode')} />
+          </div>
+          <p className="web-note">{t('connectors/signIn/waiting')}</p>
+          <div className="web-page__actions">
+            <Button label={t('connectors/signIn/cancel')} onClick={end} />
+          </div>
         </>
       ) : (
         <>
