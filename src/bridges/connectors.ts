@@ -90,13 +90,14 @@ export interface AdapterRow {
 }
 
 /**
- * Where a connector is: `ready` answers, `invalid` no longer fits its
- * adapter's schema or its adapter refused to open it, `unavailable` has no
+ * Where a connector is: `ready` answers, `unauthorized` is open but its
+ * provider refused its credential at the last check, `invalid` no longer fits
+ * its adapter's schema or its adapter refused to open it, `unavailable` has no
  * plugin registering its adapter.
  */
-export type ConnectorState = 'ready' | 'invalid' | 'unavailable';
+export type ConnectorState = 'ready' | 'unauthorized' | 'invalid' | 'unavailable';
 
-export const CONNECTOR_STATES: readonly ConnectorState[] = ['unavailable', 'invalid', 'ready'];
+export const CONNECTOR_STATES: readonly ConnectorState[] = ['unavailable', 'invalid', 'unauthorized', 'ready'];
 
 /** What a connector's last check found. */
 export type CheckOutcome = 'ok' | 'denied' | 'unreachable' | 'failed';

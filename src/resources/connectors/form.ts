@@ -216,6 +216,20 @@ export function signInFills(schema: Bag, signIn: SignInRow): string[] {
 }
 
 /**
+ * What a made connector holds of its device sign-in: undefined while the field
+ * the sign-in fills is empty, otherwise the account it names when the adapter
+ * names one. A pasted code fills a field a person may also type, so only a
+ * device sign-in is read this way.
+ */
+export function signedInOf(config: Bag, signIn: SignInRow): { account?: string } | undefined {
+  if (signIn.flow !== 'device') return undefined;
+  const held = config[signIn.field];
+  if (held === undefined || held === null || held === '') return undefined;
+  const account = signIn.account === undefined ? undefined : config[signIn.account];
+  return typeof account === 'string' && account !== '' ? { account } : {};
+}
+
+/**
  * An adapter's schema as the form draws it: each secret a password, and, where the
  * connector holds one, a description that says it is kept. The hidden fields are
  * left out, and are not required.

@@ -2567,10 +2567,12 @@
     },
     "states": {
       "ready": "Pronto",
+      "unauthorized": "Não autorizado",
       "invalid": "Inválido",
       "unavailable": "Indisponível"
     },
     "stateNotes": {
+      "unauthorized": "O provedor recusou a credencial na última verificação. Entre de novo, ou atualize as configurações.",
       "invalid": "As configurações não correspondem ao adaptador, ou o adaptador não conseguiu abri-lo. Atualize as configurações para abri-lo de novo.",
       "unavailable": "Nenhum plugin oferece o adaptador no momento. Ative o plugin que oferece {adapter} para abri-lo de novo."
     },
@@ -2623,7 +2625,9 @@
       "finish": "Concluir",
       "cancel": "Cancelar",
       "failed": "O login não foi concluído",
-      "done": "Conectado com {provider}. Estado: {state}.",
+      "with": "Conectado com {provider}.",
+      "as": "Conectado como {account}.",
+      "lastCheck": "Última verificação: {result}, {at}.",
       "again": "Entrar de novo"
     },
     "page": {

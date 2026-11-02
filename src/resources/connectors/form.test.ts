@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { AdapterRow } from '../../bridges/connectors.js';
 import type { ListedUser } from '../../bridges/people.js';
-import { adapterGroups, adapterSchema, capabilityGroups, configForForm, configForPut, configForSignIn, holds, ID_PATTERN, idFor, ownerChoices, secretFields, signInFills, slugOf, topSchema } from './form.js';
+import { adapterGroups, adapterSchema, capabilityGroups, configForForm, configForPut, configForSignIn, holds, ID_PATTERN, idFor, ownerChoices, secretFields, signedInOf, signInFills, slugOf, topSchema } from './form.js';
 
 const SCHEMA = { type: 'object', properties: { bot: { type: 'string' }, secret: { type: 'string', writeOnly: true } }, required: ['secret'] };
 const WEBHOOK: AdapterRow = { name: 'webhook', title: 'Webhook', description: 'Calls in.', schema: SCHEMA, capabilities: [], plugin: 'webhook' };
@@ -186,6 +186,20 @@ describe('the fields a sign-in fills', () => {
     const drawn = adapterSchema(DEVICE, {}, 'Kept', ['token', 'refresh', 'account']) as { properties: Record<string, unknown>; required: string[] };
     expect(Object.keys(drawn.properties)).toEqual(['region']);
     expect(drawn.required).toEqual(['region']);
+  });
+});
+
+describe('signedInOf', () => {
+  const DEVICE = { title: 'Sign in', field: 'token', flow: 'device' as const, account: 'account' };
+
+  it('names the account once the field holds a value, and nothing before', () => {
+    expect(signedInOf({ token: { $secret: 'host:connector/t/token' }, account: 'octocat' }, DEVICE)).toEqual({ account: 'octocat' });
+    expect(signedInOf({ token: { $secret: 'host:connector/t/token' } }, DEVICE)).toEqual({});
+    expect(signedInOf({ account: 'octocat' }, DEVICE)).toBeUndefined();
+  });
+
+  it('reads nothing for a pasted code, whose field a person may type', () => {
+    expect(signedInOf({ token: { $secret: 'host:connector/t/token' } }, { title: 'Sign in', field: 'token', flow: 'code' })).toBeUndefined();
   });
 });
 

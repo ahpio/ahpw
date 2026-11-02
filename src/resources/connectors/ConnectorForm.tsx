@@ -170,6 +170,7 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
               key={top.adapter}
               host={host}
               signIn={adapter!.signIn}
+              {...(connector === undefined ? {} : { held: connector })}
               provider={adapter!.title}
               wanted={wantedWith(configForSignIn(config, adapter!.schema, adapter!.signIn.field))}
               disabled={!ready || busy}

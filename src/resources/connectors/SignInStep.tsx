@@ -1,22 +1,27 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
 import { Alert, Button, CheckBox, TextField } from '@softov/scena/ui';
-import { awaitSignIn, finishSignIn, startSignIn, type ConnectorRow, type ConnectorState, type ConnectorWanted, type SignInRow, type SignInStarted } from '../../bridges/connectors.js';
+import { awaitSignIn, finishSignIn, startSignIn, type ConnectorRow, type ConnectorWanted, type SignInRow, type SignInStarted } from '../../bridges/connectors.js';
 import { hostSaid } from '../../bridges/said.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
+import { when } from '../sessions/turn.js';
+import { signedInOf } from './form.js';
 
 /**
  * The sign-in under an adapter's fields: a button labelled by the host, then a
  * step that depends on the flow. A pasted sign-in opens the provider's page and
  * takes the code it shows. A device sign-in shows the code the host answered,
  * for the person to type on the provider's page, and waits for the approval.
- * Once it finishes, the step says it is signed in and the connector's state,
- * and offers to sign in again. The code and the started sign-in live only in
- * this component's state, and are cleared when the step ends, however it ends.
+ * Once it finishes, or when a made connector holds a device sign-in, the step
+ * says who it is signed in as and the last check, and offers to sign in again.
+ * The code and the started sign-in live only in this component's state, and
+ * are cleared when the step ends, however it ends.
  */
-export function SignInStep({ host, signIn, provider, wanted, disabled, byHand, onByHand, onDone }: {
+export function SignInStep({ host, signIn, held, provider, wanted, disabled, byHand, onByHand, onDone }: {
   host: string;
   signIn: SignInRow;
+  /** The made connector as the host lists it now; absent on a new form. */
+  held?: ConnectorRow;
   /** What the done step names as the provider: the adapter's title. */
   provider: string;
   /** The put the sign-in finishes as, with the config from `configForSignIn`. */
@@ -32,8 +37,8 @@ export function SignInStep({ host, signIn, provider, wanted, disabled, byHand, o
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
-  /** The state of the connector the last sign-in finished as; null before one finishes. */
-  const [signedIn, setSignedIn] = useState<ConnectorState | null>(null);
+  /** The connector the last sign-in finished as; null before one finishes. */
+  const [signedIn, setSignedIn] = useState<ConnectorRow | null>(null);
 
   // An answer that comes after the form closed is dropped, so a closed step finishes nothing.
   const live = useRef(true);
@@ -43,7 +48,12 @@ export function SignInStep({ host, signIn, provider, wanted, disabled, byHand, o
 
   const end = (): void => { attempt.current += 1; setStarted(null); setCode(''); setBusy(false); };
 
-  const finished = (row: ConnectorRow): void => { end(); setSignedIn(row.state); onDone(row); };
+  const finished = (row: ConnectorRow): void => { end(); setSignedIn(row); onDone(row); };
+
+  // What the host lists wins over what the sign-in answered, since a later check changes it.
+  const row = held ?? signedIn ?? undefined;
+  const kept = row === undefined ? undefined : signedInOf(row.config, signIn);
+  const check = row?.health?.check;
   const failed = (caught: unknown): void => { end(); setFailure(hostSaid(caught)); };
 
   const start = (): void => {
@@ -80,12 +90,14 @@ export function SignInStep({ host, signIn, provider, wanted, disabled, byHand, o
 
   return (
     <div className="web-connector-form__signin">
-      {started === null && signedIn !== null ? (
+      {started === null && (signedIn !== null || kept !== undefined) ? (
         <>
-          <p className="web-connector-form__signed-in">{t('connectors/signIn/done', { provider, state: t(`connectors/states/${signedIn}`) })}</p>
+          <p className="web-connector-form__signed-in">{kept?.account === undefined ? t('connectors/signIn/with', { provider }) : t('connectors/signIn/as', { account: kept.account })}</p>
+          {check === undefined ? null : <p className="web-note">{t('connectors/signIn/lastCheck', { result: t(`connectors/health/${check.result}`), at: when(check.at) })}</p>}
           <div className="web-connector-form__signin-start">
             <Button label={t('connectors/signIn/again')} disabled={disabled || busy} onClick={start} />
           </div>
+          {signIn.flow === 'device' ? <CheckBox label={t('connectors/signIn/byHand')} value={byHand} onChange={onByHand} /> : null}
         </>
       ) : started === null ? (
         <>

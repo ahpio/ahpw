@@ -17,6 +17,7 @@ import { DangerZone } from '../../shell/controls/DangerZone.js';
 const TONE: Record<ConnectorState, BadgeTone> = {
   ready: 'success',
   invalid: 'warning',
+  unauthorized: 'warning',
   unavailable: 'danger',
 };
 

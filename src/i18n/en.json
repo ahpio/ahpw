@@ -2567,10 +2567,12 @@
     },
     "states": {
       "ready": "Ready",
+      "unauthorized": "Unauthorized",
       "invalid": "Invalid",
       "unavailable": "Unavailable"
     },
     "stateNotes": {
+      "unauthorized": "The provider refused its credential at the last check. Sign in again, or update its settings.",
       "invalid": "Its settings don't match its adapter, or the adapter couldn't open it. Update its settings to open it again.",
       "unavailable": "No plugin provides its adapter right now. Enable the plugin that offers {adapter} to open it again."
     },
@@ -2623,7 +2625,9 @@
       "finish": "Finish",
       "cancel": "Cancel",
       "failed": "Sign-in didn't finish",
-      "done": "Signed in with {provider}. State: {state}.",
+      "with": "Signed in with {provider}.",
+      "as": "Signed in as {account}.",
+      "lastCheck": "Last check: {result}, {at}.",
       "again": "Sign in again"
     },
     "page": {
