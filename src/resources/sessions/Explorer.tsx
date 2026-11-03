@@ -17,6 +17,7 @@ import { activityLabel, activityOf, isArchived, isRead, shows, type Activity, ty
 import { arrangeTwo, groupOf, type Group, type Grouping } from './grouping.js';
 import { confirm, failed } from '../../shell/notify/index.js';
 import { EMOJIcon } from '../emojis.js';
+import { copyText } from '../../shell/controls/CopyButton.js';
 
 const sameDay = dateFormat({ hour: '2-digit', minute: '2-digit' });
 const otherDay = dateFormat({ month: 'short', day: 'numeric' });
@@ -51,7 +52,7 @@ function menuOf(host: string, session: SessionSummary, open: () => void, pinned:
     },
     { title: translate(read ? 'sessions/explorer/markUnread' : 'sessions/explorer/markRead'), onSelect: (menu) => { menu.closeMenu(); say({ type: 'session/isReadChanged', isRead: !read } as StateAction); } },
     { title: translate(archived ? 'sessions/explorer/unarchive' : 'sessions/explorer/archive'), onSelect: (menu) => { menu.closeMenu(); say({ type: 'session/isArchivedChanged', isArchived: !archived } as StateAction); } },
-    { title: translate('sessions/explorer/copyLink'), group: 'more', onSelect: (menu) => { menu.closeMenu(); void navigator.clipboard?.writeText(session.resource).catch(() => undefined); } },
+    { title: translate('sessions/explorer/copyLink'), group: 'more', onSelect: (menu) => { menu.closeMenu(); void copyText(session.resource); } },
     {
       title: translate('sessions/explorer/delete'),
       group: 'more',

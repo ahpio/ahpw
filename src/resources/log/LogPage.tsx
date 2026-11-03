@@ -7,6 +7,7 @@ import { ahpPaths, type HostFacts } from '../../bridges/data.js';
 import { everyHost } from '../../bridges/hosts.js';
 import { clock, filterLog, LOG_LEVELS, LOG_SCOPES, lineText, logText, piecesOf, useLog, type LogEntry, type LogLevel, type LogScope } from './log.js';
 import { EMOJIcon } from '../emojis.js';
+import { copyText } from '../../shell/controls/CopyButton.js';
 
 const MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 const FOLLOW_KEY = MAC ? 'log/follow/mac' : 'log/follow/other';
@@ -39,7 +40,7 @@ function detailText(detail: unknown): string {
   return JSON.stringify(detail, null, 2) ?? String(detail);
 }
 
-const copy = (text: string): void => void navigator.clipboard?.writeText(text).catch(() => undefined);
+const copy = (text: string): void => void copyText(text);
 
 const Row = memo(function Row({ entry, open, onToggle }: { entry: LogEntry; open: boolean; onToggle: (id: string) => void }): ReactElement {
   const scena = useScena();

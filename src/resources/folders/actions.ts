@@ -5,6 +5,7 @@ import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { folderLabel } from '../../bridges/words.js';
 import { plural } from '../../i18n/locales.js';
 import { confirm, done, failed } from '../../shell/notify/index.js';
+import { copyText } from '../../shell/controls/CopyButton.js';
 import { addedPath, setAdded, withFolder, withoutFolder } from './added.js';
 import { askName } from './ask.js';
 import { askFolder } from './pick.js';
@@ -81,7 +82,7 @@ const RUN: Record<EntryAction, (scena: Scena, host: string, entry: MenuEntry) =>
     done(files.length === 1 && only !== undefined ? translate('folders/uploaded', { name: only.name }) : plural('folders/uploadedFiles', files.length));
   },
   copyPath: async (_scena, _host, { uri }) => {
-    await navigator.clipboard.writeText(folderLabel(uri));
+    if (!await copyText(folderLabel(uri))) throw new Error('copy');
     done(translate('folders/pathCopied'));
   },
   download: async (_scena, host, { uri }) => {
