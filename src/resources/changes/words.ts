@@ -172,3 +172,49 @@ export function folderTree(changes: readonly Change[], workspace: string | null)
   };
   return { ...root, folders: root.folders.map(join).sort((one, other) => NAMES.compare(one.name, other.name)) };
 }
+
+/** What a row's copy items copy: its name, its full path, and its path from the session's folder, null when it is not inside that folder. */
+export interface CopyTexts {
+  name: string;
+  path: string;
+  relative: string | null;
+}
+
+/** The session's folder as a path with no slash at its end, or null when the session has no folder. */
+function rootPath(workspace: string | null): string | null {
+  return workspace === null ? null : folderLabel(workspace).replace(/\/+$/, '');
+}
+
+/** Whether `dir` is the session's folder or inside it. */
+function inside(dir: string, workspace: string | null): boolean {
+  const root = rootPath(workspace);
+  return root !== null && (dir === root || dir.startsWith(`${root}/`));
+}
+
+/** The texts a file row's copy items copy. */
+export function changeCopies(change: Change, workspace: string | null): CopyTexts {
+  return {
+    name: change.name,
+    path: change.dir === '' ? change.name : `${change.dir}/${change.name}`,
+    relative: inside(change.dir, workspace) ? pathOf(change, workspace) : null,
+  };
+}
+
+/** The first change in `folder` or under it. */
+function firstChange(folder: ChangeFolder): Change | undefined {
+  if (folder.changes[0] !== undefined) return folder.changes[0];
+  for (const one of folder.folders) {
+    const found = firstChange(one);
+    if (found !== undefined) return found;
+  }
+  return undefined;
+}
+
+/** The texts a folder row's copy items copy; a joined folder's name is its last folder. */
+export function folderCopies(folder: ChangeFolder, workspace: string | null): CopyTexts {
+  const name = folder.name.split('/').pop() ?? folder.name;
+  const dir = firstChange(folder)?.dir ?? '';
+  const root = rootPath(workspace);
+  if (root !== null && inside(dir, workspace)) return { name, path: `${root}/${folder.path}`, relative: folder.path };
+  return { name, path: dir.startsWith('/') ? `/${folder.path}` : folder.path, relative: null };
+}

@@ -5,6 +5,7 @@ import { AUTOMATIONS, hostBridge } from '../../bridges/data.js';
 import { newId } from '../../bridges/words.js';
 import { titleOf } from './words.js';
 import { confirm, failed } from '../../shell/notify/index.js';
+import { copyText } from '../../shell/controls/CopyButton.js';
 
 /** Run an automation now, outside its schedule. */
 export function runNow(host: string, entry: AutomationEntry): Promise<unknown> {
@@ -38,7 +39,7 @@ export function menuOf(host: string, entry: AutomationEntry, open: () => void, e
     items.push({ title: translate(entry.definition.enabled ? 'automations/actions/turnOff' : 'automations/actions/turnOn'), onSelect: (menu) => { menu.closeMenu(); setEnabled(host, entry, !entry.definition.enabled); } });
     items.push({ title: translate('automations/actions/edit'), onSelect: (menu) => { menu.closeMenu(); edit(); } });
   }
-  items.push({ title: translate('automations/actions/copyLink'), group: 'more', onSelect: (menu) => { menu.closeMenu(); void navigator.clipboard?.writeText(entry.resource).catch(() => undefined); } });
+  items.push({ title: translate('automations/actions/copyLink'), group: 'more', onSelect: (menu) => { menu.closeMenu(); void copyText(entry.resource); } });
   if (can('remove')) items.push({ title: translate('automations/actions/delete'), group: 'more', color: 'red', onSelect: (menu) => { menu.closeMenu(); void remove(host, entry); } });
   return items;
 }

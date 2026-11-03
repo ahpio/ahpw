@@ -19,7 +19,7 @@ import { RELOAD_FOLDERS, REVEAL_FOLDER, type RevealFolderArgs } from './index.js
 import { addedPath } from './added.js';
 import { HOST_NODE, expandedPath, setExpanded } from './expanded.js';
 import { STALE_FOLDERS, addFolder, type StaleFolders } from './actions.js';
-import { ENTRY_SLOT, MENU_ENTRY, type MenuEntry } from './menu.js';
+import { ENTRY_SLOT, MENU_ENTRY, rootOf, type MenuEntry } from './menu.js';
 
 /** The display size class the modus backend publishes. */
 const MODUS_CLASS = '$/modus/class' as BindingPath;
@@ -284,6 +284,7 @@ export function HostFolders({ host, named, selected, onSelected, rooted }: {
               directory: node.data.directory,
               added: roots.some((root) => root.uri === node.key && root.added),
               root: roots.some((root) => root.uri === node.key),
+              rootUri: rootOf(node.data.uri, roots.map((root) => root.uri)),
             } satisfies MenuEntry,
         })}
         contextExtraItems={(node) => (node.data === undefined ? hostItems : node.data.directory ? [] : openItems(node.data.uri))}

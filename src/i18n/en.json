@@ -249,7 +249,9 @@
       "newFile": "New file",
       "newFolder": "New folder",
       "upload": "Upload",
+      "copyName": "Copy name",
       "copyPath": "Copy path",
+      "copyRelativePath": "Copy relative path",
       "download": "Download",
       "rename": "Rename",
       "copy": "Copy",
@@ -260,7 +262,9 @@
       "newFile": "Couldn't create the file",
       "newFolder": "Couldn't create the folder",
       "upload": "Upload failed",
+      "copyName": "Couldn't copy the name",
       "copyPath": "Couldn't copy the path",
+      "copyRelativePath": "Couldn't copy the relative path",
       "download": "Download failed",
       "rename": "Couldn't rename it",
       "copy": "Couldn't copy it",
@@ -277,7 +281,9 @@
       "one": "{count} file uploaded",
       "other": "{count} files uploaded"
     },
+    "nameCopied": "Name copied",
     "pathCopied": "Path copied",
+    "relativePathCopied": "Relative path copied",
     "delete": {
       "title": "Delete \"{name}\"?",
       "body": "Everything inside it will be deleted too."
@@ -398,6 +404,17 @@
     },
     "openChange": "Open change",
     "openFile": "Open file",
+    "copy": {
+      "name": "Copy name",
+      "path": "Copy path",
+      "relative": "Copy relative path"
+    },
+    "copied": {
+      "name": "Name copied",
+      "path": "Path copied",
+      "relative": "Relative path copied"
+    },
+    "copyFailed": "Couldn't copy it",
     "markReviewed": "Mark as reviewed",
     "markNotReviewed": "Mark as not reviewed",
     "noSession": "Open a session to see what it changed.",
@@ -1302,7 +1319,7 @@
       "reading": "Loading",
       "noPut": "You don't have permission to add agents on this host.",
       "unknownEngine": "The {engine} engine isn't loaded, so its settings can't be shown.",
-      "settingsOf": "{engine} settings",
+      "settings": "Settings",
       "failed": "Couldn't save the agent",
       "create": "Create",
       "searchEngines": "Search engines",
@@ -2608,7 +2625,7 @@
       "failed": "Couldn't save the connector",
       "noAdapters": "This host doesn't list any adapters for you. Creating a connector needs the connector:list grant.",
       "noPut": "Creating a connector needs the connector:put grant, which you don't have.",
-      "settingsOf": "{adapter} settings",
+      "settings": "Settings",
       "secretKept": "Saved. Type a new value to replace it."
     },
     "signIn": {

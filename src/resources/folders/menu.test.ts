@@ -1,18 +1,29 @@
 import { expect, test } from 'vitest';
-import { base64Of, bytesOf, copyNameOf, entryActions, folderUriOf, leafOf, nameProblem, parentOf, siblingUri } from './menu.js';
+import { base64Of, bytesOf, copyNameOf, entryActions, folderUriOf, leafOf, nameProblem, parentOf, relativePathOf, rootOf, siblingUri } from './menu.js';
 import { withFolder, withoutFolder } from './added.js';
 
 test('a folder offers to add, then to read and change, Delete last', () => {
-  expect(entryActions({ host: 'h', uri: 'file:///src/a', directory: true, added: false, root: false })).toEqual(['newFile', 'newFolder', 'upload', 'copyPath', 'rename', 'copy', 'delete']);
+  expect(entryActions({ host: 'h', uri: 'file:///src/a', directory: true, added: false, root: false, rootUri: 'file:///src' })).toEqual(['newFile', 'newFolder', 'upload', 'copyName', 'copyPath', 'copyRelativePath', 'rename', 'copy', 'delete']);
 });
 
 test('a file offers Download and nothing that adds', () => {
-  expect(entryActions({ host: 'h', uri: 'file:///src/a.ts', directory: false, added: false, root: false })).toEqual(['copyPath', 'download', 'rename', 'copy', 'delete']);
+  expect(entryActions({ host: 'h', uri: 'file:///src/a.ts', directory: false, added: false, root: false, rootUri: 'file:///src' })).toEqual(['copyName', 'copyPath', 'copyRelativePath', 'download', 'rename', 'copy', 'delete']);
 });
 
-test('an added root offers Remove folder, and no root offers Rename, Copy or Delete', () => {
-  expect(entryActions({ host: 'h', uri: 'file:///opt/x', directory: true, added: true, root: true })).toEqual(['newFile', 'newFolder', 'upload', 'copyPath', 'removeFolder']);
-  expect(entryActions({ host: 'h', uri: 'file:///w', directory: true, added: false, root: true })).toEqual(['newFile', 'newFolder', 'upload', 'copyPath']);
+test('an added root offers Remove folder, and no root offers Copy relative path, Rename, Copy or Delete', () => {
+  expect(entryActions({ host: 'h', uri: 'file:///opt/x', directory: true, added: true, root: true, rootUri: 'file:///opt/x' })).toEqual(['newFile', 'newFolder', 'upload', 'copyName', 'copyPath', 'removeFolder']);
+  expect(entryActions({ host: 'h', uri: 'file:///w', directory: true, added: false, root: true, rootUri: 'file:///w' })).toEqual(['newFile', 'newFolder', 'upload', 'copyName', 'copyPath']);
+});
+
+test('a row counts its relative path from the deepest root it is under', () => {
+  const roots = ['file:///w', 'file:///w/packages/sdk', 'file:///'];
+  expect(rootOf('file:///w/src/a.ts', roots)).toBe('file:///w');
+  expect(rootOf('file:///w/packages/sdk/src', roots)).toBe('file:///w/packages/sdk');
+  expect(rootOf('file:///etc/hosts', roots)).toBe('file:///');
+  expect(rootOf('file:///wx/a', ['file:///w'])).toBe('file:///wx/a');
+  expect(relativePathOf('file:///w/src/my%20a.ts', 'file:///w')).toBe('src/my a.ts');
+  expect(relativePathOf('file:///w/src/', 'file:///w/')).toBe('src');
+  expect(relativePathOf('file:///etc/hosts', 'file:///')).toBe('etc/hosts');
 });
 
 test('a row that is no file or folder offers nothing', () => {

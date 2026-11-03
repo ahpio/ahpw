@@ -2,6 +2,7 @@ import { translate } from '@softov/scena';
 import type { PickerAction } from '@softov/scena/types';
 import { allows, type Offers } from '../../bridges/offers.js';
 import { confirm, failed } from '../../shell/notify/index.js';
+import { copyText } from '../../shell/controls/CopyButton.js';
 import { actOn, COMPUTER_PROVIDER, type ComputerAction, type Standing } from './machines.js';
 
 const say = (error: unknown): void => failed(translate('computers/actions/failed'), error);
@@ -33,7 +34,7 @@ export function menuOf(host: string, offers: Offers, id: string, standing: Stand
       : item(translate('computers/actions/start'), () => void act(host, offers, id, 'start')));
     if (standing === 'running') items.push(item(translate('computers/actions/restart'), () => void act(host, offers, id, 'restart')));
   }
-  items.push(item(translate('computers/actions/copyName'), () => void navigator.clipboard?.writeText(id).catch(() => undefined), { group: 'more' }));
+  items.push(item(translate('computers/actions/copyName'), () => void copyText(id), { group: 'more' }));
   if (controlled && may(offers, 'delete')) items.push(item(translate('computers/actions/remove'), () => void act(host, offers, id, 'remove'), { group: 'more', color: 'red' }));
   return items;
 }

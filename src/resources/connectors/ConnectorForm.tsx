@@ -10,7 +10,7 @@ import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { PEOPLE, peopleReducer, readOwnUser, servesPeople, type ListedUser, type PeopleState } from '../../bridges/people.js';
 import { PLUGINS, pluginsReducer, type PluginRow } from '../../bridges/plugins.js';
 import { hostSaid } from '../../bridges/said.js';
-import { HostIcon } from '../../shell/HostIcon.js';
+import { EMOJIcon } from '../emojis.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { meOn } from './actions.js';
 import { AdapterPicker } from './AdapterPicker.js';
@@ -160,14 +160,12 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
       </div>
       {!editing && adapter === undefined ? null : <SchemaForm schema={head} value={top as unknown as Bag} baseline={(editing ? heldTop : top) as unknown as Bag} onChange={changeTop} jsonTextRoot={false} />}
       {fields === undefined ? null : (
-        <section className="web-connector-form__adapter" aria-label={t('connectors/form/settingsOf', { adapter: adapter!.title })}>
-          <h3 className="web-connector-form__heading web-host-label"><HostIcon icons={adapter!.icons} size={16} />{t('connectors/form/settingsOf', { adapter: adapter!.title })}</h3>
-          {/* The schema says what the form is when it can; the adapter says it otherwise. */}
-          {adapter!.description === '' || typeof adapter!.schema.description === 'string' ? null : <p className="web-note">{adapter!.description}</p>}
+        <section className="web-connector-form__adapter" aria-label={t('connectors/form/settings')}>
+          <h3 className="web-connector-form__heading web-host-label"><span aria-hidden="true">{EMOJIcon.settings}</span>{t('connectors/form/settings')}</h3>
           <SchemaForm key={top.adapter} schema={fields} views={SETTINGS_VIEWS} value={config} baseline={heldConfig} onChange={(next) => { setConfig(next); setSaved(false); }} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} fieldActions />
           {adapter!.signIn === undefined ? null : (
             <SignInStep
-              key={top.adapter}
+              key={`${top.adapter}:sign-in`}
               host={host}
               signIn={adapter!.signIn}
               {...(connector === undefined ? {} : { held: connector })}

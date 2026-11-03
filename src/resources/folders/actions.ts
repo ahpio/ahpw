@@ -5,12 +5,13 @@ import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { folderLabel } from '../../bridges/words.js';
 import { plural } from '../../i18n/locales.js';
 import { confirm, done, failed } from '../../shell/notify/index.js';
+import { copyText } from '../../shell/controls/CopyButton.js';
 import { addedPath, setAdded, withFolder, withoutFolder } from './added.js';
 import { askName } from './ask.js';
 import { askFolder } from './pick.js';
 import {
   ENTRY_ACTIONS, ENTRY_ICONS, ENTRY_SLOT, MENU_ENTRY,
-  base64Of, bytesOf, copyNameOf, entryActions, folderUriOf, leafOf, nameProblem, parentOf, siblingUri,
+  base64Of, bytesOf, copyNameOf, entryActions, folderUriOf, leafOf, nameProblem, parentOf, relativePathOf, siblingUri,
   type EntryAction, type MenuEntry,
 } from './menu.js';
 import { childUri } from './roots.js';
@@ -80,9 +81,17 @@ const RUN: Record<EntryAction, (scena: Scena, host: string, entry: MenuEntry) =>
     const [only] = files;
     done(files.length === 1 && only !== undefined ? translate('folders/uploaded', { name: only.name }) : plural('folders/uploadedFiles', files.length));
   },
+  copyName: async (_scena, _host, { uri }) => {
+    if (!await copyText(leafOf(uri))) throw new Error('copy');
+    done(translate('folders/nameCopied'));
+  },
   copyPath: async (_scena, _host, { uri }) => {
-    await navigator.clipboard.writeText(folderLabel(uri));
+    if (!await copyText(folderLabel(uri))) throw new Error('copy');
     done(translate('folders/pathCopied'));
+  },
+  copyRelativePath: async (_scena, _host, { uri, rootUri }) => {
+    if (!await copyText(relativePathOf(uri, rootUri))) throw new Error('copy');
+    done(translate('folders/relativePathCopied'));
   },
   download: async (_scena, host, { uri }) => {
     const read = await hostBridge(host).readBase64(uri);

@@ -1,6 +1,6 @@
 import { translate } from '@softov/scena';
 import type { BindingPath } from '@softov/scena/types';
-import { folderUri } from '../../bridges/words.js';
+import { folderLabel, folderUri } from '../../bridges/words.js';
 import { EMOJIcon } from '../emojis.js';
 import { bare, childUri } from './roots.js';
 
@@ -20,20 +20,24 @@ export interface MenuEntry {
   added: boolean;
   /** A folder the explorer shows at the top, which its menu cannot rename, copy or delete. */
   root: boolean;
+  /** The URI of the root the row is under, which Copy relative path counts from; the row's own URI on a root. */
+  rootUri: string;
 }
 
 /** What a file or folder row's menu can do, past opening it. */
-export type EntryAction = 'newFile' | 'newFolder' | 'upload' | 'copyPath' | 'download' | 'rename' | 'copy' | 'removeFolder' | 'delete';
+export type EntryAction = 'newFile' | 'newFolder' | 'upload' | 'copyName' | 'copyPath' | 'copyRelativePath' | 'download' | 'rename' | 'copy' | 'removeFolder' | 'delete';
 
 /** Every action in draw order: what adds first, then what reads, then what changes, Delete last. */
-export const ENTRY_ACTIONS: readonly EntryAction[] = ['newFile', 'newFolder', 'upload', 'copyPath', 'download', 'rename', 'copy', 'removeFolder', 'delete'];
+export const ENTRY_ACTIONS: readonly EntryAction[] = ['newFile', 'newFolder', 'upload', 'copyName', 'copyPath', 'copyRelativePath', 'download', 'rename', 'copy', 'removeFolder', 'delete'];
 
 /** Each action's icon; its title is the message `folders/entry/<action>`. */
 export const ENTRY_ICONS: Record<EntryAction, string> = {
   newFile: EMOJIcon.file,
   newFolder: EMOJIcon.folder,
   upload: EMOJIcon.upload,
+  copyName: EMOJIcon.copyText,
   copyPath: EMOJIcon.link,
+  copyRelativePath: EMOJIcon.link,
   download: EMOJIcon.download,
   rename: EMOJIcon.edit,
   copy: EMOJIcon.copy,
@@ -44,8 +48,8 @@ export const ENTRY_ICONS: Record<EntryAction, string> = {
 /** The actions only a folder offers. */
 const FOLDER_ONLY: ReadonlySet<EntryAction> = new Set(['newFile', 'newFolder', 'upload']);
 
-/** The actions a root does not offer: a slip there would take a whole workspace. */
-const NOT_ON_ROOT: ReadonlySet<EntryAction> = new Set(['rename', 'copy', 'delete']);
+/** The actions a root does not offer: a slip there would take a whole workspace, and a root has no path inside itself. */
+const NOT_ON_ROOT: ReadonlySet<EntryAction> = new Set(['copyRelativePath', 'rename', 'copy', 'delete']);
 
 /** The actions a row's menu offers, in draw order: none for a row that is no file or folder. */
 export function entryActions(entry: MenuEntry | null | undefined): EntryAction[] {
@@ -56,6 +60,26 @@ export function entryActions(entry: MenuEntry | null | undefined): EntryAction[]
     if (entry.root && NOT_ON_ROOT.has(action)) return false;
     return entry.directory || !FOLDER_ONLY.has(action);
   });
+}
+
+/** The root `uri` is under, the deepest when roots nest, or `uri` itself when it is under none. */
+export function rootOf(uri: string, roots: readonly string[]): string {
+  const key = bare(uri);
+  let found: string | undefined;
+  for (const root of roots) {
+    const top = bare(root);
+    const inside = key === top || key.startsWith(top.endsWith('/') ? top : `${top}/`);
+    if (inside && (found === undefined || top.length > bare(found).length)) found = root;
+  }
+  return found ?? uri;
+}
+
+/** `uri`'s path from `rootUri`, as a person reads it: `src/a.ts` for `file:///w/src/a.ts` under `file:///w`. */
+export function relativePathOf(uri: string, rootUri: string): string {
+  const top = folderLabel(bare(rootUri));
+  const path = folderLabel(bare(uri));
+  const prefix = top.endsWith('/') ? top : `${top}/`;
+  return path.startsWith(prefix) ? path.slice(prefix.length) : path;
 }
 
 /** A URI's last segment, decoded. */
