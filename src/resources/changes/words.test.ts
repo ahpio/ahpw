@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Changeset, ChangesetFile } from '@microsoft/agent-host-protocol';
-import { changeOf, firstScope, folderTree, groupChanges, letterOf, relativeDir, scopesOf, sortChanges, type Change } from './words.js';
+import { changeCopies, changeOf, firstScope, folderCopies, folderTree, groupChanges, letterOf, relativeDir, scopesOf, sortChanges, type Change } from './words.js';
 
 const set = (fields: Record<string, unknown>): Changeset => ({ label: 'x', uriTemplate: 'u', changeKind: 'session', ...fields }) as unknown as Changeset;
 
@@ -107,5 +107,31 @@ describe('sortChanges', () => {
   it('leaves the tree with its folders in name order', () => {
     const tree = folderTree(sent, 'file:///w');
     expect(tree.folders.map((one) => one.name)).toEqual(['.project/plans', 'docs/sdk', 'packages/agent-cofold']);
+  });
+});
+
+describe('changeCopies and folderCopies', () => {
+  it('gives a file its name, its full path and its path from the session folder', () => {
+    expect(changeCopies(change('/w/src/a.ts'), 'file:///w')).toEqual({ name: 'a.ts', path: '/w/src/a.ts', relative: 'src/a.ts' });
+    expect(changeCopies(change('/w/README.md'), 'file:///w/')).toEqual({ name: 'README.md', path: '/w/README.md', relative: 'README.md' });
+  });
+
+  it('gives no relative path outside the session folder or with no folder', () => {
+    expect(changeCopies(change('/elsewhere/a.ts'), 'file:///w')).toEqual({ name: 'a.ts', path: '/elsewhere/a.ts', relative: null });
+    expect(changeCopies(change('/w/src/a.ts'), null).relative).toBeNull();
+  });
+
+  it('names a joined folder by its last folder', () => {
+    const tree = folderTree([change('/w/packages/sdk/src/a.ts'), change('/w/packages/sdk/src/t/b.ts'), change('/w/README.md')], 'file:///w');
+    const [joined] = tree.folders;
+    expect(joined === undefined ? null : folderCopies(joined, 'file:///w')).toEqual({ name: 'src', path: '/w/packages/sdk/src', relative: 'packages/sdk/src' });
+    const [inner] = joined?.folders ?? [];
+    expect(inner === undefined ? null : folderCopies(inner, 'file:///w')).toEqual({ name: 't', path: '/w/packages/sdk/src/t', relative: 'packages/sdk/src/t' });
+  });
+
+  it('keeps the full path of a folder outside the session folder', () => {
+    const tree = folderTree([change('/elsewhere/lib/a.ts')], 'file:///w');
+    const [outside] = tree.folders;
+    expect(outside === undefined ? null : folderCopies(outside, 'file:///w')).toEqual({ name: 'lib', path: '/elsewhere/lib', relative: null });
   });
 });

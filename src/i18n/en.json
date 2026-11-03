@@ -249,7 +249,9 @@
       "newFile": "New file",
       "newFolder": "New folder",
       "upload": "Upload",
+      "copyName": "Copy name",
       "copyPath": "Copy path",
+      "copyRelativePath": "Copy relative path",
       "download": "Download",
       "rename": "Rename",
       "copy": "Copy",
@@ -260,7 +262,9 @@
       "newFile": "Couldn't create the file",
       "newFolder": "Couldn't create the folder",
       "upload": "Upload failed",
+      "copyName": "Couldn't copy the name",
       "copyPath": "Couldn't copy the path",
+      "copyRelativePath": "Couldn't copy the relative path",
       "download": "Download failed",
       "rename": "Couldn't rename it",
       "copy": "Couldn't copy it",
@@ -277,7 +281,9 @@
       "one": "{count} file uploaded",
       "other": "{count} files uploaded"
     },
+    "nameCopied": "Name copied",
     "pathCopied": "Path copied",
+    "relativePathCopied": "Relative path copied",
     "delete": {
       "title": "Delete \"{name}\"?",
       "body": "Everything inside it will be deleted too."
@@ -398,6 +404,17 @@
     },
     "openChange": "Open change",
     "openFile": "Open file",
+    "copy": {
+      "name": "Copy name",
+      "path": "Copy path",
+      "relative": "Copy relative path"
+    },
+    "copied": {
+      "name": "Name copied",
+      "path": "Path copied",
+      "relative": "Relative path copied"
+    },
+    "copyFailed": "Couldn't copy it",
     "markReviewed": "Mark as reviewed",
     "markNotReviewed": "Mark as not reviewed",
     "noSession": "Open a session to see what it changed.",

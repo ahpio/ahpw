@@ -9,9 +9,11 @@ import { ACTIVE_SESSION, type ActiveSession } from '../sessions/state.js';
 import { openAsItems, viewersOf } from '../files/viewers.js';
 import { plural } from '../../i18n/locales.js';
 import { EMOJIcon } from '../emojis.js';
+import { copyText } from '../../shell/controls/CopyButton.js';
+import { done, failed } from '../../shell/notify/index.js';
 import { iconOf, openChange, scoped, toneOf, useChangeset } from './changeset.js';
 import { ChangesetForms } from './Forms.js';
-import { firstScope, folderTree, groupChanges, letterOf, relativeDir, scopesOf, sortChanges, type Change, type ChangeFolder, type ChangeGrouping, type ChangeSort } from './words.js';
+import { changeCopies, firstScope, folderCopies, folderTree, groupChanges, letterOf, relativeDir, scopesOf, sortChanges, type Change, type ChangeFolder, type ChangeGrouping, type ChangeSort, type CopyTexts } from './words.js';
 
 /** How the files are drawn: one row each with its folder beside it, or under their folders. */
 type View = 'list' | 'tree';
@@ -79,12 +81,26 @@ export default function ChangesExplorer(): ReactElement {
   const whole = operations.filter((one) => scoped(one, 'changeset') && !(offersCreate && one.id === 'prepare-pull-request'));
   const busy = (operation: ChangesetOperation): boolean => String(operation.status) === 'running';
 
+  /** Copy name, Copy path and Copy relative path, the last only inside the session's folder. */
+  const copyItems = (texts: CopyTexts): PickerAction[] => {
+    const item = (kind: 'name' | 'path' | 'relative', text: string): PickerAction => ({
+      title: t(`changes/copy/${kind}`),
+      icon: kind === 'name' ? EMOJIcon.copyText : EMOJIcon.link,
+      onSelect: (host) => {
+        host.closeMenu();
+        void copyText(text).then((copied) => (copied ? done(t(`changes/copied/${kind}`)) : failed(t('changes/copyFailed'), new Error('copy'), { source: 'changes.copy' })));
+      },
+    });
+    return [item('name', texts.name), item('path', texts.path), ...(texts.relative === null ? [] : [item('relative', texts.relative)])];
+  };
+
   const menuOf = (change: Change): PickerAction[] => {
     const items: PickerAction[] = [{ title: t('changes/openChange'), onSelect: (host) => { host.closeMenu(); openChange(scena, at, change, scope?.uri, review); } }];
     if (change.status !== 'deleted') {
       items.push({ title: t('changes/openFile'), onSelect: (host) => { host.closeMenu(); void scena.commands.execute('ahp.openFile', { uri: change.file }); } });
       items.push(...openAsItems(scena, at, change.file, viewersOf(scena, change.file)[0]?.component ?? null));
     }
+    items.push(...copyItems(changeCopies(change, workspace)));
     if (review) {
       items.push({ title: t(change.reviewed ? 'changes/markNotReviewed' : 'changes/markReviewed'), onSelect: (host) => { host.closeMenu(); changes.review([change], !change.reviewed); } });
     }
@@ -138,8 +154,9 @@ export default function ChangesExplorer(): ReactElement {
   const shown = needle === '' ? files : files.filter((one) => `${relativeDir(one.dir, workspace)}/${one.name}`.toLowerCase().includes(needle));
   const groups = groupChanges(sortChanges(shown, sort, workspace), grouping);
 
-  // The rows, and which change each file row stands for, for its menu.
+  // The rows, and which change or folder each row stands for, for its menu.
   const byKey = new Map<string, Change>();
+  const folderByKey = new Map<string, ChangeFolder>();
   const nodes = ((): TreeNode<Change>[] => {
     const fileNode = (change: Change, group: string): TreeNode<Change> => {
       const key = `${group}|${change.id}`;
@@ -158,12 +175,16 @@ export default function ChangesExplorer(): ReactElement {
         data: change,
       };
     };
-    const folderNode = (folder: ChangeFolder, group: string): TreeNode<Change> => ({
-      key: `${group}|dir:${folder.path}`,
-      label: <span className="web-change__name" title={folder.path}>{folder.name}</span>,
-      icon: EMOJIcon.folder,
-      children: [...folder.folders.map((one) => folderNode(one, group)), ...folder.changes.map((one) => fileNode(one, group))],
-    });
+    const folderNode = (folder: ChangeFolder, group: string): TreeNode<Change> => {
+      const key = `${group}|dir:${folder.path}`;
+      folderByKey.set(key, folder);
+      return {
+        key,
+        label: <span className="web-change__name" title={folder.path}>{folder.name}</span>,
+        icon: EMOJIcon.folder,
+        children: [...folder.folders.map((one) => folderNode(one, group)), ...folder.changes.map((one) => fileNode(one, group))],
+      };
+    };
     const bodyOf = (list: Change[], group: string): TreeNode<Change>[] => {
       if (view === 'list') return list.map((one) => fileNode(one, group));
       const root = folderTree(list, workspace);
@@ -194,11 +215,14 @@ export default function ChangesExplorer(): ReactElement {
 
   const openMenu = (event: MouseEvent<HTMLElement>): void => {
     const key = (event.target as HTMLElement).closest<HTMLElement>('[data-key]')?.dataset.key;
-    const change = key === undefined ? undefined : byKey.get(key);
-    if (change === undefined) return;
+    if (key === undefined) return;
+    const change = byKey.get(key);
+    const folder = folderByKey.get(key);
+    const items = change !== undefined ? menuOf(change) : folder !== undefined ? copyItems(folderCopies(folder, workspace)) : null;
+    if (items === null) return;
     event.preventDefault();
-    setSelected(key ?? null);
-    setMenu({ x: event.clientX, y: event.clientY, items: menuOf(change) });
+    setSelected(key);
+    setMenu({ x: event.clientX, y: event.clientY, items });
   };
 
   const status = String(changes.state?.status ?? '');

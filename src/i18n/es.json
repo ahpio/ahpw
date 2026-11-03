@@ -249,7 +249,9 @@
       "newFile": "Nuevo archivo",
       "newFolder": "Nueva carpeta",
       "upload": "Subir",
+      "copyName": "Copiar nombre",
       "copyPath": "Copiar ruta",
+      "copyRelativePath": "Copiar ruta relativa",
       "download": "Descargar",
       "rename": "Cambiar nombre",
       "copy": "Copiar",
@@ -260,7 +262,9 @@
       "newFile": "No se pudo crear el archivo",
       "newFolder": "No se pudo crear la carpeta",
       "upload": "No se pudo subir",
+      "copyName": "No se pudo copiar el nombre",
       "copyPath": "No se pudo copiar la ruta",
+      "copyRelativePath": "No se pudo copiar la ruta relativa",
       "download": "No se pudo descargar",
       "rename": "No se pudo cambiar el nombre",
       "copy": "No se pudo copiar",
@@ -277,7 +281,9 @@
       "one": "{count} archivo subido",
       "other": "{count} archivos subidos"
     },
+    "nameCopied": "Nombre copiado",
     "pathCopied": "Ruta copiada",
+    "relativePathCopied": "Ruta relativa copiada",
     "delete": {
       "title": "¿Eliminar \"{name}\"?",
       "body": "Todo lo que contiene también se eliminará."
@@ -398,6 +404,17 @@
     },
     "openChange": "Abrir cambio",
     "openFile": "Abrir archivo",
+    "copy": {
+      "name": "Copiar nombre",
+      "path": "Copiar ruta",
+      "relative": "Copiar ruta relativa"
+    },
+    "copied": {
+      "name": "Nombre copiado",
+      "path": "Ruta copiada",
+      "relative": "Ruta relativa copiada"
+    },
+    "copyFailed": "No se pudo copiar",
     "markReviewed": "Marcar como revisado",
     "markNotReviewed": "Marcar como no revisado",
     "noSession": "Abre una sesión para ver qué cambió.",

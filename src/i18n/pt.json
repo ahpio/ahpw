@@ -249,7 +249,9 @@
       "newFile": "Novo arquivo",
       "newFolder": "Nova pasta",
       "upload": "Enviar",
+      "copyName": "Copiar nome",
       "copyPath": "Copiar caminho",
+      "copyRelativePath": "Copiar caminho relativo",
       "download": "Baixar",
       "rename": "Renomear",
       "copy": "Copiar",
@@ -260,7 +262,9 @@
       "newFile": "Não foi possível criar o arquivo",
       "newFolder": "Não foi possível criar a pasta",
       "upload": "Falha no envio",
+      "copyName": "Não foi possível copiar o nome",
       "copyPath": "Não foi possível copiar o caminho",
+      "copyRelativePath": "Não foi possível copiar o caminho relativo",
       "download": "Falha no download",
       "rename": "Não foi possível renomear",
       "copy": "Não foi possível copiar",
@@ -277,7 +281,9 @@
       "one": "{count} arquivo enviado",
       "other": "{count} arquivos enviados"
     },
+    "nameCopied": "Nome copiado",
     "pathCopied": "Caminho copiado",
+    "relativePathCopied": "Caminho relativo copiado",
     "delete": {
       "title": "Excluir \"{name}\"?",
       "body": "Tudo o que está dentro dela também será excluído."
@@ -398,6 +404,17 @@
     },
     "openChange": "Abrir alteração",
     "openFile": "Abrir arquivo",
+    "copy": {
+      "name": "Copiar nome",
+      "path": "Copiar caminho",
+      "relative": "Copiar caminho relativo"
+    },
+    "copied": {
+      "name": "Nome copiado",
+      "path": "Caminho copiado",
+      "relative": "Caminho relativo copiado"
+    },
+    "copyFailed": "Não foi possível copiar",
     "markReviewed": "Marcar como revisado",
     "markNotReviewed": "Marcar como não revisado",
     "noSession": "Abra uma sessão para ver o que ela alterou.",
