@@ -91,10 +91,12 @@ function passwords(schema: Bag, held: unknown, keptWord: string): Bag {
 /**
  * The engine's schema as the form draws it: as the host lists it, with each
  * secret field a password. A `hostOnly` field is left out of a record the
- * host does not own.
+ * host does not own. The schema's own description is left out, since the
+ * section's heading names the form.
  */
 export function engineSchema(engine: EngineRow, held: Bag, owner: string, keptWord: string): JsonSchemaObject {
-  const drawn = passwords(engine.schema, held, keptWord);
+  const drawn: Bag = { ...passwords(engine.schema, held, keptWord) };
+  delete drawn.description;
   if (owner === 'host' || (engine.hostOnly ?? []).length === 0) return drawn as JsonSchemaObject;
   const properties = { ...bagOf(drawn.properties) };
   for (const field of engine.hostOnly ?? []) delete properties[field];

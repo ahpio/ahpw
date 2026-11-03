@@ -32,6 +32,11 @@ describe('engineSchema', () => {
     expect(hasSecrets(engine)).toBe(true);
   });
 
+  it('leaves out the schema\'s own description, which the heading replaces', () => {
+    const engine: EngineRow = { ...ENGINE, schema: { type: 'object', description: 'Runs Claude.', properties: { shown: { type: 'string' } } } };
+    expect(engineSchema(engine, {}, 'host', 'Kept')).toEqual({ type: 'object', properties: { shown: { type: 'string' } } });
+  });
+
   it('draws the schema in its own shape, each writeOnly field a password, and says a stored one is kept', () => {
     const drawn = engineSchema(ENGINE, { apiKey: { $secret: 'x' }, env: { ANTHROPIC_API_KEY: KEPT } }, 'host', 'Kept') as { properties: Record<string, Record<string, unknown>> };
     expect(Object.keys(drawn.properties)).toEqual(['outputStyle', 'apiKey', 'env', 'extraArgs']);

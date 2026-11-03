@@ -1319,7 +1319,7 @@
       "reading": "Loading",
       "noPut": "You don't have permission to add agents on this host.",
       "unknownEngine": "The {engine} engine isn't loaded, so its settings can't be shown.",
-      "settingsOf": "{engine} settings",
+      "settings": "Settings",
       "failed": "Couldn't save the agent",
       "create": "Create",
       "searchEngines": "Search engines",
@@ -2625,7 +2625,7 @@
       "failed": "Couldn't save the connector",
       "noAdapters": "This host doesn't list any adapters for you. Creating a connector needs the connector:list grant.",
       "noPut": "Creating a connector needs the connector:put grant, which you don't have.",
-      "settingsOf": "{adapter} settings",
+      "settings": "Settings",
       "secretKept": "Saved. Type a new value to replace it."
     },
     "signIn": {

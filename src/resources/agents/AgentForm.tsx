@@ -12,7 +12,7 @@ import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { PEOPLE, peopleReducer, readOwnUser, servesPeople, type ListedUser, type PeopleState } from '../../bridges/people.js';
 import { PLUGINS, pluginsReducer, type PluginRow } from '../../bridges/plugins.js';
 import { hostSaid } from '../../bridges/said.js';
-import { HostIcon } from '../../shell/HostIcon.js';
+import { EMOJIcon } from '../emojis.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { meOn } from '../connectors/actions.js';
 import { ID_PATTERN, idFor, ownerChoices } from '../connectors/form.js';
@@ -178,9 +178,8 @@ export function AgentForm({ host, record }: { host: string; record?: AgentRow })
       )}
       {engine === undefined ? null : <SchemaForm schema={head} value={top as unknown as Bag} baseline={(editing ? heldTop : top) as unknown as Bag} onChange={changeTop} jsonTextRoot={false} />}
       {fields === undefined ? null : (
-        <section className="web-connector-form__adapter" aria-label={t('agents/form/settingsOf', { engine: engine!.title })}>
-          <h3 className="web-connector-form__heading web-host-label"><HostIcon icons={engine!.icons} size={16} />{t('agents/form/settingsOf', { engine: engine!.title })}</h3>
-          {engine!.description === '' || typeof engine!.schema.description === 'string' ? null : <p className="web-note">{engine!.description}</p>}
+        <section className="web-connector-form__adapter" aria-label={t('agents/form/settings')}>
+          <h3 className="web-connector-form__heading web-host-label"><span aria-hidden="true">{EMOJIcon.settings}</span>{t('agents/form/settings')}</h3>
           <SchemaForm key={`${engineName}:${template}`} schema={fields} views={SETTINGS_VIEWS} value={config} baseline={editing ? heldForm : config} onChange={(next) => { setConfig(next); setSaved(false); }} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} fieldActions />
         </section>
       )}

@@ -232,11 +232,14 @@ export function signedInOf(config: Bag, signIn: SignInRow): { account?: string }
 /**
  * An adapter's schema as the form draws it: each secret a password, and, where the
  * connector holds one, a description that says it is kept. The hidden fields are
- * left out, and are not required.
+ * left out, and are not required. The schema's own description is left out too,
+ * since the section's heading names the form.
  */
 export function adapterSchema(schema: Bag, held: Bag, keptWord: string, hidden: string[] = []): JsonSchemaObject {
   const secrets = secretFields(schema);
-  if (secrets.length === 0 && hidden.length === 0) return schema as JsonSchemaObject;
+  const top: Bag = { ...schema };
+  delete top.description;
+  if (secrets.length === 0 && hidden.length === 0) return top as JsonSchemaObject;
   const properties = { ...bagOf(schema.properties) };
   for (const name of secrets) {
     const field = bagOf(properties[name]);
@@ -244,7 +247,7 @@ export function adapterSchema(schema: Bag, held: Bag, keptWord: string, hidden: 
   }
   for (const name of hidden) delete properties[name];
   const required = Array.isArray(schema.required) ? schema.required.filter((name) => !hidden.includes(name as string)) : undefined;
-  return { ...schema, properties, ...(required === undefined ? {} : { required }) } as JsonSchemaObject;
+  return { ...top, properties, ...(required === undefined ? {} : { required }) } as JsonSchemaObject;
 }
 
 /** A held config as the form shows it: each kept secret empty, since the host never lists its value. */

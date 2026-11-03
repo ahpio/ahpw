@@ -1319,7 +1319,7 @@
       "reading": "Cargando",
       "noPut": "No tienes permiso para agregar agentes en este host.",
       "unknownEngine": "El motor {engine} no está cargado, así que sus ajustes no se pueden mostrar.",
-      "settingsOf": "Ajustes de {engine}",
+      "settings": "Ajustes",
       "failed": "No se pudo guardar el agente",
       "create": "Crear",
       "searchEngines": "Buscar motores",
@@ -2625,7 +2625,7 @@
       "failed": "No se pudo guardar el conector",
       "noAdapters": "Este host no te muestra ningún adaptador. Para crear un conector se necesita el permiso connector:list.",
       "noPut": "Para crear un conector se necesita el permiso connector:put, que no tienes.",
-      "settingsOf": "Configuración de {adapter}",
+      "settings": "Configuración",
       "secretKept": "Guardado. Escribe un valor nuevo para reemplazarlo."
     },
     "signIn": {

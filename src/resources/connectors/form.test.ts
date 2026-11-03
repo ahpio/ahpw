@@ -148,6 +148,11 @@ describe('secrets', () => {
     expect(adapterSchema(SCHEMA, {}, 'Kept.').properties?.secret?.description).toBeUndefined();
   });
 
+  it('leaves out the schema\'s own description, which the heading replaces', () => {
+    expect(adapterSchema({ ...SCHEMA, description: 'Calls in.' }, {}, 'Kept.').description).toBeUndefined();
+    expect(adapterSchema({ type: 'object', description: 'Calls in.', properties: { bot: { type: 'string' } } }, {}, 'Kept.')).toEqual({ type: 'object', properties: { bot: { type: 'string' } } });
+  });
+
   it('shows a held secret empty, and sends one left empty as ""', () => {
     expect(configForForm({ bot: 'bot://a', secret: { $secret: 'x' } })).toEqual({ bot: 'bot://a', secret: '' });
     expect(configForPut({ bot: 'bot://a' }, SCHEMA)).toEqual({ bot: 'bot://a', secret: '' });
