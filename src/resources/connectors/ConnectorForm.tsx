@@ -165,7 +165,7 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
           <SchemaForm key={top.adapter} schema={fields} views={SETTINGS_VIEWS} value={config} baseline={heldConfig} onChange={(next) => { setConfig(next); setSaved(false); }} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} fieldActions />
           {adapter!.signIn === undefined ? null : (
             <SignInStep
-              key={top.adapter}
+              key={`${top.adapter}:sign-in`}
               host={host}
               signIn={adapter!.signIn}
               {...(connector === undefined ? {} : { held: connector })}
