@@ -156,6 +156,7 @@ export function BotChat({ host, mark, summary, session, chat, chatUri, send, too
           lastUsage={turns.at(-1)?.usage}
           config={session.state?.config}
           changesets={session.state?.changesets}
+          backgroundWork={chat.state.backgroundWork}
           summary={summary}
           send={send}
           placeholder={t('bots/chat/message', { name: mark.name })}

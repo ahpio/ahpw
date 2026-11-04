@@ -4,6 +4,7 @@ import { Button, useChatPicker } from '@softov/scena/ui';
 import type { HostCtx, PickerAction } from '@softov/scena/types';
 import type {
   AgentInfo,
+  BackgroundWork,
   Changeset,
   Customization,
   Message,
@@ -46,6 +47,8 @@ import { useComposerDrop } from './composer-drop.js';
 import { warn } from '../../shell/notify/index.js';
 import { COMPOSER_FOCUS, hostCommands, registerHostCommands, type HostCommand } from './host-commands.js';
 import { useAgentIconSrc } from '../agents/icons.js';
+import { shellsOf } from './shells.js';
+import { ShellsList, ShellsPill } from './Shells.js';
 
 /** Tells one composer from another in the store's focus path. */
 let composers = 0;
@@ -76,7 +79,7 @@ export function messageOf(text: string, model: string | undefined, attachments: 
 }
 
 /** The composer of one chat: the box, its `/` and `@` picker, the settings row, and send, queue, steer and stop. */
-export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, config, changesets, customizations, summary, send, placeholder, steers = false }: {
+export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false }: {
   /** The session's host. */
   host: string;
   chatUri: string;
@@ -93,6 +96,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   changesets: readonly Changeset[] | undefined;
   /** The session's customizations, whose custom agents the Agent picker lists. */
   customizations?: readonly Customization[] | undefined;
+  /** The chat's background work, whose shells the composer lists. */
+  backgroundWork?: readonly BackgroundWork[] | undefined;
   summary: SessionSummary;
   send: Send;
   /** The box's prompt, in place of the agent's; a chat with a bot names the bot. */
@@ -119,6 +124,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
 
   const active = activeId === undefined ? undefined : { id: activeId, startedAt: activeStart ?? '' };
   const queued = held ?? [];
+  const shells = useMemo(() => shellsOf(backgroundWork), [backgroundWork]);
+  const [shellsOpen, setShellsOpen] = useState(false);
 
   useEffect(() => fitToText(area.current), [text]);
 
@@ -364,9 +371,12 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         </ul>
       )}
 
+      {shellsOpen && shells.length > 0 ? <ShellsList host={host} chatUri={chatUri} shells={shells} /> : null}
+
       <div className="web-composer__where">
         {folder === undefined ? null : <Pill label={`${EMOJIcon.folder} ${folderLabel(folder)}`} title={t('sessions/composer/folderHint')} />}
         <Pill label={agentImage === undefined ? `${EMOJIcon.agents} ${agent?.displayName ?? summary.provider}` : agent?.displayName ?? summary.provider} image={agentImage} title={agent?.description ?? t('sessions/composer/agentHint')} />
+        {shells.length === 0 ? null : <ShellsPill count={shells.length} onToggle={() => setShellsOpen((was) => !was)} />}
       </div>
 
       <div

@@ -126,7 +126,7 @@ export type Output =
 
 /** Strip ANSI escapes, which a terminal preview carries and a page cannot draw. */
 // eslint-disable-next-line no-control-regex
-const stripAnsi = (text: string): string => text.replace(/\u001b\[[0-9;?]*[ -/]*[@-~]/g, '');
+export const stripAnsi = (text: string): string => text.replace(/\u001b\[[0-9;?]*[ -/]*[@-~]/g, '');
 
 /** What the call produced, in reading order. */
 export function outputOf(call: ToolCallState): Output[] {
