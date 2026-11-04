@@ -35,6 +35,8 @@ export const EMOJIcon = {
   agents: mono('🤖'),
   host: mono('🖥'),
   computers: mono('💻'),
+  tunnels: mono('🚇'),
+  clients: mono('📡'),
   bots: mono('👾'),
   users: mono('👤'),
   roles: mono('🛡'),

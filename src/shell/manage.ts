@@ -6,6 +6,8 @@ import { NO_OFFERS, type Offers } from '../bridges/offers.js';
 import { selfId } from '../bridges/people.js';
 import { english } from '../i18n/locales.js';
 import { EMOJIcon } from '../resources/emojis.js';
+import { CLIENTS_SERVED } from '../resources/clients/state.js';
+import { TUNNELS_SERVED } from '../resources/tunnels/state.js';
 import { openPalette } from './CommandPalette.js';
 import { localeList, themeList } from './commands.js';
 import { layoutMenu } from './layout-menu.js';
@@ -15,8 +17,8 @@ export const MANAGE_SLOT = 'ahp:manage';
 
 /**
  * The Manage menu, as VS Code's gear: language, layout and theme open their
- * lists in the palette, then the host and settings, and the account group
- * parted below.
+ * lists in the palette, then the host, its tunnels and clients while a host
+ * lists them, and settings, and the account group parted below.
  */
 export function registerManage(scena: Scena, embedded: boolean): Disposable {
   return combineDisposables(
@@ -62,6 +64,30 @@ export function registerManage(scena: Scena, embedded: boolean): Disposable {
       run: (ctx) => {
         ctx.host?.closeMenu();
         void ctx.scena.commands.execute('ahp.openHostInfo');
+      },
+    }),
+    scena.commands.register({
+      id: 'ahp.manage.tunnels',
+      title: () => translate('tunnels/explorer/title'),
+      keywords: [english('tunnels/explorer/title')],
+      icon: EMOJIcon.tunnels,
+      slots: [MANAGE_SLOT],
+      when: () => scena.store.get<boolean>(TUNNELS_SERVED) === true,
+      run: (ctx) => {
+        ctx.host?.closeMenu();
+        void ctx.scena.commands.execute('ahp.showTunnels');
+      },
+    }),
+    scena.commands.register({
+      id: 'ahp.manage.clients',
+      title: () => translate('clients/explorer/title'),
+      keywords: [english('clients/explorer/title')],
+      icon: EMOJIcon.clients,
+      slots: [MANAGE_SLOT],
+      when: () => scena.store.get<boolean>(CLIENTS_SERVED) === true,
+      run: (ctx) => {
+        ctx.host?.closeMenu();
+        void ctx.scena.commands.execute('ahp.showClients');
       },
     }),
     scena.commands.register({

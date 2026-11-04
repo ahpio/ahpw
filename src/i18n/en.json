@@ -2756,5 +2756,101 @@
         "price": "Price"
       }
     }
+  },
+  "operations": {
+    "failed": "Couldn't run {label}",
+    "kept": "Kept. Leave empty to keep it.",
+    "cancel": "Cancel"
+  },
+  "tunnels": {
+    "commands": {
+      "show": "Show tunnels",
+      "new": "New tunnel",
+      "open": "Open tunnel",
+      "pickKind": "Choose a kind of tunnel"
+    },
+    "explorer": {
+      "title": "Tunnels",
+      "filter": "Filter tunnels",
+      "empty": "No tunnels yet.",
+      "notServed": "None of your hosts list tunnels."
+    },
+    "status": {
+      "busy": "working",
+      "running": "running",
+      "error": "error",
+      "stopped": "stopped",
+      "disabled": "disabled"
+    },
+    "notices": {
+      "none": "No tunnels",
+      "reading": "Loading tunnels",
+      "gone": "This tunnel no longer exists.",
+      "error": "The tunnel failed"
+    },
+    "actions": {
+      "open": "Open",
+      "copyUrl": "Copy URL",
+      "copyId": "Copy id"
+    },
+    "facts": {
+      "kind": "Kind",
+      "plugin": "Plugin",
+      "purpose": "Purpose",
+      "enabled": "Enabled",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "purpose": {
+      "system": "Kept by the host",
+      "person": "Made by a person"
+    },
+    "page": {
+      "settings": "Settings"
+    }
+  },
+  "clients": {
+    "commands": {
+      "show": "Show clients",
+      "open": "Open client"
+    },
+    "explorer": {
+      "title": "Clients",
+      "filter": "Filter clients",
+      "empty": "No clients connected.",
+      "notServed": "None of your hosts list clients.",
+      "thisApp": "this app",
+      "connected": "connected"
+    },
+    "notices": {
+      "none": "No clients",
+      "reading": "Loading clients",
+      "gone": "This client is no longer connected."
+    },
+    "actions": {
+      "open": "Open",
+      "copyClientId": "Copy client id"
+    },
+    "facts": {
+      "clientId": "Client id",
+      "name": "Name",
+      "principal": "Signed in as",
+      "address": "Address",
+      "forwardedFor": "Forwarded for",
+      "protocolVersion": "Protocol",
+      "locale": "Language",
+      "connectedAt": "Connected",
+      "watching": "Channels followed"
+    },
+    "traffic": {
+      "framesIn": "Frames in",
+      "framesOut": "Frames out",
+      "bytesIn": "Bytes in",
+      "bytesOut": "Bytes out"
+    },
+    "page": {
+      "traffic": "Traffic",
+      "watching": "Channels it follows"
+    }
   }
 }
