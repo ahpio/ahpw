@@ -38,6 +38,7 @@ import { PageAlert } from '../../shell/view/PageAlert.js';
 import { BotChat } from '../bots/chat/BotChat.js';
 import { sessionKey } from './focus.js';
 import { botMarkOf } from '../bots/chat/mark.js';
+import { askOf, type Source } from './origin.js';
 
 /** How a turn ended, as the key of its words, when it did not end well. */
 const ENDED: Record<string, string> = { cancelled: 'sessions/turn/stopped', error: 'sessions/turn/failed' };
@@ -77,6 +78,35 @@ function FactLine({ facts, state, live, text }: { facts: TurnFacts; state?: stri
 
 const NONE: readonly ChatInputRequest[] = [];
 
+/** A message the host started: one muted line, which opens the full text when it holds more. */
+function Notice({ line, text }: { line: string; text: string }): ReactElement {
+  const [open, setOpen] = useState(false);
+  const more = text.trim() !== line;
+  const body = <><span aria-hidden="true">{EMOJIcon.info}</span><span>{line}</span></>;
+  return (
+    <div className="web-turn__notice">
+      {more ? (
+        <button type="button" className="web-activity__line" aria-expanded={open} onClick={() => setOpen(!open)}>
+          {body}
+          <span className="web-activity__chev" aria-hidden="true">{open ? EMOJIcon.caretDown : EMOJIcon.caretRight}</span>
+        </button>
+      ) : <span className="web-turn__notice-line">{body}</span>}
+      {open ? <div className="web-turn__notice-text">{text}</div> : null}
+    </div>
+  );
+}
+
+/** The chip over a message that another chat or session sent, which opens that source. */
+function FromChip({ from, onSource }: { from: Source; onSource: (from: Source) => void }): ReactElement {
+  const { t } = useI18n();
+  const label = t(from.scope === 'chat' ? 'sessions/turn/fromChat' : 'sessions/turn/fromSession');
+  return (
+    <button type="button" className="web-chip web-turn__from" title={t('sessions/turn/openSource')} onClick={() => onSource(from)}>
+      <span aria-hidden="true">{EMOJIcon.forward}</span>{label}
+    </button>
+  );
+}
+
 /** What a message carried along with its text: a file opens where it is one, what the message holds opens a preview. */
 function SentAttachments({ attachments }: { attachments: readonly MessageAttachment[] }): ReactElement {
   const scena = useScena();
@@ -100,10 +130,14 @@ function SentAttachments({ attachments }: { attachments: readonly MessageAttachm
 }
 
 /** A finished turn renders once: the reducer keeps its object while later turns stream. */
-const TurnView = memo(function TurnView({ turn, live, send, open = NONE, hideCalls = false }: {
+const TurnView = memo(function TurnView({ turn, live, send, session, onSource, open = NONE, hideCalls = false }: {
   turn: Turn | ActiveTurn;
   live: boolean;
   send: Send;
+  /** The URI of the session that holds the turn. */
+  session: string | undefined;
+  /** Opens the chat or session that sent a message. */
+  onSource: (from: Source) => void;
   /** Leaves out the runs of calls and thinking, except one in a running turn that waits on the person. */
   hideCalls?: boolean;
   /** Questions the session waits on that no part of this turn holds: what a page opened mid-question reads. */
@@ -112,12 +146,24 @@ const TurnView = memo(function TurnView({ turn, live, send, open = NONE, hideCal
   const { t } = useI18n();
   const state = 'state' in turn ? String(turn.state) : undefined;
   const parts = turn.responseParts;
+  const ask = askOf(turn.message, session);
+  const attachments = turn.message.attachments === undefined || turn.message.attachments.length === 0 ? null : <SentAttachments attachments={turn.message.attachments} />;
   return (
     <article className="web-turn">
-      <div className="web-turn__ask">
-        {turn.message.text}
-        {turn.message.attachments === undefined || turn.message.attachments.length === 0 ? null : <SentAttachments attachments={turn.message.attachments} />}
-      </div>
+      {ask.kind === 'hidden' ? null : ask.kind === 'notice' ? (
+        <>
+          <Notice line={ask.line} text={turn.message.text} />
+          {attachments}
+        </>
+      ) : (
+        <>
+          {ask.from === undefined ? null : <FromChip from={ask.from} onSource={onSource} />}
+          <div className="web-turn__ask">
+            {turn.message.text}
+            {attachments}
+          </div>
+        </>
+      )}
       <div className="web-turn__answer">
         {groupParts(parts, live, factsOf(turn).duration).map((shown) => shown.kind === 'activity'
           ? (hideCalls && (shown.ended || !shown.steps.some(stepWaits)) ? null : <Activity key={shown.id} group={shown} send={send} turnId={turn.id} />)
@@ -221,6 +267,16 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const send = useCallback<Send>((action) => {
     if (chatUri !== undefined) hostBridge(host).dispatch(chatUri, action);
   }, [chatUri]);
+  // Read when a chip is clicked, so the callback keeps one identity and a finished turn does not draw again.
+  const chats = useRef(session.state?.chats);
+  chats.current = session.state?.chats;
+  const openSource = useCallback((from: Source): void => {
+    if (from.chat !== undefined && (chats.current ?? []).some((one) => one.resource === from.chat)) {
+      setPicked(from.chat);
+      return;
+    }
+    void scena.commands.execute('ahp.openSession', { host, resource: from.session });
+  }, [host, scena]);
 
   const turns = chat.state?.turns.length ?? 0;
   const open = useOpenQuestions(host, session.state?.inputNeeded, chatUri, chat.state?.activeTurn);
@@ -317,8 +373,8 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
             {rawView ?? (
               <>
-                {chat.state?.turns.map((turn) => <TurnView key={turn.id} turn={turn} live={false} send={send} hideCalls={callsHidden} />)}
-                {chat.state?.activeTurn === undefined ? null : <TurnView turn={chat.state.activeTurn} live send={send} open={open} hideCalls={callsHidden} />}
+                {chat.state?.turns.map((turn) => <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} onSource={openSource} hideCalls={callsHidden} />)}
+                {chat.state?.activeTurn === undefined ? null : <TurnView turn={chat.state.activeTurn} live send={send} session={resource} onSource={openSource} open={open} hideCalls={callsHidden} />}
               </>
             )}
           </WorkspaceContext.Provider>

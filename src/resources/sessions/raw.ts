@@ -34,6 +34,8 @@ export interface RawTurn {
   index: number;
   live: boolean;
   facts: TurnFacts;
+  /** How the turn ended, as the host sent it: absent on a turn that runs. */
+  state?: string;
   /** The turn as the host sent it, less its response parts, which are its steps. */
   source: unknown;
   steps: RawStep[];
@@ -76,7 +78,8 @@ function turnOf(turn: Turn | ActiveTurn, index: number, live: boolean): RawTurn 
     const at = steps.length + 1;
     steps.push({ id: `${turn.id}:${String(at)}`, step: at, source: part, ...step });
   }
-  return { id: turn.id, index, live, facts: factsOf(turn), source, steps };
+  const state = 'state' in turn && turn.state !== undefined ? String(turn.state) : undefined;
+  return { id: turn.id, index, live, facts: factsOf(turn), ...(state === undefined ? {} : { state }), source, steps };
 }
 
 /** Every loaded turn, then the one in flight. */

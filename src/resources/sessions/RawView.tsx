@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react';
+import { Fragment, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
 import { elapsed } from '../../bridges/words.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
@@ -69,6 +69,40 @@ function SourceView({ view, source }: { view: Exclude<StepView, 'formatted'>; so
   return view === 'raw' ? <pre className="web-tool__pre">{json(source)}</pre> : <div className="web-raw__tree"><JsonTree value={source} /></div>;
 }
 
+/** How a turn ended, as the key of its words; a state the host adds later shows as it was sent. */
+const STATE_WORDS: Record<string, string> = { complete: 'sessions/raw/states/complete', cancelled: 'sessions/raw/states/cancelled', error: 'sessions/raw/states/error' };
+
+/** What a fact reads when the host sent no value for it. */
+function NotSent(): ReactElement {
+  const { t } = useI18n();
+  return <span className="web-note">{t('sessions/raw/notSent')}</span>;
+}
+
+/** The message a step holds, as its origin and `_meta` read it. */
+type Held = { origin?: { kind?: unknown }; _meta?: unknown };
+
+const heldOf = (message: unknown): Held => (typeof message === 'object' && message !== null ? message : {}) as Held;
+
+/** A message's origin, as the host sent it. */
+function OriginFact({ message }: { message: unknown }): ReactElement {
+  const { t } = useI18n();
+  const origin = heldOf(message).origin?.kind;
+  return <><dt>{t('sessions/raw/origin')}</dt><dd>{origin === undefined ? <NotSent /> : <code>{String(origin)}</code>}</dd></>;
+}
+
+/** Each `_meta` entry the host sent with a message, its value as JSON. */
+function MetaFacts({ message }: { message: unknown }): ReactElement {
+  const meta = heldOf(message)._meta;
+  const entries = typeof meta === 'object' && meta !== null && !Array.isArray(meta) ? Object.entries(meta) : [];
+  return (
+    <>
+      {entries.map(([key, value]) => (
+        <Fragment key={key}><dt><code>{key}</code></dt><dd><code>{json(value)}</code></dd></Fragment>
+      ))}
+    </>
+  );
+}
+
 /** A turn's heading, opened in place to its facts or to what the host sent for it, less its steps. */
 function TurnHead({ turn, view, setView }: { turn: RawTurn; view: StepView; setView: (view: StepView) => void }): ReactElement {
   const { t } = useI18n();
@@ -85,11 +119,12 @@ function TurnHead({ turn, view, setView }: { turn: RawTurn; view: StepView; setV
           <ViewToggle view={view} setView={setView} source={turn.source} />
           {view !== 'formatted' ? <SourceView view={view} source={turn.source} /> : (
             <dl className="web-tool__facts">
+              <dt>{t('sessions/raw/state')}</dt><dd>{turn.state === undefined ? t('sessions/raw/live') : STATE_WORDS[turn.state] === undefined ? <code>{turn.state}</code> : t(STATE_WORDS[turn.state]!)}</dd>
               {startedAt === undefined ? null : <><dt>{t('sessions/raw/started')}</dt><dd>{when(startedAt)}</dd></>}
               {duration === undefined ? null : <><dt>{t('sessions/raw/took')}</dt><dd>{elapsed(duration)}</dd></>}
               {model === undefined ? null : <><dt>{t('sessions/raw/model')}</dt><dd>{model}</dd></>}
-              {input === undefined && output === undefined ? null : <><dt>{t('sessions/raw/tokenLabel')}</dt><dd>{t('sessions/raw/tokens', { input: tokens(input ?? 0), output: tokens(output ?? 0) })}</dd></>}
-              {cacheRead === undefined ? null : <><dt>{t('sessions/raw/cacheRead')}</dt><dd>{tokens(cacheRead)}</dd></>}
+              <dt>{t('sessions/raw/tokenLabel')}</dt><dd>{input === undefined && output === undefined ? <NotSent /> : t('sessions/raw/tokens', { input: tokens(input ?? 0), output: tokens(output ?? 0) })}</dd>
+              <dt>{t('sessions/raw/cacheRead')}</dt><dd>{cacheRead === undefined ? <NotSent /> : tokens(cacheRead)}</dd>
               <dt>{t('sessions/raw/stepCount')}</dt><dd>{turn.steps.length}</dd>
               <dt>{t('sessions/raw/toolCount')}</dt><dd>{tools}</dd>
             </dl>
@@ -139,7 +174,9 @@ function StepRow({ step, turn, subagent, onOpenChat, view, setView }: {
             <>
               <dl className="web-tool__facts">
                 <dt>{t('sessions/raw/kindLabel')}</dt><dd>{t(`sessions/raw/kind/${step.kind}`)}</dd>
+                {step.kind === 'message' ? <OriginFact message={step.source} /> : null}
                 <dt>{t('sessions/raw/place')}</dt><dd>{t('sessions/raw/placeValue', { turn: turn.index, step: step.step })}</dd>
+                {step.kind === 'message' ? <MetaFacts message={step.source} /> : null}
                 {call === undefined ? null : (
                   <>
                     <dt>{t('sessions/tool/tool')}</dt><dd><code>{call.toolName}</code>{call.displayName && call.displayName !== call.toolName ? ` (${call.displayName})` : null}</dd>

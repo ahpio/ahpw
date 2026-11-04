@@ -244,6 +244,42 @@
   border: 1px solid var(--oo-color-border);
 }
 
+/* A message the host started: one muted line, with no bubble. */
+.web-turn__notice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+  min-width: 0;
+}
+
+.web-turn__notice-line {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--oo-spacing-xs);
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-muted);
+}
+
+.web-turn__notice-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding-inline-start: var(--oo-spacing-md);
+  border-inline-start: 2px solid var(--oo-color-border);
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-muted);
+}
+
+/* The chip over a message that another chat or session sent. */
+.web-turn__from {
+  align-self: flex-end;
+  margin-bottom: calc(-1 * var(--oo-spacing-xs));
+}
+
+.web-turn__from:hover,
+.web-turn__from:focus-visible {
+  color: var(--oo-color-accent);
+}
+
 .web-turn__answer {
   display: flex;
   flex-direction: column;

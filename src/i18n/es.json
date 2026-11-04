@@ -1680,7 +1680,10 @@
         "other": "{count} llamadas a herramientas"
       },
       "copyReply": "Copiar la respuesta",
-      "working": "Trabajando"
+      "working": "Trabajando",
+      "fromChat": "Enviado desde otro chat",
+      "fromSession": "Enviado por otra sesión",
+      "openSource": "Abrir el chat que lo envió"
     },
     "chat": {
       "loading": "Cargando",
@@ -1786,7 +1789,15 @@
       "tokenLabel": "Tokens",
       "cacheRead": "Leídos de caché",
       "stepCount": "Pasos",
-      "toolCount": "Llamadas a herramientas"
+      "toolCount": "Llamadas a herramientas",
+      "state": "Estado",
+      "states": {
+        "complete": "Completo",
+        "cancelled": "Detenido",
+        "error": "Terminó con un error"
+      },
+      "notSent": "no enviado",
+      "origin": "Origen"
     },
     "header": {
       "files": {

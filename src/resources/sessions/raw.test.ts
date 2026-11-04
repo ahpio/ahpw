@@ -25,6 +25,13 @@ test('a turn is its message, then each part in order, blank text left out, each 
   expect(one!.facts.duration).toBe(3000);
 });
 
+test('a turn keeps the state the host sent, and one in flight has none', () => {
+  const active = turn('b', []) as unknown as ActiveTurn;
+  const [done, running] = rawOf([turn('a', [], { state: 'cancelled' })], active);
+  expect(done!.state).toBe('cancelled');
+  expect(running).not.toHaveProperty('state');
+});
+
 test('the turn in flight comes last, and a filter keeps the tool calls or only the ones that spawned a subagent chat', () => {
   const active = turn('b', [tool('t2', 'Bash', 'completed'), tool('t3', 'Task', 'running'), tool('t4', 'Worked', 'completed', { _meta: { toolKind: 'subagent' } })]) as unknown as ActiveTurn;
   const turns = rawOf([turn('a', [])], active);
