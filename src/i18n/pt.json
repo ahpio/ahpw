@@ -1512,6 +1512,26 @@
       "notAttached": "Não anexado",
       "refused": "Não foi possível anexar (mais de 5 MB ou ilegível): {names}"
     },
+    "shells": {
+      "count": {
+        "one": "{count} shell em segundo plano",
+        "other": "{count} shells em segundo plano"
+      },
+      "hint": "Os shells que este chat executa em segundo plano",
+      "title": "Shells em segundo plano",
+      "command": "Comando",
+      "status": "Status",
+      "running": "Em execução",
+      "exited": "Encerrado",
+      "exitedWith": "Encerrou com o código {code}",
+      "started": "Início",
+      "output": "Saída",
+      "openTerminal": "Abrir terminal",
+      "stop": "Parar shell",
+      "stopped": "{name} parado.",
+      "finished": "{name} já tinha terminado.",
+      "stopFailed": "Não foi possível parar {name}"
+    },
     "composer": {
       "steering": "Redirecionando",
       "remove": "Remover",

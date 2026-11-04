@@ -39,20 +39,10 @@ import { BotChat } from '../bots/chat/BotChat.js';
 import { sessionKey } from './focus.js';
 import { botMarkOf } from '../bots/chat/mark.js';
 import { askOf, type Source } from './origin.js';
+import { useNow } from './clock.js';
 
 /** How a turn ended, as the key of its words, when it did not end well. */
 const ENDED: Record<string, string> = { cancelled: 'sessions/turn/stopped', error: 'sessions/turn/failed' };
-
-/** A clock that moves once a second while `on`. */
-function useNow(on: boolean): number {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!on) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [on]);
-  return now;
-}
 
 /** The line under a turn: a copy of its reply, when, how long, the tokens, the model and the tools it called. */
 function FactLine({ facts, state, live, text }: { facts: TurnFacts; state?: string; live: boolean; text: string }): ReactElement {
@@ -397,6 +387,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           config={session.state?.config}
           customizations={session.state?.customizations}
           changesets={session.state?.changesets}
+          backgroundWork={chat.state.backgroundWork}
           summary={summary}
           send={send}
         />
