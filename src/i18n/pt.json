@@ -1703,7 +1703,11 @@
       "working": "Trabalhando",
       "fromChat": "Enviado de outro chat",
       "fromSession": "Enviado por outra sessão",
-      "openSource": "Abrir o chat que o enviou"
+      "openSource": "Abrir o chat que o enviou",
+      "fromAgent": "Do agente principal",
+      "fromAutomation": "De uma automação",
+      "openParent": "Abrir o chat principal",
+      "openAutomation": "Abrir a automação"
     },
     "chat": {
       "loading": "Carregando",

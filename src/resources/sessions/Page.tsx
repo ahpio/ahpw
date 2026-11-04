@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Badge, Button, Spinner, Text } from '@softov/scena/ui';
 import {
@@ -38,7 +38,7 @@ import { PageAlert } from '../../shell/view/PageAlert.js';
 import { BotChat } from '../bots/chat/BotChat.js';
 import { sessionKey } from './focus.js';
 import { botMarkOf } from '../bots/chat/mark.js';
-import { askOf, type Source } from './origin.js';
+import { askOf, opens, type Origins, type Source } from './origin.js';
 import { useNow } from './clock.js';
 
 /** How a turn ended, as the key of its words, when it did not end well. */
@@ -86,15 +86,22 @@ function Notice({ line, text }: { line: string; text: string }): ReactElement {
   );
 }
 
-/** The chip over a message that another chat or session sent, which opens that source. */
+/** The words of a source's chip, and the hint of its click. */
+const FROM_WORDS: Record<Source['scope'], { label: string; open: string }> = {
+  chat: { label: 'sessions/turn/fromChat', open: 'sessions/turn/openSource' },
+  session: { label: 'sessions/turn/fromSession', open: 'sessions/turn/openSource' },
+  agent: { label: 'sessions/turn/fromAgent', open: 'sessions/turn/openParent' },
+  automation: { label: 'sessions/turn/fromAutomation', open: 'sessions/turn/openAutomation' },
+};
+
+/** The chip over a message the person did not type, which names its sender and opens it when the host named where. */
 function FromChip({ from, onSource }: { from: Source; onSource: (from: Source) => void }): ReactElement {
   const { t } = useI18n();
-  const label = t(from.scope === 'chat' ? 'sessions/turn/fromChat' : 'sessions/turn/fromSession');
-  return (
-    <button type="button" className="web-chip web-turn__from" title={t('sessions/turn/openSource')} onClick={() => onSource(from)}>
-      <span aria-hidden="true">{EMOJIcon.forward}</span>{label}
-    </button>
-  );
+  const words = FROM_WORDS[from.scope];
+  const body = <><span aria-hidden="true">{EMOJIcon.forward}</span>{t(words.label)}</>;
+  return opens(from)
+    ? <button type="button" className="web-chip web-turn__from" title={t(words.open)} onClick={() => onSource(from)}>{body}</button>
+    : <span className="web-chip web-turn__from">{body}</span>;
 }
 
 /** What a message carried along with its text: a file opens where it is one, what the message holds opens a preview. */
@@ -120,12 +127,14 @@ function SentAttachments({ attachments }: { attachments: readonly MessageAttachm
 }
 
 /** A finished turn renders once: the reducer keeps its object while later turns stream. */
-const TurnView = memo(function TurnView({ turn, live, send, session, onSource, open = NONE, hideCalls = false }: {
+const TurnView = memo(function TurnView({ turn, live, send, session, origins, onSource, open = NONE, hideCalls = false }: {
   turn: Turn | ActiveTurn;
   live: boolean;
   send: Send;
   /** The URI of the session that holds the turn. */
   session: string | undefined;
+  /** The origins of the turn's chat and session, which name an automation or a parent agent. */
+  origins: Origins;
   /** Opens the chat or session that sent a message. */
   onSource: (from: Source) => void;
   /** Leaves out the runs of calls and thinking, except one in a running turn that waits on the person. */
@@ -136,7 +145,7 @@ const TurnView = memo(function TurnView({ turn, live, send, session, onSource, o
   const { t } = useI18n();
   const state = 'state' in turn ? String(turn.state) : undefined;
   const parts = turn.responseParts;
-  const ask = askOf(turn.message, session);
+  const ask = askOf(turn.message, session, origins);
   const attachments = turn.message.attachments === undefined || turn.message.attachments.length === 0 ? null : <SentAttachments attachments={turn.message.attachments} />;
   return (
     <article className="web-turn">
@@ -261,12 +270,19 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const chats = useRef(session.state?.chats);
   chats.current = session.state?.chats;
   const openSource = useCallback((from: Source): void => {
+    if (from.scope === 'automation') {
+      if (from.automation !== undefined) void scena.commands.execute('ahp.openAutomation', { host, resource: from.automation });
+      return;
+    }
     if (from.chat !== undefined && (chats.current ?? []).some((one) => one.resource === from.chat)) {
       setPicked(from.chat);
       return;
     }
-    void scena.commands.execute('ahp.openSession', { host, resource: from.session });
+    if (from.scope !== 'agent') void scena.commands.execute('ahp.openSession', { host, resource: from.session });
   }, [host, scena]);
+  const chatOrigin = session.state?.chats.find((one) => one.resource === chatUri)?.origin;
+  const sessionOrigin = summary?.origin;
+  const origins = useMemo<Origins>(() => ({ chat: chatOrigin, session: sessionOrigin }), [chatOrigin, sessionOrigin]);
 
   const turns = chat.state?.turns.length ?? 0;
   const open = useOpenQuestions(host, session.state?.inputNeeded, chatUri, chat.state?.activeTurn);
@@ -363,8 +379,8 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
             {rawView ?? (
               <>
-                {chat.state?.turns.map((turn) => <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} onSource={openSource} hideCalls={callsHidden} />)}
-                {chat.state?.activeTurn === undefined ? null : <TurnView turn={chat.state.activeTurn} live send={send} session={resource} onSource={openSource} open={open} hideCalls={callsHidden} />}
+                {chat.state?.turns.map((turn) => <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} origins={origins} onSource={openSource} hideCalls={callsHidden} />)}
+                {chat.state?.activeTurn === undefined ? null : <TurnView turn={chat.state.activeTurn} live send={send} session={resource} origins={origins} onSource={openSource} open={open} hideCalls={callsHidden} />}
               </>
             )}
           </WorkspaceContext.Provider>
