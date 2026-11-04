@@ -73,7 +73,7 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
   const folder = summary.workingDirectories?.[0];
   const terminals = useSessionTerminals(host, summary.resource, folder);
   const chats = session?.chats ?? [];
-  const subagents = subagentsOf(chat?.turns ?? [], chat?.activeTurn, chats);
+  const subagents = subagentsOf(chat?.turns ?? [], chat?.activeTurn, chats, chat?.backgroundWork);
   const running = subagents.filter((one) => one.running).length;
   // The switcher counts the session's own chats; a subagent's chat is reached from its button.
   const spawned = subagentChats(chats);

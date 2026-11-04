@@ -2,7 +2,7 @@
  * What the session header counts: the session's terminals and its subagents.
  */
 
-import type { ActiveTurn, ChatSummary, TerminalInfo, ToolCallState, Turn } from '@microsoft/agent-host-protocol';
+import type { ActiveTurn, BackgroundWork, ChatSummary, TerminalInfo, ToolCallState, Turn } from '@microsoft/agent-host-protocol';
 import { activityOf } from './status.js';
 import { outcomeOf } from './tool.js';
 
@@ -55,9 +55,11 @@ function callsOf(turns: readonly Turn[], active: ActiveTurn | undefined): { call
  * The chat's subagents, one per chat: each chat its tool calls hand work to,
  * then the session's spawned chats none of them names. A chat woken by
  * several calls, as a bot's back session is once a turn, is one subagent; it
- * runs while a call to it runs in the turn in flight, or while its chat says so.
+ * runs while a call to it runs in the turn in flight, while its chat says so,
+ * or while the chat's `backgroundWork` lists it. A row of another kind, or one
+ * without a chat, is skipped.
  */
-export function subagentsOf(turns: readonly Turn[], active: ActiveTurn | undefined, chats: readonly ChatSummary[]): Subagent[] {
+export function subagentsOf(turns: readonly Turn[], active: ActiveTurn | undefined, chats: readonly ChatSummary[], work?: readonly BackgroundWork[]): Subagent[] {
   const found = new Map<string, Subagent>();
   for (const { call, live } of callsOf(turns, active)) {
     const chat = linkOf(call);
@@ -69,6 +71,12 @@ export function subagentsOf(turns: readonly Turn[], active: ActiveTurn | undefin
   for (const one of subagentChats(chats)) {
     const held = found.get(one.resource);
     found.set(one.resource, { chat: one.resource, title: one.title === '' ? held?.title ?? '' : one.title, running: (held?.running ?? false) || chatRunning(one) });
+  }
+  for (const row of work ?? []) {
+    const chat = String(row.kind) === 'subagent' && 'chat' in row && typeof row.chat === 'string' && row.chat !== '' ? row.chat : undefined;
+    if (chat === undefined) continue;
+    const title = found.get(chat)?.title ?? '';
+    found.set(chat, { chat, title: title === '' ? row.label : title, running: true });
   }
   return [...found.values()];
 }

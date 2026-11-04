@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import type { ActiveTurn, ChatSummary, ResponsePart, TerminalInfo, Turn } from '@microsoft/agent-host-protocol';
+import type { ActiveTurn, BackgroundWork, ChatSummary, ResponsePart, TerminalInfo, Turn } from '@microsoft/agent-host-protocol';
 import { rawOf, shownSteps } from './raw.js';
 import { claimedTerminals, subagentCalls, subagentChats, subagentsOf } from './header.js';
 
@@ -64,6 +64,25 @@ test('a bot chat\'s calls to its back session are one subagent, linked by their 
   expect(subagentsOf(ended, undefined, [])).toEqual([{ chat: back, title: 'Worked', running: false }]);
   expect(subagentsOf(ended, active, [])).toEqual([{ chat: back, title: 'Worked', running: true }]);
   expect([...subagentCalls(ended, active, [], 'c://bot')]).toEqual([['w1', back], ['w2', back], ['w3', back]]);
+});
+
+test('a background subagent row runs while the host lists it, keeps the title it has, and other rows are skipped', () => {
+  const rows = (...given: Record<string, unknown>[]): BackgroundWork[] => given as unknown as BackgroundWork[];
+  const started = '2026-11-04T08:00:00Z';
+  // A row alone is a subagent, titled by its label.
+  expect(subagentsOf([], undefined, [], rows({ id: 'subagent:a', kind: 'subagent', label: 'Explore', startedAt: started, chat: 'c://a' })))
+    .toEqual([{ chat: 'c://a', title: 'Explore', running: true }]);
+  // A row beside the call that spawned it is one subagent: the call's title, running while the row is listed.
+  const spawned = [turn('a', [tool('t1', 'Task', 'completed', { displayName: 'Look around', content: [{ type: 'subagent', resource: 'c://a', title: 'Look around' }] })])];
+  expect(subagentsOf(spawned, undefined, [], rows({ id: 'subagent:a', kind: 'subagent', label: 'Explore', startedAt: started, chat: 'c://a' })))
+    .toEqual([{ chat: 'c://a', title: 'Look around', running: true }]);
+  expect(subagentsOf(spawned, undefined, [], [])).toEqual([{ chat: 'c://a', title: 'Look around', running: false }]);
+  // A shell row, a kind ahpw does not know, and a row without a chat add nothing.
+  expect(subagentsOf([], undefined, [], rows(
+    { id: 'shell:x', kind: 'shell', label: 'Dev server', startedAt: started, command: 'pnpm dev' },
+    { id: 'new:y', kind: 'somethingNew', label: 'New', startedAt: started, chat: 'c://y' },
+    { id: 'subagent:z', kind: 'subagent', label: 'Lost', startedAt: started },
+  ))).toEqual([]);
 });
 
 test('a session holds the terminals its claim names, not another session\'s or a client\'s', () => {
