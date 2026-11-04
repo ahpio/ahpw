@@ -53,7 +53,9 @@ He sent screenshots of that sheet on 2026-11-04. ahpw draws only what ahpd sends
 - agent-claude reads `rate_limit_event` only to know when a login is refused, and when to try it again.
   That is `limited`, at https://github.com/softov/ahpd/blob/e938d751/packages/agent-claude/src/session/logins.ts#L146-L149.
   It keeps no utilization and sends none to a client.
-- No Claude model reports a `maxContextWindow`, so the footer of a Claude session shows nothing. Only pi sets it.
+- Each result from Claude Code has `modelUsage`, and each model's entry has `contextWindow` and `maxOutputTokens`. ahpd does not read them.
+- So no Claude model reports a `maxContextWindow`, and the footer of a Claude session shows nothing. Only pi sets it.
+- `/autocompact` sets a smaller window for a model, such as 600k for Opus 5.5 with its limit of 1M. `getContextUsage()` measures against that autocompact window, as `raw_max_tokens`.
 - A Claude turn's usage has `ahpd.cost` and `ahpd.cacheWriteTokens` in `_meta`.
 - agent-acp puts `ahpd.context`, with `used` and `size`, on a turn's usage `_meta`.
 - A Claude login is a connector of the adapter `claude-login`. The rate limits are the account's, so every session on that login shares them.
@@ -61,7 +63,7 @@ He sent screenshots of that sheet on 2026-11-04. ahpw draws only what ahpd sends
 ## What ahpd needs to send
 
 - **The model's window.**
-  Each Claude model has a `maxContextWindow`, so the footer has a figure before the first turn.
+  Each Claude model gets the `maxContextWindow` that `modelUsage.contextWindow` gives, so the footer has the model's limit.
 - **The context breakdown.**
   After a turn, agent-claude calls `getContextUsage()` and puts its answer on the turn's usage `_meta`.
   The key is `contextAttribution`, in VS Code's shape, so VS Code draws it too.
@@ -90,7 +92,8 @@ He sent screenshots of that sheet on 2026-11-04. ahpw draws only what ahpd sends
 ## The change
 
 - A session gets a Usage view, opened from the context figure in its footer.
-- The view has a Context part: a bar and one row per category, with tokens and a share. Deferred rows stand apart and count for nothing, as the Claude app shows them. The MCP tools, memory files, agents and skills open as lists.
+- The view has a Context part: a bar and one row per category, with tokens and a share.
+  The bar fills against the autocompact window, and the model's limit shows as the ceiling. A total past the window shows as over it, as `over_limit` says. Deferred rows stand apart and count for nothing, as the Claude app shows them. The MCP tools, memory files, agents and skills open as lists.
 - The view has a Plan part when the session's login has a plan.
   It shows each window with its bar, its percentage and the time it resets.
   It shows the credits when the account has them.
