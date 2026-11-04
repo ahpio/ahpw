@@ -45,9 +45,11 @@ describe('enable and disable', () => {
 });
 
 describe('restartNeeded', () => {
-  it('reads the root state the host marks', () => {
-    expect(restartNeeded({ _meta: { 'ahpd.restartNeeded': true } } as unknown as RootState)).toBe(true);
-    expect(restartNeeded({ _meta: {} } as unknown as RootState)).toBe(false);
+  it('reads the mark in the root config the host changes', () => {
+    const schema = { type: 'object', properties: {} };
+    expect(restartNeeded({ config: { schema, values: { 'ahpd.restartNeeded': true } } } as unknown as RootState)).toBe(true);
+    expect(restartNeeded({ config: { schema, values: {} } } as unknown as RootState)).toBe(false);
+    expect(restartNeeded({ _meta: { 'ahpd.restartNeeded': true } } as unknown as RootState)).toBe(false);
     expect(restartNeeded(undefined)).toBe(false);
   });
 });

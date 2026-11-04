@@ -4,7 +4,7 @@
  * commands. Reading takes `plugin:list`, and each command its own grant:
  * `plugin:enable`, `plugin:disable`, `plugin:options`, `plugin:reload`,
  * `plugin:apply`. A host refuses the rest in its own words. It applies a
- * change at once, and marks its root state `ahpd.restartNeeded` only when a
+ * change at once, and sets `ahpd.restartNeeded` in its root config only when a
  * plugin that holds a port or a URI scheme is in the way.
  *
  * The row is written here rather than imported: ahpd serves it from the
@@ -166,9 +166,13 @@ export async function applyPlugins(host: string): Promise<void> {
   await hostBridge(host).request(PLUGINS.apply as never, {} as never);
 }
 
-/** Whether the host holds a configuration change that only a restart applies. */
+/**
+ * Whether the host holds a configuration change that only a restart applies.
+ * The host says so with `root/configChanged`, so the mark is in the root's
+ * config values.
+ */
 export function restartNeeded(root: RootState | undefined): boolean {
-  return root?._meta?.['ahpd.restartNeeded'] === true;
+  return root?.config?.values['ahpd.restartNeeded'] === true;
 }
 
 /** Whether the configuration turns a plugin on: a spec without `enabled: false`. */
