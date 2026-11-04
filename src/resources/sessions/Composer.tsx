@@ -365,6 +365,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
             <li key={one.id}>
               <span className="web-chip">{t('sessions/composer/next', { number: index + 1 })}</span>
               <span className="web-composer__queued">{one.message.text}</span>
+              {/* The same id and message as steering: the host moves the entry out of the queue. */}
+              {active === undefined ? null : <Button label={t('sessions/composer/sendNow')} size="sm" onClick={() => send({ type: 'chat/pendingMessageSet', kind: 'steering', id: one.id, message: one.message } as StateAction)} />}
               <Button label={t('sessions/composer/remove')} size="sm" onClick={() => send({ type: 'chat/pendingMessageRemoved', kind: 'queued', id: one.id } as StateAction)} />
             </li>
           ))}

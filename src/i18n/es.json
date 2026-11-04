@@ -1535,6 +1535,7 @@
     "composer": {
       "steering": "Redirigiendo",
       "remove": "Quitar",
+      "sendNow": "Enviar ahora",
       "next": "Siguiente {number}",
       "folderHint": "La carpeta en la que trabaja esta sesión",
       "agentHint": "El agente que ejecuta esta sesión",

@@ -1535,6 +1535,7 @@
     "composer": {
       "steering": "Steering",
       "remove": "Remove",
+      "sendNow": "Send now",
       "next": "Next {number}",
       "folderHint": "The folder this session works in",
       "agentHint": "The agent running this session",
