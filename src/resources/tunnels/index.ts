@@ -71,7 +71,7 @@ export function registerTunnels(scena: Scena): Disposable {
         // Every kind's create, on every shown host that lists its tunnels.
         const choices = servingHosts(ctx.scena).flatMap((host) =>
           listOperations(ctx.store.get<TunnelsState>(channelPath(host, TUNNELS))).map((operation) => ({
-            place: { host, channel: TUNNELS },
+            place: { host, channel: TUNNELS, opens: 'ahp.openTunnel' },
             operation,
             ...(multi ? { hostName: hostNameOf(ctx.store, host) } : {}),
           })));

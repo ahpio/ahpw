@@ -91,6 +91,30 @@ export function invokeParams(channel: string, operation: Operation, target?: str
   };
 }
 
+/**
+ * The input an operation's form starts from: what the record holds, and for
+ * each required field it does not hold, the field's `default` or the one value
+ * an enum of one allows. A form shows those values, so it sends them too.
+ */
+export function startingInput(schema: Bag, held: Bag): Bag {
+  const fields = schema.properties !== null && typeof schema.properties === 'object' ? schema.properties as Record<string, Bag> : {};
+  const required = Array.isArray(schema.required) ? schema.required.filter((name): name is string => typeof name === 'string') : [];
+  const out: Bag = { ...held };
+  for (const name of required) {
+    if (out[name] !== undefined) continue;
+    const field = fields[name] ?? {};
+    if (field.default !== undefined) out[name] = field.default;
+    else if (Array.isArray(field.enum) && field.enum.length === 1) out[name] = field.enum[0];
+  }
+  return out;
+}
+
+/** The id of the record an operation's answer names, or nothing. */
+export function madeId(answer: unknown): string | undefined {
+  const id = answer !== null && typeof answer === 'object' ? (answer as Bag).id : undefined;
+  return typeof id === 'string' && id !== '' ? id : undefined;
+}
+
 /** Run one operation on the host; the host's answer, the record or `{}`. A refusal throws. */
 export async function invokeOperation(host: string, channel: string, operation: Operation, target?: string, input?: Bag): Promise<unknown> {
   return await hostBridge(host).request(INVOKE_OPERATION as never, invokeParams(channel, operation, target, input) as never);

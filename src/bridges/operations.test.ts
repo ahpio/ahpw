@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { INVOKE_OPERATION, invokeOperation, listOperations, operationsReducer, rowOperations, type Operation, type OperationsState } from './operations.js';
+import { INVOKE_OPERATION, invokeOperation, listOperations, madeId, operationsReducer, rowOperations, startingInput, type Operation, type OperationsState } from './operations.js';
 
 const request = vi.hoisted(() => vi.fn());
 
@@ -63,5 +63,28 @@ describe('a channel with operations', () => {
     expect(request).toHaveBeenLastCalledWith(INVOKE_OPERATION, { channel: 'x-ahpd-tunnels://', operationId: 'devtunnel/create', input: { port: 1 } });
     await invokeOperation('h', 'x-ahpd-tunnels://', create);
     expect(request).toHaveBeenLastCalledWith(INVOKE_OPERATION, { channel: 'x-ahpd-tunnels://', operationId: 'devtunnel/create' });
+  });
+
+  it('starts a form from what it shows: a default, or the one value an enum allows', () => {
+    const schema = {
+      type: 'object',
+      required: ['connector', 'port', 'region'],
+      properties: {
+        connector: { type: 'string', enum: ['devtunnel'] },
+        port: { type: 'number', default: 4321 },
+        region: { type: 'string', enum: ['eu', 'us'] },
+        anonymous: { type: 'boolean', default: false },
+      },
+    };
+    expect(startingInput(schema, {})).toEqual({ connector: 'devtunnel', port: 4321 });
+    expect(startingInput(schema, { connector: 'other', port: 1 })).toEqual({ connector: 'other', port: 1 });
+    expect(startingInput({}, { a: 1 })).toEqual({ a: 1 });
+  });
+
+  it('reads the id of the record an answer names', () => {
+    expect(madeId({ id: 'devtunnel-1', status: 'running' })).toBe('devtunnel-1');
+    expect(madeId({})).toBeUndefined();
+    expect(madeId({ id: '' })).toBeUndefined();
+    expect(madeId(null)).toBeUndefined();
   });
 });

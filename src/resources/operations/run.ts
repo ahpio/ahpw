@@ -6,7 +6,7 @@
 
 import { combineDisposables, translate } from '@softov/scena';
 import type { BindingPath, Disposable, PickerAction, Scena } from '@softov/scena/types';
-import { askFirst, invokeOperation, labelOf, sayRefused, type Operation } from '../../bridges/operations.js';
+import { askFirst, invokeOperation, labelOf, madeId, sayRefused, type Operation } from '../../bridges/operations.js';
 
 type Bag = Record<string, unknown>;
 
@@ -21,6 +21,15 @@ export interface OperationPlace {
   target?: string;
   /** The record's own settings, which an operation's form starts from. */
   held?: Bag;
+  /** The command that opens a record a list operation made, run with `{ host, id }` of the row the host answers with. */
+  opens?: string;
+}
+
+/** Open the record a list operation made, where the place names how and the answer names one. */
+export function openMade(scena: Scena, place: OperationPlace, answer: unknown): void {
+  const id = madeId(answer);
+  if (place.opens === undefined || place.target !== undefined || id === undefined) return;
+  void scena.commands.execute(place.opens, { host: place.host, id });
 }
 
 /** What the dialog holds: the operation and where it runs. */
@@ -35,7 +44,11 @@ export async function runOperation(scena: Scena, place: OperationPlace, operatio
     return;
   }
   if (!(await askFirst(operation))) return;
-  await invokeOperation(place.host, place.channel, operation, place.target).catch((error: unknown) => sayRefused(operation, error));
+  try {
+    openMade(scena, place, await invokeOperation(place.host, place.channel, operation, place.target));
+  } catch (error) {
+    sayRefused(operation, error);
+  }
 }
 
 /** Whether an operation is running now, which disables it. */

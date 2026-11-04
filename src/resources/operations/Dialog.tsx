@@ -1,11 +1,11 @@
 import { useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Button, Modal, SchemaForm } from '@softov/scena/ui';
-import { askFirst, invokeOperation, labelOf } from '../../bridges/operations.js';
+import { askFirst, invokeOperation, labelOf, startingInput } from '../../bridges/operations.js';
 import { hostSaid } from '../../bridges/said.js';
 import { adapterSchema, configForForm, configForPut } from '../connectors/form.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
-import { OPERATION_DIALOG, refusedTitle, type OpenDialog } from './run.js';
+import { OPERATION_DIALOG, openMade, refusedTitle, type OpenDialog } from './run.js';
 
 type Bag = Record<string, unknown>;
 
@@ -18,11 +18,12 @@ function heldFor(schema: Bag, held: Bag): Bag {
 }
 
 function OperationForm({ open, onClose }: { open: OpenDialog; onClose: () => void }): ReactElement {
+  const scena = useScena();
   const { t } = useI18n();
   const input = open.operation.input ?? {};
   const held = heldFor(input, open.held ?? {});
   const schema = adapterSchema(input, held, t('operations/kept'));
-  const [value, setValue] = useState<Bag>(() => configForForm(held));
+  const [value, setValue] = useState<Bag>(() => startingInput(input, configForForm(held)));
   const [jsonValid, setJsonValid] = useState(true);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
@@ -33,8 +34,9 @@ function OperationForm({ open, onClose }: { open: OpenDialog; onClose: () => voi
     setBusy(true);
     setFailure(null);
     try {
-      await invokeOperation(open.host, open.channel, open.operation, open.target, configForPut(value, input));
+      const answer = await invokeOperation(open.host, open.channel, open.operation, open.target, configForPut(value, input));
       onClose();
+      openMade(scena, open, answer);
     } catch (error) {
       setFailure(hostSaid(error));
     } finally {
