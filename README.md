@@ -1,6 +1,6 @@
 # @ahpd/web
 
-[![CI](https://github.com/softov/ahpw/actions/workflows/ci.yml/badge.svg)](https://github.com/softov/ahpw/actions/workflows/ci.yml)
+[![CI](https://github.com/ahpio/ahpw/actions/workflows/ci.yml/badge.svg)](https://github.com/ahpio/ahpw/actions/workflows/ci.yml)
 [![@ahpd/web](https://img.shields.io/npm/v/%40ahpd%2Fweb?label=%40ahpd%2Fweb)](https://www.npmjs.com/package/@ahpd/web)
 ![license MIT](https://img.shields.io/badge/license-MIT-blue)
 ![node >=22](https://img.shields.io/badge/node-%3E%3D22-5fa04e)
@@ -189,7 +189,7 @@ git tag v0.1.0 && git push origin v0.1.0
 The release workflow runs the same checks and stages `@ahpd/web` on npm with provenance. Nothing is installable until it is approved on the package's npm page.
 It also creates the tag's GitHub Release, with the version's `CHANGELOG.md` section as its notes and the packed tarball attached.
 
-npm sets a trusted publisher on a package that exists, so the first version is published once by hand with `pnpm build && npm publish --access public`, and the trusted publisher (`softov/ahpw`, `release.yml`) is added after it.
+npm sets a trusted publisher on a package that exists, so the first version is published once by hand with `pnpm build && npm publish --access public`, and the trusted publisher (`ahpio/ahpw`, `release.yml`) is added after it.
 
 ---
 
