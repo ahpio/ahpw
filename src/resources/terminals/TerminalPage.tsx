@@ -61,13 +61,18 @@ export default function TerminalPage({ host, uri }: { host: string; uri?: string
 
     /** The stream as far as the screen has drawn it. */
     let drawn = '';
-    /** True on a terminal with no pty: this client echoes, and sends Enter as a newline. */
+    /**
+     * True on a terminal with no pty: this client echoes, sends Enter as a
+     * newline, and starts a line of output at the left margin, since plain
+     * text ends its lines with `\n` alone.
+     */
     let discipline = false;
 
     const draw = (value: unknown): void => {
       if (value === undefined) return;
       const next = normalizeState(value);
       discipline = next.isPty === false;
+      term.options.convertEol = discipline;
       const delta = deltaOf(drawn, joinParts(next.content));
       if (delta.reset) term.reset();
       if (delta.text !== '') term.write(delta.text);
