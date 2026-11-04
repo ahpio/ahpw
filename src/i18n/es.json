@@ -2756,5 +2756,101 @@
         "price": "Precio"
       }
     }
+  },
+  "operations": {
+    "failed": "No se pudo ejecutar {label}",
+    "kept": "Guardado. Déjalo vacío para conservarlo.",
+    "cancel": "Cancelar"
+  },
+  "tunnels": {
+    "commands": {
+      "show": "Mostrar túneles",
+      "new": "Nuevo túnel",
+      "open": "Abrir túnel",
+      "pickKind": "Elige un tipo de túnel"
+    },
+    "explorer": {
+      "title": "Túneles",
+      "filter": "Filtrar túneles",
+      "empty": "Aún no hay túneles.",
+      "notServed": "Ninguno de tus hosts lista túneles."
+    },
+    "status": {
+      "busy": "trabajando",
+      "running": "activo",
+      "error": "error",
+      "stopped": "detenido",
+      "disabled": "desactivado"
+    },
+    "notices": {
+      "none": "Sin túneles",
+      "reading": "Cargando túneles",
+      "gone": "Este túnel ya no existe.",
+      "error": "El túnel falló"
+    },
+    "actions": {
+      "open": "Abrir",
+      "copyUrl": "Copiar URL",
+      "copyId": "Copiar id"
+    },
+    "facts": {
+      "kind": "Tipo",
+      "plugin": "Plugin",
+      "purpose": "Propósito",
+      "enabled": "Activado",
+      "yes": "Sí",
+      "no": "No"
+    },
+    "purpose": {
+      "system": "Mantenido por el host",
+      "person": "Creado por una persona"
+    },
+    "page": {
+      "settings": "Configuración"
+    }
+  },
+  "clients": {
+    "commands": {
+      "show": "Mostrar clientes",
+      "open": "Abrir cliente"
+    },
+    "explorer": {
+      "title": "Clientes",
+      "filter": "Filtrar clientes",
+      "empty": "No hay clientes conectados.",
+      "notServed": "Ninguno de tus hosts lista clientes.",
+      "thisApp": "esta app",
+      "connected": "conectado"
+    },
+    "notices": {
+      "none": "Sin clientes",
+      "reading": "Cargando clientes",
+      "gone": "Este cliente ya no está conectado."
+    },
+    "actions": {
+      "open": "Abrir",
+      "copyClientId": "Copiar id de cliente"
+    },
+    "facts": {
+      "clientId": "Id de cliente",
+      "name": "Nombre",
+      "principal": "Sesión de",
+      "address": "Dirección",
+      "forwardedFor": "Reenviado por",
+      "protocolVersion": "Protocolo",
+      "locale": "Idioma",
+      "connectedAt": "Conectado",
+      "watching": "Canales seguidos"
+    },
+    "traffic": {
+      "framesIn": "Tramas recibidas",
+      "framesOut": "Tramas enviadas",
+      "bytesIn": "Bytes recibidos",
+      "bytesOut": "Bytes enviados"
+    },
+    "page": {
+      "traffic": "Tráfico",
+      "watching": "Canales que sigue"
+    }
   }
 }

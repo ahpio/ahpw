@@ -1875,7 +1875,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--oo-spacing-sm);
-  width: min(36rem, calc(100vw - 4rem));
+  /* scena's Modal box is at least 320px and at most 80vw, with 16px padding and a 1px border each side. */
+  width: min(36rem, calc(max(320px, 80vw) - 34px));
 }
 
 .web-changeset-form__actions {
@@ -3424,6 +3425,20 @@
   display: flex;
   align-items: center;
   gap: var(--oo-spacing-xs);
+}
+
+/* A tunnel's address, as a link with its copy button. */
+.web-tunnel__url {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+  min-width: 0;
+  font-family: var(--oo-font-mono, monospace);
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-tunnel__url a {
+  overflow-wrap: anywhere;
 }
 
 .web-record summary {

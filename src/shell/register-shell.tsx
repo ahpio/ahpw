@@ -11,6 +11,9 @@ import { SESSIONS_SECTION, hideOverlaidSidebar, registerSessionFiles, registerSe
 import { AGENTS_SECTION, registerAgents } from '../resources/agents/index.js';
 import { AUTOMATIONS_SECTION, registerAutomations } from '../resources/automations/index.js';
 import { COMPUTERS_SECTION, registerComputers } from '../resources/computers/index.js';
+import { registerClients } from '../resources/clients/index.js';
+import { registerOperations } from '../resources/operations/run.js';
+import { registerTunnels } from '../resources/tunnels/index.js';
 import { COMPUTERS_SERVED } from '../resources/computers/state.js';
 import { BOTS_SECTION, registerBots } from '../resources/bots/index.js';
 import { registerCanvases } from '../resources/canvases/index.js';
@@ -328,6 +331,9 @@ export function registerShell(scena: Scena): Disposable {
     registerSessionFiles(scena),
     registerAutomations(scena),
     registerComputers(scena),
+    registerOperations(scena),
+    registerTunnels(scena),
+    registerClients(scena),
     registerBots(scena),
     registerCanvases(scena),
     registerUsers(scena),

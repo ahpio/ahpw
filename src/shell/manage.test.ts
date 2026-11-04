@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { createScena } from '@softov/scena/core';
 import { ahpPaths, windowHost } from '../bridges/data.js';
 import { NO_OFFERS } from '../bridges/offers.js';
+import { CLIENTS_SERVED } from '../resources/clients/state.js';
+import { TUNNELS_SERVED } from '../resources/tunnels/state.js';
 import { MANAGE_SLOT, profileEntryTitle, registerManage } from './manage.js';
 
 /** The Manage menu's ids, in its order, as it lists for the principal given. */
@@ -25,6 +27,18 @@ describe('the Manage menu', () => {
 
   it('keeps the profile entry in an embedder, which has no Sign out', () => {
     expect(menuAs('user:ana', true).at(-1)).toBe(`ahp.manage.profile.${windowHost()}`);
+  });
+
+  it('lists Tunnels and Clients after Host only while a host serves them', () => {
+    const scena = createScena();
+    registerManage(scena, false);
+    const ids = (): string[] => scena.commands.list({ slot: MANAGE_SLOT, enabled: true }).map((one) => one.id);
+    expect(ids()).not.toContain('ahp.manage.tunnels');
+    expect(ids()).not.toContain('ahp.manage.clients');
+    scena.store.set(TUNNELS_SERVED, true);
+    scena.store.set(CLIENTS_SERVED, true);
+    const at = ids().indexOf('ahp.manage.host');
+    expect(ids().slice(at, at + 3)).toEqual(['ahp.manage.host', 'ahp.manage.tunnels', 'ahp.manage.clients']);
   });
 });
 
