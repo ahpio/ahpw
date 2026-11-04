@@ -5,6 +5,40 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.9.0-rc.1] - 2026-11-04
+
+A candidate for ahpd 0.15.0-rc.1, on npm's `next` tag. Its tunnels and clients explorers need a host that serves those channels.
+
+### Added
+
+- **Tunnels and clients** in Manage, each with a sidebar explorer, a page for each row, and the host's operations.
+  An operation with input opens its form in a dialog. A create opens the tunnel it made.
+- **A message is drawn by its origin:** a host notice is one muted line, and a message from an automation or a parent agent names its sender.
+- **Background shells** show by the composer, each with its output and a stop button. The subagents button reads the host's background work.
+- **Send now** on a queued message, which sends it to the running turn.
+- **A custom agent** is made and edited, and picked in the composer. Approvals sit beside the agent picker.
+- **Customizations by kind**, and a plugin's page draws its view.
+- **Session views** open from the session's "..." menu, and the sidebar follows the focused session. A Browser view sits in the right sidebar.
+- **A chat's canvases** show in the chat.
+- **A connector signs in from its form**, with its health and models. A device sign-in shows its code and waits.
+- **The host restarts from ahpw**, and is told the language ahpw shows.
+- **A browser gets a push** notification from the host.
+- Explorers copy a name and its paths.
+- A release also creates the tag's GitHub Release.
+
+### Changed
+
+- A working session rings its composer, and a host pill shows before the folder.
+- Delete moves to a danger zone, and pages are narrower, at 64rem.
+- The changes list is sorted and counts its files.
+- The interface strings are friendlier, and the settings heading says Settings.
+- scena 0.5.16 to 0.5.18.
+
+### Fixed
+
+- The plugin page's restart notice reads `ahpd.restartNeeded` from the root config, where the host puts it.
+- A terminal without a pty starts each line of its output at the left margin.
+
 ## [0.8.0] - 2026-10-28
 
 ### Changed
@@ -311,7 +345,8 @@ The first release: a web UI for an [Agent Host Protocol](https://microsoft.githu
 - Page components load lazily, one chunk per page.
 - CI, an npm release with provenance, and screenshots.
 
-[Unreleased]: https://github.com/ahpio/ahpw/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.1...HEAD
+[0.9.0-rc.1]: https://github.com/ahpio/ahpw/compare/v0.8.0...v0.9.0-rc.1
 [0.8.0]: https://github.com/ahpio/ahpw/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/ahpio/ahpw/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/ahpio/ahpw/compare/v0.6.0...v0.7.0
