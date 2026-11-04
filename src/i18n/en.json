@@ -1680,7 +1680,10 @@
         "other": "{count} tool calls"
       },
       "copyReply": "Copy the reply",
-      "working": "Working"
+      "working": "Working",
+      "fromChat": "Sent from another chat",
+      "fromSession": "Sent by another session",
+      "openSource": "Open the chat that sent it"
     },
     "chat": {
       "loading": "Loading",
@@ -1786,7 +1789,15 @@
       "tokenLabel": "Tokens",
       "cacheRead": "Cache read",
       "stepCount": "Steps",
-      "toolCount": "Tool calls"
+      "toolCount": "Tool calls",
+      "state": "State",
+      "states": {
+        "complete": "Complete",
+        "cancelled": "Stopped",
+        "error": "Ended with an error"
+      },
+      "notSent": "not sent",
+      "origin": "Origin"
     },
     "header": {
       "files": {
