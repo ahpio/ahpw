@@ -938,20 +938,6 @@
   white-space: nowrap;
 }
 
-/* The readout opens the Usage view where the host says what fills the context. */
-.web-composer__context--open {
-  border: 0;
-  border-radius: var(--oo-radius-sm);
-  background: transparent;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.web-composer__context--open:hover {
-  background: var(--oo-color-hover);
-  color: var(--oo-color-text);
-}
-
 /* The Usage view: the context window and the plan, as rows of name, tokens and share. */
 .web-usage {
   display: flex;

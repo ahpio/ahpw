@@ -39,8 +39,8 @@ import {
 import { useChangeset } from '../changes/changeset.js';
 import { modelLabels, settingLabels } from './pill-labels.js';
 import { contextReadout, footerSide } from './footer.js';
-import { sessionUsage } from '../../bridges/usage-meta.js';
-import { hasUsage, UsageDialog } from './Usage.js';
+import type { UsageMeta } from '../../bridges/usage-meta.js';
+import { hasUsage } from './Usage.js';
 import { firstScope, scopesOf } from '../changes/words.js';
 import { EMOJIcon } from '../emojis.js';
 import { attachmentPath, fromFiles, resourceAttachment, sameAttachment, withRanges, withToken } from './attachments.js';
@@ -81,7 +81,7 @@ export function messageOf(text: string, model: string | undefined, attachments: 
 }
 
 /** The composer of one chat: the box, its `/` and `@` picker, the settings row, and send, queue, steer and stop. */
-export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, sessionMeta, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false }: {
+export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, usage, onUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false }: {
   /** The session's host. */
   host: string;
   chatUri: string;
@@ -93,8 +93,10 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   lastModel: string | undefined;
   /** The last turn's usage, for the context readout beside the model. */
   lastUsage: UsageInfo | undefined;
-  /** The session's `_meta`, whose usage keys the readout and the Usage view read first. */
-  sessionMeta?: Record<string, unknown> | undefined;
+  /** What the session says of its usage, which the readout reads first. */
+  usage?: UsageMeta;
+  /** Opens the session's Usage view; the readout is its button. */
+  onUsage?: () => void;
   config: SessionConfigState | undefined;
   /** The session's changesets: Add context lists the files of the first, the one the Changes pane opens on. */
   changesets: readonly Changeset[] | undefined;
@@ -340,9 +342,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   }
 
   const modelName = models.find((one) => one.id === model)?.name ?? model;
-  const usage = useMemo(() => sessionUsage(sessionMeta, lastUsage?._meta), [sessionMeta, lastUsage]);
-  const [usageOpen, setUsageOpen] = useState(false);
-  const readout = contextReadout(agent?.models.find((one) => one.id === model), lastUsage, usage.context);
+  const readout = contextReadout(agent?.models.find((one) => one.id === model), lastUsage, usage?.context);
+  const opensUsage = onUsage !== undefined && usage !== undefined && hasUsage(usage);
   const pills = options.filter(showsPill);
   const settingPill = (option: Option): ReactElement => (
     <Pill
@@ -356,7 +357,6 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
 
   return (
     <div className="web-composer">
-      {usageOpen ? <UsageDialog usage={usage} onClose={() => setUsageOpen(false)} /> : null}
       {picker.pickerNode === null || adding ? null : <div className="web-composer__picker">{picker.pickerNode}</div>}
 
       {steering === undefined && queued.length === 0 ? null : (
@@ -454,11 +454,9 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
               <Pill {...modelLabels(modelName ?? t('sessions/values/default'))} title={t('sessions/composer/modelHint')} onOpen={() => openCommand('ahp.composer.model')} />
             )}
             {pills.filter((option) => footerSide(option) === 'right').map(settingPill)}
-            {readout === null && !hasUsage(usage) ? null : hasUsage(usage) ? (
-              <button type="button" className="web-composer__context web-composer__context--open" title={`${readout?.title ?? ''}${readout === null ? '' : '\n'}${t('sessions/usage/open')}`} onClick={() => setUsageOpen(true)}>
-                {readout?.text ?? t('sessions/usage/title')}
-              </button>
-            ) : <span className="web-composer__context" title={readout?.title}>{readout?.text}</span>}
+            {opensUsage ? (
+              <Pill label={readout?.text ?? t('sessions/usage/title')} title={[readout?.title, t('sessions/usage/open')].filter(Boolean).join('\n')} onOpen={onUsage} />
+            ) : readout === null ? null : <span className="web-composer__context" title={readout.title}>{readout.text}</span>}
           </div>
           {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/steer')} size="sm" title={t('sessions/composer/steerHint')} onClick={() => submit('steer')} />}
           {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/queue')} variant="primary" size="sm" title={t('sessions/composer/queueHint')} onClick={() => submit('send')} />}
