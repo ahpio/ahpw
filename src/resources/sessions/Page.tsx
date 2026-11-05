@@ -400,6 +400,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           draft={chat.state.draft}
           lastModel={chat.state.turns.at(-1)?.message.model?.id}
           lastUsage={chat.state.turns.at(-1)?.usage}
+          sessionMeta={session.state?._meta}
           config={session.state?.config}
           customizations={session.state?.customizations}
           changesets={session.state?.changesets}

@@ -1650,7 +1650,8 @@
     },
     "footer": {
       "window": "The model's context window: {window} tokens",
-      "used": "{used} of {window} tokens used, as of the last turn"
+      "used": "{used} of {window} tokens used, as of the last turn",
+      "now": "{used} of {window} tokens in the context window now"
     },
     "new": {
       "unsent": "Your message wasn't sent.",
@@ -1854,6 +1855,46 @@
       "reads": "Display",
       "hideCalls": "Hide calls",
       "showCalls": "Show calls"
+    },
+    "usage": {
+      "title": "Usage",
+      "open": "Show what fills the context and the plan limits",
+      "context": "Context window",
+      "used": "{used} of {window} ({share})",
+      "usedTitle": "{used} of {window} tokens",
+      "limit": "Model limit {limit}",
+      "over": "The context is past the window, so the next turn compacts it.",
+      "deferredNote": "Deferred tools are named but not loaded, so they fill nothing.",
+      "plan": "Plan usage",
+      "planUnknown": "The plan limits show after the agent's first answer.",
+      "noPlan": "This account has no plan limits.",
+      "unlimited": "Unlimited",
+      "percentUsed": "{percent}% used",
+      "resets": "Resets in {in}, at {at}",
+      "lasts": "At this pace, it lasts until it resets.",
+      "runsOut": "At this pace, it runs out in {in}.",
+      "credits": "Usage credits",
+      "creditsUsed": "{used} used",
+      "creditsOf": "{used} of {limit} used",
+      "noContext": "The context breakdown shows after the agent starts.",
+      "rows": {
+        "system": "System prompt and memory",
+        "toolDefinition": "System tools",
+        "tool": "Tools",
+        "skill": "Skills",
+        "subagent": "Custom agents",
+        "mcpServer": "MCP tools",
+        "plugin": "Plugins",
+        "messages": "Messages",
+        "free": "Free space",
+        "buffer": "Compaction buffer",
+        "deferred": "Deferred tools"
+      },
+      "quotas": {
+        "session": "Current session",
+        "weekly": "Weekly, all models",
+        "weeklyOf": "Weekly, {name}"
+      }
     }
   },
   "host": {

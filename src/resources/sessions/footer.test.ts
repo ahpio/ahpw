@@ -28,4 +28,15 @@ describe('contextReadout', () => {
     expect(got?.text).toBe('12k / 200k');
     expect(got?.title).toBe('12,000 of 200,000 tokens used, as of the last turn');
   });
+
+  it('takes the session\'s own context over the last turn, against the window it compacts at', () => {
+    const context = { total: 40000, entries: [], figures: { used: 40000, size: 600000, limit: 1000000 } };
+    const got = contextReadout(model(1000000), { inputTokens: 9000 }, context);
+    expect(got?.text).toBe('40k / 600k');
+    expect(got?.title).toBe('40,000 of 600,000 tokens in the context window now');
+  });
+
+  it('falls back to the model\'s window when the context names none', () => {
+    expect(contextReadout(model(200000), undefined, { total: 5000, entries: [] })?.text).toBe('200k');
+  });
 });

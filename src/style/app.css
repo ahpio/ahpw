@@ -938,6 +938,133 @@
   white-space: nowrap;
 }
 
+/* The readout opens the Usage view where the host says what fills the context. */
+.web-composer__context--open {
+  border: 0;
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.web-composer__context--open:hover {
+  background: var(--oo-color-hover);
+  color: var(--oo-color-text);
+}
+
+/* The Usage view: the context window and the plan, as rows of name, tokens and share. */
+.web-usage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-lg);
+  /* scena's Modal box is at least 320px and at most 80vw, with 16px padding and a 1px border each side. */
+  width: min(36rem, calc(max(320px, 80vw) - 34px));
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.web-usage__part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+}
+
+.web-usage__total {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.web-usage__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.web-usage__rows--apart {
+  padding-top: var(--oo-spacing-sm);
+  border-top: 1px solid var(--oo-color-border);
+}
+
+.web-usage__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 4.5em;
+  gap: var(--oo-spacing-sm);
+  padding: 3px var(--oo-spacing-xs);
+  font-size: var(--oo-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.web-usage__group > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.web-usage__group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.web-usage__group > summary:hover {
+  background: var(--oo-color-hover);
+  border-radius: var(--oo-radius-sm);
+}
+
+.web-usage__row--entry {
+  padding-left: var(--oo-spacing-lg);
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}
+
+.web-usage__row--free,
+.web-usage__row--buffer,
+.web-usage__row--deferred {
+  color: var(--oo-color-muted);
+}
+
+.web-usage__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.web-usage__count,
+.web-usage__share {
+  color: var(--oo-color-muted);
+}
+
+.web-usage__figure,
+.web-usage__share {
+  text-align: right;
+}
+
+.web-usage__plan {
+  margin: 0;
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-usage__quota {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.web-usage__quota-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.web-usage__quota-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-xs);
+}
+
 /* Send, or Stop while a turn runs: a round icon button at the end of the row. */
 .web-composer__round {
   flex: none;

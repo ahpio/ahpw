@@ -13,6 +13,8 @@ import { done } from '../../shell/notify/index.js';
 import { when } from '../sessions/turn.js';
 import { meOn, ownerWord } from './actions.js';
 import { inputsOf } from './inputs.js';
+import { accountOf, quotasOf } from '../../bridges/usage-meta.js';
+import { PlanPart } from '../sessions/Usage.js';
 
 /** The capability types ahpd names, in the order their groups show, with each one's icon. Another type is shown by its name, last. */
 const KNOWN_TYPES = new Map([
@@ -135,6 +137,7 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
     <div className="web-connector__overview">
       {adapter === undefined || adapter.description === '' ? null : <p>{adapter.description}</p>}
       <DetailList items={facts} columns={2} />
+      <PlanPart quotas={quotasOf(row.health?.quotaSnapshots)} account={accountOf(row.health?.account)} />
       <Text variant="h3" text={t('connectors/page/capabilities', { count: capabilities.length })} />
       {capabilities.length === 0 ? <p className="web-note">{t('connectors/page/noCapabilities')}</p> : (
         byType(capabilities).map((group) => (
