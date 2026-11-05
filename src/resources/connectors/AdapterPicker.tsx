@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, Chip } from '@softov/scena/ui';
+import { Button, Chip, TextField } from '@softov/scena/ui';
 import { HostIcon } from '../../shell/HostIcon.js';
 import { readChoice, writeChoice } from '../../shell/explorer/choice.js';
 import { ADAPTER_GROUPING_KEY, ADAPTER_GROUPINGS, adapterGroups, capabilityGroups, type AdapterGrouping, type Pickable } from './form.js';
+import './adapter-picker.css';
 
 /** The capability types ahpw has its own words for; another is headed by the host's title. */
 const KNOWN_TYPES = ['receive', 'command', 'action', 'view'];
@@ -44,8 +45,8 @@ export function AdapterPicker({ adapters, value, labelOf, fixed, onPick, words }
   const [needle, setNeedle] = useState('');
   const [focus, setFocus] = useState(0);
   const [grouping, setGrouping] = useState<AdapterGrouping>(() => readChoice(ADAPTER_GROUPING_KEY, ADAPTER_GROUPINGS, 'type'));
-  const search = useRef<HTMLInputElement>(null);
-  useEffect(() => { if (choosing) search.current?.focus(); }, [choosing]);
+  const search = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (choosing) search.current?.querySelector('input')?.focus(); }, [choosing]);
 
   if (!choosing) {
     if (picked === undefined) return null;
@@ -75,15 +76,9 @@ export function AdapterPicker({ adapters, value, labelOf, fixed, onPick, words }
 
   return (
     <div className="web-adapter-picker" onKeyDown={onKey}>
-      <input
-        ref={search}
-        className="web-adapter-picker__search"
-        type="search"
-        value={needle}
-        placeholder={words?.search ?? t('connectors/picker/search')}
-        aria-label={words?.search ?? t('connectors/picker/search')}
-        onChange={(event) => { setNeedle(event.target.value); setFocus(0); }}
-      />
+      <div ref={search} className="web-adapter-picker__search">
+        <TextField type="search" value={needle} placeholder={words?.search ?? t('connectors/picker/search')} onChange={(next) => { setNeedle(next); setFocus(0); }} />
+      </div>
       <div className="web-adapter-picker__list" role="listbox" aria-label={words?.label ?? t('connectors/form/adapter')}>
         {rows.length === 0 ? <p className="web-note">{words?.none ?? t('connectors/picker/none')}</p> : groups.map((group, index) => (
           <div key={group.key} role="group" aria-label={group.label}>

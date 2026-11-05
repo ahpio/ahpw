@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button, Spinner } from '@softov/scena/ui';
+import { Alert, Button, Spinner, TextField } from '@softov/scena/ui';
 import { readConnectorModels, type ConnectorModels } from '../../bridges/connectors.js';
 import { hostSaid } from '../../bridges/said.js';
 import { getLocale } from '@softov/scena';
@@ -8,6 +8,7 @@ import { plural } from '../../i18n/locales.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { tokens, when } from '../sessions/turn.js';
 import { matches, priceLine } from './models.js';
+import './models.css';
 
 /**
  * The models a provider connector serves, as the host lists them for this
@@ -43,14 +44,9 @@ export function Models({ host, id }: { host: string; id: string }): ReactElement
       {read === undefined ? null : (
         <>
           <div className="web-connector__models-head">
-            <input
-              className="web-log__search"
-              type="search"
-              value={query}
-              placeholder={t('connectors/models/search')}
-              aria-label={t('connectors/models/search')}
-              onChange={(event) => setQuery(event.target.value)}
-            />
+            <span className="web-connector__models-search">
+              <TextField type="search" value={query} placeholder={t('connectors/models/search')} onChange={setQuery} />
+            </span>
             <span className="web-note">
               {query === '' ? plural('connectors/models/count', read.models.length) : plural('connectors/models/shown', read.models.length, { shown: shown.length })}
               {read.at === undefined ? null : ` \u{00B7} ${t('connectors/models/at', { when: when(read.at) })}`}
