@@ -938,6 +938,40 @@
   white-space: nowrap;
 }
 
+/* How full the context window is, as a ring; a click opens the Usage view. */
+.web-context-ring {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.web-context-ring:hover:not(:disabled) {
+  background: var(--oo-color-hover);
+}
+
+.web-context-ring:disabled {
+  cursor: default;
+}
+
+.web-context-ring__track {
+  fill: none;
+  stroke: var(--oo-color-border);
+  stroke-width: 2.5;
+}
+
+.web-context-ring__fill {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
 /* The Usage view: the context window and the plan, as rows of name, tokens and share. */
 .web-usage {
   display: flex;

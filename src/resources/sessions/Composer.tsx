@@ -39,6 +39,7 @@ import {
 import { useChangeset } from '../changes/changeset.js';
 import { modelLabels, settingLabels } from './pill-labels.js';
 import { contextReadout, footerSide } from './footer.js';
+import { ContextRing } from './ContextRing.js';
 import type { UsageMeta } from '../../bridges/usage-meta.js';
 import { hasUsage } from './Usage.js';
 import { firstScope, scopesOf } from '../changes/words.js';
@@ -454,8 +455,10 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
               <Pill {...modelLabels(modelName ?? t('sessions/values/default'))} title={t('sessions/composer/modelHint')} onOpen={() => openCommand('ahp.composer.model')} />
             )}
             {pills.filter((option) => footerSide(option) === 'right').map(settingPill)}
-            {opensUsage ? (
-              <Pill label={readout?.text ?? t('sessions/usage/title')} title={[readout?.title, t('sessions/usage/open')].filter(Boolean).join('\n')} onOpen={onUsage} />
+            {readout?.fraction !== undefined ? (
+              <ContextRing fraction={readout.fraction} text={readout.text} {...(opensUsage ? { onOpen: onUsage } : {})} />
+            ) : opensUsage ? (
+              <Pill label={t('sessions/usage/title')} title={t('sessions/usage/open')} onOpen={onUsage} />
             ) : readout === null ? null : <span className="web-composer__context" title={readout.title}>{readout.text}</span>}
           </div>
           {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/steer')} size="sm" title={t('sessions/composer/steerHint')} onClick={() => submit('steer')} />}

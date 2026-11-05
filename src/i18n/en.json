@@ -1894,7 +1894,8 @@
         "session": "Current session",
         "weekly": "Weekly, all models",
         "weeklyOf": "Weekly, {name}"
-      }
+      },
+      "ring": "Context {text}, {percent}% full"
     }
   },
   "host": {
