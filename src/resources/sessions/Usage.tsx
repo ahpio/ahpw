@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { getLocale } from '@softov/scena';
 import { useI18n } from '@softov/scena/react';
-import { Modal, Progress, Text } from '@softov/scena/ui';
+import { DetailList, Modal, Progress, Text, Tree, type DetailItem, type TreeNode } from '@softov/scena/ui';
 import {
   contextRows,
   creditsOf,
@@ -16,6 +16,7 @@ import {
   type UsageMeta,
 } from '../../bridges/usage-meta.js';
 import { tokens, when } from './turn.js';
+import './usage.css';
 
 type T = ReturnType<typeof useI18n>['t'];
 
@@ -29,9 +30,6 @@ const rowLabel = (t: T, key: string): string => (KNOWN_ROWS.has(key) ? t(`sessio
 const share = (part: number, whole: number): string =>
   whole <= 0 ? '' : `${(part / whole * 100).toLocaleString(getLocale(), { maximumFractionDigits: 1 })}%`;
 
-/** A count of tokens in full, for a title. */
-const full = (count: number): string => count.toLocaleString(getLocale());
-
 /** How long until a time, as `2 hr 10 min` or `3 days`. */
 function untilWords(ms: number): string {
   const minutes = Math.max(0, Math.round(ms / 60_000));
@@ -44,29 +42,18 @@ function untilWords(ms: number): string {
   return hours % 24 === 0 ? unit(days, 'day') : `${unit(days, 'day')} ${unit(hours % 24, 'hour')}`;
 }
 
-/** One row of the context part, which opens to its sources when it has any. */
-function ContextLine({ row, whole }: { row: ContextRow; whole: number }): ReactElement {
-  const { t } = useI18n();
-  const head = (
-    <>
-      <span className="web-usage__name">{rowLabel(t, row.key)}{row.entries.length > 1 ? <span className="web-usage__count">{` \u{00B7} ${row.entries.length}`}</span> : null}</span>
-      <span className="web-usage__figure" title={full(row.tokens)}>{tokens(row.tokens)}</span>
-      <span className="web-usage__share">{row.counts ? share(row.tokens, whole) : ''}</span>
-    </>
-  );
-  if (row.entries.length === 0) return <div className={`web-usage__row web-usage__row--${row.key}`}>{head}</div>;
-  return (
-    <details className="web-usage__group">
-      <summary className="web-usage__row">{head}</summary>
-      {row.entries.map((entry) => (
-        <div key={entry.id} className="web-usage__row web-usage__row--entry">
-          <span className="web-usage__name" title={entry.label}>{entry.label}</span>
-          <span className="web-usage__figure" title={full(entry.tokens)}>{tokens(entry.tokens)}</span>
-          <span className="web-usage__share">{share(entry.tokens, whole)}</span>
-        </div>
-      ))}
-    </details>
-  );
+/** A context row as a tree node: its name, and its tokens and share at the end; its sources open under it. */
+function nodeOf(t: T, row: ContextRow, whole: number): TreeNode {
+  const figure = (count: number, counts: boolean): string => (counts ? `${tokens(count)} \u{00B7} ${share(count, whole)}` : tokens(count));
+  return {
+    key: row.key,
+    icon: '',
+    label: row.entries.length > 1 ? `${rowLabel(t, row.key)} (${row.entries.length})` : rowLabel(t, row.key),
+    trailing: figure(row.tokens, row.counts),
+    ...(row.entries.length === 0 ? {} : {
+      children: row.entries.map((entry) => ({ key: entry.id, icon: '', label: entry.label, trailing: figure(entry.tokens, true) })),
+    }),
+  };
 }
 
 /** What fills the context window: a bar against the compaction window, and a row for each kind of source. */
@@ -76,26 +63,24 @@ export function ContextPart({ context }: { context: ContextUsage }): ReactElemen
   const rows = contextRows(context);
   const limit = context.figures?.limit;
   const over = context.total > whole;
+  const counted = rows.filter((row) => row.counts).map((row) => nodeOf(t, row, whole));
+  const apart = rows.filter((row) => !row.counts).map((row) => nodeOf(t, row, whole));
   return (
     <section className="web-usage__part">
       <Text variant="h3" text={t('sessions/usage/context')} />
-      <div className="web-usage__total">
-        <span title={t('sessions/usage/usedTitle', { used: full(context.total), window: full(whole) })}>
-          {t('sessions/usage/used', { used: tokens(context.total), window: tokens(whole), share: share(context.total, whole) })}
-        </span>
-        {limit === undefined || limit === whole ? null : <span className="web-note">{t('sessions/usage/limit', { limit: tokens(limit) })}</span>}
-      </div>
+      <Text text={[
+        t('sessions/usage/used', { used: tokens(context.total), window: tokens(whole), share: share(context.total, whole) }),
+        ...(limit === undefined || limit === whole ? [] : [t('sessions/usage/limit', { limit: tokens(limit) })]),
+      ].join(' \u{00B7} ')} />
       <Progress value={Math.min(context.total, whole)} max={whole} color={over ? 'red' : 'blue'} height={6} />
       {over ? <p className="web-note">{t('sessions/usage/over')}</p> : null}
-      <div className="web-usage__rows">
-        {rows.filter((row) => row.counts).map((row) => <ContextLine key={row.key} row={row} whole={whole} />)}
-      </div>
-      {rows.some((row) => !row.counts) ? (
-        <div className="web-usage__rows web-usage__rows--apart">
-          {rows.filter((row) => !row.counts).map((row) => <ContextLine key={row.key} row={row} whole={whole} />)}
+      <Tree nodes={counted} />
+      {apart.length === 0 ? null : (
+        <>
+          <Tree nodes={apart} />
           <p className="web-note">{t('sessions/usage/deferredNote')}</p>
-        </div>
-      ) : null}
+        </>
+      )}
     </section>
   );
 }
@@ -111,57 +96,64 @@ function quotaLabel(t: T, key: string): string {
   return key;
 }
 
-/** One window of the plan: its bar, how much is used, when it resets and whether it lasts. */
-function QuotaLine({ name, snapshot, now }: { name: string; snapshot: QuotaSnapshot; now: number }): ReactElement {
-  const { t } = useI18n();
+/** One window of the plan: how much is used, its bar, when it resets and whether it lasts. */
+function quotaItem(t: T, name: string, snapshot: QuotaSnapshot, now: number): DetailItem {
   const used = usedPercent(snapshot);
   const reset = snapshot.resetDate === undefined ? NaN : Date.parse(snapshot.resetDate);
   const pace = paceOf(name, snapshot, now);
-  return (
-    <div className="web-usage__quota">
-      <div className="web-usage__quota-head">
-        <span className="web-usage__name">{quotaLabel(t, name)}</span>
-        <span className="web-usage__figure">
-          {snapshot.isUnlimitedEntitlement === true ? t('sessions/usage/unlimited') : used === undefined ? '' : t('sessions/usage/percentUsed', { percent: Math.round(used) })}
-        </span>
-      </div>
-      {used === undefined ? null : <Progress value={used} max={100} color={used >= 100 ? 'red' : used >= 80 ? 'orange' : 'blue'} height={6} />}
-      <div className="web-usage__quota-foot web-note">
-        {Number.isFinite(reset) ? <span title={new Date(reset).toLocaleString(getLocale())}>{t('sessions/usage/resets', { in: untilWords(reset - now), at: when(reset) })}</span> : null}
-        {pace === undefined ? null : <span>{pace.lasts ? t('sessions/usage/lasts') : t('sessions/usage/runsOut', { in: untilWords(pace.runsOut - now) })}</span>}
-      </div>
-    </div>
-  );
+  const notes = [
+    ...(Number.isFinite(reset) ? [t('sessions/usage/resets', { in: untilWords(reset - now), at: when(reset) })] : []),
+    ...(pace === undefined ? [] : [pace.lasts ? t('sessions/usage/lasts') : t('sessions/usage/runsOut', { in: untilWords(pace.runsOut - now) })]),
+  ];
+  return {
+    label: quotaLabel(t, name),
+    span: true,
+    value: (
+      <>
+        <Text text={snapshot.isUnlimitedEntitlement === true ? t('sessions/usage/unlimited') : used === undefined ? '' : t('sessions/usage/percentUsed', { percent: Math.round(used) })} />
+        {used === undefined ? null : <Progress value={used} max={100} color={used >= 100 ? 'red' : used >= 80 ? 'orange' : 'blue'} height={6} />}
+        {notes.length === 0 ? null : <p className="web-note">{notes.join(' \u{00B7} ')}</p>}
+      </>
+    ),
+  };
+}
+
+/** The credits beyond the plan, as one more item. */
+function creditsItem(t: T, credits: { used?: number; limit?: number }): DetailItem {
+  const number = (value: number): string => value.toLocaleString(getLocale());
+  const words = credits.used === undefined ? '' : credits.limit === undefined
+    ? t('sessions/usage/creditsUsed', { used: number(credits.used) })
+    : t('sessions/usage/creditsOf', { used: number(credits.used), limit: number(credits.limit) });
+  return {
+    label: t('sessions/usage/credits'),
+    span: true,
+    value: (
+      <>
+        <Text text={words} />
+        {credits.used === undefined || credits.limit === undefined || credits.limit <= 0 ? null : (
+          <Progress value={Math.min(credits.used, credits.limit)} max={credits.limit} color="blue" height={6} />
+        )}
+      </>
+    ),
+  };
 }
 
 /** The plan's windows and credits, or why there are none. */
 export function PlanPart({ quotas, account, now = Date.now() }: { quotas: Record<string, QuotaSnapshot> | undefined; account?: PlanAccount | undefined; now?: number }): ReactElement | null {
   const { t } = useI18n();
   if (quotas === undefined && account === undefined) return null;
-  const windows = quotas === undefined ? [] : quotaOrder(quotas);
   const credits = quotas === undefined ? undefined : creditsOf(quotas);
+  const items = [
+    ...(quotas === undefined ? [] : quotaOrder(quotas).map(([name, snapshot]) => quotaItem(t, name, snapshot, now))),
+    ...(credits === undefined ? [] : [creditsItem(t, credits)]),
+  ];
   return (
     <section className="web-usage__part">
       <Text variant="h3" text={t('sessions/usage/plan')} />
-      {account?.subscriptionType === undefined ? null : <p className="web-usage__plan">{account.subscriptionType}</p>}
+      {account?.subscriptionType === undefined ? null : <Text text={account.subscriptionType} />}
       {quotas === undefined ? <p className="web-note">{t('sessions/usage/planUnknown')}</p> : null}
-      {quotas !== undefined && windows.length === 0 ? <p className="web-note">{t('sessions/usage/noPlan')}</p> : null}
-      {windows.map(([name, snapshot]) => <QuotaLine key={name} name={name} snapshot={snapshot} now={now} />)}
-      {credits === undefined ? null : (
-        <div className="web-usage__quota">
-          <div className="web-usage__quota-head">
-            <span className="web-usage__name">{t('sessions/usage/credits')}</span>
-            <span className="web-usage__figure">
-              {credits.used === undefined ? '' : credits.limit === undefined
-                ? t('sessions/usage/creditsUsed', { used: credits.used.toLocaleString(getLocale()) })
-                : t('sessions/usage/creditsOf', { used: credits.used.toLocaleString(getLocale()), limit: credits.limit.toLocaleString(getLocale()) })}
-            </span>
-          </div>
-          {credits.used === undefined || credits.limit === undefined || credits.limit <= 0 ? null : (
-            <Progress value={Math.min(credits.used, credits.limit)} max={credits.limit} color="blue" height={6} />
-          )}
-        </div>
-      )}
+      {quotas !== undefined && items.length === 0 ? <p className="web-note">{t('sessions/usage/noPlan')}</p> : null}
+      {items.length === 0 ? null : <DetailList items={items} columns={1} />}
     </section>
   );
 }
