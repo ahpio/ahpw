@@ -6,7 +6,7 @@ import { readChoice, writeChoice } from '../../shell/explorer/choice.js';
 import { ADAPTER_GROUPING_KEY, ADAPTER_GROUPINGS, adapterGroups, capabilityGroups, type AdapterGrouping, type Pickable } from './form.js';
 
 /** The capability types ahpw has its own words for; another is headed by the host's title. */
-const KNOWN_TYPES = ['receive', 'command', 'action', 'ui'];
+const KNOWN_TYPES = ['receive', 'command', 'action', 'view'];
 
 /** An adapter as a row: its icon, its title, the plugin that registers it when given, and its description. */
 function AdapterLine({ adapter, size, plugin }: { adapter: Pickable; size: number; plugin?: string | undefined }): ReactElement {

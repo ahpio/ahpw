@@ -10,6 +10,7 @@ import { HostIcon } from '../../shell/HostIcon.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { copyText } from '../../shell/controls/CopyButton.js';
 import { done } from '../../shell/notify/index.js';
+import { PluginViewPanel } from '../plugins/PluginViewPanel.js';
 import { when } from '../sessions/turn.js';
 import { meOn, ownerWord } from './actions.js';
 import { inputsOf } from './inputs.js';
@@ -21,7 +22,7 @@ const KNOWN_TYPES = new Map([
   ['receive', EMOJIcon.receive],
   ['command', EMOJIcon.terminal],
   ['action', EMOJIcon.action],
-  ['ui', EMOJIcon.interface],
+  ['view', EMOJIcon.interface],
   ['models', EMOJIcon.model],
 ]);
 
@@ -104,8 +105,9 @@ function healthFacts(t: (key: string, values?: Record<string, unknown>) => strin
 }
 
 /**
- * What a connector is: its adapter and the plugin that offers it, whose it
- * is, its state, and what its adapter declares it does. An adapter no plugin
+ * What a connector is: the view its plugin draws for it, its adapter and the
+ * plugin that offers it, whose it is, its state, and what its adapter declares
+ * it does. An adapter no plugin
  * registers now is named by its name. Capabilities are grouped by type.
  */
 export function Overview({ host, row, adapter }: { host: string; row: ConnectorRow; adapter: AdapterRow | undefined }): ReactElement {
@@ -136,6 +138,7 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
   return (
     <div className="web-connector__overview">
       {adapter === undefined || adapter.description === '' ? null : <p>{adapter.description}</p>}
+      {plugin === undefined || row.views?.main === undefined ? null : <PluginViewPanel host={host} plugin={plugin} at={`connector:${row.id}`} view={row.views.main} />}
       <DetailList items={facts} columns={2} />
       <PlanPart quotas={quotasOf(row.health?.quotaSnapshots)} account={accountOf(row.health?.account)} />
       <Text variant="h3" text={t('connectors/page/capabilities', { count: capabilities.length })} />

@@ -52,6 +52,12 @@ export function registerPlugins(scena: Scena): Disposable {
   };
 
   return combineDisposables(
+    // The view kinds scena's catalog does not register: a bar with its header
+    // and footer, a time in the reader's zone, and a label with its value. A
+    // plugin's view and a record's view draw all three.
+    scena.components.register({ component: 'Progress', category: 'inline', renderer: { kind: 'react', load: () => import('./ViewProgress.js') } }),
+    scena.components.register({ component: 'DateTime', category: 'inline', renderer: { kind: 'react', load: () => import('./DateTime.js') } }),
+    scena.components.register({ component: 'KeyValue', category: 'inline', renderer: { kind: 'react', load: () => import('./KeyValue.js') } }),
     trackServed(scena, PLUGINS.scheme, PLUGINS_SERVED),
     trackServed(scena, (offers) => offers.methods.includes(PLUGINS.apply), PLUGINS_APPLY),
     registerChoice(scena, { resource: 'plugins', name: 'group', slot: GROUP_SLOT, path: PLUGINS_GROUP, values: PLUGIN_GROUPINGS, usual: 'state', key: GROUP_KEY }),

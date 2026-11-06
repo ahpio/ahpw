@@ -2752,7 +2752,7 @@
       "receive": "Recibe",
       "command": "Comandos",
       "action": "Acciones",
-      "ui": "Interfaces",
+      "view": "Vistas",
       "models": "Modelos"
     },
     "picker": {

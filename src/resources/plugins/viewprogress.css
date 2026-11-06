@@ -1,0 +1,6 @@
+/* A view's Progress: scena's bar, then its footer close below it. */
+.web-view-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+}

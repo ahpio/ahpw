@@ -18,6 +18,7 @@
  */
 
 import { RpcTimeoutError } from '@microsoft/agent-host-protocol/client';
+import type { PluginView } from './views.js';
 import { hostBridge } from './data.js';
 import type { Icon } from './icons.js';
 import type { Offers } from './offers.js';
@@ -41,8 +42,8 @@ export const CONNECTORS = {
   models: 'x-ahpd/connectors/models',
 } as const;
 
-/** `receive` answers calls, `command` adds a `/` command, `action` is offered to run, `ui` is reserved. Another is shown by its title. */
-export type CapabilityType = 'receive' | 'command' | 'action' | 'ui' | (string & {});
+/** `receive` answers calls, `command` adds a `/` command, `action` is offered to run, `view` names a surface its records show a view on. Another is shown by its title. */
+export type CapabilityType = 'receive' | 'command' | 'action' | 'view' | (string & {});
 
 /** One thing a connector of an adapter does; declared and shown, never run from here. */
 export interface Capability {
@@ -138,6 +139,8 @@ export interface ConnectorRow {
   state: ConnectorState;
   /** Absent on a host from before health, and until the host knows something. */
   health?: ConnectorHealth;
+  /** What its adapter's plugin draws for it, by surface; `main` is drawn on its page. */
+  views?: Record<string, PluginView>;
 }
 
 export const adaptersReducer = recordsReducer<AdapterRow>(ADAPTERS.scheme);
