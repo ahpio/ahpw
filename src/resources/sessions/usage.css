@@ -1,0 +1,16 @@
+/* The Usage view: the context part and the plan part, one above the other. */
+.web-usage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-lg);
+  /* scena's Modal box is at least 320px and at most 80vw, with 16px padding and a 1px border each side. */
+  width: min(36rem, calc(max(320px, 80vw) - 34px));
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.web-usage__part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+}

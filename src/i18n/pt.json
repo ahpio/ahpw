@@ -1650,7 +1650,8 @@
     },
     "footer": {
       "window": "Janela de contexto do modelo: {window} tokens",
-      "used": "{used} de {window} tokens usados, segundo o último turno"
+      "used": "{used} de {window} tokens usados, segundo o último turno",
+      "now": "{used} de {window} tokens na janela de contexto agora"
     },
     "new": {
       "unsent": "Sua mensagem não foi enviada.",
@@ -1854,6 +1855,47 @@
       "reads": "Exibição",
       "hideCalls": "Ocultar chamadas",
       "showCalls": "Mostrar chamadas"
+    },
+    "usage": {
+      "title": "Uso",
+      "open": "Mostrar o que ocupa o contexto e os limites do plano",
+      "context": "Janela de contexto",
+      "used": "{used} de {window} ({share})",
+      "usedTitle": "{used} de {window} tokens",
+      "limit": "Limite do modelo {limit}",
+      "over": "O contexto passou da janela, então o próximo turno o compacta.",
+      "deferredNote": "Ferramentas adiadas têm nome mas não estão carregadas, então não ocupam nada.",
+      "plan": "Uso do plano",
+      "planUnknown": "Os limites do plano aparecem depois da primeira resposta do agente.",
+      "noPlan": "Esta conta não tem limites de plano.",
+      "unlimited": "Ilimitado",
+      "percentUsed": "{percent}% usado",
+      "resets": "Reinicia em {in}, às {at}",
+      "lasts": "Neste ritmo, dura até reiniciar.",
+      "runsOut": "Neste ritmo, acaba em {in}.",
+      "credits": "Créditos de uso",
+      "creditsUsed": "{used} usados",
+      "creditsOf": "{used} de {limit} usados",
+      "noContext": "O detalhamento do contexto aparece quando o agente inicia.",
+      "rows": {
+        "system": "Prompt do sistema e memória",
+        "toolDefinition": "Ferramentas do sistema",
+        "tool": "Ferramentas",
+        "skill": "Skills",
+        "subagent": "Agentes personalizados",
+        "mcpServer": "Ferramentas MCP",
+        "plugin": "Plugins",
+        "messages": "Mensagens",
+        "free": "Espaço livre",
+        "buffer": "Reserva de compactação",
+        "deferred": "Ferramentas adiadas"
+      },
+      "quotas": {
+        "session": "Sessão atual",
+        "weekly": "Semanal, todos os modelos",
+        "weeklyOf": "Semanal, {name}"
+      },
+      "ring": "Contexto {text}, {percent}% cheio"
     }
   },
   "host": {

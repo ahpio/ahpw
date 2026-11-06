@@ -40,6 +40,8 @@ import { sessionKey } from './focus.js';
 import { botMarkOf } from '../bots/chat/mark.js';
 import { askOf, opens, type Origins, type Source } from './origin.js';
 import { useNow } from './clock.js';
+import { sessionUsage } from '../../bridges/usage-meta.js';
+import { hasUsage, UsageDialog } from './Usage.js';
 
 /** How a turn ended, as the key of its words, when it did not end well. */
 const ENDED: Record<string, string> = { cancelled: 'sessions/turn/stopped', error: 'sessions/turn/failed' };
@@ -259,6 +261,8 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const [raw, setRaw] = useState(false);
   const [rawFilter, setRawFilter] = useState<RawFilter>('all');
   const [callsHidden, setCallsHidden] = useState(false);
+  // The Usage view, opened from the composer's readout or the header's menu.
+  const [usageOpen, setUsageOpen] = useState(false);
   const chat = useChannel<ChatState>(host, chatUri, chatReducer);
   const end = useRef<HTMLDivElement>(null);
   // Following the newest turn, until a person scrolls up to read an older one.
@@ -283,6 +287,9 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const chatOrigin = session.state?.chats.find((one) => one.resource === chatUri)?.origin;
   const sessionOrigin = summary?.origin;
   const origins = useMemo<Origins>(() => ({ chat: chatOrigin, session: sessionOrigin }), [chatOrigin, sessionOrigin]);
+  const sessionMeta = session.state?._meta;
+  const turnMeta = chat.state?.turns.at(-1)?.usage?._meta;
+  const usage = useMemo(() => sessionUsage(sessionMeta, turnMeta), [sessionMeta, turnMeta]);
 
   const turns = chat.state?.turns.length ?? 0;
   const open = useOpenQuestions(host, session.state?.inputNeeded, chatUri, chat.state?.activeTurn);
@@ -310,6 +317,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   };
   // A session with a bot's mark is a chat with that bot, whatever its provider: only what is said shows.
   const mark = botMarkOf(summary._meta) ?? botMarkOf(session.state?._meta);
+  const openUsage = hasUsage(usage) ? () => setUsageOpen(true) : undefined;
   // The header's buttons and the Raw view, the same on a session and on a chat with a bot, whose bubbles draw no calls to hide.
   const tools = (
     <SessionHeaderTools
@@ -322,6 +330,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
       onSubagent={openSubagent}
       raw={raw}
       onRaw={setRaw}
+      {...(openUsage === undefined ? {} : { onUsage: openUsage })}
       {...(mark === undefined ? { calls: { hidden: callsHidden, onHidden: setCallsHidden } } : { bot: mark })}
     />
   );
@@ -400,6 +409,8 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           draft={chat.state.draft}
           lastModel={chat.state.turns.at(-1)?.message.model?.id}
           lastUsage={chat.state.turns.at(-1)?.usage}
+          usage={usage}
+          {...(openUsage === undefined ? {} : { onUsage: openUsage })}
           config={session.state?.config}
           customizations={session.state?.customizations}
           changesets={session.state?.changesets}
@@ -408,6 +419,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           send={send}
         />
       )}
+      {usageOpen ? <UsageDialog usage={usage} onClose={() => setUsageOpen(false)} /> : null}
     </div>
   );
 }

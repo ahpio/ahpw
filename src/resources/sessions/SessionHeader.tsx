@@ -50,7 +50,7 @@ function useSessionTerminals(host: string, session: string, folder: string | und
  * the chat reads: the Raw view, and the calls hidden. Each of those, while
  * on, shows its icon, which turns it off.
  */
-export function SessionHeaderTools({ host, summary, session, chat, chatUri, onChat, onSubagent, raw, onRaw, calls, bot }: {
+export function SessionHeaderTools({ host, summary, session, chat, chatUri, onChat, onSubagent, raw, onRaw, calls, bot, onUsage }: {
   host: string;
   summary: SessionSummary;
   session: SessionState | undefined;
@@ -65,6 +65,8 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
   calls?: { hidden: boolean; onHidden: (hidden: boolean) => void };
   /** The bot the session is a chat with. */
   bot?: BotMark;
+  /** Opens the session's Usage view, when the session says its usage. */
+  onUsage?: () => void;
 }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
@@ -116,6 +118,7 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
     ...viewEntries(scena).map((one): PickerAction => ({ title: one.title, icon: one.icon, group: views, onSelect: (picked) => { picked.closeMenu(); run(`ahp.view.${one.key}`); } })),
     ...(folder === undefined ? [] : [{ title: t('sessions/header/newTerminal'), icon: EMOJIcon.terminal, group: views, onSelect: (picked) => { picked.closeMenu(); run('ahp.newTerminal', { host, cwd: folder }); } } satisfies PickerAction]),
     ...(bot === undefined ? [] : [{ title: t('bots/commands/open'), icon: EMOJIcon.bots, group: reads, onSelect: (picked) => { picked.closeMenu(); run('ahp.openBot', { host, slug: bot.bot, name: bot.name }); } } satisfies PickerAction]),
+    ...(onUsage === undefined ? [] : [{ title: t('sessions/usage/title'), icon: EMOJIcon.usage, group: reads, onSelect: (picked) => { picked.closeMenu(); onUsage(); } } satisfies PickerAction]),
     { title: t('sessions/raw/button'), icon: EMOJIcon.data, group: reads, active: raw, onSelect: () => onRaw(!raw) },
     ...(calls === undefined ? [] : [{ title: t('sessions/header/hideCalls'), icon: EMOJIcon.callsHidden, group: reads, active: calls.hidden, onSelect: () => calls.onHidden(!calls.hidden) }]),
   ]);

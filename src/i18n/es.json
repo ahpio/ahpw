@@ -1650,7 +1650,8 @@
     },
     "footer": {
       "window": "Ventana de contexto del modelo: {window} tokens",
-      "used": "{used} de {window} tokens usados, según el último turno"
+      "used": "{used} de {window} tokens usados, según el último turno",
+      "now": "{used} de {window} tokens en la ventana de contexto ahora"
     },
     "new": {
       "unsent": "Tu mensaje no se envió.",
@@ -1854,6 +1855,47 @@
       "reads": "Visualización",
       "hideCalls": "Ocultar llamadas",
       "showCalls": "Mostrar llamadas"
+    },
+    "usage": {
+      "title": "Uso",
+      "open": "Mostrar qué llena el contexto y los límites del plan",
+      "context": "Ventana de contexto",
+      "used": "{used} de {window} ({share})",
+      "usedTitle": "{used} de {window} tokens",
+      "limit": "Límite del modelo {limit}",
+      "over": "El contexto pasó la ventana, así que el próximo turno lo compacta.",
+      "deferredNote": "Las herramientas diferidas están nombradas pero no cargadas, así que no llenan nada.",
+      "plan": "Uso del plan",
+      "planUnknown": "Los límites del plan aparecen tras la primera respuesta del agente.",
+      "noPlan": "Esta cuenta no tiene límites de plan.",
+      "unlimited": "Ilimitado",
+      "percentUsed": "{percent}% usado",
+      "resets": "Se reinicia en {in}, a las {at}",
+      "lasts": "A este ritmo, dura hasta que se reinicia.",
+      "runsOut": "A este ritmo, se agota en {in}.",
+      "credits": "Créditos de uso",
+      "creditsUsed": "{used} usados",
+      "creditsOf": "{used} de {limit} usados",
+      "noContext": "El desglose del contexto aparece cuando el agente inicia.",
+      "rows": {
+        "system": "Prompt del sistema y memoria",
+        "toolDefinition": "Herramientas del sistema",
+        "tool": "Herramientas",
+        "skill": "Skills",
+        "subagent": "Agentes personalizados",
+        "mcpServer": "Herramientas MCP",
+        "plugin": "Plugins",
+        "messages": "Mensajes",
+        "free": "Espacio libre",
+        "buffer": "Reserva de compactación",
+        "deferred": "Herramientas diferidas"
+      },
+      "quotas": {
+        "session": "Sesión actual",
+        "weekly": "Semanal, todos los modelos",
+        "weeklyOf": "Semanal, {name}"
+      },
+      "ring": "Contexto {text}, {percent}% lleno"
     }
   },
   "host": {

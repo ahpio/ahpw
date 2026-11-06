@@ -22,6 +22,7 @@ import { hostBridge } from './data.js';
 import type { Icon } from './icons.js';
 import type { Offers } from './offers.js';
 import { recordsReducer } from './people.js';
+import type { PlanAccount, QuotaSnapshot } from './usage-meta.js';
 
 type Bag = Record<string, unknown>;
 
@@ -119,6 +120,10 @@ export interface ConnectorHealth {
   check?: { result: CheckOutcome; message?: string; at: string };
   lastCall?: CallRow;
   lastFailure?: CallRow;
+  /** The plan limits of a login's account, in VS Code's `quotaSnapshots` shape; an empty map is an account with none. */
+  quotaSnapshots?: Record<string, QuotaSnapshot>;
+  /** The plan type and the provider of a login's account. */
+  account?: PlanAccount;
 }
 
 /** One stored connector, as `x-ahpd-connectors` lists it. */
