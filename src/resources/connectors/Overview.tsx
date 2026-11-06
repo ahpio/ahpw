@@ -44,16 +44,17 @@ function iconOf(type: string): string {
 /**
  * One capability as a row: its type's icon, its title over its description,
  * and its name. Open, the description wraps, and below it come the URL its
- * calls go to, when it receives, and the values it takes.
+ * calls go to, when it receives, the values it takes, and the view it draws.
+ * A row with a view starts open.
  */
-function CapabilityRow({ capability, url }: { capability: Capability; url: string | undefined }): ReactElement {
+function CapabilityRow({ capability, url, view }: { capability: Capability; url: string | undefined; view?: ReactElement | undefined }): ReactElement {
   const { t } = useI18n();
   const inputs = inputsOf(capability.input);
   const copy = (text: string): void => {
     void copyText(text).then((copied) => { if (copied) done(t('connectors/page/copied')); });
   };
   return (
-    <details className="web-connector__capability">
+    <details className="web-connector__capability" open={view !== undefined}>
       <summary>
         <span className="web-connector__capability-icon" aria-hidden="true">{iconOf(capability.type)}</span>
         <span className="web-connector__capability-head">
@@ -84,6 +85,7 @@ function CapabilityRow({ capability, url }: { capability: Capability; url: strin
           ))}
         </dl>
       )}
+      {view}
     </details>
   );
 }
@@ -134,13 +136,16 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
   ];
   const capabilities = adapter?.capabilities ?? [];
   const root = httpRoot(host);
+  // The record's main view draws inside the capability that declares it.
+  const mainView = plugin === undefined || row.views?.main === undefined
+    ? undefined
+    : <PluginViewPanel host={host} plugin={plugin} at={`connector:${row.id}`} view={row.views.main} />;
 
   return (
     <div className="web-connector__overview">
       {adapter === undefined || adapter.description === '' ? null : <p>{adapter.description}</p>}
       <DetailList items={facts} columns={2} />
       <PlanPart quotas={quotasOf(row.health?.quotaSnapshots)} account={accountOf(row.health?.account)} />
-      {plugin === undefined || row.views?.main === undefined ? null : <PluginViewPanel host={host} plugin={plugin} at={`connector:${row.id}`} view={row.views.main} />}
       <Text variant="h3" text={t('connectors/page/capabilities', { count: capabilities.length })} />
       {capabilities.length === 0 ? <p className="web-note">{t('connectors/page/noCapabilities')}</p> : (
         byType(capabilities).map((group) => (
@@ -152,7 +157,12 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
             </div>
             <div className="web-connector__capabilities">
               {group.items.map((one) => (
-                <CapabilityRow key={`${one.type}:${one.name}`} capability={one} url={root === undefined ? undefined : receiveUrl(root, one, row.id)} />
+                <CapabilityRow
+                  key={`${one.type}:${one.name}`}
+                  capability={one}
+                  url={root === undefined ? undefined : receiveUrl(root, one, row.id)}
+                  view={one.type === 'view' && one.name === 'main' ? mainView : undefined}
+                />
               ))}
             </div>
           </section>
