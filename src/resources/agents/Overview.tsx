@@ -8,6 +8,7 @@ import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { meOn, ownerWord } from '../connectors/actions.js';
+import { PluginViewPanel } from '../plugins/PluginViewPanel.js';
 import { customizationKinds, emptyKinds, kindCount, kindTabKey } from './kinds.js';
 import { capabilitiesOf, limitsOf, modelsLine, signInOf } from './words.js';
 
@@ -24,9 +25,10 @@ export function healthLine(t: (key: string, values?: Record<string, unknown>) =>
 }
 
 /**
- * One agent's Overview: what it is, its record's engine, owner and plugin, its
- * models, what it is customized with and how to sign in to it. An agent the
- * host does not serve has its record's facts only.
+ * One agent's Overview: what it is, the view its plugin draws for it, its
+ * record's engine, owner and plugin, its models, what it is customized with
+ * and how to sign in to it. An agent the host does not serve has its record's
+ * facts only.
  */
 export function Overview({ host, info, record, engine }: { host: string; info?: AgentInfo; record?: AgentRow; engine?: EngineRow }): ReactElement {
   const { t } = useI18n();
@@ -58,6 +60,7 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
     <div className="web-agent__overview">
       {description === '' ? null : <Markdown text={description} />}
       <DetailList items={facts} columns={2} />
+      {record?.views?.main === undefined || engine === undefined ? null : <PluginViewPanel host={host} plugin={engine.plugin} at={`agent:${record.id}`} view={record.views.main} />}
       {info === undefined ? null : <Served host={host} agent={info} signIn={signIn} />}
     </div>
   );

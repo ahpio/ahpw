@@ -9,6 +9,7 @@
 import type { Grant, Named, Role, UserRecord } from '@ahpd/sdk';
 import { hostBridge } from './data.js';
 import { allows, type Offers } from './offers.js';
+import { withViewData, type ViewData } from './views.js';
 
 export type { Grant, Named, Role, UserRecord };
 
@@ -42,6 +43,7 @@ export interface PeopleState<R> {
 
 type PeopleAction<R> =
   | { type: string; id: string; record: R }
+  | ({ type: string } & ViewData)
   | { type: string; id: string };
 
 /** Folds a domain's channel actions, `x-ahpd-<domain>/added`, `/changed` and `/removed`, into its snapshot, `{ records }`. */
@@ -49,7 +51,11 @@ export function peopleReducer<D extends PeopleDomain>(domain: D): (state: People
   return recordsReducer<PeopleRecords[D]>(channelScheme(domain));
 }
 
-/** Folds a records channel's actions, `<scheme>/added`, `/changed` and `/removed`, into its snapshot, `{ records }`; ahpd's policies channel is one too. */
+/**
+ * Folds a records channel's actions, `<scheme>/added`, `/changed` and
+ * `/removed`, into its snapshot, `{ records }`; ahpd's policies channel is one
+ * too. `<scheme>/viewData` sets one value of a record's view data.
+ */
 export function recordsReducer<R>(scheme: string): (state: PeopleState<R>, action: PeopleAction<R>) => PeopleState<R> {
   return (state, action) => {
     switch (action.type) {
@@ -62,6 +68,10 @@ export function recordsReducer<R>(scheme: string): (state: PeopleState<R>, actio
       }
       case `${scheme}/removed`:
         return { records: state.records.filter((one) => one.id !== action.id) };
+      case `${scheme}/viewData`: {
+        if (!('surface' in action) || !('path' in action)) return state;
+        return { records: state.records.map((one) => (one.id === action.id ? { id: one.id, record: withViewData(one.record, action) } : one)) };
+      }
       default:
         return state;
     }

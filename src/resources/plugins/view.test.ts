@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PluginView } from '../../bridges/plugins.js';
-import { viewMethods, viewNode } from './view.js';
+import { viewDataPath, viewMethods, viewNode } from './view.js';
 
 /** The Dev Tunnel page, as ahpd's `tunnelView` sends it. */
 const TUNNEL: PluginView = {
@@ -80,5 +80,36 @@ describe('viewMethods', () => {
     };
     expect([...viewMethods(view)]).toEqual(['x-tunnel/restart']);
     expect(viewMethods(TUNNEL).size).toBe(0);
+  });
+});
+
+describe('a view with a data model', () => {
+  /** A Claude agent's view: one row for each login it names, read from `/logins`. */
+  const AGENT: PluginView = {
+    root: 'logins',
+    components: {
+      logins: { id: 'logins', component: 'Column', children: { path: '/logins', componentId: 'login' } },
+      login: { id: 'login', component: 'Text', text: { path: 'name' } },
+    },
+    dataModel: { logins: [{ name: 'work' }, { name: 'home' }] },
+  };
+
+  it('keeps a bound prop as a path, and a list as its template over the path, each item\'s path from the item', () => {
+    expect(viewNode(AGENT, 's')).toMatchObject({
+      component: 'Column',
+      children: { path: '/logins', template: { component: 'Text', text: { path: '/name' } } },
+    });
+  });
+
+  it('draws nothing when a list repeats the component that holds it', () => {
+    expect(viewNode({
+      root: 'loop',
+      components: { loop: { id: 'loop', component: 'Column', children: { path: '/items', componentId: 'loop' } } },
+    }, 's')).toBeNull();
+  });
+
+  it('keeps its data where scena keeps a surface\'s, the mount key as one step', () => {
+    expect(viewDataPath('view:local:connector:work')).toBe('$/surfaces/view:local:connector:work/data');
+    expect(viewDataPath('view:wss://a/b:agent:x~y')).toBe('$/surfaces/view:wss:~1~1a~1b:agent:x~0y/data');
   });
 });

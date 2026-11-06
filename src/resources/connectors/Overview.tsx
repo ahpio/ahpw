@@ -10,6 +10,7 @@ import { HostIcon } from '../../shell/HostIcon.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { copyText } from '../../shell/controls/CopyButton.js';
 import { done } from '../../shell/notify/index.js';
+import { PluginViewPanel } from '../plugins/PluginViewPanel.js';
 import { when } from '../sessions/turn.js';
 import { meOn, ownerWord } from './actions.js';
 import { inputsOf } from './inputs.js';
@@ -21,7 +22,7 @@ const KNOWN_TYPES = new Map([
   ['receive', EMOJIcon.receive],
   ['command', EMOJIcon.terminal],
   ['action', EMOJIcon.action],
-  ['ui', EMOJIcon.interface],
+  ['view', EMOJIcon.interface],
   ['models', EMOJIcon.model],
 ]);
 
@@ -43,16 +44,17 @@ function iconOf(type: string): string {
 /**
  * One capability as a row: its type's icon, its title over its description,
  * and its name. Open, the description wraps, and below it come the URL its
- * calls go to, when it receives, and the values it takes.
+ * calls go to, when it receives, the values it takes, and the view it draws.
+ * A row with a view starts open.
  */
-function CapabilityRow({ capability, url }: { capability: Capability; url: string | undefined }): ReactElement {
+function CapabilityRow({ capability, url, view }: { capability: Capability; url: string | undefined; view?: ReactElement | undefined }): ReactElement {
   const { t } = useI18n();
   const inputs = inputsOf(capability.input);
   const copy = (text: string): void => {
     void copyText(text).then((copied) => { if (copied) done(t('connectors/page/copied')); });
   };
   return (
-    <details className="web-connector__capability">
+    <details className="web-connector__capability" open={view !== undefined}>
       <summary>
         <span className="web-connector__capability-icon" aria-hidden="true">{iconOf(capability.type)}</span>
         <span className="web-connector__capability-head">
@@ -83,6 +85,7 @@ function CapabilityRow({ capability, url }: { capability: Capability; url: strin
           ))}
         </dl>
       )}
+      {view}
     </details>
   );
 }
@@ -104,8 +107,9 @@ function healthFacts(t: (key: string, values?: Record<string, unknown>) => strin
 }
 
 /**
- * What a connector is: its adapter and the plugin that offers it, whose it
- * is, its state, and what its adapter declares it does. An adapter no plugin
+ * What a connector is: the view its plugin draws for it, its adapter and the
+ * plugin that offers it, whose it is, its state, and what its adapter declares
+ * it does. An adapter no plugin
  * registers now is named by its name. Capabilities are grouped by type.
  */
 export function Overview({ host, row, adapter }: { host: string; row: ConnectorRow; adapter: AdapterRow | undefined }): ReactElement {
@@ -132,6 +136,10 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
   ];
   const capabilities = adapter?.capabilities ?? [];
   const root = httpRoot(host);
+  // The record's main view draws inside the capability that declares it.
+  const mainView = plugin === undefined || row.views?.main === undefined
+    ? undefined
+    : <PluginViewPanel host={host} plugin={plugin} at={`connector:${row.id}`} view={row.views.main} />;
 
   return (
     <div className="web-connector__overview">
@@ -149,7 +157,12 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
             </div>
             <div className="web-connector__capabilities">
               {group.items.map((one) => (
-                <CapabilityRow key={`${one.type}:${one.name}`} capability={one} url={root === undefined ? undefined : receiveUrl(root, one, row.id)} />
+                <CapabilityRow
+                  key={`${one.type}:${one.name}`}
+                  capability={one}
+                  url={root === undefined ? undefined : receiveUrl(root, one, row.id)}
+                  view={one.type === 'view' && one.name === 'main' ? mainView : undefined}
+                />
               ))}
             </div>
           </section>

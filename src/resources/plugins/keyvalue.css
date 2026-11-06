@@ -1,0 +1,16 @@
+/* A view's KeyValue: one line, the label at the start and the value at the end. */
+.web-keyvalue {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--oo-spacing-sm);
+}
+
+.web-keyvalue__label {
+  color: var(--oo-color-muted);
+}
+
+.web-keyvalue__value {
+  text-align: end;
+  overflow-wrap: anywhere;
+}

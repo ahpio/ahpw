@@ -49,7 +49,7 @@ export function Overview({ host, id, row }: { host: string; id: string; row: Plu
     <div className="web-plugin__overview">
       {manifest?.description === undefined ? null : <Markdown text={manifest.description} />}
       {row.problem === undefined ? null : <Alert tone={tone ?? 'warning'} message={row.problem} />}
-      {row.views?.main === undefined ? null : <PluginViewPanel host={host} id={id} view={row.views.main} />}
+      {row.views?.main === undefined ? null : <PluginViewPanel host={host} plugin={id} at={`plugin:${id}`} view={row.views.main} />}
       <DetailList items={facts} columns={2} />
 
       {(manifest?.categories ?? []).length === 0 ? null : (

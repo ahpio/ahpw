@@ -16,7 +16,9 @@
  * once it carries them.
  */
 
+import type { Capability } from './connectors.js';
 import type { Icon } from './icons.js';
+import type { PluginView } from './views.js';
 import { hostBridge } from './data.js';
 import type { ConnectorOwner } from './connectors.js';
 import type { Offers } from './offers.js';
@@ -71,6 +73,8 @@ export interface AgentRow {
   config: Record<string, unknown>;
   state: AgentState;
   health?: AgentHealth;
+  /** What its engine's plugin draws for it, by surface; `main` is drawn on its page. */
+  views?: Record<string, PluginView>;
 }
 
 /** What a new record starts from, as an engine offers it. */
@@ -99,6 +103,8 @@ export interface EngineRow {
   hostOnly?: string[];
   /** The `env` variables any owner may set, each a secret. */
   keyVariables?: string[];
+  /** What a record of it does, as an adapter's capabilities say; a `view` one names a surface it shows a view on. */
+  capabilities?: Capability[];
 }
 
 export const enginesReducer = recordsReducer<EngineRow>(ENGINES.scheme);
