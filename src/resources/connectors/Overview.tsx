@@ -138,9 +138,9 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
   return (
     <div className="web-connector__overview">
       {adapter === undefined || adapter.description === '' ? null : <p>{adapter.description}</p>}
-      {plugin === undefined || row.views?.main === undefined ? null : <PluginViewPanel host={host} plugin={plugin} at={`connector:${row.id}`} view={row.views.main} />}
       <DetailList items={facts} columns={2} />
       <PlanPart quotas={quotasOf(row.health?.quotaSnapshots)} account={accountOf(row.health?.account)} />
+      {plugin === undefined || row.views?.main === undefined ? null : <PluginViewPanel host={host} plugin={plugin} at={`connector:${row.id}`} view={row.views.main} />}
       <Text variant="h3" text={t('connectors/page/capabilities', { count: capabilities.length })} />
       {capabilities.length === 0 ? <p className="web-note">{t('connectors/page/noCapabilities')}</p> : (
         byType(capabilities).map((group) => (

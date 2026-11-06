@@ -59,8 +59,8 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
   return (
     <div className="web-agent__overview">
       {description === '' ? null : <Markdown text={description} />}
-      {record?.views?.main === undefined || engine === undefined ? null : <PluginViewPanel host={host} plugin={engine.plugin} at={`agent:${record.id}`} view={record.views.main} />}
       <DetailList items={facts} columns={2} />
+      {record?.views?.main === undefined || engine === undefined ? null : <PluginViewPanel host={host} plugin={engine.plugin} at={`agent:${record.id}`} view={record.views.main} />}
       {info === undefined ? null : <Served host={host} agent={info} signIn={signIn} />}
     </div>
   );
