@@ -1750,6 +1750,7 @@
       "thinkingAbout": "Pensando: {text}",
       "approve": "Aprobar",
       "deny": "Denegar",
+      "moreOptions": "Más opciones",
       "agentError": "El agente informó un error.",
       "ran": "Ejecutó {name}",
       "ranSubagent": "Ejecutó un subagente",
