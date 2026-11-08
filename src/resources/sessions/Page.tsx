@@ -26,6 +26,7 @@ import { answeredHere, InputRequest } from './Question.js';
 import { Activity } from './Activity.js';
 import { groupParts, stepWaits } from './activity-parts.js';
 import { Composer } from './Composer.js';
+import { HeaderInfo } from './HeaderInfo.js';
 import { SessionHostContext, WorkspaceContext } from './workspace.js';
 import { ACTIVITY_TONE, activityLabel, activityOf, isRead } from './status.js';
 import { plural } from '../../i18n/locales.js';
@@ -376,6 +377,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
             </div>
             {tools}
           </div>
+          <HeaderInfo host={host} summary={summary} session={session.state} chat={chat.state} chatUri={chatUri} />
           {doing === undefined || doing === '' ? null : <span className="web-note web-chat__doing">{doing}</span>}
         </header>
         {lifecycle === 'creating' ? <Spinner label={t('sessions/chat/starting')} /> : null}

@@ -1,0 +1,8 @@
+/* An id and the button that copies it, on one line while it fits. */
+.web-details__id {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--oo-spacing-xs);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
