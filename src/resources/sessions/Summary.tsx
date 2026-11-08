@@ -32,7 +32,7 @@ function toolValue(t: (key: string, values?: Record<string, unknown>) => string,
   ].join(' \u{00B7} ');
 }
 
-/** A session's Summary: four KPIs, then cards for the newest turns, the tools, the MCP servers and the skills. */
+/** A session's Summary: four KPIs (tokens, working time, turns and steps), then cards for the newest turns, the tools, the MCP servers and the skills. */
 export function Summary({ figures, summary, session }: { figures: SessionFigures; summary: SessionSummary; session: SessionState | undefined }): ReactElement {
   const { t } = useI18n();
   const kinds = useMemo(() => customizationKinds(session?.customizations), [session?.customizations]);
@@ -45,8 +45,6 @@ export function Summary({ figures, summary, session }: { figures: SessionFigures
   return (
     <>
       <Grid minColumnWidth={150} gap={12}>
-        <Kpi icon={EMOJIcon.sessions} label={t('sessions/info/turns')} value={String(figures.turns)} note={figures.cancelled === 0 ? '' : plural('sessions/info/cancelled', figures.cancelled)} color="blue" />
-        <Kpi icon={EMOJIcon.running} label={t('sessions/info/working')} value={elapsed(figures.working)} note={t('sessions/info/open', { time: elapsed(open) })} color="green" />
         <Kpi
           icon={EMOJIcon.tokensIn}
           label={t('sessions/info/tokens')}
@@ -54,6 +52,8 @@ export function Summary({ figures, summary, session }: { figures: SessionFigures
           note={t('sessions/details/cached', { count: tokens(figures.cached) })}
           color="purple"
         />
+        <Kpi icon={EMOJIcon.running} label={t('sessions/info/working')} value={elapsed(figures.working)} note={t('sessions/info/open', { time: elapsed(open) })} color="green" />
+        <Kpi icon={EMOJIcon.sessions} label={t('sessions/info/turns')} value={String(figures.turns)} note={figures.cancelled === 0 ? '' : plural('sessions/info/cancelled', figures.cancelled)} color="blue" />
         <Kpi
           icon={EMOJIcon.log}
           label={t('sessions/info/steps')}
@@ -62,7 +62,7 @@ export function Summary({ figures, summary, session }: { figures: SessionFigures
           color="amber"
         />
       </Grid>
-      <Grid minColumnWidth={300} gap={12} align="start">
+      <Grid minColumnWidth="max(40%, 280px)" gap={12} align="start">
         <Card title={t('sessions/info/perTurn')}>
           <Column gap={10}>
             {figures.perTurn.map((line) => (

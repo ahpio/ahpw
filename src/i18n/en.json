@@ -1549,7 +1549,13 @@
       "queueHint": "Enter to queue",
       "send": "Send",
       "sendHint": "Enter to send, Shift+Enter for a new line",
-      "stopHint": "Esc to stop"
+      "stopHint": "Esc to stop",
+      "fold": "Fold the composer",
+      "unfold": "Open the composer",
+      "waiting": {
+        "one": "{count} waiting",
+        "other": "{count} waiting"
+      }
     },
     "files": {
       "tab": "Files",

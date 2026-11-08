@@ -1,10 +1,4 @@
-/* The line under a session's title, and the facts and Summary it opens. */
-.web-head-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--oo-spacing-sm);
-}
-
+/* The line under a session's title, which shows the session's info in place of its chat. */
 .web-head-info__line {
   display: flex;
   flex-wrap: wrap;
@@ -22,6 +16,7 @@
 }
 
 .web-head-info__line:hover {
+  background: none;
   color: var(--oo-color-text);
 }
 
@@ -29,20 +24,10 @@
   font-size: var(--oo-font-size-xs);
 }
 
-/*
- * The opened info stays in the sticky session header, so it opens where the
- * reader is in the chat. Its own background covers the chat that scrolls
- * under the header, and its height is held to half the window, scrolling
- * inside when it is taller.
- */
+/* The session's info, where the chat's turns are while it shows. */
 .web-head-info__panel {
   display: flex;
   flex-direction: column;
   gap: var(--oo-spacing-lg);
-  max-height: 50vh;
-  overflow-y: auto;
-  padding: var(--oo-spacing-md) var(--oo-spacing-lg);
-  border: 1px solid var(--oo-color-border);
-  border-radius: var(--oo-radius-md, 8px);
-  background: var(--oo-color-surface);
+  padding-bottom: var(--oo-spacing-lg);
 }

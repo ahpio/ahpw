@@ -1549,7 +1549,13 @@
       "queueHint": "Enter para poner en cola",
       "send": "Enviar",
       "sendHint": "Enter para enviar, Shift+Enter para un salto de línea",
-      "stopHint": "Esc para detener"
+      "stopHint": "Esc para detener",
+      "fold": "Plegar el compositor",
+      "unfold": "Abrir el compositor",
+      "waiting": {
+        "one": "{count} en espera",
+        "other": "{count} en espera"
+      }
     },
     "files": {
       "tab": "Archivos",

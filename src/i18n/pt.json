@@ -1549,7 +1549,13 @@
       "queueHint": "Enter para pôr na fila",
       "send": "Enviar",
       "sendHint": "Enter para enviar, Shift+Enter para nova linha",
-      "stopHint": "Esc para parar"
+      "stopHint": "Esc para parar",
+      "fold": "Recolher o compositor",
+      "unfold": "Abrir o compositor",
+      "waiting": {
+        "one": "{count} aguardando",
+        "other": "{count} aguardando"
+      }
     },
     "files": {
       "tab": "Arquivos",

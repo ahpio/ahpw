@@ -52,6 +52,9 @@ import { COMPOSER_FOCUS, hostCommands, registerHostCommands, type HostCommand } 
 import { useAgentIconSrc } from '../agents/icons.js';
 import { shellsOf } from './shells.js';
 import { ShellsList, ShellsPill } from './Shells.js';
+import { readChoice, writeChoice } from '../../shell/explorer/choice.js';
+import { plural } from '../../i18n/locales.js';
+import './composer.css';
 
 /** Tells one composer from another in the store's focus path. */
 let composers = 0;
@@ -81,8 +84,15 @@ export function messageOf(text: string, model: string | undefined, attachments: 
   } as Message;
 }
 
-/** The composer of one chat: the box, its `/` and `@` picker, the settings row, and send, queue, steer and stop. */
-export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, usage, onUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false }: {
+/** Where the browser keeps whether the composer is folded. */
+const FOLDED_KEY = 'ahpw.composerFolded';
+
+/**
+ * The composer of one chat: the box, its `/` and `@` picker, the settings row,
+ * and send, queue, steer and stop. Folded, it is one line: the `+`, the
+ * draft's first line or the agent and model, what waits, and send or stop.
+ */
+export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, usage, onUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false, onEngage }: {
   /** The session's host. */
   host: string;
   chatUri: string;
@@ -111,6 +121,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   placeholder?: string;
   /** Whether a message sent while a turn runs always steers it, as a bot's chat does, rather than waiting its turn. */
   steers?: boolean;
+  /** Called when the person turns to the composer: its text takes focus, or it unfolds. */
+  onEngage?: () => void;
 }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
@@ -133,6 +145,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   const queued = held ?? [];
   const shells = useMemo(() => shellsOf(backgroundWork), [backgroundWork]);
   const [shellsOpen, setShellsOpen] = useState(false);
+  // Folded or not, kept per browser; it opens unfolded.
+  const [folded, setFolded] = useState(() => readChoice(FOLDED_KEY, ['open', 'folded'], 'open') === 'folded');
 
   useEffect(() => fitToText(area.current), [text]);
 
@@ -343,6 +357,40 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   }
 
   const modelName = models.find((one) => one.id === model)?.name ?? model;
+  const fold = (next: boolean): void => {
+    setFolded(next);
+    writeChoice(FOLDED_KEY, next ? 'folded' : 'open');
+    if (next) return;
+    onEngage?.();
+    focusCaret(text.length);
+  };
+  // Send while nothing runs, or while a bot's chat steers with what is typed; else stop.
+  const round = active === undefined || (steers && text.trim() !== '') ? (
+    <button type="button" className="web-composer__round" aria-label={t('sessions/composer/send')} title={t('sessions/composer/sendHint')} disabled={text.trim() === ''} onClick={() => submit('send')}>{EMOJIcon.send}</button>
+  ) : (
+    <button type="button" className="web-composer__round" aria-label={t('sessions/commands/stop')} title={t('sessions/composer/stopHint')} onClick={stop}>{EMOJIcon.stop}</button>
+  );
+  if (folded) {
+    const said = text.trim().split('\n')[0] ?? '';
+    const agentName = agent?.displayName ?? summary.provider;
+    const waiting = queued.length + (steering === undefined ? 0 : 1);
+    return (
+      <div className="web-composer">
+        <div className="web-composer__box web-composer__folded" data-ring={ringOf(summary.status)}>
+          <button type="button" className="web-composer__add" aria-label={t('sessions/composer/unfold')} title={t('sessions/composer/unfold')} onClick={() => fold(false)}>
+            <svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+          <button type="button" className="web-composer__folded-line" data-draft={said === '' ? undefined : 'true'} title={t('sessions/composer/unfold')} onClick={() => fold(false)}>
+            {said === '' ? `${agentName} \u{00B7} ${modelName ?? t('sessions/values/default')}` : said}
+          </button>
+          {waiting === 0 ? null : <span className="web-chip">{plural('sessions/composer/waiting', waiting)}</span>}
+          {round}
+        </div>
+      </div>
+    );
+  }
   const readout = contextReadout(agent?.models.find((one) => one.id === model), lastUsage, usage?.context);
   const opensUsage = onUsage !== undefined && usage !== undefined && hasUsage(usage);
   const pills = options.filter(showsPill);
@@ -387,6 +435,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         {folder === undefined ? null : <Pill label={`${EMOJIcon.folder} ${folderLabel(folder)}`} title={t('sessions/composer/folderHint')} />}
         <Pill label={agentImage === undefined ? `${EMOJIcon.agents} ${agent?.displayName ?? summary.provider}` : agent?.displayName ?? summary.provider} image={agentImage} title={agent?.description ?? t('sessions/composer/agentHint')} />
         {shells.length === 0 ? null : <ShellsPill count={shells.length} onToggle={() => setShellsOpen((was) => !was)} />}
+        <button type="button" className="web-composer__fold" aria-label={t('sessions/composer/fold')} title={t('sessions/composer/fold')} onClick={() => fold(true)}>{EMOJIcon.caretDown}</button>
       </div>
 
       <div
@@ -418,7 +467,10 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
               setText(event.currentTarget.value);
               setCaret(event.currentTarget.selectionStart);
             }}
-            onFocus={() => scena.store.set(COMPOSER_FOCUS, focus)}
+            onFocus={() => {
+              scena.store.set(COMPOSER_FOCUS, focus);
+              onEngage?.();
+            }}
             onKeyUp={(event) => setCaret(event.currentTarget.selectionStart)}
             onClick={(event) => setCaret(event.currentTarget.selectionStart)}
             onKeyDown={(event) => {
@@ -463,11 +515,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
           </div>
           {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/steer')} size="sm" title={t('sessions/composer/steerHint')} onClick={() => submit('steer')} />}
           {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/queue')} variant="primary" size="sm" title={t('sessions/composer/queueHint')} onClick={() => submit('send')} />}
-          {active === undefined || (steers && text.trim() !== '') ? (
-            <button type="button" className="web-composer__round" aria-label={t('sessions/composer/send')} title={t('sessions/composer/sendHint')} disabled={text.trim() === ''} onClick={() => submit('send')}>{EMOJIcon.send}</button>
-          ) : (
-            <button type="button" className="web-composer__round" aria-label={t('sessions/commands/stop')} title={t('sessions/composer/stopHint')} onClick={stop}>{EMOJIcon.stop}</button>
-          )}
+          {round}
         </div>
       </div>
     </div>
