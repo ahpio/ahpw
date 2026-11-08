@@ -1,0 +1,15 @@
+/* The main option and the caret that opens the rest, drawn as one button. */
+.web-confirm__split {
+  display: inline-flex;
+}
+
+.web-confirm__split > button:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.web-confirm__split > button + button {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+}

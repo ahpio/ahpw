@@ -11,6 +11,7 @@ import { codePath, fileLink } from '../files/link.js';
 import { linkClicks } from '../files/clicks.js';
 import { useSessionHost, WorkspaceContext } from './workspace.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
+import { Confirm } from './Confirm.js';
 import { InputRequest } from './Question.js';
 import { durationOf, fileOf, inputText, kindOf, lineOf, outcomeOf, outputOf, segmentsOf, type Outcome, type Output, type ToolKind } from './tool.js';
 import { EMOJIcon } from '../emojis.js';
@@ -196,49 +197,6 @@ export function Reasoning({ text, running }: { text: string; running: boolean })
         <span className="web-tool__line">{open ? t('sessions/activity/thinking') : t('sessions/tool/thinkingAbout', { text: opening })}</span>
       </button>
       {open ? <div className="web-tool__body web-md"><Markdown text={text} /></div> : null}
-    </div>
-  );
-}
-
-/** The host's options for a call awaiting approval, or approve and deny when it offers none. */
-function Confirm({ call, send, turnId }: { call: ToolCallState; send: Send; turnId: string }): ReactElement {
-  const { t } = useI18n();
-  const approve = (optionId?: string): void => send({
-    type: 'chat/toolCallConfirmed',
-    turnId,
-    toolCallId: call.toolCallId,
-    approved: true,
-    confirmed: 'user-action',
-    ...(optionId === undefined ? {} : { selectedOptionId: optionId }),
-  } as StateAction);
-  const deny = (optionId?: string): void => send({
-    type: 'chat/toolCallConfirmed',
-    turnId,
-    toolCallId: call.toolCallId,
-    approved: false,
-    reason: 'denied',
-    ...(optionId === undefined ? {} : { selectedOptionId: optionId }),
-  } as StateAction);
-  const options = call.status === PENDING_CONFIRMATION ? call.options ?? [] : [];
-  const title = call.status === PENDING_CONFIRMATION ? textOf(call.confirmationTitle) : '';
-  return (
-    <div className="web-tool__confirm">
-      {title === '' ? null : <Markdown text={title} />}
-      <div className="web-tool__actions">
-        {options.length === 0 ? (
-          <>
-            <Button label={t('sessions/tool/approve')} variant="primary" onClick={() => approve()} />
-            <Button label={t('sessions/tool/deny')} onClick={() => deny()} />
-          </>
-        ) : options.map((option) => (
-          <Button
-            key={option.id}
-            label={option.label}
-            {...(option.kind === 'approve' ? { variant: 'primary' as const } : {})}
-            onClick={() => (option.kind === 'approve' ? approve(option.id) : deny(option.id))}
-          />
-        ))}
-      </div>
     </div>
   );
 }
