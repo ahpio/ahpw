@@ -1450,7 +1450,7 @@
       "yourAnswer": "Your answer",
       "recommended": "Recommended",
       "other": "Other",
-      "otherPlaceholder": "Other: write your own answer",
+      "otherPlaceholder": "or say it in words",
       "declined": "Question declined",
       "unanswered": "Question not answered",
       "answered": "Question answered",
@@ -1466,7 +1466,12 @@
       "missing": {
         "one": "One question still needs an answer.",
         "other": "{count} questions still need an answer."
-      }
+      },
+      "otherPlaceholderMany": "or add an answer of your own",
+      "waiting": "Waiting on you · A question",
+      "waitingMany": "Waiting on you · {count} questions",
+      "fold": "Fold the question",
+      "unfold": "Open the question"
     },
     "attachments": {
       "see": "See {name}",

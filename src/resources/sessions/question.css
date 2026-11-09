@@ -1,0 +1,35 @@
+/* The card's head as a button: a click folds the card to that line, and opens it again. */
+.web-ask__fold {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.web-ask__fold:hover {
+  background: none;
+}
+
+.web-ask__fold:hover .web-ask__title {
+  color: var(--oo-color-text);
+}
+
+.web-ask__caret {
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+}
+
+/* Folded, the card is its head line alone, in the colour of what waits. */
+.web-ask[data-folded='true'] {
+  padding-block: var(--oo-spacing-sm);
+}
+
+.web-ask[data-folded='true'] .web-ask__title {
+  color: var(--oo-color-warning);
+}

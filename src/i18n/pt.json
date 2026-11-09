@@ -1450,7 +1450,7 @@
       "yourAnswer": "Sua resposta",
       "recommended": "Recomendada",
       "other": "Outra",
-      "otherPlaceholder": "Outra: escreva sua própria resposta",
+      "otherPlaceholder": "ou diga com suas palavras",
       "declined": "Pergunta recusada",
       "unanswered": "Pergunta não respondida",
       "answered": "Pergunta respondida",
@@ -1466,7 +1466,12 @@
       "missing": {
         "one": "Uma pergunta ainda precisa de resposta.",
         "other": "{count} perguntas ainda precisam de resposta."
-      }
+      },
+      "otherPlaceholderMany": "ou adicione uma resposta sua",
+      "waiting": "Esperando por você · Uma pergunta",
+      "waitingMany": "Esperando por você · {count} perguntas",
+      "fold": "Recolher a pergunta",
+      "unfold": "Abrir a pergunta"
     },
     "attachments": {
       "see": "Ver {name}",

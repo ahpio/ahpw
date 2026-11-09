@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ChatInputQuestion } from '@microsoft/agent-host-protocol';
-import { EMPTY, answerWords, draftOf, encode } from './answer.js';
+import { EMPTY, allowsOther, answerWords, draftOf, encode } from './answer.js';
 
 const single = { id: 'q1', kind: 'single-select', message: 'Color?', options: [{ id: 'blue', label: 'Blue' }, { id: 'red', label: 'Red' }], allowFreeformInput: true } as unknown as ChatInputQuestion;
 const multi = { id: 'q2', kind: 'multi-select', message: 'Which?', options: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }] } as unknown as ChatInputQuestion;
@@ -34,5 +34,16 @@ describe('draftOf and answerWords', () => {
     expect(draftOf(answer)).toEqual({ picked: ['a'], text: 'c', other: true });
     expect(answerWords(multi, answer)).toBe('A, c');
     expect(answerWords(single, undefined)).toBe('Skipped');
+  });
+});
+
+describe('allowsOther', () => {
+  it('takes words on a select question unless the host says false, and none on a yes/no question', () => {
+    const ask = (fields: Record<string, unknown>): ChatInputQuestion => ({ id: 'q', message: 'Which?', options: [], ...fields }) as unknown as ChatInputQuestion;
+    expect(allowsOther(ask({ kind: 'single-select' }))).toBe(true);
+    expect(allowsOther(ask({ kind: 'multi-select', allowFreeformInput: true }))).toBe(true);
+    expect(allowsOther(ask({ kind: 'single-select', allowFreeformInput: false }))).toBe(false);
+    expect(allowsOther(ask({ kind: 'boolean' }))).toBe(false);
+    expect(allowsOther(ask({ kind: 'text' }))).toBe(false);
   });
 });

@@ -7,6 +7,8 @@ import type { ChatInputAnswer, ChatInputQuestion, ChatInputRequest, StateAction 
 import { EMPTY, allowsOther, answerWords, draftOf, encode, isChoice, optionsOf, type Draft } from './answer.js';
 import type { Send } from './Parts.js';
 import { useSessionHost } from './workspace.js';
+import { EMOJIcon } from '../emojis.js';
+import './question.css';
 
 /** What this page sent, by host and request id. Kept past the card: a finished turn draws it anew, and the host may never say. */
 const SENT = new Map<string, Sent>();
@@ -20,6 +22,9 @@ interface Sent {
   response: 'accept' | 'decline';
   answers: Record<string, ChatInputAnswer>;
 }
+
+/** The questions folded to their head line, by host and request id, so a card drawn anew stays folded. */
+const FOLDED = new Set<string>();
 
 /** The line a request carries when the agent said nothing of its own. The host's own words, so not translated. */
 const GENERIC = 'The agent has a question';
@@ -99,7 +104,7 @@ function QuestionForm({ question, draft, set, next }: {
           <input
             className="web-field"
             value={draft.text}
-            placeholder={t('sessions/question/otherPlaceholder')}
+            placeholder={t(many ? 'sessions/question/otherPlaceholderMany' : 'sessions/question/otherPlaceholder')}
             onFocus={() => { if (!draft.other) set({ ...draft, other: true, ...(many ? {} : { picked: [] }) }); }}
             onChange={(event) => set({ ...draft, text: event.target.value, other: true, ...(many ? {} : { picked: [] }) })}
             onKeyDown={enterGoesOn}
@@ -113,7 +118,8 @@ function QuestionForm({ question, draft, set, next }: {
 /**
  * A question the agent asked, one page per question, answered here while its
  * turn waits. What was sent shows at once: the host says so only once the
- * agent has moved on.
+ * agent has moved on. Its head folds the card to one line that says what
+ * waits, and opens it again.
  */
 export function InputRequest({ request, send, live, response }: {
   request: ChatInputRequest;
@@ -127,6 +133,12 @@ export function InputRequest({ request, send, live, response }: {
   const [drafts, setDrafts] = useState<Record<string, Draft>>(() => Object.fromEntries(questions.map((one) => [one.id, draftOf(request.answers?.[one.id])])));
   const [page, setPage] = useState(0);
   const [sent, setSent] = useState<Sent | null>(() => SENT.get(sentKey) ?? null);
+  const [folded, setFolded] = useState(() => FOLDED.has(sentKey));
+  const fold = (next: boolean): void => {
+    if (next) FOLDED.add(sentKey);
+    else FOLDED.delete(sentKey);
+    setFolded(next);
+  };
   const answers = Object.fromEntries(questions.flatMap((one) => {
     const answer = encode(one, drafts[one.id] ?? EMPTY);
     return answer === undefined ? [] : [[one.id, answer]];
@@ -166,6 +178,22 @@ export function InputRequest({ request, send, live, response }: {
     );
   }
 
+  const foldButton = (words: string): ReactElement => (
+    <button type="button" className="web-ask__fold" aria-expanded={!folded} title={t(folded ? 'sessions/question/unfold' : 'sessions/question/fold')} onClick={() => fold(!folded)}>
+      <span className="web-ask__title"><span className="web-ask__icon" aria-hidden="true">?</span>{words}</span>
+      <span className="web-ask__caret" aria-hidden="true">{folded ? EMOJIcon.caretRight : EMOJIcon.caretDown}</span>
+    </button>
+  );
+  if (folded) {
+    return (
+      <div className="web-ask" data-folded="true">
+        <div className="web-ask__head">
+          {foldButton(questions.length > 1 ? t('sessions/question/waitingMany', { count: questions.length }) : t('sessions/question/waiting'))}
+        </div>
+      </div>
+    );
+  }
+
   const question = questions[page];
   const last = page >= questions.length - 1;
   const here = question === undefined ? undefined : answers[question.id];
@@ -190,7 +218,7 @@ export function InputRequest({ request, send, live, response }: {
   return (
     <div className="web-ask" tabIndex={-1} onKeyDown={keys}>
       <div className="web-ask__head">
-        <span className="web-ask__title"><span className="web-ask__icon" aria-hidden="true">?</span>{message === undefined ? t('sessions/question/asks') : t('sessions/question/asksColon')}</span>
+        {foldButton(message === undefined ? t('sessions/question/asks') : t('sessions/question/asksColon'))}
         {questions.length > 1 ? (
           <span className="web-ask__steps" aria-label={t('sessions/question/step', { page: page + 1, total: questions.length })}>
             {questions.map((one, index) => (
