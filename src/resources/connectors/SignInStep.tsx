@@ -6,6 +6,7 @@ import { hostSaid } from '../../bridges/said.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { when } from '../sessions/turn.js';
 import { signedInOf } from './form.js';
+import './signin.css';
 
 /**
  * The sign-in under an adapter's fields: a button labelled by the host, then a

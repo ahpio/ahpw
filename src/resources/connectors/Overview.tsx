@@ -16,6 +16,7 @@ import { meOn, ownerWord } from './actions.js';
 import { inputsOf } from './inputs.js';
 import { accountOf, quotasOf } from '../../bridges/usage-meta.js';
 import { PlanPart } from '../sessions/Usage.js';
+import './overview.css';
 
 /** The capability types ahpd names, in the order their groups show, with each one's icon. Another type is shown by its name, last. */
 const KNOWN_TYPES = new Map([

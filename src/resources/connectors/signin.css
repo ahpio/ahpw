@@ -1,0 +1,31 @@
+.web-connector-form__signin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+}
+
+.web-connector-form__signin > .web-note {
+  margin: 0;
+}
+
+.web-connector-form__signin-start {
+  display: flex;
+}
+
+.web-connector-form__signed-in {
+  margin: 0;
+  color: var(--oo-color-success);
+}
+
+.web-connector-form__device-code {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}
+
+.web-connector-form__device-code > code {
+  font-family: var(--oo-font-mono, monospace);
+  font-size: 1.5em;
+  letter-spacing: 0.1em;
+  user-select: all;
+}
