@@ -46,7 +46,14 @@ export function AdapterPicker({ adapters, value, labelOf, fixed, onPick, words }
   const [focus, setFocus] = useState(0);
   const [grouping, setGrouping] = useState<AdapterGrouping>(() => readChoice(ADAPTER_GROUPING_KEY, ADAPTER_GROUPINGS, 'type'));
   const search = useRef<HTMLDivElement>(null);
-  useEffect(() => { if (choosing) search.current?.querySelector('input')?.focus(); }, [choosing]);
+  const searchName = words?.search ?? t('connectors/picker/search');
+  // scena's `TextField` takes no accessible name, so its input is given the search's words here.
+  useEffect(() => {
+    const input = search.current?.querySelector('input');
+    if (input === null || input === undefined) return;
+    input.setAttribute('aria-label', searchName);
+    if (choosing) input.focus();
+  }, [choosing, searchName]);
 
   if (!choosing) {
     if (picked === undefined) return null;
@@ -77,7 +84,7 @@ export function AdapterPicker({ adapters, value, labelOf, fixed, onPick, words }
   return (
     <div className="web-adapter-picker" onKeyDown={onKey}>
       <div ref={search} className="web-adapter-picker__search">
-        <TextField type="search" value={needle} placeholder={words?.search ?? t('connectors/picker/search')} onChange={(next) => { setNeedle(next); setFocus(0); }} />
+        <TextField type="search" value={needle} placeholder={searchName} onChange={(next) => { setNeedle(next); setFocus(0); }} />
       </div>
       <div className="web-adapter-picker__list" role="listbox" aria-label={words?.label ?? t('connectors/form/adapter')}>
         {rows.length === 0 ? <p className="web-note">{words?.none ?? t('connectors/picker/none')}</p> : groups.map((group, index) => (
