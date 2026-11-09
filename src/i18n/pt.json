@@ -190,6 +190,18 @@
       "refused": "Só endereços da web (http e https) podem abrir aqui.",
       "empty": "Abra uma página da web",
       "emptyBody": "Digite um endereço e pressione Enter. Muitos sites que pedem login não podem ser mostrados aqui, então abra esses em uma nova aba."
+    },
+    "filter": {
+      "text": "Texto em um passo",
+      "errors": "Erros",
+      "errorsOff": "Mostrar só os passos que falharam",
+      "errorsOn": "Mostrando só os passos que falharam",
+      "highlight": "Destacar",
+      "highlightOff": "Mostrando só as correspondências",
+      "highlightOn": "Destacando as correspondências",
+      "previous": "Correspondência anterior",
+      "next": "Próxima correspondência",
+      "clear": "Limpar o filtro"
     }
   },
   "close": {
@@ -1786,12 +1798,6 @@
     "raw": {
       "button": "Raw",
       "back": "Voltar ao chat",
-      "filter": "Etapas mostradas",
-      "filters": {
-        "all": "Todas as etapas",
-        "tools": "Chamadas de ferramenta",
-        "subagents": "Subagentes"
-      },
       "none": "Nenhuma etapa para mostrar.",
       "turn": "Turno {n}",
       "live": "em andamento",
@@ -1938,7 +1944,27 @@
       "mcp": "Servidores MCP · {count}",
       "noMcp": "Nenhum servidor MCP.",
       "skills": "Skills · {count}",
-      "noSkills": "Nenhuma skill."
+      "noSkills": "Nenhuma skill.",
+      "showCalls": "Mostrar as chamadas para {name}"
+    },
+    "filter": {
+      "open": "Filtrar o chat",
+      "close": "Fechar o filtro",
+      "turn": "Turno {n}",
+      "kept": "{count} de {total} passos",
+      "place": "{n} de {count}",
+      "noMatch": "Nenhuma correspondência",
+      "none": "Nenhum passo corresponde ao filtro.",
+      "older": "Os turnos anteriores não são pesquisados",
+      "types": {
+        "all": "Todos os tipos",
+        "user": "Usuário",
+        "agent": "Agente",
+        "tool": "Ferramenta",
+        "subagent": "Subagente",
+        "question": "Pergunta",
+        "notification": "Notificação"
+      }
     }
   },
   "host": {

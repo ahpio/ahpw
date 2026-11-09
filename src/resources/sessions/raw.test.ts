@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import type { ActiveTurn, BackgroundWork, ChatSummary, ResponsePart, TerminalInfo, Turn } from '@microsoft/agent-host-protocol';
-import { rawOf, shownSteps } from './raw.js';
+import { rawOf } from './raw.js';
 import { claimedTerminals, subagentCalls, subagentChats, subagentsOf } from './header.js';
 
 const tool = (id: string, toolName: string, status: string, fields: Record<string, unknown> = {}): ResponsePart =>
@@ -32,15 +32,10 @@ test('a turn keeps the state the host sent, and one in flight has none', () => {
   expect(running).not.toHaveProperty('state');
 });
 
-test('the turn in flight comes last, and a filter keeps the tool calls or only the ones that spawned a subagent chat', () => {
-  const active = turn('b', [tool('t2', 'Bash', 'completed'), tool('t3', 'Task', 'running'), tool('t4', 'Worked', 'completed', { _meta: { toolKind: 'subagent' } })]) as unknown as ActiveTurn;
+test('the turn in flight comes last', () => {
+  const active = turn('b', [tool('t2', 'Bash', 'completed')]) as unknown as ActiveTurn;
   const turns = rawOf([turn('a', [])], active);
-  const spawned = new Map([['t3', 'c://worker']]);
   expect(turns.map((one) => [one.index, one.live])).toEqual([[1, false], [2, true]]);
-  expect(shownSteps(turns[1]!.steps, 'tools', spawned).map((step) => step.call?.toolName)).toEqual(['Bash', 'Task', 'Worked']);
-  // A call the host only calls a subagent, with no chat of its own, is not one.
-  expect(shownSteps(turns[1]!.steps, 'subagents', spawned).map((step) => step.call?.toolName)).toEqual(['Task']);
-  expect(shownSteps(turns[1]!.steps, 'all', spawned)).toHaveLength(4);
 });
 
 test('subagents are the chats a tool call spawned, not hidden ones, each found from the call in its parent chat', () => {

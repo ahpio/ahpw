@@ -34,8 +34,8 @@ export function HeaderLine({ summary, chat, open, onToggle }: { summary: Session
   );
 }
 
-/** A session's info, drawn in place of its chat: its facts, then its Summary. */
-export function SessionInfo({ host, summary, session, chat, chatUri }: { host: string; summary: SessionSummary; session: SessionState | undefined; chat: ChatState | undefined; chatUri: string | undefined }): ReactElement {
+/** A session's info, drawn in place of its chat: its facts, then its Summary, whose tools each open the chat filtered to their calls. */
+export function SessionInfo({ host, summary, session, chat, chatUri, onTool }: { host: string; summary: SessionSummary; session: SessionState | undefined; chat: ChatState | undefined; chatUri: string | undefined; onTool: (name: string) => void }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
   const hostFacts = useStore<HostFacts | null>(ahpPaths(host).host);
@@ -45,7 +45,7 @@ export function SessionInfo({ host, summary, session, chat, chatUri }: { host: s
   return (
     <div className="web-head-info__panel">
       <DetailList items={sessionFacts(scena, t, { host, summary, session, chat, chatUri, hostFacts, title: false, figures: false })} columns={2} />
-      <Summary figures={figures} summary={summary} session={session} />
+      <Summary figures={figures} summary={summary} session={session} onTool={onTool} />
     </div>
   );
 }

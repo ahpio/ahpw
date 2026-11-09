@@ -37,12 +37,17 @@ function doingOf(host: string, step: Step, now: number): Doing {
   return { what: stepWaits(step) ? 'waiting' : 'working', name, ...(long === undefined ? {} : { for: long }) };
 }
 
-/** One run of tool calls and thinking, folded to a line that says what it did and does. */
-export function Activity({ group, send, turnId }: { group: Group; send: Send; turnId: string }): ReactElement {
+/**
+ * One run of tool calls and thinking, folded to a line that says what it did
+ * and does. `hits` holds the places of the parts a filter marks: the run opens
+ * when it holds one, and each is drawn marked. `opened` opens the run.
+ */
+export function Activity({ group, send, turnId, hits, opened = false }: { group: Group; send: Send; turnId: string; hits?: ReadonlySet<number>; opened?: boolean }): ReactElement {
   // Subscribed so the folded line, which translates, follows a language switch.
   useI18n();
   const host = useSessionHost();
-  const [open, setOpen] = useState(false);
+  // A person's own click; until one, the run is open as the filter and the waiting calls say.
+  const [open, setOpen] = useState<boolean | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const last = group.steps.length - 1;
   const done = group.steps.map((step, index) => stepDone(step, index === last, group));
@@ -60,7 +65,8 @@ export function Activity({ group, send, turnId }: { group: Group; send: Send; tu
 
   // A run holding a call that waits on the person stays open, so its buttons show.
   const waits = group.live && group.steps.some(stepWaits);
-  const shown = open || waits;
+  const marked = hits !== undefined && group.steps.some((step) => hits.has(step.index));
+  const shown = waits || (open ?? (opened || marked));
 
   const count = done.filter(Boolean).length;
   const until = running === undefined ? now : began.get(slot(host, running.key));
@@ -77,7 +83,7 @@ export function Activity({ group, send, turnId }: { group: Group; send: Send; tu
 
   return (
     <div className="web-activity" data-live={running !== undefined}>
-      <button type="button" className="web-activity__line" aria-expanded={shown} onClick={() => setOpen(!open)}>
+      <button type="button" className="web-activity__line" aria-expanded={shown} onClick={() => setOpen(!shown)}>
         <span>
           {line.map((piece, index) => piece.failed
             ? <span key={index} className="web-activity__failed">{piece.text}</span>
@@ -87,9 +93,12 @@ export function Activity({ group, send, turnId }: { group: Group; send: Send; tu
       </button>
       {shown ? (
         <div className="web-activity__steps">
-          {group.steps.map((step, index) => step.kind === 'tool'
-            ? <ToolCall key={step.key} call={step.call} send={send} live={!group.ended} turnId={turnId} />
-            : <Reasoning key={step.key} text={step.text} running={!done[index]} />)}
+          {group.steps.map((step, index) => {
+            const drawn = step.kind === 'tool'
+              ? <ToolCall key={step.key} call={step.call} send={send} live={!group.ended} turnId={turnId} />
+              : <Reasoning key={step.key} text={step.text} running={!done[index]} />;
+            return hits?.has(step.index) === true ? <div key={step.key} className="web-hit">{drawn}</div> : drawn;
+          })}
         </div>
       ) : null}
     </div>

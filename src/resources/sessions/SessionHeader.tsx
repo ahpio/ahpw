@@ -50,7 +50,7 @@ function useSessionTerminals(host: string, session: string, folder: string | und
  * the chat reads: the Raw view, and the calls hidden. Each of those, while
  * on, shows its icon, which turns it off.
  */
-export function SessionHeaderTools({ host, summary, session, chat, chatUri, onChat, onSubagent, raw, onRaw, calls, bot, onUsage }: {
+export function SessionHeaderTools({ host, summary, session, chat, chatUri, onChat, onSubagent, raw, onRaw, calls, bot, onUsage, filter }: {
   host: string;
   summary: SessionSummary;
   session: SessionState | undefined;
@@ -67,6 +67,8 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
   bot?: BotMark;
   /** Opens the session's Usage view, when the session says its usage. */
   onUsage?: () => void;
+  /** Whether the chat's filter is open, and its toggle, on a page that draws one. */
+  filter?: { open: boolean; onToggle: () => void };
 }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
@@ -180,6 +182,11 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
           {EMOJIcon.data}
         </button>
       ) : null}
+      {filter === undefined ? null : (
+        <button type="button" className="web-chat__tool" data-on={filter.open ? 'true' : undefined} aria-pressed={filter.open} title={t(filter.open ? 'sessions/filter/close' : 'sessions/filter/open')} onClick={filter.onToggle}>
+          {EMOJIcon.filter}
+        </button>
+      )}
       <button type="button" className="web-chat__tool" title={t('sessions/header/view')} aria-haspopup="menu" onClick={viewMenu}>
         {EMOJIcon.more}
       </button>

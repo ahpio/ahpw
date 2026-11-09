@@ -5,7 +5,8 @@ import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { JsonTree } from '../../shell/view/JsonTree.js';
 import { EMOJIcon } from '../emojis.js';
 import { Block, KIND_ICON, MARK, OutputView, ToolLine } from './Parts.js';
-import { shownSteps, type RawFilter, type RawStep, type RawTurn, type StepKind } from './raw.js';
+import { stepMatches, type StepFilter } from './filter.js';
+import type { RawStep, RawTurn, StepKind } from './raw.js';
 import { durationOf, fileOf, inputText, kindOf, outcomeOf, outputOf, startedOf } from './tool.js';
 import { tokens, when } from './turn.js';
 
@@ -19,8 +20,6 @@ const STEP_ICON: Record<Exclude<StepKind, 'tool'>, string> = {
   note: EMOJIcon.dot,
   file: EMOJIcon.file,
 };
-
-const FILTERS: readonly RawFilter[] = ['all', 'tools', 'subagents'];
 
 /** How an opened step reads: its facts and what went in and out, the object the host sent as text to copy, or as a tree to open. */
 type StepView = 'formatted' | 'raw' | 'json';
@@ -141,8 +140,10 @@ function TurnHead({ turn, view, setView }: { turn: RawTurn; view: StepView; setV
  * subagent opens its chat. The toggle is kept for every step, so a person
  * reading JSON keeps reading JSON.
  */
-function StepRow({ step, turn, subagent, onOpenChat, view, setView }: {
+function StepRow({ step, turn, subagent, onOpenChat, view, setView, hit = false }: {
   step: RawStep;
+  /** Marked as a match of the filter. */
+  hit?: boolean;
   turn: RawTurn;
   subagent: string | undefined;
   onOpenChat: (chat: string) => void;
@@ -159,7 +160,7 @@ function StepRow({ step, turn, subagent, onOpenChat, view, setView }: {
   const icon = call === undefined ? STEP_ICON[step.kind as Exclude<StepKind, 'tool'>] : KIND_ICON[kindOf(call)];
   const line = step.text.replace(/\s+/g, ' ').trim();
   return (
-    <li className="web-raw__step" data-kind={step.kind} {...(outcome === undefined ? {} : { 'data-outcome': outcome })}>
+    <li className={hit ? 'web-raw__step web-hit' : 'web-raw__step'} data-kind={step.kind} {...(outcome === undefined ? {} : { 'data-outcome': outcome })}>
       <button type="button" className="web-raw__row" aria-expanded={open} onClick={() => setOpen(!open)}>
         <span className="web-raw__n">{step.step}</span>
         <span className="web-raw__icon" aria-hidden="true">{icon}</span>
@@ -205,33 +206,29 @@ function StepRow({ step, turn, subagent, onOpenChat, view, setView }: {
 
 /**
  * The chat as its steps: each turn as a heading with its facts, then one row
- * per step, each opened in place. The filter keeps all steps, the tool calls,
- * or the calls that spawned a subagent chat (`spawned`, by tool call id).
+ * per step, each opened in place. The session's filter, while it keeps less
+ * than every step, shows only its matches or marks them; `spawned` holds the
+ * calls that started a subagent chat, by tool call id.
  */
-export function RawView({ turns, filter, onFilter, spawned, onOpenChat }: {
+export function RawView({ turns, filter, spawned, onOpenChat }: {
   turns: readonly RawTurn[];
-  filter: RawFilter;
-  onFilter: (filter: RawFilter) => void;
+  filter: StepFilter | null;
   spawned: ReadonlyMap<string, string>;
   onOpenChat: (chat: string) => void;
 }): ReactElement {
   const { t } = useI18n();
   const [view, setView] = useState<StepView>('formatted');
-  const shown = turns.map((turn) => ({ turn, steps: shownSteps(turn.steps, filter, spawned) })).filter((one) => one.steps.length > 0);
+  const shown = turns.map((turn) => {
+    const hits = new Set(filter === null ? [] : turn.steps.filter((step) => stepMatches(step, filter, spawned)));
+    return { turn, hits, steps: filter === null || filter.highlight ? turn.steps : turn.steps.filter((step) => hits.has(step)) };
+  }).filter((one) => one.steps.length > 0);
   return (
     <div className="web-raw">
-      <div className="web-raw__filters" role="radiogroup" aria-label={t('sessions/raw/filter')}>
-        {FILTERS.map((one) => (
-          <button key={one} type="button" role="radio" aria-checked={filter === one} className="web-chip" data-on={filter === one ? 'true' : undefined} onClick={() => onFilter(one)}>
-            {t(`sessions/raw/filters/${one}`)}
-          </button>
-        ))}
-      </div>
-      {shown.length === 0 ? <p className="web-note">{t('sessions/raw/none')}</p> : shown.map(({ turn, steps }) => (
+      {shown.length === 0 ? <p className="web-note">{t('sessions/raw/none')}</p> : shown.map(({ turn, steps, hits }) => (
         <section key={turn.id} className="web-raw__turn">
           <TurnHead turn={turn} view={view} setView={setView} />
           <ol className="web-raw__steps">
-            {steps.map((step) => <StepRow key={step.id} step={step} turn={turn} subagent={step.call === undefined ? undefined : spawned.get(step.call.toolCallId)} onOpenChat={onOpenChat} view={view} setView={setView} />)}
+            {steps.map((step) => <StepRow key={step.id} step={step} turn={turn} hit={filter !== null && filter.highlight && hits.has(step)} subagent={step.call === undefined ? undefined : spawned.get(step.call.toolCallId)} onOpenChat={onOpenChat} view={view} setView={setView} />)}
           </ol>
         </section>
       ))}

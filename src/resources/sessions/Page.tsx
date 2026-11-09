@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Badge, Button, Spinner, Text } from '@softov/scena/ui';
 import {
@@ -20,7 +20,10 @@ import { Part, type Send } from './Parts.js';
 import { RawView } from './RawView.js';
 import { sessionOfChannel } from '../log/wire.js';
 import { subagentCalls } from './header.js';
-import { rawOf, type RawFilter } from './raw.js';
+import { rawOf } from './raw.js';
+import { EMPTY_FILTER, filtering, matchTurn, STEP_TYPES, useKeptFilter, type StepFilter, type TurnMatch } from './filter.js';
+import { FilterBar } from '../../shell/view/FilterBar.js';
+import './turn-kept.css';
 import { SessionHeaderTools } from './SessionHeader.js';
 import { answeredHere, InputRequest } from './Question.js';
 import { Activity } from './Activity.js';
@@ -130,7 +133,7 @@ function SentAttachments({ attachments }: { attachments: readonly MessageAttachm
 }
 
 /** A finished turn renders once: the reducer keeps its object while later turns stream. */
-const TurnView = memo(function TurnView({ turn, live, send, session, origins, onSource, open = NONE, hideCalls = false }: {
+const TurnView = memo(function TurnView({ turn, live, send, session, origins, onSource, open = NONE, hideCalls = false, match, only = false, number }: {
   turn: Turn | ActiveTurn;
   live: boolean;
   send: Send;
@@ -144,42 +147,63 @@ const TurnView = memo(function TurnView({ turn, live, send, session, origins, on
   hideCalls?: boolean;
   /** Questions the session waits on that no part of this turn holds: what a page opened mid-question reads. */
   open?: readonly ChatInputRequest[];
+  /** What the chat's filter keeps of the turn, while one is on. */
+  match?: TurnMatch;
+  /** Draws only what `match` keeps, under a line with the turn's number and time; else what it keeps is marked. */
+  only?: boolean;
+  /** The turn's place in the loaded chat, from 1, for that line. */
+  number?: number;
 }): ReactElement {
   const { t } = useI18n();
   const state = 'state' in turn ? String(turn.state) : undefined;
-  const parts = turn.responseParts;
+  const all = turn.responseParts;
+  const parts = useMemo(() => (match !== undefined && only ? all.filter((_, at) => match.parts[at] === true) : all), [all, match, only]);
+  const hits = useMemo(() => (match !== undefined && !only ? new Set(match.parts.flatMap((hit, at) => (hit ? [at] : []))) : undefined), [match, only]);
+  const asked = match === undefined || !only || match.message;
+  const askHit = match !== undefined && !only && match.message;
   const ask = askOf(turn.message, session, origins);
   const attachments = turn.message.attachments === undefined || turn.message.attachments.length === 0 ? null : <SentAttachments attachments={turn.message.attachments} />;
   return (
     <article className="web-turn">
-      {ask.kind === 'hidden' ? null : ask.kind === 'notice' ? (
-        <>
+      {match === undefined || !only ? null : (
+        <div className="web-turn__kept">
+          {[t('sessions/filter/turn', { n: number ?? 0 }), ...(turn.startedAt === undefined ? [] : [when(turn.startedAt)]), t('sessions/filter/kept', { count: match.count, total: match.total })].join(' \u{00B7} ')}
+        </div>
+      )}
+      {!asked || ask.kind === 'hidden' ? null : ask.kind === 'notice' ? (
+        <div className={askHit ? 'web-hit' : undefined}>
           <Notice line={ask.line} text={turn.message.text} />
           {attachments}
-        </>
+        </div>
       ) : (
         <>
           {ask.from === undefined ? null : <FromChip from={ask.from} onSource={onSource} />}
-          <div className="web-turn__ask">
+          <div className={askHit ? 'web-turn__ask web-hit' : 'web-turn__ask'}>
             {turn.message.text}
             {attachments}
           </div>
         </>
       )}
       <div className="web-turn__answer">
-        {groupParts(parts, live, factsOf(turn).duration).map((shown) => shown.kind === 'activity'
-          ? (hideCalls && (shown.ended || !shown.steps.some(stepWaits)) ? null : <Activity key={shown.id} group={shown} send={send} turnId={turn.id} />)
-          : <Part key={shown.index} part={shown.part} send={send} live={live} turnId={turn.id} />)}
+        {groupParts(parts, live, factsOf(turn).duration).map((shown) => {
+          if (shown.kind === 'activity') {
+            return hideCalls && match === undefined && (shown.ended || !shown.steps.some(stepWaits))
+              ? null
+              : <Activity key={shown.id} group={shown} send={send} turnId={turn.id} opened={match !== undefined && only} {...(hits === undefined ? {} : { hits })} />;
+          }
+          const drawn = <Part key={shown.index} part={shown.part} send={send} live={live} turnId={turn.id} />;
+          return hits?.has(shown.index) === true ? <div key={shown.index} className="web-hit">{drawn}</div> : drawn;
+        })}
         {live ? open.map((request) => <InputRequest key={request.id} request={request} send={send} live response={undefined} />) : null}
-        {live && parts.length === 0 ? <Spinner label={t('sessions/turn/working')} /> : null}
+        {live && all.length === 0 ? <Spinner label={t('sessions/turn/working')} /> : null}
       </div>
-      <FactLine facts={factsOf(turn)} {...(state === undefined ? {} : { state })} live={live} text={replyText(turn)} />
+      {match !== undefined && only ? null : <FactLine facts={factsOf(turn)} {...(state === undefined ? {} : { state })} live={live} text={replyText(turn)} />}
     </article>
   );
 });
 
 /** Asks the host for the page of turns before the oldest one shown. */
-function OlderTurns({ host, chatUri, cursor }: { host: string; chatUri: string; cursor: string }): ReactElement {
+function OlderTurns({ host, chatUri, cursor, note }: { host: string; chatUri: string; cursor: string; note?: string }): ReactElement {
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -193,6 +217,7 @@ function OlderTurns({ host, chatUri, cursor }: { host: string; chatUri: string; 
   return (
     <div className="web-chat__older">
       <Button label={busy ? t('sessions/chat/loading') : t('sessions/chat/older')} disabled={busy} onClick={load} />
+      {note === undefined ? null : <span className="web-note">{note}</span>}
       {error === null ? null : <span className="web-note">{error}</span>}
     </div>
   );
@@ -258,9 +283,8 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const [picked, setPicked] = useState<string | undefined>(undefined);
   const chosen = picked !== undefined && (session.state?.chats ?? []).some((one) => one.resource === picked) ? picked : undefined;
   const chatUri = chosen ?? session.state?.defaultChat ?? summary?.defaultChat;
-  // The Raw view, and which steps it keeps; the page opens on the chat.
+  // The Raw view; the page opens on the chat.
   const [raw, setRaw] = useState(false);
-  const [rawFilter, setRawFilter] = useState<RawFilter>('all');
   const [callsHidden, setCallsHidden] = useState(false);
   // The Usage view, opened from the composer's readout or the header's menu.
   const [usageOpen, setUsageOpen] = useState(false);
@@ -284,6 +308,61 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
       else box.scrollTop = chatScroll.current;
     });
   }, []);
+  // The filter the chat and the Raw view share, `null` while closed, kept per session while the page is open.
+  const [filter, setFilter] = useKeptFilter(resource === undefined ? undefined : sessionKey(host, resource));
+  const active = filtering(filter) ? filter : null;
+  // Where the chat was read when a filter began to keep less, so clearing it comes back there.
+  const readAt = useRef<{ top: number; following: boolean }>({ top: 0, following: true });
+  const changeFilter = useCallback((next: StepFilter | null): void => {
+    const box = scroller.current;
+    const was = filtering(filter);
+    const now = filtering(next);
+    if (!was && now) readAt.current = { top: infoOpen ? chatScroll.current : box?.scrollTop ?? 0, following: following.current };
+    setFilter(next);
+    if (was && !now) {
+      requestAnimationFrame(() => {
+        following.current = readAt.current.following;
+        if (following.current) end.current?.scrollIntoView({ block: 'end' });
+        else if (box !== null) box.scrollTop = readAt.current.top;
+      });
+    }
+  }, [filter, setFilter, infoOpen]);
+  const toggleFilter = (): void => {
+    if (filter !== null) {
+      changeFilter(null);
+      return;
+    }
+    if (infoOpen) toggleInfo(false);
+    changeFilter(EMPTY_FILTER);
+  };
+  // A tool in the Summary: the chat, with that tool's calls only.
+  const showTool = useCallback((name: string): void => {
+    changeFilter({ ...EMPTY_FILTER, type: 'tool', text: name });
+    setInfoOpen(false);
+    requestAnimationFrame(() => end.current?.scrollIntoView({ block: 'end' }));
+  }, [changeFilter]);
+  const spawned = useMemo(
+    () => subagentCalls(chat.state?.turns ?? [], chat.state?.activeTurn, session.state?.chats ?? [], chatUri),
+    [chat.state?.turns, chat.state?.activeTurn, session.state?.chats, chatUri],
+  );
+  const matches = useMemo(() => (active === null ? undefined : (chat.state?.turns ?? []).map((turn) => matchTurn(turn, active, spawned))), [active, chat.state?.turns, spawned]);
+  const activeMatch = active === null || chat.state?.activeTurn === undefined ? undefined : matchTurn(chat.state.activeTurn, active, spawned);
+  // The match a highlight is on, by its place among the marked ones, and how many are marked.
+  const [current, setCurrent] = useState(0);
+  const [marked, setMarked] = useState(0);
+  useEffect(() => setCurrent(0), [active]);
+  useEffect(() => {
+    const hits = [...(scroller.current?.querySelectorAll('.web-hit') ?? [])];
+    for (const hit of hits) hit.removeAttribute('data-current');
+    if (hits.length !== marked) setMarked(hits.length);
+    if (hits.length === 0) return;
+    const at = ((current % hits.length) + hits.length) % hits.length;
+    hits[at]!.setAttribute('data-current', 'true');
+  });
+  useEffect(() => {
+    if (active?.highlight !== true) return;
+    scroller.current?.querySelector('.web-hit[data-current]')?.scrollIntoView({ block: 'center' });
+  }, [active, current, marked]);
   const send = useCallback<Send>((action) => {
     if (chatUri !== undefined) hostBridge(host).dispatch(chatUri, action);
   }, [chatUri]);
@@ -313,8 +392,8 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   // Grows with every delta, so the view follows text as it streams, not only new parts.
   const streamed = (chat.state?.activeTurn?.responseParts ?? []).reduce((total, part) => total + 1 + ('content' in part && typeof part.content === 'string' ? part.content.length : 0), 0);
   useEffect(() => {
-    if (following.current && !infoOpen) end.current?.scrollIntoView({ block: 'end' });
-  }, [turns, streamed, infoOpen]);
+    if (following.current && !infoOpen && active?.highlight !== true) end.current?.scrollIntoView({ block: 'end' });
+  }, [turns, streamed, infoOpen, active]);
 
   // Opening a session is reading it, as far as the unread dot is concerned.
   const unread = !beside && summary !== undefined && !isRead(summary.status);
@@ -347,19 +426,35 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
       onSubagent={openSubagent}
       raw={raw}
       onRaw={setRaw}
+      {...(mark === undefined || raw ? { filter: { open: filter !== null, onToggle: toggleFilter } } : {})}
       {...(openUsage === undefined ? {} : { onUsage: openUsage })}
       {...(mark === undefined ? { calls: { hidden: callsHidden, onHidden: setCallsHidden } } : { bot: mark })}
     />
   );
+  const kept = (matches ?? []).reduce((sum, one) => sum + one.count, activeMatch?.count ?? 0);
+  const total = (matches ?? []).reduce((sum, one) => sum + one.total, activeMatch?.total ?? 0);
+  let count = '';
+  if (active === null) count = '';
+  else if (!active.highlight) count = t('sessions/filter/kept', { count: kept, total });
+  else if (marked === 0) count = t('sessions/filter/noMatch');
+  else count = t('sessions/filter/place', { n: (((current % marked) + marked) % marked) + 1, count: marked });
+  const filterBar: ReactNode = filter === null ? null : (
+    <FilterBar
+      value={filter}
+      onChange={(next) => changeFilter(next)}
+      types={STEP_TYPES.map((one) => ({ value: one, label: t(`sessions/filter/types/${one}`) }))}
+      count={count}
+      onPrevious={() => setCurrent((at) => at - 1)}
+      onNext={() => setCurrent((at) => at + 1)}
+      onClear={() => changeFilter(EMPTY_FILTER)}
+    />
+  );
   // Drawn inside the page's session host and folder, which both pages provide.
   const rawView = raw && chat.state !== undefined ? (
-    <RawView
-      turns={rawOf(chat.state.turns, chat.state.activeTurn)}
-      filter={rawFilter}
-      onFilter={setRawFilter}
-      spawned={subagentCalls(chat.state.turns, chat.state.activeTurn, session.state?.chats ?? [], chatUri)}
-      onOpenChat={openSubagent}
-    />
+    <>
+      {mark === undefined ? null : filterBar}
+      <RawView turns={rawOf(chat.state.turns, chat.state.activeTurn)} filter={active} spawned={spawned} onOpenChat={openSubagent} />
+    </>
   ) : null;
   if (mark !== undefined) {
     // A bot's bubble draws a question or an approval as a transcript part, which reads the session's host and folder.
@@ -382,7 +477,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
         className="web-chat__turns"
         onScroll={(event) => {
           // Scrolling the info says nothing of where the chat is read.
-          if (infoOpen) return;
+          if (infoOpen || active !== null) return;
           const box = event.currentTarget;
           following.current = box.scrollHeight - box.scrollTop - box.clientHeight < 48;
         }}
@@ -397,6 +492,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
             {tools}
           </div>
           <HeaderLine summary={summary} chat={chat.state} open={infoOpen} onToggle={() => toggleInfo(!infoOpen)} />
+          {filterBar}
           {doing === undefined || doing === '' ? null : <span className="web-note web-chat__doing">{doing}</span>}
         </header>
         {lifecycle === 'creating' ? <Spinner label={t('sessions/chat/starting')} /> : null}
@@ -404,15 +500,24 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
         {session.error === null ? null : <Alert tone="danger" title={t('sessions/chat/sessionUnreadable')} message={session.error} />}
         {chat.error === null ? null : <Alert tone="danger" title={t('sessions/chat/chatUnreadable')} message={chat.error} />}
         {chatUri !== undefined && chat.state === undefined && chat.error === null ? <Spinner label={t('sessions/chat/reading')} /> : null}
-        {infoOpen ? <SessionInfo host={host} summary={summary} session={session.state} chat={chat.state} chatUri={chatUri} /> : (
+        {infoOpen ? <SessionInfo host={host} summary={summary} session={session.state} chat={chat.state} chatUri={chatUri} onTool={showTool} /> : (
           <>
-            {chatUri === undefined || chat.state?.turnsNextCursor === undefined ? null : <OlderTurns host={host} chatUri={chatUri} cursor={chat.state.turnsNextCursor} />}
+            {chatUri === undefined || chat.state?.turnsNextCursor === undefined ? null : (
+              <OlderTurns host={host} chatUri={chatUri} cursor={chat.state.turnsNextCursor} {...(active === null ? {} : { note: t('sessions/filter/older') })} />
+            )}
             <SessionHostContext.Provider value={host}>
               <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
                 {rawView ?? (
                   <>
-                    {chat.state?.turns.map((turn) => <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} origins={origins} onSource={openSource} hideCalls={callsHidden} />)}
-                    {chat.state?.activeTurn === undefined ? null : <TurnView turn={chat.state.activeTurn} live send={send} session={resource} origins={origins} onSource={openSource} open={open} hideCalls={callsHidden} />}
+                    {chat.state?.turns.map((turn, at) => {
+                      const match = matches?.[at];
+                      if (match !== undefined && !active!.highlight && match.count === 0) return null;
+                      return <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} origins={origins} onSource={openSource} hideCalls={callsHidden} {...(match === undefined ? {} : { match, only: !active!.highlight, number: at + 1 })} />;
+                    })}
+                    {chat.state?.activeTurn === undefined || (activeMatch !== undefined && !active!.highlight && activeMatch.count === 0) ? null : (
+                      <TurnView turn={chat.state.activeTurn} live send={send} session={resource} origins={origins} onSource={openSource} open={open} hideCalls={callsHidden} {...(activeMatch === undefined ? {} : { match: activeMatch, only: !active!.highlight, number: turns + 1 })} />
+                    )}
+                    {active !== null && !active.highlight && kept === 0 ? <p className="web-note">{t('sessions/filter/none')}</p> : null}
                   </>
                 )}
               </WorkspaceContext.Provider>
