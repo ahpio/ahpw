@@ -1518,7 +1518,11 @@
       "newSession": "Nova sessão",
       "newSessionHint": "Inicia outra sessão",
       "showSessions": "Mostrar sessões",
-      "openSession": "Abrir sessão"
+      "openSession": "Abrir sessão",
+      "info": "Informações da sessão",
+      "infoHint": "Mostrar as informações da sessão, ou o chat de novo",
+      "changes": "Alterações da sessão",
+      "changesHint": "Abrir os arquivos que a sessão alterou"
     },
     "upload": {
       "notAttached": "Não anexado",

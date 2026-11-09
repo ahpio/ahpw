@@ -363,6 +363,8 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
     if (active?.highlight !== true) return;
     scroller.current?.querySelector('.web-hit[data-current]')?.scrollIntoView({ block: 'center' });
   }, [active, current, marked]);
+  // What `/session.info` in the composer does.
+  const flipInfo = useCallback((): void => toggleInfo(!infoOpen), [toggleInfo, infoOpen]);
   const send = useCallback<Send>((action) => {
     if (chatUri !== undefined) hostBridge(host).dispatch(chatUri, action);
   }, [chatUri]);
@@ -548,6 +550,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           summary={summary}
           send={send}
           {...(infoOpen ? { onEngage: () => toggleInfo(false) } : {})}
+          onInfo={flipInfo}
         />
       )}
       {usageOpen ? <UsageDialog usage={usage} onClose={() => setUsageOpen(false)} /> : null}

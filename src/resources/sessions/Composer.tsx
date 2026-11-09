@@ -92,7 +92,7 @@ const FOLDED_KEY = 'ahpw.composerFolded';
  * and send, queue, steer and stop. Folded, it is one line: the `+`, the
  * draft's first line or the agent and model, what waits, and send or stop.
  */
-export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, usage, onUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false, onEngage }: {
+export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, usage, onUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false, onEngage, onInfo }: {
   /** The session's host. */
   host: string;
   chatUri: string;
@@ -123,6 +123,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   steers?: boolean;
   /** Called when the person turns to the composer: its text takes focus, or it unfolds. */
   onEngage?: () => void;
+  /** Shows the session's info in place of its chat, or the chat again: what `/session.info` does. */
+  onInfo?: () => void;
 }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
@@ -147,6 +149,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   const [shellsOpen, setShellsOpen] = useState(false);
   // Folded or not, kept per browser; it opens unfolded.
   const [folded, setFolded] = useState(() => readChoice(FOLDED_KEY, ['open', 'folded'], 'open') === 'folded');
+  // The folded line's `+` unfolds the composer with its Add context menu open.
+  const [addOnUnfold, setAddOnUnfold] = useState(false);
 
   useEffect(() => fitToText(area.current), [text]);
 
@@ -300,6 +304,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     },
     upload: () => files.current?.click(),
     changed: () => changed,
+    ...(onInfo === undefined ? {} : { toggleInfo: onInfo }),
   };
   useEffect(() => attachComposer(path, {
     models: () => api.current?.models() ?? [],
@@ -319,7 +324,10 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     type: (prefix) => api.current?.type(prefix),
     upload: () => api.current?.upload(),
     changed: () => api.current?.changed() ?? [],
-  }), [path]);
+    ...(onInfo === undefined ? {} : { toggleInfo: () => api.current?.toggleInfo?.() }),
+  // Only whether the page has an info matters here; the call itself is read through `api`.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [path, onInfo === undefined]);
 
   // Keyed on which settings exist, not their values, so a value changing does not tear down an open list.
   const shape = options.map((one) => one.key).join('\n');
@@ -357,12 +365,13 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   }
 
   const modelName = models.find((one) => one.id === model)?.name ?? model;
-  const fold = (next: boolean): void => {
+  const fold = (next: boolean, add = false): void => {
     setFolded(next);
     writeChoice(FOLDED_KEY, next ? 'folded' : 'open');
     if (next) return;
     onEngage?.();
-    focusCaret(text.length);
+    if (add) setAddOnUnfold(true);
+    else focusCaret(text.length);
   };
   // Send while nothing runs, or while a bot's chat steers with what is typed; else stop.
   const round = active === undefined || (steers && text.trim() !== '') ? (
@@ -377,7 +386,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     return (
       <div className="web-composer">
         <div className="web-composer__box web-composer__folded" data-ring={ringOf(summary.status)}>
-          <button type="button" className="web-composer__add" aria-label={t('sessions/composer/unfold')} title={t('sessions/composer/unfold')} onClick={() => fold(false)}>
+          <button type="button" className="web-composer__add" aria-label={t('sessions/context/title')} title={t('sessions/context/title')} onClick={() => fold(false, true)}>
             <svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true">
               <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
@@ -496,7 +505,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         </div>
 
         <div className="web-composer__foot">
-          <AddButton host={host} path={path} onOpenChange={setAdding} />
+          <AddButton host={host} path={path} onOpenChange={setAdding} openNow={addOnUnfold} onOpened={() => setAddOnUnfold(false)} />
           <input ref={files} type="file" multiple hidden onChange={(event) => { void upload(event.currentTarget.files); event.currentTarget.value = ''; }} />
           <div className="web-composer__chips web-composer__chips--left">
             <AgentPicker agents={agentsOfSession} chosen={customAgent} open={() => openCommand(CUSTOM_AGENT_COMMAND)} />

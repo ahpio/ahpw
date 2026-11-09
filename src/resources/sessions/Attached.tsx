@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useStore } from '@softov/scena/react';
 import { ContextMenu, Modal } from '@softov/scena/ui';
 import type { BindingPath, PickerAction } from '@softov/scena/types';
@@ -57,7 +57,14 @@ const MENU_GAP = 4;
  * `onOpenChange` lets the composer hide its `@` or `/` list while the menu is open.
  * The `+` is drawn, not typed, so it sits in the middle of its circle in any font.
  */
-export function AddButton({ host, path, onOpenChange }: { host: string; path: BindingPath; onOpenChange: (open: boolean) => void }): ReactElement {
+export function AddButton({ host, path, onOpenChange, openNow = false, onOpened }: {
+  host: string;
+  path: BindingPath;
+  onOpenChange: (open: boolean) => void;
+  /** Opens the menu as the button is drawn, as the folded composer's `+` asks; `onOpened` then clears the ask. */
+  openNow?: boolean;
+  onOpened?: () => void;
+}): ReactElement {
   const { t } = useI18n();
   const sessions = useStore<SessionSummary[]>(ahpPaths(host).sessions);
   const [menu, setMenu] = useState<{ rect: DOMRect; y: number; items: PickerAction[] } | null>(null);
@@ -93,6 +100,14 @@ export function AddButton({ host, path, onOpenChange }: { host: string; path: Bi
     setMenu({ rect, y: rect.bottom + MENU_GAP, items: contextItems(api, sessions ?? [], image) });
     onOpenChange(true);
   };
+
+  useEffect(() => {
+    if (!openNow) return;
+    onOpened?.();
+    void toggle();
+  // Only the ask: `toggle` and `onOpened` are new on every render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openNow]);
 
   return (
     <span ref={holder} className="web-composer__add-holder">

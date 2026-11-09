@@ -221,6 +221,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--oo-spacing-lg);
+  /* Room for the composer's faded top edge, so the last turn ends above it. */
+  padding-bottom: 32px;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }

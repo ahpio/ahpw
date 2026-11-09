@@ -1518,7 +1518,11 @@
       "newSession": "New session",
       "newSessionHint": "Start another session",
       "showSessions": "Show sessions",
-      "openSession": "Open session"
+      "openSession": "Open session",
+      "info": "Session info",
+      "infoHint": "Show the session's info, or the chat again",
+      "changes": "Session changes",
+      "changesHint": "Open the files the session changed"
     },
     "upload": {
       "notAttached": "Not attached",
