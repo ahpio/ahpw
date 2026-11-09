@@ -3267,11 +3267,6 @@
   gap: var(--oo-spacing-sm);
 }
 
-.web-custom-item__copies {
-  display: inline-flex;
-  gap: var(--oo-spacing-xs);
-}
-
 .web-custom-item__flags {
   margin: 0;
   color: var(--oo-color-muted);
