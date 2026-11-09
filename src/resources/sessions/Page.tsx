@@ -26,6 +26,7 @@ import { answeredHere, InputRequest } from './Question.js';
 import { Activity } from './Activity.js';
 import { groupParts, stepWaits } from './activity-parts.js';
 import { Composer } from './Composer.js';
+import { HeaderLine, SessionInfo } from './HeaderInfo.js';
 import { SessionHostContext, WorkspaceContext } from './workspace.js';
 import { ACTIVITY_TONE, activityLabel, activityOf, isRead } from './status.js';
 import { plural } from '../../i18n/locales.js';
@@ -267,6 +268,22 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const end = useRef<HTMLDivElement>(null);
   // Following the newest turn, until a person scrolls up to read an older one.
   const following = useRef(true);
+  // The session's info, shown in place of the chat, and where the chat was scrolled when it opened.
+  const [infoOpen, setInfoOpen] = useState(false);
+  const scroller = useRef<HTMLDivElement>(null);
+  const chatScroll = useRef(0);
+  const toggleInfo = useCallback((next: boolean): void => {
+    const box = scroller.current;
+    if (next) chatScroll.current = box?.scrollTop ?? 0;
+    setInfoOpen(next);
+    // After the swap is drawn: the info opens at its top, and the chat comes back where it was, or at its end when following.
+    requestAnimationFrame(() => {
+      if (box === null) return;
+      if (next) box.scrollTop = 0;
+      else if (following.current) end.current?.scrollIntoView({ block: 'end' });
+      else box.scrollTop = chatScroll.current;
+    });
+  }, []);
   const send = useCallback<Send>((action) => {
     if (chatUri !== undefined) hostBridge(host).dispatch(chatUri, action);
   }, [chatUri]);
@@ -296,8 +313,8 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   // Grows with every delta, so the view follows text as it streams, not only new parts.
   const streamed = (chat.state?.activeTurn?.responseParts ?? []).reduce((total, part) => total + 1 + ('content' in part && typeof part.content === 'string' ? part.content.length : 0), 0);
   useEffect(() => {
-    if (following.current) end.current?.scrollIntoView({ block: 'end' });
-  }, [turns, streamed]);
+    if (following.current && !infoOpen) end.current?.scrollIntoView({ block: 'end' });
+  }, [turns, streamed, infoOpen]);
 
   // Opening a session is reading it, as far as the unread dot is concerned.
   const unread = !beside && summary !== undefined && !isRead(summary.status);
@@ -361,8 +378,11 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   return (
     <div className="web-chat">
       <div
+        ref={scroller}
         className="web-chat__turns"
         onScroll={(event) => {
+          // Scrolling the info says nothing of where the chat is read.
+          if (infoOpen) return;
           const box = event.currentTarget;
           following.current = box.scrollHeight - box.scrollTop - box.clientHeight < 48;
         }}
@@ -376,6 +396,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
             </div>
             {tools}
           </div>
+          <HeaderLine summary={summary} chat={chat.state} open={infoOpen} onToggle={() => toggleInfo(!infoOpen)} />
           {doing === undefined || doing === '' ? null : <span className="web-note web-chat__doing">{doing}</span>}
         </header>
         {lifecycle === 'creating' ? <Spinner label={t('sessions/chat/starting')} /> : null}
@@ -383,18 +404,22 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
         {session.error === null ? null : <Alert tone="danger" title={t('sessions/chat/sessionUnreadable')} message={session.error} />}
         {chat.error === null ? null : <Alert tone="danger" title={t('sessions/chat/chatUnreadable')} message={chat.error} />}
         {chatUri !== undefined && chat.state === undefined && chat.error === null ? <Spinner label={t('sessions/chat/reading')} /> : null}
-        {chatUri === undefined || chat.state?.turnsNextCursor === undefined ? null : <OlderTurns host={host} chatUri={chatUri} cursor={chat.state.turnsNextCursor} />}
-        <SessionHostContext.Provider value={host}>
-          <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
-            {rawView ?? (
-              <>
-                {chat.state?.turns.map((turn) => <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} origins={origins} onSource={openSource} hideCalls={callsHidden} />)}
-                {chat.state?.activeTurn === undefined ? null : <TurnView turn={chat.state.activeTurn} live send={send} session={resource} origins={origins} onSource={openSource} open={open} hideCalls={callsHidden} />}
-              </>
-            )}
-          </WorkspaceContext.Provider>
-        </SessionHostContext.Provider>
-        {chat.state !== undefined && turns === 0 && chat.state.activeTurn === undefined ? <p className="web-note">{t('sessions/chat/empty')}</p> : null}
+        {infoOpen ? <SessionInfo host={host} summary={summary} session={session.state} chat={chat.state} chatUri={chatUri} /> : (
+          <>
+            {chatUri === undefined || chat.state?.turnsNextCursor === undefined ? null : <OlderTurns host={host} chatUri={chatUri} cursor={chat.state.turnsNextCursor} />}
+            <SessionHostContext.Provider value={host}>
+              <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
+                {rawView ?? (
+                  <>
+                    {chat.state?.turns.map((turn) => <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} origins={origins} onSource={openSource} hideCalls={callsHidden} />)}
+                    {chat.state?.activeTurn === undefined ? null : <TurnView turn={chat.state.activeTurn} live send={send} session={resource} origins={origins} onSource={openSource} open={open} hideCalls={callsHidden} />}
+                  </>
+                )}
+              </WorkspaceContext.Provider>
+            </SessionHostContext.Provider>
+            {chat.state !== undefined && turns === 0 && chat.state.activeTurn === undefined ? <p className="web-note">{t('sessions/chat/empty')}</p> : null}
+          </>
+        )}
         <div ref={end} />
       </div>
 
@@ -417,6 +442,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           backgroundWork={chat.state.backgroundWork}
           summary={summary}
           send={send}
+          {...(infoOpen ? { onEngage: () => toggleInfo(false) } : {})}
         />
       )}
       {usageOpen ? <UsageDialog usage={usage} onClose={() => setUsageOpen(false)} /> : null}

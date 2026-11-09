@@ -1,0 +1,6 @@
+/* A status row's detail: it gives way first, so the name stays whole. */
+.web-status-row__detail {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: right;
+}

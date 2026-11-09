@@ -1549,7 +1549,13 @@
       "queueHint": "Enter para poner en cola",
       "send": "Enviar",
       "sendHint": "Enter para enviar, Shift+Enter para un salto de línea",
-      "stopHint": "Esc para detener"
+      "stopHint": "Esc para detener",
+      "fold": "Plegar el compositor",
+      "unfold": "Abrir el compositor",
+      "waiting": {
+        "one": "{count} en espera",
+        "other": "{count} en espera"
+      }
     },
     "files": {
       "tab": "Archivos",
@@ -1586,7 +1592,8 @@
       },
       "from": "Origen",
       "automation": "Una ejecución de automatización",
-      "watching": "Viendo"
+      "watching": "Viendo",
+      "cached": "{count} en caché"
     },
     "grouping": {
       "none": "Sin grupos",
@@ -1897,6 +1904,42 @@
         "weeklyOf": "Semanal, {name}"
       },
       "ring": "Contexto {text}, {percent}% lleno"
+    },
+    "info": {
+      "show": "Mostrar la información de la sesión",
+      "hide": "Ocultar la información de la sesión",
+      "turnCount": {
+        "one": "{count} turno",
+        "other": "{count} turnos"
+      },
+      "workingFor": "{time} trabajando",
+      "tokenCount": "{count} tokens",
+      "turns": "Turnos",
+      "cancelled": {
+        "one": "{count} cancelado",
+        "other": "{count} cancelados"
+      },
+      "working": "Trabajando",
+      "open": "abierta {time}",
+      "tokens": "Tokens",
+      "steps": "Pasos",
+      "calls": {
+        "one": "{count} llamada a herramienta",
+        "other": "{count} llamadas a herramientas"
+      },
+      "rate": "{count} tok/s",
+      "perTurn": "Por turno",
+      "turn": "Turno {index}",
+      "turnValue": "{prompt} · {cached} en caché",
+      "tools": "Herramientas",
+      "noTools": "Aún no hay llamadas a herramientas.",
+      "failed": "{count} fallidas",
+      "denied": "{count} denegadas",
+      "more": "{count} más",
+      "mcp": "Servidores MCP · {count}",
+      "noMcp": "Sin servidores MCP.",
+      "skills": "Skills · {count}",
+      "noSkills": "Sin skills."
     }
   },
   "host": {

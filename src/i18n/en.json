@@ -1549,7 +1549,13 @@
       "queueHint": "Enter to queue",
       "send": "Send",
       "sendHint": "Enter to send, Shift+Enter for a new line",
-      "stopHint": "Esc to stop"
+      "stopHint": "Esc to stop",
+      "fold": "Fold the composer",
+      "unfold": "Open the composer",
+      "waiting": {
+        "one": "{count} waiting",
+        "other": "{count} waiting"
+      }
     },
     "files": {
       "tab": "Files",
@@ -1586,7 +1592,8 @@
       },
       "from": "From",
       "automation": "An automation run",
-      "watching": "Watching"
+      "watching": "Watching",
+      "cached": "{count} cached"
     },
     "grouping": {
       "none": "No groups",
@@ -1897,6 +1904,42 @@
         "weeklyOf": "Weekly, {name}"
       },
       "ring": "Context {text}, {percent}% full"
+    },
+    "info": {
+      "show": "Show the session's info",
+      "hide": "Hide the session's info",
+      "turnCount": {
+        "one": "{count} turn",
+        "other": "{count} turns"
+      },
+      "workingFor": "{time} working",
+      "tokenCount": "{count} tokens",
+      "turns": "Turns",
+      "cancelled": {
+        "one": "{count} cancelled",
+        "other": "{count} cancelled"
+      },
+      "working": "Working",
+      "open": "open {time}",
+      "tokens": "Tokens",
+      "steps": "Steps",
+      "calls": {
+        "one": "{count} tool call",
+        "other": "{count} tool calls"
+      },
+      "rate": "{count} tok/s",
+      "perTurn": "Per turn",
+      "turn": "Turn {index}",
+      "turnValue": "{prompt} · {cached} cached",
+      "tools": "Tools",
+      "noTools": "No tool calls yet.",
+      "failed": "{count} failed",
+      "denied": "{count} denied",
+      "more": "{count} more",
+      "mcp": "MCP servers · {count}",
+      "noMcp": "No MCP servers.",
+      "skills": "Skills · {count}",
+      "noSkills": "No skills."
     }
   },
   "host": {

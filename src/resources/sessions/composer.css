@@ -1,0 +1,47 @@
+/* The caret at the end of the composer's top row, which folds it to one line. */
+.web-composer__fold {
+  margin-left: auto;
+  padding: 0 var(--oo-spacing-xs);
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--oo-color-muted);
+  cursor: pointer;
+}
+
+.web-composer__fold:hover {
+  background: none;
+  color: var(--oo-color-text);
+}
+
+/* The folded composer: the +, its one line, what waits, and send or stop. */
+.web-composer__folded {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+}
+
+/* The draft's first line, or the agent and model, cut to the line. */
+.web-composer__folded-line {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--oo-spacing-xs) 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--oo-color-muted);
+  cursor: text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.web-composer__folded-line:hover {
+  background: none;
+}
+
+.web-composer__folded-line[data-draft='true'] {
+  color: var(--oo-color-text);
+}

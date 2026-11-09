@@ -1,0 +1,33 @@
+/* The line under a session's title, which shows the session's info in place of its chat. */
+.web-head-info__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--oo-spacing-md);
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.web-head-info__line:hover {
+  background: none;
+  color: var(--oo-color-text);
+}
+
+.web-head-info__caret {
+  font-size: var(--oo-font-size-xs);
+}
+
+/* The session's info, where the chat's turns are while it shows. */
+.web-head-info__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-lg);
+  padding-bottom: var(--oo-spacing-lg);
+}
