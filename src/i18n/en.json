@@ -190,6 +190,18 @@
       "refused": "Only web addresses (http and https) can open here.",
       "empty": "Open a web page",
       "emptyBody": "Type an address and press Enter. Many sites that need you to sign in can't be shown here, so open those in a new tab."
+    },
+    "filter": {
+      "text": "Text in a step",
+      "errors": "Errors",
+      "errorsOff": "Show only the steps that failed",
+      "errorsOn": "Showing only the steps that failed",
+      "highlight": "Highlight",
+      "highlightOff": "Showing only the matches",
+      "highlightOn": "Highlighting the matches",
+      "previous": "Previous match",
+      "next": "Next match",
+      "clear": "Clear the filter"
     }
   },
   "close": {
@@ -1438,7 +1450,7 @@
       "yourAnswer": "Your answer",
       "recommended": "Recommended",
       "other": "Other",
-      "otherPlaceholder": "Other: write your own answer",
+      "otherPlaceholder": "or say it in words",
       "declined": "Question declined",
       "unanswered": "Question not answered",
       "answered": "Question answered",
@@ -1454,7 +1466,12 @@
       "missing": {
         "one": "One question still needs an answer.",
         "other": "{count} questions still need an answer."
-      }
+      },
+      "otherPlaceholderMany": "or add an answer of your own",
+      "waiting": "Waiting on you · A question",
+      "waitingMany": "Waiting on you · {count} questions",
+      "fold": "Fold the question",
+      "unfold": "Open the question"
     },
     "attachments": {
       "see": "See {name}",
@@ -1506,7 +1523,11 @@
       "newSession": "New session",
       "newSessionHint": "Start another session",
       "showSessions": "Show sessions",
-      "openSession": "Open session"
+      "openSession": "Open session",
+      "info": "Session info",
+      "infoHint": "Show the session's info, or the chat again",
+      "changes": "Session changes",
+      "changesHint": "Open the files the session changed"
     },
     "upload": {
       "notAttached": "Not attached",
@@ -1787,12 +1808,6 @@
     "raw": {
       "button": "Raw",
       "back": "Back to the chat",
-      "filter": "Steps shown",
-      "filters": {
-        "all": "All steps",
-        "tools": "Tool calls",
-        "subagents": "Subagents"
-      },
       "none": "No steps to show.",
       "turn": "Turn {n}",
       "live": "running",
@@ -1939,7 +1954,27 @@
       "mcp": "MCP servers · {count}",
       "noMcp": "No MCP servers.",
       "skills": "Skills · {count}",
-      "noSkills": "No skills."
+      "noSkills": "No skills.",
+      "showCalls": "Show the calls to {name}"
+    },
+    "filter": {
+      "open": "Filter the chat",
+      "close": "Close the filter",
+      "turn": "Turn {n}",
+      "kept": "{count} of {total} steps",
+      "place": "{n} of {count}",
+      "noMatch": "No matches",
+      "none": "No steps match the filter.",
+      "older": "Older turns are not searched",
+      "types": {
+        "all": "All types",
+        "user": "User",
+        "agent": "Agent",
+        "tool": "Tool",
+        "subagent": "Subagent",
+        "question": "Question",
+        "notification": "Notification"
+      }
     }
   },
   "host": {

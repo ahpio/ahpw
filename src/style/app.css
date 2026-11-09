@@ -213,7 +213,7 @@
   background: linear-gradient(to bottom, var(--oo-color-surface) 0%, var(--oo-color-surface) 70%, transparent 90%);
 }
 
-/* The scroll spans the page, so the head's fade does too; the turns keep the gutter. */
+/* The scroll spans the page, so the head's fade does too; the turns keep the gutter. Its scrollbar shows while the pointer is over the chat, and keeps its room, so nothing moves when it does. */
 .web-chat__turns {
   flex: 1;
   min-height: 0;
@@ -221,6 +221,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--oo-spacing-lg);
+  /* Room for the composer's faded top edge, so the last turn ends above it. */
+  padding-bottom: 32px;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.web-chat__turns:hover {
+  scrollbar-color: var(--oo-color-border) transparent;
 }
 
 .web-chat__turns > :not(.web-chat__head) {
@@ -3259,11 +3267,6 @@
   gap: var(--oo-spacing-sm);
 }
 
-.web-custom-item__copies {
-  display: inline-flex;
-  gap: var(--oo-spacing-xs);
-}
-
 .web-custom-item__flags {
   margin: 0;
   color: var(--oo-color-muted);
@@ -4246,12 +4249,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--oo-spacing-lg);
-}
-
-.web-raw__filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--oo-spacing-xs);
 }
 
 /* How an opened step reads, as words: the one shown bright, the others dimmed, a slash between. */

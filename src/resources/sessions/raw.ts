@@ -41,10 +41,8 @@ export interface RawTurn {
   steps: RawStep[];
 }
 
-export type RawFilter = 'all' | 'tools' | 'subagents';
-
 /** The step a response part is, or null for blank text or thinking, which draws nothing. */
-function stepOf(part: ResponsePart): Pick<RawStep, 'kind' | 'text' | 'call'> | null {
+export function stepOf(part: ResponsePart): Pick<RawStep, 'kind' | 'text' | 'call'> | null {
   const held = part as unknown as Record<string, unknown>;
   switch (String(part.kind)) {
     case 'markdown':
@@ -86,10 +84,4 @@ function turnOf(turn: Turn | ActiveTurn, index: number, live: boolean): RawTurn 
 export function rawOf(turns: readonly Turn[], active: ActiveTurn | undefined): RawTurn[] {
   const out = turns.map((turn, at) => turnOf(turn, at + 1, false));
   return active === undefined ? out : [...out, turnOf(active, turns.length + 1, true)];
-}
-
-/** The steps a filter keeps: all, the tool calls, or the calls that spawned a subagent chat (`spawned`, by tool call id). */
-export function shownSteps(steps: readonly RawStep[], filter: RawFilter, spawned: ReadonlyMap<string, string>): RawStep[] {
-  if (filter === 'all') return [...steps];
-  return steps.filter((step) => step.call !== undefined && (filter === 'tools' || spawned.has(step.call.toolCallId)));
 }

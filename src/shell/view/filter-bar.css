@@ -1,0 +1,62 @@
+/* A filter's parts on one line, wrapping on a narrow screen; the text takes the room left. */
+.web-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}
+
+.web-filter-bar .oo-field {
+  margin: 0;
+}
+
+.web-filter-bar__text {
+  flex: 1 1 200px;
+  min-width: 140px;
+}
+
+.web-filter-bar__count {
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-muted);
+  white-space: nowrap;
+}
+
+.web-filter-bar__nav {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.web-filter-bar__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm, 6px);
+  background: none;
+  color: var(--oo-color-muted);
+  cursor: pointer;
+}
+
+.web-filter-bar__icon:hover {
+  background: none;
+  color: var(--oo-color-text);
+  border-color: var(--oo-color-text);
+}
+
+/* A match the filter marks, and the current one, with a bar on its side. */
+/* The outline shows on an item with a background of its own, such as a message's bubble. */
+.web-hit {
+  border-radius: 4px;
+  outline: 1px solid color-mix(in srgb, var(--oo-color-accent) 35%, transparent);
+  outline-offset: 1px;
+  background: color-mix(in srgb, var(--oo-color-accent) 6%, transparent);
+}
+
+.web-hit[data-current] {
+  outline-color: var(--oo-color-accent);
+  box-shadow: inset 3px 0 0 var(--oo-color-accent);
+  background: color-mix(in srgb, var(--oo-color-accent) 14%, transparent);
+}

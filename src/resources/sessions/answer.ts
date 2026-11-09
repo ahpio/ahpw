@@ -26,8 +26,15 @@ export function isChoice(question: ChatInputQuestion): boolean {
   return kind === 'single-select' || kind === 'multi-select' || kind === 'boolean';
 }
 
+/**
+ * True when a select question takes an answer in words beside its options:
+ * unless the host says `false`, as VS Code reads an absent flag as `true`. A
+ * yes/no question takes none.
+ */
 export function allowsOther(question: ChatInputQuestion): boolean {
-  return 'allowFreeformInput' in question && question.allowFreeformInput === true;
+  const kind = String(question.kind);
+  if (kind !== 'single-select' && kind !== 'multi-select') return false;
+  return !('allowFreeformInput' in question) || question.allowFreeformInput !== false;
 }
 
 /**

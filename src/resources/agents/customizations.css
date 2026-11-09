@@ -1,0 +1,11 @@
+/* A customization's name and its copy on the left; Edit, the description's copy and the state at the line's end, wrapping under the name on a narrow pane. */
+.web-custom-item__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}
+
+.web-custom-item__head > .web-custom-item__actions {
+  margin-left: auto;
+}

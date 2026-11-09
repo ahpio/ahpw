@@ -54,6 +54,8 @@ export interface ComposerApi {
   upload(): void;
   /** The session's changed files, to attach from Add context; none before a session exists. */
   changed(): ChangedFile[];
+  /** Shows the session's info in place of its chat, or the chat again; absent where the page has no info. */
+  toggleInfo?(): void;
 }
 
 /** A file the session changed, as Add context lists it. */
@@ -322,6 +324,31 @@ export function registerComposerCommands(scena: Scena): Disposable {
       run: (ctx) => {
         apiOf(ctx)?.stop();
         ctx.host?.closeMenu();
+      },
+    }),
+    share(scena, {
+      id: 'ahp.composer.info',
+      title: () => translate('sessions/commands/info'),
+      description: () => translate('sessions/commands/infoHint'),
+      category: 'Session',
+      shortcut: '/session.info',
+      slots: [COMPOSER_SLOT],
+      disabled: (ctx) => apiOf(ctx)?.toggleInfo === undefined,
+      run: (ctx) => {
+        ctx.host?.closeMenu();
+        apiOf(ctx)?.toggleInfo?.();
+      },
+    }),
+    share(scena, {
+      id: 'ahp.composer.changes',
+      title: () => translate('sessions/commands/changes'),
+      description: () => translate('sessions/commands/changesHint'),
+      category: 'Session',
+      shortcut: '/session.changes',
+      slots: [COMPOSER_SLOT],
+      run: (ctx) => {
+        ctx.host?.closeMenu();
+        void ctx.scena.commands.execute('ahp.showRight.changes:explorer');
       },
     }),
     share(scena, {

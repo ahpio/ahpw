@@ -190,6 +190,18 @@
       "refused": "Aquí solo se pueden abrir direcciones web (http y https).",
       "empty": "Abre una página web",
       "emptyBody": "Escribe una dirección y presiona Enter. Muchos sitios que requieren iniciar sesión no se pueden mostrar aquí; ábrelos en una pestaña nueva."
+    },
+    "filter": {
+      "text": "Texto en un paso",
+      "errors": "Errores",
+      "errorsOff": "Mostrar solo los pasos que fallaron",
+      "errorsOn": "Mostrando solo los pasos que fallaron",
+      "highlight": "Resaltar",
+      "highlightOff": "Mostrando solo las coincidencias",
+      "highlightOn": "Resaltando las coincidencias",
+      "previous": "Coincidencia anterior",
+      "next": "Coincidencia siguiente",
+      "clear": "Borrar el filtro"
     }
   },
   "close": {
@@ -1438,7 +1450,7 @@
       "yourAnswer": "Tu respuesta",
       "recommended": "Recomendada",
       "other": "Otra",
-      "otherPlaceholder": "Otra: escribe tu propia respuesta",
+      "otherPlaceholder": "o dilo con tus palabras",
       "declined": "Pregunta rechazada",
       "unanswered": "Pregunta sin responder",
       "answered": "Pregunta respondida",
@@ -1454,7 +1466,12 @@
       "missing": {
         "one": "Queda una pregunta sin responder.",
         "other": "Quedan {count} preguntas sin responder."
-      }
+      },
+      "otherPlaceholderMany": "o añade una respuesta propia",
+      "waiting": "Esperándote · Una pregunta",
+      "waitingMany": "Esperándote · {count} preguntas",
+      "fold": "Plegar la pregunta",
+      "unfold": "Abrir la pregunta"
     },
     "attachments": {
       "see": "Ver {name}",
@@ -1506,7 +1523,11 @@
       "newSession": "Nueva sesión",
       "newSessionHint": "Inicia otra sesión",
       "showSessions": "Mostrar sesiones",
-      "openSession": "Abrir sesión"
+      "openSession": "Abrir sesión",
+      "info": "Información de la sesión",
+      "infoHint": "Mostrar la información de la sesión, o el chat de nuevo",
+      "changes": "Cambios de la sesión",
+      "changesHint": "Abrir los archivos que cambió la sesión"
     },
     "upload": {
       "notAttached": "No se adjuntó",
@@ -1787,12 +1808,6 @@
     "raw": {
       "button": "Raw",
       "back": "Volver al chat",
-      "filter": "Pasos mostrados",
-      "filters": {
-        "all": "Todos los pasos",
-        "tools": "Llamadas a herramientas",
-        "subagents": "Subagentes"
-      },
       "none": "No hay pasos para mostrar.",
       "turn": "Turno {n}",
       "live": "en curso",
@@ -1939,7 +1954,27 @@
       "mcp": "Servidores MCP · {count}",
       "noMcp": "Sin servidores MCP.",
       "skills": "Skills · {count}",
-      "noSkills": "Sin skills."
+      "noSkills": "Sin skills.",
+      "showCalls": "Mostrar las llamadas a {name}"
+    },
+    "filter": {
+      "open": "Filtrar el chat",
+      "close": "Cerrar el filtro",
+      "turn": "Turno {n}",
+      "kept": "{count} de {total} pasos",
+      "place": "{n} de {count}",
+      "noMatch": "Sin coincidencias",
+      "none": "Ningún paso coincide con el filtro.",
+      "older": "Los turnos anteriores no se buscan",
+      "types": {
+        "all": "Todos los tipos",
+        "user": "Usuario",
+        "agent": "Agente",
+        "tool": "Herramienta",
+        "subagent": "Subagente",
+        "question": "Pregunta",
+        "notification": "Notificación"
+      }
     }
   },
   "host": {

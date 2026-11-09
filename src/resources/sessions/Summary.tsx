@@ -11,6 +11,7 @@ import { customizationKinds } from '../agents/kinds.js';
 import { EMOJIcon } from '../emojis.js';
 import { TOOLS_SHOWN, type SessionFigures } from './figures.js';
 import { tokens } from './turn.js';
+import './summary.css';
 
 /** How many skill names the Skills card lists before it counts the rest. */
 const SKILLS_SHOWN = 5;
@@ -32,8 +33,12 @@ function toolValue(t: (key: string, values?: Record<string, unknown>) => string,
   ].join(' \u{00B7} ');
 }
 
-/** A session's Summary: four KPIs (tokens, working time, turns and steps), then cards for the newest turns, the tools, the MCP servers and the skills. */
-export function Summary({ figures, summary, session }: { figures: SessionFigures; summary: SessionSummary; session: SessionState | undefined }): ReactElement {
+/**
+ * A session's Summary: four KPIs (tokens, working time, turns and steps), then
+ * cards for the newest turns, the tools, the MCP servers and the skills. A
+ * click on a tool calls `onTool` with its name.
+ */
+export function Summary({ figures, summary, session, onTool }: { figures: SessionFigures; summary: SessionSummary; session: SessionState | undefined; onTool: (name: string) => void }): ReactElement {
   const { t } = useI18n();
   const kinds = useMemo(() => customizationKinds(session?.customizations), [session?.customizations]);
   const servers = kinds.find((one) => one.kind === 'mcpServer')?.groups.flatMap((group) => group.items) ?? [];
@@ -79,7 +84,11 @@ export function Summary({ figures, summary, session }: { figures: SessionFigures
         <Card title={t('sessions/info/tools')}>
           {tools.length === 0 ? <Text text={t('sessions/info/noTools')} muted /> : (
             <Column gap={10}>
-              {tools.map((line) => <Progress key={line.name} label={line.name} display={toolValue(t, line)} value={line.calls} max={mostCalls} />)}
+              {tools.map((line) => (
+                <button key={line.name} type="button" className="web-summary__tool" title={t('sessions/info/showCalls', { name: line.name })} onClick={() => onTool(line.name)}>
+                  <Progress label={line.name} display={toolValue(t, line)} value={line.calls} max={mostCalls} />
+                </button>
+              ))}
               {figures.tools.length > TOOLS_SHOWN ? <Text text={t('sessions/info/more', { count: figures.tools.length - TOOLS_SHOWN })} variant="caption" muted /> : null}
             </Column>
           )}

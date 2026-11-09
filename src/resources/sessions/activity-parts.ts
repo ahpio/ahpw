@@ -12,10 +12,10 @@ import { durationOf, startedOf } from './tool.js';
  * thinking neither draw nor break one.
  */
 
-/** One step of a run. `key` is the host's own id, which stays as the turn ends. */
+/** One step of a run. `key` is the host's own id, which stays as the turn ends; `index` is its part's place in the turn. */
 export type Step =
-  | { kind: 'tool'; key: string; call: ToolCallState }
-  | { kind: 'reasoning'; key: string; text: string };
+  | { kind: 'tool'; key: string; index: number; call: ToolCallState }
+  | { kind: 'reasoning'; key: string; index: number; text: string };
 
 /** One run of steps. */
 export interface Group {
@@ -47,12 +47,12 @@ const SETTLED = new Set(['completed', 'cancelled']);
 const WAITING = new Set(['pending-confirmation', 'pending-result-confirmation', 'auth-required']);
 
 /** The step a part is, `null` for a part that breaks a run, `undefined` for one that is skipped. */
-function stepOf(part: ResponsePart): Step | null | undefined {
+function stepOf(part: ResponsePart, index: number): Step | null | undefined {
   const kind = String(part.kind);
-  if (kind === 'toolCall' && 'toolCall' in part) return { kind: 'tool', key: part.toolCall.toolCallId, call: part.toolCall };
+  if (kind === 'toolCall' && 'toolCall' in part) return { kind: 'tool', key: part.toolCall.toolCallId, index, call: part.toolCall };
   if (kind === 'reasoning' && 'content' in part) {
     const text = String(part.content);
-    return text.trim() === '' ? undefined : { kind: 'reasoning', key: 'id' in part ? String(part.id) : '', text };
+    return text.trim() === '' ? undefined : { kind: 'reasoning', key: 'id' in part ? String(part.id) : '', index, text };
   }
   if (kind === 'markdown' && 'content' in part && String(part.content).trim() === '') return undefined;
   return null;
@@ -94,7 +94,7 @@ export function groupParts(parts: readonly ResponsePart[], live: boolean, turnMs
     run = [];
   };
   parts.forEach((part, index) => {
-    const step = stepOf(part);
+    const step = stepOf(part, index);
     if (step === undefined) return;
     if (step !== null) {
       run.push(step);

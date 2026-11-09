@@ -10,23 +10,13 @@ import { frontmatterOf, withoutFrontmatter, type FileSpot, type NewKind, type St
 import { kindTitle, searchKind, type KindItem, type KindTab } from './kinds.js';
 import { customFileTitle, newCustomFile, openCustomFile } from './custom-files.js';
 import { FileModal } from './FileModal.js';
+import './customizations.css';
 
 /** A dot and its words, or a spinner while a container loads. */
 function stateMark(state: StateWord | undefined): ReactElement | null {
   if (state === undefined) return null;
   if (state.tone === 'busy') return <Spinner size={12} label={state.text} />;
   return <StatusDot tone={state.tone} label={state.text} className="web-custom__state" />;
-}
-
-/** Copy buttons for a name and a description. */
-function Copies({ name, description }: { name: string; description: string }): ReactElement {
-  const { t } = useI18n();
-  return (
-    <span className="web-custom-item__copies">
-      <CopyButton text={name} label={t('agents/customizations/copyName')} />
-      {description === '' ? null : <CopyButton text={description} label={t('agents/customizations/copyDescription')} icon={EMOJIcon.copyText} />}
-    </span>
-  );
 }
 
 /** The folder a file URI sits in, which its relative links start from. */
@@ -50,7 +40,7 @@ function FileBody({ host, uri }: { host: string; uri: string }): ReactElement {
   );
 }
 
-/** The selected customization in place of the list: its name, where it comes from, Edit and the copy buttons, its flags and description, then its Markdown file, or a button that opens any other file. */
+/** The selected customization in place of the list: its name with a copy of it, and at the end of that line Edit, a copy of its description and its state; where it comes from, its flags and description, then its Markdown file, or a button that opens any other file. */
 function ItemPane({ host, item, back, onBack, onEdit }: { host: string; item: KindItem; back: string; onBack: () => void; onEdit: (spot: FileSpot) => void }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
@@ -59,16 +49,19 @@ function ItemPane({ host, item, back, onBack, onEdit }: { host: string; item: Ki
   return (
     <div className="web-custom-item">
       <button type="button" className="web-custom-item__back" onClick={onBack}>‹ {back}</button>
-      <h3 className="web-custom-item__name">{item.label}</h3>
-      <p className="web-custom-item__path">{item.plugin === undefined ? item.path : `${item.plugin} · ${item.path}`}</p>
-      <div className="web-custom-item__actions">
-        {open !== undefined && item.editable ? <Button label={t('agents/customizations/edit')} variant="primary" onClick={() => onEdit(open)} /> : null}
-        {open !== undefined && !markdown
-          ? <Button label={t('agents/customizations/openFile')} onClick={() => void scena.commands.execute('ahp.openFile', { host, uri: open.uri, line: open.line })} />
-          : null}
-        <Copies name={item.label} description={item.description} />
-        {stateMark(item.state)}
+      <div className="web-custom-item__head">
+        <h3 className="web-custom-item__name">{item.label}</h3>
+        <CopyButton text={item.label} label={t('agents/customizations/copyName')} />
+        <div className="web-custom-item__actions">
+          {open !== undefined && item.editable ? <Button label={t('agents/customizations/edit')} variant="primary" onClick={() => onEdit(open)} /> : null}
+          {open !== undefined && !markdown
+            ? <Button label={t('agents/customizations/openFile')} onClick={() => void scena.commands.execute('ahp.openFile', { host, uri: open.uri, line: open.line })} />
+            : null}
+          {item.description === '' ? null : <CopyButton text={item.description} label={t('agents/customizations/copyDescription')} icon={EMOJIcon.copyText} />}
+          {stateMark(item.state)}
+        </div>
       </div>
+      <p className="web-custom-item__path">{item.plugin === undefined ? item.path : `${item.plugin} · ${item.path}`}</p>
       {item.flags.length === 0 ? null : <p className="web-custom-item__flags">{item.flags.join(' · ')}</p>}
       {markdown || (item.description === '' && item.line === '') ? null : <p>{item.description === '' ? item.line : item.description}</p>}
       {markdown ? <FileBody host={host} uri={open.uri} /> : null}

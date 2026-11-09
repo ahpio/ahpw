@@ -45,3 +45,11 @@
 .web-composer__folded-line[data-draft='true'] {
   color: var(--oo-color-text);
 }
+
+/* Over the chat's end: the turns pass under its faded top edge, as they pass under the head's bottom edge. */
+.web-chat > .web-composer {
+  z-index: 1;
+  margin-top: -32px;
+  padding-top: 32px;
+  background: linear-gradient(to top, var(--oo-color-surface) 0%, var(--oo-color-surface) 70%, transparent 90%);
+}

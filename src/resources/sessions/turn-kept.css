@@ -1,0 +1,14 @@
+/* Over a filtered turn: its number, its time, and how many of its steps the filter keeps. */
+.web-turn__kept {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+}
+
+.web-turn__kept::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--oo-color-border);
+}
