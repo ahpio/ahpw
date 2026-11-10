@@ -70,9 +70,28 @@ export function topOf(record: AgentRow | undefined, owner: string): AgentTop {
 }
 
 /**
+ * The names of a map's entries drawn as a password: one ending in `_KEY`,
+ * `_TOKEN`, `_SECRET` or `_PASSWORD`, or that word alone, in capitals or not.
+ * Only the form hides them; the host keeps them as written.
+ */
+export const SECRET_NAME = '(?:^|_)(?:KEY|TOKEN|SECRET|PASSWORD|key|token|secret|password)$';
+
+/** A value schema with its text drawn as a password, a union's text branches included. */
+function asPassword(schema: Bag): Bag {
+  const out: Bag = { ...schema };
+  if (schema.type === 'string') out.format = 'password';
+  for (const keyword of ['oneOf', 'anyOf'] as const) {
+    const branches = schema[keyword];
+    if (Array.isArray(branches)) out[keyword] = branches.map((branch) => asPassword(bagOf(branch)));
+  }
+  return out;
+}
+
+/**
  * A schema with each secret field, as `isSecret` says, at any depth and as a map's values,
  * drawn as a password. Where `held` keeps a secret at that field, its
- * description says it is kept.
+ * description says it is kept. A map whose values hold text draws the entries
+ * `SECRET_NAME` matches as a password too.
  */
 function passwords(schema: Bag, held: unknown, keptWord: string): Bag {
   const out: Bag = { ...schema };
@@ -85,7 +104,12 @@ function passwords(schema: Bag, held: unknown, keptWord: string): Bag {
     out.properties = Object.fromEntries(Object.entries(properties).map(([name, field]) => [name, passwords(bagOf(field), bagOf(held)[name], keptWord)]));
   }
   const values = schema.additionalProperties;
-  if (typeof values === 'object' && values !== null) out.additionalProperties = passwords(values as Bag, undefined, keptWord);
+  if (typeof values === 'object' && values !== null) {
+    const drawn = passwords(values as Bag, undefined, keptWord);
+    out.additionalProperties = drawn;
+    const hidden = asPassword(drawn);
+    if (JSON.stringify(hidden) !== JSON.stringify(drawn)) out.patternProperties = { ...bagOf(schema.patternProperties), [SECRET_NAME]: hidden };
+  }
   return out;
 }
 

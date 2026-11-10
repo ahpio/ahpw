@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EngineRow } from '../../bridges/agents.js';
 import { idFor } from '../connectors/form.js';
-import { agentConfigForForm, agentConfigForPut, agentWanted, engineSchema, hasSecrets, startOf } from './form.js';
+import { agentConfigForForm, agentConfigForPut, agentWanted, engineSchema, hasSecrets, SECRET_NAME, startOf } from './form.js';
 
 const ENGINE: EngineRow = {
   name: 'claude',
@@ -45,6 +45,7 @@ describe('engineSchema', () => {
       type: 'object',
       properties: { ANTHROPIC_API_KEY: { type: 'string', writeOnly: true, format: 'password', description: 'Kept' } },
       additionalProperties: { type: 'string' },
+      patternProperties: { [SECRET_NAME]: { type: 'string', format: 'password' } },
     });
   });
 
@@ -52,6 +53,21 @@ describe('engineSchema', () => {
     const engine: EngineRow = { ...ENGINE, schema: { type: 'object', properties: { env: { type: 'object', additionalProperties: { type: 'string', writeOnly: true } } } } };
     const drawn = engineSchema(engine, {}, 'host', 'Kept') as { properties: Record<string, Record<string, unknown>> };
     expect(drawn.properties.env?.additionalProperties).toEqual({ type: 'string', writeOnly: true, format: 'password' });
+  });
+
+  it('draws a map entry named like a secret as a password, a union\'s text included', () => {
+    const engine: EngineRow = { ...ENGINE, schema: { type: 'object', properties: { env: { type: 'object', additionalProperties: { oneOf: [{ type: 'string' }, { type: 'null' }] } } } } };
+    const drawn = engineSchema(engine, {}, 'host', 'Kept') as { properties: Record<string, Record<string, unknown>> };
+    expect(drawn.properties.env?.patternProperties).toEqual({ [SECRET_NAME]: { oneOf: [{ type: 'string', format: 'password' }, { type: 'null' }] } });
+    const secret = new RegExp(SECRET_NAME, 'u');
+    expect(['ANTHROPIC_API_KEY', 'GITHUB_TOKEN', 'CLIENT_SECRET', 'DB_PASSWORD', 'api_key', 'TOKEN'].every((name) => secret.test(name))).toBe(true);
+    expect(['BASE_URL', 'KEYBOARD', 'TOKENS', 'DEBUG'].some((name) => secret.test(name))).toBe(false);
+  });
+
+  it('adds no pattern to a map whose values hold no text', () => {
+    const engine: EngineRow = { ...ENGINE, schema: { type: 'object', properties: { flags: { type: 'object', additionalProperties: { type: 'boolean' } } } } };
+    const drawn = engineSchema(engine, {}, 'host', 'Kept') as { properties: Record<string, Record<string, unknown>> };
+    expect(drawn.properties.flags?.patternProperties).toBeUndefined();
   });
 
   it('leaves the host-only fields out of a record the host does not own, and keeps env', () => {
