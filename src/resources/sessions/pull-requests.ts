@@ -148,10 +148,19 @@ export function allMerged(pullRequests: readonly PullRequest[]): boolean {
   return pullRequests.length > 0 && pullRequests.every((one) => one.state === 'merged');
 }
 
-/** The state the chip draws for a set of pull requests: merged when all are, open when any is, else none. */
+/** The colour of the pull request glyph in each state. */
+export const STATE_COLOR: Record<PullRequestState, string> = { open: 'green', closed: 'red', merged: 'purple' };
+
+/**
+ * The state the pill draws for a set of pull requests, from the states the
+ * host sent: open when any is, merged when any is, closed when all are, and
+ * none when the host sent no state.
+ */
 export function chipState(pullRequests: readonly PullRequest[]): PullRequestState | undefined {
-  if (allMerged(pullRequests)) return 'merged';
-  return pullRequests.some((one) => one.state === 'open') ? 'open' : undefined;
+  const known = pullRequests.flatMap((one) => (one.state === undefined ? [] : [one.state]));
+  if (known.includes('open')) return 'open';
+  if (known.includes('merged')) return 'merged';
+  return known[0];
 }
 
 /** Where the sessions whose merged banner was closed are kept, per window. */

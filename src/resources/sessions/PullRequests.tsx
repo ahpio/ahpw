@@ -1,20 +1,21 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button, DetailList, Link } from '@softov/scena/ui';
+import { Alert, Button, DetailList, Icon, Link } from '@softov/scena/ui';
 import { plural } from '../../i18n/locales.js';
 import { EMOJIcon } from '../emojis.js';
 import { Pill } from './pills.js';
-import { chipState, pullRequestFacts, pullRequestName, type PullRequest } from './pull-requests.js';
+import { chipState, pullRequestFacts, pullRequestName, STATE_COLOR, type PullRequest } from './pull-requests.js';
 import './pull-requests.css';
 
 /** The composer pill of a session's pull requests: the number of one, or the count of several, its glyph in their state's colour. */
 export function PullRequestPill({ pullRequests, onOpen }: { pullRequests: readonly PullRequest[]; onOpen: () => void }): ReactElement {
   const one = pullRequests.length === 1 ? pullRequests[0] : undefined;
+  const state = chipState(pullRequests);
   return (
     <Pill
       label={one === undefined ? String(pullRequests.length) : `#${one.number}`}
       title={one === undefined ? plural('sessions/pullRequests/count', pullRequests.length) : `${pullRequestName(one)} · ${pullRequestFacts(one)}`}
-      lead={<span className="web-pulls__glyph" data-state={chipState(pullRequests)} aria-hidden="true">{EMOJIcon.pullRequest}</span>}
+      lead={<Icon name={EMOJIcon.pullRequest} size={12} {...(state === undefined ? {} : { color: STATE_COLOR[state] })} />}
       onOpen={onOpen}
     />
   );

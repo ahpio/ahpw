@@ -1,6 +1,2 @@
-/* The pull request pill's glyph, in its state's colour. */
-.web-pulls__glyph[data-state='merged'] { color: rgb(var(--oo-rgb-purple)); }
-.web-pulls__glyph[data-state='open'] { color: rgb(var(--oo-rgb-green)); }
-
 /* The merged banner's lines, one under another inside scena's Alert. */
 .web-merged .oo-alert__message { display: grid; justify-items: start; gap: var(--oo-spacing-xs); }

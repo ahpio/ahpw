@@ -8,7 +8,7 @@ import { plural } from '../../i18n/locales.js';
 import { chatAttachment, clipboardImage, fromFiles } from './attachments.js';
 import { EMOJIcon } from '../emojis.js';
 import type { CustomAgent } from './custom-agents.js';
-import { pullRequestFacts, pullRequestName, type PullRequest } from './pull-requests.js';
+import { pullRequestFacts, pullRequestName, STATE_COLOR, type PullRequest } from './pull-requests.js';
 import { PullRequestCard } from './PullRequests.js';
 import { copyText } from '../../shell/controls/CopyButton.js';
 
@@ -249,6 +249,17 @@ export const CUSTOM_AGENT_COMMAND = 'ahp.composer.agent';
 /** The command behind the pull request pill and `/session.pr`: open, copy or remove a pull request. */
 export const PULL_REQUESTS_COMMAND = 'ahp.composer.pullRequests';
 
+/** One row per pull request, its glyph in the colour of the state the host sent. */
+export function pullRequestRows(pullRequests: readonly PullRequest[], open: (host: HostCtx, pullRequest: PullRequest) => void): PickerAction[] {
+  return pullRequests.map((pullRequest) => ({
+    title: pullRequestName(pullRequest),
+    description: pullRequestFacts(pullRequest),
+    icon: EMOJIcon.pullRequest,
+    ...(pullRequest.state === undefined ? {} : { color: STATE_COLOR[pullRequest.state] }),
+    onSelect: (host: HostCtx) => open(host, pullRequest),
+  }));
+}
+
 /** The picker entries of one pull request: open it, copy its URL, and remove it when an artifact records it and the host allows. */
 export function pullRequestItems(pullRequest: PullRequest, removes: boolean, remove: (artifactId: string) => void): PickerAction[] {
   const close = (host: HostCtx): void => host.closeMenu();
@@ -397,11 +408,7 @@ export function registerComposerCommands(scena: Scena): Disposable {
         ctx.host?.pushList({
           title: translate('sessions/pullRequests/title'),
           sentinel: '/session.pr',
-          items: pullRequests.map((pullRequest) => ({
-            title: pullRequestName(pullRequest),
-            description: pullRequestFacts(pullRequest),
-            onSelect: (host: HostCtx) => host.pushList(listOf(pullRequest)),
-          })),
+          items: pullRequestRows(pullRequests, (host, pullRequest) => host.pushList(listOf(pullRequest))),
         });
       },
     }),

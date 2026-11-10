@@ -85,9 +85,13 @@ describe('allMerged and chipState', () => {
     expect(allMerged([])).toBe(false);
   });
 
-  it('draws merged, open, or nothing', () => {
+  it('draws from the states the host sent: open, then merged, then closed, else nothing', () => {
+    const closed = { ...unknown, state: 'closed' as const };
     expect(chipState([merged])).toBe('merged');
     expect(chipState([merged, open])).toBe('open');
+    expect(chipState([merged, unknown])).toBe('merged');
+    expect(chipState([closed, merged])).toBe('merged');
+    expect(chipState([closed, unknown])).toBe('closed');
     expect(chipState([unknown])).toBeUndefined();
   });
 });
