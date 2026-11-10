@@ -2,8 +2,9 @@
  * What the agent form draws and sends. The top is ahpw's own: the name, the
  * id, the owner, the description and the model. Below it, the engine's schema,
  * as the host lists it, in its own shape, each secret field a password. A
- * secret the host stores is never listed back: its field is empty, and an empty
- * one sent as `""` keeps it.
+ * secret the host stores is never listed back, only its `{ $secret }`
+ * reference. A field whose schema offers that shape shows the reference; any
+ * other shows empty. Either one sent as `""` keeps the secret.
  */
 
 import type { EnumOption, JsonSchemaObject } from '@softov/scena/ui';
@@ -69,9 +70,28 @@ export function topOf(record: AgentRow | undefined, owner: string): AgentTop {
 }
 
 /**
+ * The names of a map's entries drawn as a password: one ending in `_KEY`,
+ * `_TOKEN`, `_SECRET` or `_PASSWORD`, or that word alone, in capitals or not.
+ * Only the form hides them; the host keeps them as written.
+ */
+export const SECRET_NAME = '(?:^|_)(?:KEY|TOKEN|SECRET|PASSWORD|key|token|secret|password)$';
+
+/** A value schema with its text drawn as a password, a union's text branches included. */
+function asPassword(schema: Bag): Bag {
+  const out: Bag = { ...schema };
+  if (schema.type === 'string') out.format = 'password';
+  for (const keyword of ['oneOf', 'anyOf'] as const) {
+    const branches = schema[keyword];
+    if (Array.isArray(branches)) out[keyword] = branches.map((branch) => asPassword(bagOf(branch)));
+  }
+  return out;
+}
+
+/**
  * A schema with each secret field, as `isSecret` says, at any depth and as a map's values,
  * drawn as a password. Where `held` keeps a secret at that field, its
- * description says it is kept.
+ * description says it is kept. A map whose values hold text draws the entries
+ * `SECRET_NAME` matches as a password too.
  */
 function passwords(schema: Bag, held: unknown, keptWord: string): Bag {
   const out: Bag = { ...schema };
@@ -84,7 +104,12 @@ function passwords(schema: Bag, held: unknown, keptWord: string): Bag {
     out.properties = Object.fromEntries(Object.entries(properties).map(([name, field]) => [name, passwords(bagOf(field), bagOf(held)[name], keptWord)]));
   }
   const values = schema.additionalProperties;
-  if (typeof values === 'object' && values !== null) out.additionalProperties = passwords(values as Bag, undefined, keptWord);
+  if (typeof values === 'object' && values !== null) {
+    const drawn = passwords(values as Bag, undefined, keptWord);
+    out.additionalProperties = drawn;
+    const hidden = asPassword(drawn);
+    if (JSON.stringify(hidden) !== JSON.stringify(drawn)) out.patternProperties = { ...bagOf(schema.patternProperties), [SECRET_NAME]: hidden };
+  }
   return out;
 }
 
@@ -103,25 +128,45 @@ export function engineSchema(engine: EngineRow, held: Bag, owner: string, keptWo
   return { ...drawn, properties } as JsonSchemaObject;
 }
 
-/** A held config as the form shows it: the same shape, with each kept secret empty, since the host never lists its value. */
-export function agentConfigForForm(config: Bag): Bag {
-  const shown = (value: unknown): unknown => {
-    if (isSecretRef(value)) return '';
+/** Whether a schema node offers a `{ "$secret" }` reference as one of its shapes. */
+function offersSecretRef(schema: Bag): boolean {
+  const branches = [schema.oneOf, schema.anyOf].flatMap((one) => (Array.isArray(one) ? one : []));
+  return branches.some((branch) => Object.hasOwn(bagOf(bagOf(branch).properties), '$secret'));
+}
+
+/** The schema of the field `name` of an object schema: its own property, else the schema of any other key. */
+function fieldSchema(schema: Bag, name: string): Bag {
+  const properties = bagOf(schema.properties);
+  return Object.hasOwn(properties, name) ? bagOf(properties[name]) : bagOf(schema.additionalProperties);
+}
+
+/**
+ * A held config as the form shows it, read against the engine's `schema`: the
+ * same shape, with each kept secret as its reference where the schema offers a
+ * `{ "$secret" }` shape there, and empty elsewhere, since the host never lists
+ * its value.
+ */
+export function agentConfigForForm(config: Bag, schema: Bag): Bag {
+  const shown = (value: unknown, at: Bag): unknown => {
+    if (isSecretRef(value)) return offersSecretRef(at) ? value : '';
     if (typeof value !== 'object' || value === null || Array.isArray(value)) return value;
-    return Object.fromEntries(Object.entries(value as Bag).map(([name, one]) => [name, shown(one)]));
+    return Object.fromEntries(Object.entries(value as Bag).map(([name, one]) => [name, shown(one, fieldSchema(at, name))]));
   };
-  return shown(config) as Bag;
+  return shown(config, schema) as Bag;
 }
 
 /**
  * Each secret `held` keeps, at any depth, sent as `""` where the form leaves it
- * empty, so the host keeps it.
+ * empty or holds its own reference, so the host keeps it. A put that names the
+ * record's own secret takes it out of the vault, so the reference is never sent
+ * back as it is.
  */
 function keepSecrets(form: Bag, held: Bag): Bag {
   const out: Bag = { ...form };
   for (const [name, value] of Object.entries(held)) {
     if (isSecretRef(value)) {
-      if (out[name] === undefined || out[name] === null) out[name] = '';
+      const sent = out[name];
+      if (sent === undefined || sent === null || (isSecretRef(sent) && sent.$secret === value.$secret)) out[name] = '';
     } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       const inner = out[name];
       if (inner === undefined || (typeof inner === 'object' && inner !== null && !Array.isArray(inner))) out[name] = keepSecrets(bagOf(inner), value as Bag);
@@ -170,7 +215,7 @@ export function startOf(engine: EngineRow, at: number): { top: Pick<AgentTop, 'n
   const template = at === -1 ? undefined : engine.templates?.[at];
   return {
     top: { name: template?.name ?? '', description: template?.description ?? '', model: template?.model ?? '' },
-    config: agentConfigForForm(bagOf(template?.config)),
+    config: agentConfigForForm(bagOf(template?.config), engine.schema),
     ...(template?.icon === undefined ? {} : { icon: template.icon }),
   };
 }
