@@ -102,6 +102,7 @@ ahpw draws nothing of them today.
 ## Open points
 
 - Where the pills go. VS Code and the shells pill use the row above the box. The canvases use a button with a menu in the session header.
-- Whether a GitHub pull request or issue gets its own pill, as in VS Code. That pill shows a live state, which needs a GitHub read that ahpw does not make today.
+- Whether a GitHub issue gets its own pill, as in VS Code. A pull request has one: the pull request pill, which opens `/session.pr`.
+- Whether a pull request artifact also shows in the *Artifacts* list. VS Code shows it in its own pill only.
 - Whether a subagent's chat shows the list. VS Code shows only the *Artifacts* pill in a subagent's chat. ahpd sends no `chat`, so each chat would show the whole session's list.
 - How a `resource` entry opens. Its `uri` can have any scheme, and `ahp.openFile` opens only a host file.

@@ -39,3 +39,9 @@ test('who the connection is, when the host names one', () => {
   expect(offersOf({}).principal).toBeUndefined();
   expect('principal' in offersOf({ 'ahpd.principal': '' })).toBe(false);
 });
+
+test('whether the host removes a session artifact', () => {
+  expect(offersOf({ 'vscode.removeSessionArtifact': true }).removesArtifacts).toBe(true);
+  expect('removesArtifacts' in offersOf({ 'vscode.removeSessionArtifact': 'yes' })).toBe(false);
+  expect('removesArtifacts' in offersOf({})).toBe(false);
+});

@@ -1,4 +1,5 @@
-import type { BindingPath, Command, CommandContext, Disposable, PickerAction, Scena } from '@softov/scena/types';
+import { createElement } from 'react';
+import type { BindingPath, Command, CommandContext, Disposable, HostCtx, ListSpec, PickerAction, Scena } from '@softov/scena/types';
 import { combineDisposables, translate } from '@softov/scena';
 import { getActiveToken } from '@softov/scena/ui';
 import type { MessageAttachment, SessionConfigPropertySchema, SessionSummary } from '@microsoft/agent-host-protocol';
@@ -7,6 +8,9 @@ import { plural } from '../../i18n/locales.js';
 import { chatAttachment, clipboardImage, fromFiles } from './attachments.js';
 import { EMOJIcon } from '../emojis.js';
 import type { CustomAgent } from './custom-agents.js';
+import { pullRequestFacts, pullRequestName, type PullRequest } from './pull-requests.js';
+import { PullRequestCard } from './PullRequests.js';
+import { copyText } from '../../shell/controls/CopyButton.js';
 
 /** The slot the composer's `/` commands are offered in. */
 export const COMPOSER_SLOT = 'ahp:input/';
@@ -56,6 +60,12 @@ export interface ComposerApi {
   changed(): ChangedFile[];
   /** Shows the session's info in place of its chat, or the chat again; absent where the page has no info. */
   toggleInfo?(): void;
+  /** The session's GitHub pull requests, which `/session.pr` lists; absent before a session exists. */
+  pullRequests?(): PullRequest[];
+  /** Whether the host removes a recorded artifact, so a recorded pull request offers *Remove*. */
+  removesArtifacts?(): boolean;
+  /** Remove the artifact `artifactId` from the session. */
+  removeArtifact?(artifactId: string): void;
 }
 
 /** A file the session changed, as Add context lists it. */
@@ -236,6 +246,26 @@ export function registerOptionCommands(scena: Scena, options: readonly Option[])
 /** The command behind the Agent pill and `/agent`: the custom agent the next message names. */
 export const CUSTOM_AGENT_COMMAND = 'ahp.composer.agent';
 
+/** The command behind the pull request pill and `/session.pr`: open, copy or remove a pull request. */
+export const PULL_REQUESTS_COMMAND = 'ahp.composer.pullRequests';
+
+/** The picker entries of one pull request: open it, copy its URL, and remove it when an artifact records it and the host allows. */
+export function pullRequestItems(pullRequest: PullRequest, removes: boolean, remove: (artifactId: string) => void): PickerAction[] {
+  const close = (host: HostCtx): void => host.closeMenu();
+  const artifactId = pullRequest.artifactId;
+  return [
+    {
+      title: translate('sessions/pullRequests/openOnGitHub'),
+      description: pullRequest.repository,
+      onSelect: (host) => { close(host); window.open(pullRequest.url, '_blank', 'noopener,noreferrer'); },
+    },
+    { title: translate('sessions/pullRequests/copyUrl'), description: pullRequest.url, onSelect: (host) => { close(host); void copyText(pullRequest.url); } },
+    ...(removes && artifactId !== undefined
+      ? [{ title: translate('sessions/pullRequests/remove'), description: translate('sessions/pullRequests/removeHint'), onSelect: (host: HostCtx) => { close(host); remove(artifactId); } }]
+      : []),
+  ];
+}
+
 /** The commands every composer has: the model, the custom agent, stopping a turn, and a new session. */
 export function registerComposerCommands(scena: Scena): Disposable {
   return combineDisposables(
@@ -337,6 +367,42 @@ export function registerComposerCommands(scena: Scena): Disposable {
       run: (ctx) => {
         ctx.host?.closeMenu();
         apiOf(ctx)?.toggleInfo?.();
+      },
+    }),
+    share(scena, {
+      id: PULL_REQUESTS_COMMAND,
+      title: () => translate('sessions/pullRequests/title'),
+      description: () => translate('sessions/pullRequests/hint'),
+      category: 'Session',
+      shortcut: '/session.pr',
+      slots: [COMPOSER_SLOT],
+      disabled: (ctx) => (apiOf(ctx)?.pullRequests?.().length ?? 0) === 0,
+      run: (ctx) => {
+        const api = apiOf(ctx);
+        const pullRequests = api?.pullRequests?.() ?? [];
+        const removes = api?.removesArtifacts?.() ?? false;
+        const remove = (artifactId: string): void => api?.removeArtifact?.(artifactId);
+        const listOf = (pullRequest: PullRequest): ListSpec => ({
+          title: translate('sessions/pullRequests/title'),
+          sentinel: '/session.pr',
+          layout: 'header-list',
+          header: () => createElement(PullRequestCard, { pullRequest }),
+          items: pullRequestItems(pullRequest, removes, remove),
+        });
+        const [only] = pullRequests;
+        if (pullRequests.length === 1 && only !== undefined) {
+          ctx.host?.pushList(listOf(only));
+          return;
+        }
+        ctx.host?.pushList({
+          title: translate('sessions/pullRequests/title'),
+          sentinel: '/session.pr',
+          items: pullRequests.map((pullRequest) => ({
+            title: pullRequestName(pullRequest),
+            description: pullRequestFacts(pullRequest),
+            onSelect: (host: HostCtx) => host.pushList(listOf(pullRequest)),
+          })),
+        });
       },
     }),
     share(scena, {

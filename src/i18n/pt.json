@@ -1553,6 +1553,33 @@
       "finished": "{name} já tinha terminado.",
       "stopFailed": "Não foi possível parar {name}"
     },
+    "pullRequests": {
+      "count": {
+        "one": "{count} pull request",
+        "other": "{count} pull requests"
+      },
+      "title": "Pull requests",
+      "state": {
+        "open": "Aberto",
+        "closed": "Fechado",
+        "merged": "Mesclado"
+      },
+      "openOnGitHub": "Abrir no GitHub",
+      "copyUrl": "Copiar URL",
+      "remove": "Remover",
+      "removeFailed": "Não foi possível remover o pull request",
+      "merged": {
+        "one": "Pull request mesclado. Arquivar esta sessão?",
+        "other": "{count} pull requests mesclados. Arquivar esta sessão?"
+      },
+      "archiveNote": "Sessões arquivadas saem da lista. Mostrar arquivadas as traz de volta.",
+      "archive": "Arquivar",
+      "hint": "Abrir, copiar ou remover os pull requests da sessão",
+      "removeHint": "Tirar dos artefatos da sessão",
+      "repository": "Repositório",
+      "status": "Status",
+      "branches": "Branches"
+    },
     "composer": {
       "steering": "Redirecionando",
       "remove": "Remover",
