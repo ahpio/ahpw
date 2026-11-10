@@ -62,12 +62,12 @@ describe('engineSchema', () => {
 
 describe('the config', () => {
   it('shows the held config in its own shape, each kept secret empty', () => {
-    expect(agentConfigForForm({ apiKey: { $secret: 'x' }, env: { ANTHROPIC_API_KEY: KEPT, DEBUG: '1' } })).toEqual({ apiKey: '', env: { ANTHROPIC_API_KEY: '', DEBUG: '1' } });
+    expect(agentConfigForForm({ apiKey: { $secret: 'x' }, env: { ANTHROPIC_API_KEY: KEPT, DEBUG: '1' } }, ENGINE.schema)).toEqual({ apiKey: '', env: { ANTHROPIC_API_KEY: '', DEBUG: '1' } });
   });
 
   it('sends an untouched kept secret as "" to keep it', () => {
     const held = { apiKey: { $secret: 'x' }, env: { ANTHROPIC_API_KEY: KEPT } };
-    expect(agentConfigForPut(ENGINE, agentConfigForForm(held), held, 'host')).toEqual({ apiKey: '', env: { ANTHROPIC_API_KEY: '' } });
+    expect(agentConfigForPut(ENGINE, agentConfigForForm(held, ENGINE.schema), held, 'host')).toEqual({ apiKey: '', env: { ANTHROPIC_API_KEY: '' } });
     expect(agentConfigForPut(ENGINE, {}, held, 'host')).toEqual({ apiKey: '', env: { ANTHROPIC_API_KEY: '' } });
   });
 
@@ -77,6 +77,29 @@ describe('the config', () => {
 
   it('drops the host-only fields from a record the host does not own', () => {
     expect(agentConfigForPut(ENGINE, { extraArgs: { x: null }, env: { ANTHROPIC_API_KEY: 'k' } }, {}, 'user:ana')).toEqual({ apiKey: '', env: { ANTHROPIC_API_KEY: 'k' } });
+  });
+});
+
+describe('a kept secret where the schema offers a reference', () => {
+  const REFERENCE = (keyword: string): Record<string, unknown> => ({ type: 'object', properties: { [keyword]: { type: 'string' } }, required: [keyword], additionalProperties: false });
+  const REFS: EngineRow = {
+    ...ENGINE,
+    schema: { type: 'object', properties: { env: { type: 'object', additionalProperties: { oneOf: [{ type: 'string' }, { type: 'null' }, REFERENCE('fromEnv'), REFERENCE('$secret')] } } } },
+  };
+  const held = { env: { ANTHROPIC_API_KEY: KEPT, DEBUG: '1' } };
+
+  it('shows the reference itself', () => {
+    expect(agentConfigForForm(held, REFS.schema)).toEqual({ env: { ANTHROPIC_API_KEY: KEPT, DEBUG: '1' } });
+  });
+
+  it('sends the reference left as it is as "", so the host keeps the secret', () => {
+    expect(agentConfigForPut(REFS, agentConfigForForm(held, REFS.schema), held, 'host')).toEqual({ env: { ANTHROPIC_API_KEY: '', DEBUG: '1' } });
+  });
+
+  it('sends a reference changed to another name, or a typed value, as it is', () => {
+    const other = { $secret: 'host:anthropic' };
+    expect(agentConfigForPut(REFS, { env: { ANTHROPIC_API_KEY: other } }, held, 'host')).toEqual({ env: { ANTHROPIC_API_KEY: other } });
+    expect(agentConfigForPut(REFS, { env: { ANTHROPIC_API_KEY: 'sk-new' } }, held, 'host')).toEqual({ env: { ANTHROPIC_API_KEY: 'sk-new' } });
   });
 });
 

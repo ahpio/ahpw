@@ -2,8 +2,9 @@
  * What the agent form draws and sends. The top is ahpw's own: the name, the
  * id, the owner, the description and the model. Below it, the engine's schema,
  * as the host lists it, in its own shape, each secret field a password. A
- * secret the host stores is never listed back: its field is empty, and an empty
- * one sent as `""` keeps it.
+ * secret the host stores is never listed back, only its `{ $secret }`
+ * reference. A field whose schema offers that shape shows the reference; any
+ * other shows empty. Either one sent as `""` keeps the secret.
  */
 
 import type { EnumOption, JsonSchemaObject } from '@softov/scena/ui';
@@ -103,25 +104,45 @@ export function engineSchema(engine: EngineRow, held: Bag, owner: string, keptWo
   return { ...drawn, properties } as JsonSchemaObject;
 }
 
-/** A held config as the form shows it: the same shape, with each kept secret empty, since the host never lists its value. */
-export function agentConfigForForm(config: Bag): Bag {
-  const shown = (value: unknown): unknown => {
-    if (isSecretRef(value)) return '';
+/** Whether a schema node offers a `{ "$secret" }` reference as one of its shapes. */
+function offersSecretRef(schema: Bag): boolean {
+  const branches = [schema.oneOf, schema.anyOf].flatMap((one) => (Array.isArray(one) ? one : []));
+  return branches.some((branch) => Object.hasOwn(bagOf(bagOf(branch).properties), '$secret'));
+}
+
+/** The schema of the field `name` of an object schema: its own property, else the schema of any other key. */
+function fieldSchema(schema: Bag, name: string): Bag {
+  const properties = bagOf(schema.properties);
+  return Object.hasOwn(properties, name) ? bagOf(properties[name]) : bagOf(schema.additionalProperties);
+}
+
+/**
+ * A held config as the form shows it, read against the engine's `schema`: the
+ * same shape, with each kept secret as its reference where the schema offers a
+ * `{ "$secret" }` shape there, and empty elsewhere, since the host never lists
+ * its value.
+ */
+export function agentConfigForForm(config: Bag, schema: Bag): Bag {
+  const shown = (value: unknown, at: Bag): unknown => {
+    if (isSecretRef(value)) return offersSecretRef(at) ? value : '';
     if (typeof value !== 'object' || value === null || Array.isArray(value)) return value;
-    return Object.fromEntries(Object.entries(value as Bag).map(([name, one]) => [name, shown(one)]));
+    return Object.fromEntries(Object.entries(value as Bag).map(([name, one]) => [name, shown(one, fieldSchema(at, name))]));
   };
-  return shown(config) as Bag;
+  return shown(config, schema) as Bag;
 }
 
 /**
  * Each secret `held` keeps, at any depth, sent as `""` where the form leaves it
- * empty, so the host keeps it.
+ * empty or holds its own reference, so the host keeps it. A put that names the
+ * record's own secret takes it out of the vault, so the reference is never sent
+ * back as it is.
  */
 function keepSecrets(form: Bag, held: Bag): Bag {
   const out: Bag = { ...form };
   for (const [name, value] of Object.entries(held)) {
     if (isSecretRef(value)) {
-      if (out[name] === undefined || out[name] === null) out[name] = '';
+      const sent = out[name];
+      if (sent === undefined || sent === null || (isSecretRef(sent) && sent.$secret === value.$secret)) out[name] = '';
     } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       const inner = out[name];
       if (inner === undefined || (typeof inner === 'object' && inner !== null && !Array.isArray(inner))) out[name] = keepSecrets(bagOf(inner), value as Bag);
@@ -170,7 +191,7 @@ export function startOf(engine: EngineRow, at: number): { top: Pick<AgentTop, 'n
   const template = at === -1 ? undefined : engine.templates?.[at];
   return {
     top: { name: template?.name ?? '', description: template?.description ?? '', model: template?.model ?? '' },
-    config: agentConfigForForm(bagOf(template?.config)),
+    config: agentConfigForForm(bagOf(template?.config), engine.schema),
     ...(template?.icon === undefined ? {} : { icon: template.icon }),
   };
 }

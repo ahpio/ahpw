@@ -67,7 +67,7 @@ export function AgentForm({ host, record }: { host: string; record?: AgentRow })
   const engine = engines.find((one) => one.name === engineName);
   const heldConfig = useMemo<Bag>(() => record?.config ?? {}, [record]);
   const heldTop = useMemo<AgentTop>(() => topOf(record, me ?? 'host'), [record, me]);
-  const heldForm = useMemo<Bag>(() => agentConfigForForm(heldConfig), [heldConfig]);
+  const heldForm = useMemo<Bag>(() => agentConfigForForm(heldConfig, engine?.schema ?? {}), [heldConfig, engine]);
   const [top, setTop] = useState<AgentTop>(heldTop);
   const [config, setConfig] = useState<Bag>(heldForm);
   const [template, setTemplate] = useState(0);
