@@ -40,6 +40,7 @@ export default function UsersExplorer(): ReactElement {
         key,
         dot: 'quiet',
         dotLabel: id,
+        initials: id,
         title: id,
         group: { key: kind, label: t(kind === 'users' ? 'users/explorer/users' : 'users/explorer/roles') },
         lines: [[multi ? hostName(host) : undefined, ...lines].filter((bit) => bit !== undefined && bit !== '').join(' \u{00B7} ')].filter((line) => line !== ''),

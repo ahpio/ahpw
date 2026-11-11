@@ -3,6 +3,7 @@ import { useStore } from '@softov/scena/react';
 import { Text } from '@softov/scena/ui';
 import { resolveThemeMode, THEME_MODE_PATH, type ThemeModeChoice } from '@softov/scena/styles';
 import { pickIcon, type Icon } from '../bridges/icons.js';
+import { NameMark } from './NameMark.js';
 
 /** The system's dark preference; the theme controller follows it on the document, not in the store. */
 const DARK = '(prefers-color-scheme: dark)';
@@ -56,9 +57,11 @@ export function HostIcon({ icons, size, fallback = null, className }: {
  * A page's heading: the host's icon, or the kind's emoji, beside two lines -
  * the title, and under it the page's URI and its state.
  */
-export function PageTitle({ icons, emoji, title, onTitle, titleHint, uri, uriHint, state }: {
+export function PageTitle({ icons, emoji, initials, title, onTitle, titleHint, uri, uriHint, state }: {
   icons?: readonly Icon[] | undefined;
   emoji: string;
+  /** A name drawn as two letters in a circle of its colour, in the emoji's place. */
+  initials?: string | undefined;
   title: string;
   /** Opens what the title names; the title is then a button. */
   onTitle?: () => void;
@@ -72,9 +75,11 @@ export function PageTitle({ icons, emoji, title, onTitle, titleHint, uri, uriHin
   const heading = <Text variant="h2" text={title} />;
   return (
     <div className="web-page-title">
-      {icon === undefined
-        ? <span className="web-page-title__mark" aria-hidden="true">{emoji}</span>
-        : <img className="web-host-icon web-page-title__mark" src={icon.src} width={40} height={40} alt="" draggable={false} />}
+      {icon !== undefined
+        ? <img className="web-host-icon web-page-title__mark" src={icon.src} width={40} height={40} alt="" draggable={false} />
+        : initials !== undefined
+          ? <NameMark name={initials} size={40} className="web-page-title__mark" />
+          : <span className="web-page-title__mark" aria-hidden="true">{emoji}</span>}
       <div className="web-page-title__lines">
         {onTitle === undefined ? heading : (
           <button type="button" className="web-page-title__open" {...(titleHint === undefined ? {} : { title: titleHint })} onClick={onTitle}>{heading}</button>

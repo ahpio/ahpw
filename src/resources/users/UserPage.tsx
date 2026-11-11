@@ -97,7 +97,7 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
   );
   return (
     <div className="web-page web-form">
-      <PageTitle emoji={EMOJIcon.users} title={fresh ? t('users/commands/newUser') : id} uri={fresh ? undefined : personUri(offers, 'users', id)} />
+      <PageTitle emoji={EMOJIcon.users} initials={fresh ? undefined : id} title={fresh ? t('users/commands/newUser') : id} uri={fresh ? undefined : personUri(offers, 'users', id)} />
       {writes ? null : <p className="web-note">{t('users/notices/readOnly')}</p>}
 
       {fresh ? (

@@ -109,6 +109,7 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
     <div className="web-page web-form">
       <PageTitle
         emoji={EMOJIcon.teams}
+        initials={fresh ? undefined : (record?.title || id)}
         title={fresh ? t(domain === 'teams' ? 'teams/commands/newTeam' : 'teams/commands/newProject') : (record?.title || id)}
         uri={fresh ? undefined : personUri(offers, domain, id)}
       />
