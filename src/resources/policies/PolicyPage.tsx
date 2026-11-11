@@ -15,6 +15,7 @@ import { timeOf } from '../automations/words.js';
 import { changedKeys } from '../host/config.js';
 import { isRecordId } from '../users/form.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
+import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import { policyTab } from './state.js';
 import { limitWord, usedWord } from './words.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
@@ -166,6 +167,7 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
       <fieldset className="web-policy__form" disabled={!writes}>
         <SchemaForm
           schema={schema}
+          views={SETTINGS_VIEWS}
           value={value}
           onChange={setDraft}
           baseline={held}
