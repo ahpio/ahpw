@@ -10,7 +10,7 @@ refs:
   - "[code://src/resources/changes/Forms.tsx#L17-L33](../../../../src/resources/changes/Forms.tsx#L17-L33) - an operation's form in a `Modal`"
   - "[code://src/resources/plugins/Options.tsx](../../../../src/resources/plugins/Options.tsx) - `SchemaForm` with secrets"
   - "[code://src/shell/manage.ts#L21-L80](../../../../src/shell/manage.ts#L21-L80) - the Manage entries"
-  - https://github.com/softov/ahpd/blob/c97d8459/packages/sdk/src/tunnels/channel.ts - the row's fields and the operations of each kind
+  - https://github.com/ahpio/ahpd/blob/c97d8459/packages/sdk/src/tunnels/channel.ts - the row's fields and the operations of each kind
 ---
 
 ## Objective

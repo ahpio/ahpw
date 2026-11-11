@@ -51,7 +51,7 @@ He sent screenshots of that sheet on 2026-11-04. ahpw draws only what ahpd sends
 
 - agent-claude does not call `getContextUsage()` or the SDK's usage request.
 - agent-claude reads `rate_limit_event` only to know when a login is refused, and when to try it again.
-  That is `limited`, at https://github.com/softov/ahpd/blob/e938d751/packages/agent-claude/src/session/logins.ts#L146-L149.
+  That is `limited`, at https://github.com/ahpio/ahpd/blob/e938d751/packages/agent-claude/src/session/logins.ts#L146-L149.
   It keeps no utilization and sends none to a client.
 - Each result from Claude Code has `modelUsage`, and each model's entry has `contextWindow` and `maxOutputTokens`. ahpd does not read them.
 - So no Claude model reports a `maxContextWindow`, and the footer of a Claude session shows nothing. Only pi sets it.

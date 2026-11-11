@@ -15,8 +15,8 @@ refs:
   - "[code://src/bridges/agents.ts#L57-L74](../../src/bridges/agents.ts#L57-L74) - `AgentRow`, with its `engine` and its `state`"
   - "[code://src/i18n/en.json#L2508-L2516](../../src/i18n/en.json#L2508-L2516) - the labels of the kinds"
   - https://github.com/softov/doop/blob/4437fe4a9c4f7e685f7fbb614013fa58399913a5/packages/web/src/components/panels/PluginDetailPanel.tsx#L414-L497 - doop's `renderFactoryInstanceRow`, the reference
-  - https://github.com/softov/ahpd/blob/f419294d/packages/sdk/src/tunnels/channel.ts#L1-L10 - `x-ahpd-tunnels`, one row per tunnel with its `kind` and `status`
-  - https://github.com/softov/ahpd/blob/f419294d/packages/sdk/src/types/plugin.ts#L1486-L1495 - `PluginContracts`, the kinds a manifest names
+  - https://github.com/ahpio/ahpd/blob/f419294d/packages/sdk/src/tunnels/channel.ts#L1-L10 - `x-ahpd-tunnels`, one row per tunnel with its `kind` and `status`
+  - https://github.com/ahpio/ahpd/blob/f419294d/packages/sdk/src/types/plugin.ts#L1486-L1495 - `PluginContracts`, the kinds a manifest names
 ---
 
 # A plugin shows what it made

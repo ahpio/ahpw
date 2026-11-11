@@ -6,7 +6,7 @@ layer: "ahpw bridges and users"
 refs:
   - "[code://src/bridges/grants.ts#L95-L150](../../../../src/bridges/grants.ts#L95-L150) - the grant arithmetic that gains `heldBy`"
   - "[code://src/resources/users/RoleGrants.tsx#L32-L133](../../../../src/resources/users/RoleGrants.tsx#L32-L133) - `SubjectCard` and `RoleGrants`, which gain an optional `bound`"
-  - https://github.com/softov/ahpd/blob/44b2d62123434b89415141904c2e81bdcde664ab/packages/sdk/src/access/users.ts#L350-L370 - ahpd's `holds`, the rule `heldBy` copies
+  - https://github.com/ahpio/ahpd/blob/44b2d62123434b89415141904c2e81bdcde664ab/packages/sdk/src/access/users.ts#L350-L370 - ahpd's `holds`, the rule `heldBy` copies
 ---
 
 ## Objective

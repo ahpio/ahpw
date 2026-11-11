@@ -24,8 +24,8 @@ refs:
   - https://github.com/softov/scena/blob/main/packages/scena/src/ui/forms/SchemaForm.tsx - the form whose two modes become a list of views
   - https://github.com/softov/scena/blob/main/packages/scena/test/ui/SchemaForm.test.tsx - the JSON behaviour the views must keep
   - https://github.com/softov/scena/blob/main/packages/scena/src/ui/overlay/Popup.tsx - the anchored popup for the field menu
-  - https://github.com/softov/ahpd/blob/main/packages/server/src/rootconfig.ts - the daemon's keys, the plugin keys, `null` takes a key back
-  - https://github.com/softov/ahpd/blob/main/packages/sdk/src/host/root.ts - the host's own keys and `_meta["ahpd.restartNeeded"]`
+  - https://github.com/ahpio/ahpd/blob/main/packages/server/src/rootconfig.ts - the daemon's keys, the plugin keys, `null` takes a key back
+  - https://github.com/ahpio/ahpd/blob/main/packages/sdk/src/host/root.ts - the host's own keys and `_meta["ahpd.restartNeeded"]`
 ---
 
 ## Goal

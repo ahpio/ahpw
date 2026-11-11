@@ -4,7 +4,7 @@ status: accepted
 date: 2026-10-19
 refs:
   - "[code://src/resources/host/config.ts](../../src/resources/host/config.ts) - `changedKeys`, which sends only keys still in the edited value"
-  - https://github.com/softov/ahpd/blob/main/packages/server/src/rootconfig.ts - "`null` is how a client says a key is taken back, as it is everywhere else on the root channel"
+  - https://github.com/ahpio/ahpd/blob/main/packages/server/src/rootconfig.ts - "`null` is how a client says a key is taken back, as it is everywhere else on the root channel"
 ---
 
 ## Context

@@ -7,7 +7,7 @@ refs:
   - "[code://src/resources/computers/index.ts](../../../../src/resources/computers/index.ts) - the section, explorer, page and commands to copy"
   - "[code://src/bridges/client-ids.ts](../../../../src/bridges/client-ids.ts) - this page's client id for each host"
   - "[code://src/shell/manage.ts#L21-L80](../../../../src/shell/manage.ts#L21-L80) - the Manage entries"
-  - https://github.com/softov/ahpd/blob/c97d8459/packages/sdk/src/clients/channel.ts - the row's fields, the counters and `drop`
+  - https://github.com/ahpio/ahpd/blob/c97d8459/packages/sdk/src/clients/channel.ts - the row's fields, the counters and `drop`
 ---
 
 ## Objective
