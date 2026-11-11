@@ -107,7 +107,7 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
       ) : null}
 
       {section(EMOJIcon.roles, t('users/user/roles'), roleIds.length === 0 ? <span className="web-input__hint">{t('users/user/noRoles')}</span> : (
-        <RolePills held={shown.roles} offered={roleIds.filter((one) => !shown.roles.includes(one))} writes={writes} onChange={(roles) => set({ roles })} />
+        <RolePills held={shown.roles} offered={roleIds.filter((one) => !shown.roles.includes(one))} writes={writes} onChange={(roles) => set({ roles })} onOpen={(role) => void scena.commands.execute('ahp.openRole', { host, id: role })} />
       ))}
 
       {section(EMOJIcon.teams, t('users/user/memberships'), (
@@ -118,6 +118,7 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
           projects={projects.state?.records.map((one) => one.record) ?? []}
           writes={writes}
           onChange={set}
+          onOpen={(domain, target) => void scena.commands.execute(domain === 'teams' ? 'ahp.openTeam' : 'ahp.openProject', { host, id: target })}
         />
       ))}
 

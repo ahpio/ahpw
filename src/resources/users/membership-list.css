@@ -1,0 +1,14 @@
+/* A team's or a project's name on a membership row, which opens its page. */
+.web-memberships__open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.web-memberships__open:hover,
+.web-memberships__open:focus-visible {
+  text-decoration: underline;
+}

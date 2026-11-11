@@ -4,6 +4,7 @@ import { Button, Chip } from '@softov/scena/ui';
 import type { Named } from '../../bridges/people.js';
 import { membershipOf, membershipParts, projectChoices, titled } from './memberships.js';
 import { PickTwo } from './PickTwo.js';
+import './membership-list.css';
 
 interface MembershipListProps {
   memberships: readonly string[];
@@ -12,15 +13,18 @@ interface MembershipListProps {
   projects: readonly Named[];
   writes: boolean;
   onChange: (change: { memberships?: string[]; primary?: string }) => void;
+  /** Opens a team's or a project's page from its name. */
+  onOpen: (domain: 'teams' | 'projects', id: string) => void;
 }
 
 /**
  * A person's teams and projects: one row a membership, its team then which of
  * the team's projects, marked primary or not; and *Add to a team*, then
  * *Which projects*, to add one (decision: a user's page lists memberships by
- * team, as ahpapp does).
+ * team, as ahpapp does). The team's name opens the team, and a project named
+ * after it opens the project.
  */
-export function MembershipList({ memberships, primary, teams, projects, writes, onChange }: MembershipListProps): ReactElement {
+export function MembershipList({ memberships, primary, teams, projects, writes, onChange, onOpen }: MembershipListProps): ReactElement {
   const { t } = useI18n();
   const scopeWord = (project: string | null): string => scopeTitle(t, projects, project);
   const drop = (membership: string): void => onChange({
@@ -39,8 +43,13 @@ export function MembershipList({ memberships, primary, teams, projects, writes, 
             return (
               <li key={membership} className="web-memberships__row">
                 <span className="web-memberships__name">
-                  {titled(teams, team)}
-                  <span className="web-memberships__scope">{` \u{00B7} ${scopeWord(project)}`}</span>
+                  <button type="button" className="web-memberships__open" onClick={() => onOpen('teams', team)}>{titled(teams, team)}</button>
+                  <span className="web-memberships__scope">
+                    {' \u{00B7} '}
+                    {project === null || project === '*'
+                      ? scopeWord(project)
+                      : <button type="button" className="web-memberships__open" onClick={() => onOpen('projects', project)}>{scopeWord(project)}</button>}
+                  </span>
                 </span>
                 {isPrimary || writes ? (
                   <Chip
