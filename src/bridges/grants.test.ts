@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { dropSubject, grantCatalog, operationState, reached, subjectInfo, subjectsOf, toggleGroup, toggleOperation } from './grants.js';
+import { boundInfo, boundSubjects, dropSubject, grantCatalog, heldBy, operationState, reached, subjectInfo, subjectsOf, toggleGroup, toggleOperation } from './grants.js';
 
 const BOT = { title: 'Bot', description: 'A bot.', operations: ['get', 'list', 'resolve', 'watch', 'put', 'delete'], groups: { read: ['get', 'list', 'resolve', 'watch'], write: ['put', 'delete'] } };
 const catalog = grantCatalog({ 'ahpd.grants': { session: { title: 'Sessions', description: 'S.', operations: ['list', 'state', 'create'], groups: { read: ['list', 'state'], write: ['create'] } }, bot: BOT, broken: 3 } });
@@ -39,4 +39,36 @@ test('a group is given or taken away, and a subject goes with all its grants', (
   expect(toggleGroup(['bot:list'], 'bot', 'write')).toEqual(['bot:list', 'bot:write']);
   expect(toggleGroup(['bot:write'], 'bot', 'write')).toEqual([]);
   expect(dropSubject(['bot:list', 'session:*', 'bot:write'], 'bot')).toEqual(['session:*']);
+});
+
+const host = grantCatalog({ 'ahpd.grants': {
+  session: { title: 'Sessions', operations: ['list', 'create', 'dispose'], groups: { read: ['list'], write: ['create', 'dispose'] } },
+  chat: { title: 'Chats', operations: ['turns', 'send', 'cancel'], groups: { read: ['turns'], write: ['send', 'cancel'] } },
+  usage: { title: 'Usage', operations: ['get', 'records'], groups: { read: ['get', 'records'], write: [] } },
+} });
+
+test('a bound holds a grant as ahpd\'s holds does', () => {
+  expect(heldBy(['session:*'], 'session:list', host)).toBe(true);
+  expect(heldBy(['session:*'], 'session:write', host)).toBe(true);
+  expect(heldBy(['session:write'], 'session:create', host)).toBe(true);
+  expect(heldBy(['session:write'], 'session:list', host)).toBe(false);
+  expect(heldBy(['*:read'], 'usage:get', host)).toBe(true);
+  expect(heldBy(['*:read'], 'chat:send', host)).toBe(false);
+  expect(heldBy(['*:*'], 'anything:at-all', host)).toBe(true);
+  // A chat's groups are the session's.
+  expect(heldBy(['session:write'], 'chat:send', host)).toBe(true);
+  expect(heldBy(['session:read'], 'chat:turns', host)).toBe(true);
+  // A group is held by itself or a wildcard, never by its operations one by one.
+  expect(heldBy(['chat:send', 'chat:cancel'], 'chat:write', host)).toBe(false);
+});
+
+test('a bound offers the subjects it holds an operation of, in the catalog\'s order', () => {
+  expect(boundSubjects(['*:*'], host)).toEqual(['*', 'session', 'chat', 'usage']);
+  expect(boundSubjects(['usage:get', 'session:*'], host)).toEqual(['session', 'usage']);
+  expect(boundSubjects(['session:read'], host)).toEqual(['session', 'chat']);
+});
+
+test('a bound subject keeps only the operations the bound holds', () => {
+  expect(boundInfo(host.chat!, 'chat', ['session:write'], host)).toMatchObject({ operations: ['send', 'cancel'], groups: { read: [], write: ['send', 'cancel'] } });
+  expect(boundInfo(host.session!, 'session', ['session:*'], host)).toEqual(host.session);
 });

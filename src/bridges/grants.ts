@@ -150,3 +150,39 @@ export function toggleGroup(grants: readonly string[], subject: string, group: G
 export function dropSubject(grants: readonly string[], subject: string): Grant[] {
   return (grants as Grant[]).filter((one) => grantParts(one).subject !== subject);
 }
+
+/**
+ * Whether a set of grants holds one, by ahpd's rule (`holds` in `@ahpd/sdk`'s
+ * `users.ts`), which the mint and every use check: the grant itself, `*:*`, a
+ * wildcard in either half, or the operation's group, where a chat's groups are
+ * the session's too. A group grant is held only by that group or a wildcard,
+ * never by its operations one by one.
+ */
+export function heldBy(bound: readonly string[], wanted: string, catalog: GrantCatalog): boolean {
+  if (bound.includes(wanted) || bound.includes(grant(EVERY, EVERY))) return true;
+  const { subject, operation } = grantParts(wanted);
+  const info = catalog[subject];
+  const group = (info === undefined ? undefined : groupOf(info, operation))
+    ?? (GRANT_GROUPS.includes(operation as GrantGroup) ? operation as GrantGroup : undefined);
+  if (group !== undefined) {
+    if (bound.includes(grant(subject, group)) || bound.includes(grant(EVERY, group))) return true;
+    if (subject === 'chat' && bound.includes(grant('session', group))) return true;
+  }
+  return bound.includes(grant(EVERY, operation)) || bound.includes(grant(subject, EVERY));
+}
+
+/** The catalog's subjects a bound holds an operation of, in its order, `*` first when the bound names a wildcard subject. */
+export function boundSubjects(bound: readonly string[], catalog: GrantCatalog): string[] {
+  const every = bound.some((one) => grantParts(one).subject === EVERY) ? [EVERY] : [];
+  return [...every, ...Object.keys(catalog).filter((subject) => catalog[subject]!.operations.some((operation) => heldBy(bound, grant(subject, operation), catalog)))];
+}
+
+/** A subject as a bound lets it be granted: only the operations the bound holds, in their groups. */
+export function boundInfo(info: GrantSubject, subject: string, bound: readonly string[], catalog: GrantCatalog): GrantSubject {
+  const held = (operation: string): boolean => heldBy(bound, grant(subject, operation), catalog);
+  return {
+    ...info,
+    operations: info.operations.filter(held),
+    groups: { read: info.groups.read.filter(held), write: info.groups.write.filter(held) },
+  };
+}

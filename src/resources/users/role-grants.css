@@ -1,0 +1,7 @@
+/* *Add subject*, with its note beside it when there is one. */
+.web-grants__add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}

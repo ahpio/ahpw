@@ -1,7 +1,7 @@
 ---
 title: A key is limited to chosen operations
 domain: organization
-status: planned
+status: active
 priority: medium
 created: 2026-11-11
 revalidated: 2026-11-11
@@ -77,8 +77,8 @@ Keys or UserPage -> MintForm (host, user?, grants = the person's role grants)
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The grant cards take a bound](task-01-the-grant-cards-take-a-bound.md) | todo | - |
-| [02 - A new key picks its grants on cards](task-02-a-new-key-picks-grants-on-cards.md) | todo | 01 |
+| [01 - The grant cards take a bound](task-01-the-grant-cards-take-a-bound.md) | implemented | - |
+| [02 - A new key picks its grants on cards](task-02-a-new-key-picks-grants-on-cards.md) | implemented | 01 |
 
 ## Risks and tradeoffs
 
@@ -87,15 +87,15 @@ Keys or UserPage -> MintForm (host, user?, grants = the person's role grants)
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-the-grant-cards-take-a-bound.md](task-01-the-grant-cards-take-a-bound.md).
+- **Done so far:** both tasks are implemented, as [implemented.md](implemented.md) says.
+- **Next action:** Softov reviews the PR.
 - **Open questions:** none.
 - **Watch out for:** a split of an implied operation must stay inside the bound. Splitting `session:*` gives back only groups and operations the person holds.
 
 ## Final verification checklist
 
-- [ ] With `session:*`, a key can be minted with `session:read` alone, and the host accepts it.
-- [ ] With `*:*`, *Add subject* lists every subject of the catalog.
-- [ ] An operation the person does not hold shows on no card.
-- [ ] The role page draws and edits as before.
-- [ ] The form shows at 1400 and 390 px.
+- [x] With `session:*`, a key can be minted with `session:read` alone, and the host accepts it.
+- [x] With `*:*`, *Add subject* lists every subject of the catalog.
+- [x] An operation the person does not hold shows on no card.
+- [x] The role page draws and edits as before.
+- [x] The form shows at 1400 and 390 px.
