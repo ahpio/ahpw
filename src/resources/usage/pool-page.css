@@ -1,0 +1,15 @@
+/* The pool page's reload, turning while the page reads. */
+.web-spend__reload {
+  display: inline-block;
+}
+
+.web-spend__reload[data-busy='true'] {
+  color: var(--oo-color-accent);
+  animation: web-turn 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .web-spend__reload[data-busy='true'] {
+    animation: none;
+  }
+}

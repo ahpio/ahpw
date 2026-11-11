@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { DetailList, Spinner, Text } from '@softov/scena/ui';
+import { Button, DetailList, Spinner, Text } from '@softov/scena/ui';
 import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { personUri } from '../../bridges/people.js';
@@ -13,11 +13,20 @@ import { monthSoFar, USAGE_ASKED } from './state.js';
 import { UsageRecords } from './Records.js';
 import { totalLine } from './words.js';
 import { PageTitle } from '../../shell/HostIcon.js';
+import './pool-page.css';
 
-/** What a pool's range reads: its total and the records behind it. */
+/** What a pool's range reads: its total and the records behind it, for the range and reload they were read for. */
 interface Ranged {
   total: UsageTotal;
   records: UsageEntry[];
+  range: Required<DayRange>;
+  asked: number;
+}
+
+/** A pool's periods, for the reload they were read for. */
+interface Periods {
+  held: UsagePeriods;
+  asked: number;
 }
 
 /** The command that opens an owner's page, and the icon its list shows it with. */
@@ -38,29 +47,33 @@ export default function UsagePoolPage({ host, pool }: { host: string; pool: stri
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
   const asked = useStore<number>(USAGE_ASKED) ?? 0;
   const [range, setRange] = useState<Required<DayRange>>(() => monthSoFar(new Date()));
-  const [periods, setPeriods] = useState<UsagePeriods | null>(null);
+  const [read, setRead] = useState<Periods | null>(null);
   const [ranged, setRanged] = useState<Ranged | null>(null);
   const [error, setError] = useState<string | null>(null);
   const said = (caught: unknown): string => (caught instanceof Error ? caught.message : String(caught));
 
   useEffect(() => {
     let live = true;
-    usagePeriods(host, offers, pool).then((held) => { if (live) setPeriods(held); }, (caught: unknown) => { if (live) setError(said(caught)); });
+    usagePeriods(host, offers, pool).then((held) => { if (live) setRead({ held, asked }); }, (caught: unknown) => { if (live) setError(said(caught)); });
     return () => { live = false; };
   }, [host, offers, pool, asked]);
 
   useEffect(() => {
     let live = true;
-    setRanged(null);
+    // A reload keeps what the range showed until the new read lands; another range starts over.
+    setRanged((held) => (held?.range === range ? held : null));
     Promise.all([usageRange(host, offers, pool, range), usageRecords(host, offers, pool, range)]).then(
-      ([total, records]) => { if (live) setRanged({ total, records }); },
+      ([total, records]) => { if (live) setRanged({ total, records, range, asked }); },
       (caught: unknown) => { if (live) setError(said(caught)); },
     );
     return () => { live = false; };
   }, [host, offers, pool, range, asked]);
 
   if (error !== null) return <PageAlert tone="danger" title={t('usage/notices/none')} message={error} />;
-  if (periods === null) return <Spinner label={t('usage/notices/reading')} />;
+  if (read === null) return <Spinner label={t('usage/notices/reading')} />;
+  const periods = read.held;
+  const reading = read.asked !== asked || ranged === null || ranged.asked !== asked;
+  const reload = t(reading ? 'usage/notices/reading' : 'common/reload');
   const nothing = t('usage/explorer/nothing');
   const owner = poolOwner(pool);
   const name = periods.name || pool;
@@ -91,6 +104,9 @@ export default function UsagePoolPage({ host, pool }: { host: string; pool: stri
         <input className="web-field" type="date" value={range.from} max={range.until} aria-label={t('usage/range/from')} onChange={(event) => { if (event.target.value !== '') setRange({ ...range, from: event.target.value }); }} />
         <span aria-hidden="true">{'\u{2013}'}</span>
         <input className="web-field" type="date" value={range.until} min={range.from} aria-label={t('usage/range/until')} onChange={(event) => { if (event.target.value !== '') setRange({ ...range, until: event.target.value }); }} />
+        <Button variant="ghost" title={reload} onClick={() => void scena.commands.execute('usage.reload')}>
+          <span className="web-spend__reload" data-busy={reading ? 'true' : 'false'} aria-hidden="true">{EMOJIcon.reload}</span>
+        </Button>
       </div>
       {ranged === null ? <Spinner label={t('usage/notices/reading')} /> : (
         <>
