@@ -50,6 +50,7 @@ export default function PoliciesExplorer(): ReactElement {
         key: refKey(host, row.id),
         dot: dotOf(row, now),
         dotLabel: t(`policies/effect/${row.effect}`),
+        initials: row.id,
         title: row.id,
         ...(group === undefined ? {} : { group: { key: group, label: by === 'kind' ? kindWord(group) : scopeWord(group) } }),
         lines: [
