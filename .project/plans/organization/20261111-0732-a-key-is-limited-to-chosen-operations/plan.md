@@ -1,7 +1,7 @@
 ---
 title: A key is limited to chosen operations
 domain: organization
-status: active
+status: built
 priority: medium
 created: 2026-11-11
 revalidated: 2026-11-11
@@ -77,8 +77,8 @@ Keys or UserPage -> MintForm (host, user?, grants = the person's role grants)
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The grant cards take a bound](task-01-the-grant-cards-take-a-bound.md) | implemented | - |
-| [02 - A new key picks its grants on cards](task-02-a-new-key-picks-grants-on-cards.md) | implemented | 01 |
+| [01 - The grant cards take a bound](task-01-the-grant-cards-take-a-bound.md) | done | - |
+| [02 - A new key picks its grants on cards](task-02-a-new-key-picks-grants-on-cards.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -87,8 +87,8 @@ Keys or UserPage -> MintForm (host, user?, grants = the person's role grants)
 
 ## Resume state
 
-- **Done so far:** both tasks are implemented, as [implemented.md](implemented.md) says.
-- **Next action:** Softov reviews the PR.
+- **Done so far:** both tasks are done, merged in ahpio/ahpw#61, as [implemented.md](implemented.md) says.
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** a split of an implied operation must stay inside the bound. Splitting `session:*` gives back only groups and operations the person holds.
 

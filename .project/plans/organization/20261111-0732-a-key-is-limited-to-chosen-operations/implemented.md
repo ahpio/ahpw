@@ -2,7 +2,7 @@
 title: A key is limited to chosen operations - implemented
 date: 2026-11-11
 refs:
-  - git://organization/20261111-0732-a-key-limited - the branch the build is on
+  - git://6433311 - the merge of ahpio/ahpw#61
   - "[code://src/bridges/grants.ts](../../../../src/bridges/grants.ts)"
   - "[code://src/resources/users/RoleGrants.tsx](../../../../src/resources/users/RoleGrants.tsx)"
   - "[code://src/resources/profile/MintForm.tsx](../../../../src/resources/profile/MintForm.tsx)"
