@@ -18,11 +18,13 @@ import { agentTitle, mergeAgents, type MergedAgent } from './merge.js';
 import { modelsLine, signInOf } from './words.js';
 import { plural } from '../../i18n/locales.js';
 
-/** A row's dot by its status; a standby record its host cannot open is failed. */
+/** A row's dot by its status; a standby record its host cannot open is failed, and one turned off is off. */
 const dotOf = (agent: MergedAgent): Dot => {
   if (agent.status === 'configured') return 'ok';
   if (agent.status === 'standalone') return 'quiet';
-  return agent.record?.state === 'unavailable' ? 'failed' : 'attention';
+  const state = agent.record?.state;
+  if (state === 'unavailable' || state === 'failed') return 'failed';
+  return state === 'paused' || state === 'disabled' ? 'off' : 'attention';
 };
 
 /**

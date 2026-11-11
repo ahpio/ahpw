@@ -18,6 +18,7 @@
 
 import type { Capability } from './connectors.js';
 import type { Icon } from './icons.js';
+import type { HostAlert } from './plugins.js';
 import type { PluginView } from './views.js';
 import { hostBridge } from './data.js';
 import type { ConnectorOwner } from './connectors.js';
@@ -41,13 +42,15 @@ export const AGENTS = {
 export type AgentOwner = ConnectorOwner;
 
 /**
- * Where an agent is: `ready` is served by the host, `invalid` no longer fits
- * its engine's schema or its engine refused to open it, `unavailable` has no plugin
- * registering its engine.
+ * Where an agent is: `ready` is served by the host, `failed` could not be
+ * opened by its engine, as when a key it reads is missing, `invalid` no longer
+ * fits its engine's schema or its engine refused to open it, `unavailable` has
+ * no plugin registering its engine, `paused` starts nothing new while it stays
+ * open, and `disabled` is not opened, asked or served.
  */
-export type AgentState = 'ready' | 'invalid' | 'unavailable';
+export type AgentState = 'ready' | 'failed' | 'invalid' | 'unavailable' | 'paused' | 'disabled';
 
-export const AGENT_STATES: readonly AgentState[] = ['unavailable', 'invalid', 'ready'];
+export const AGENT_STATES: readonly AgentState[] = ['failed', 'unavailable', 'invalid', 'paused', 'disabled', 'ready'];
 
 /** What the host last found when it built an agent's backend and asked its probe. */
 export interface AgentHealth {
@@ -73,6 +76,8 @@ export interface AgentRow {
   config: Record<string, unknown>;
   state: AgentState;
   health?: AgentHealth;
+  /** The problems the host found on it, kept in its memory only; absent when it has none. */
+  alerts?: HostAlert[];
   /** What its engine's plugin draws for it, by surface; `main` is drawn on its page. */
   views?: Record<string, PluginView>;
 }

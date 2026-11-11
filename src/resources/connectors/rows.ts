@@ -9,7 +9,9 @@ export type ConnectorGrouping = 'adapter' | 'owner' | 'state';
 export const CONNECTOR_GROUPINGS: readonly ConnectorGrouping[] = ['adapter', 'owner', 'state'];
 
 const DOT: Record<ConnectorState, Dot> = {
+  failed: 'failed',
   unavailable: 'failed',
+  disabled: 'off',
   invalid: 'attention',
   unauthorized: 'attention',
   ready: 'ok',

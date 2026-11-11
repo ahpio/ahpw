@@ -64,13 +64,18 @@ export interface PluginManifest {
 /** How the configuration names a plugin: the module alone, or with its options and whether it is on. */
 export type PluginSpec = string | { name: string; options?: Record<string, unknown>; enabled?: boolean; grants?: string[] };
 
-/** One thing a plugin's row says about it; a later alert with the same `ref` replaced the one before. */
-export interface PluginAlert {
+/** One thing a plugin's, an agent's or a connector's row says about it; a later alert with the same `ref` replaced the one before. */
+export interface HostAlert {
   level: 'notice' | 'info' | 'warning' | 'error';
   text: string;
   /** What it is about, as `<kind>:<id>`. */
   ref?: string;
+  /** When it was raised, as an ISO time. */
+  at?: string;
 }
+
+/** An alert on a plugin's row. */
+export type PluginAlert = HostAlert;
 
 /** One configured plugin, as the channel lists it; a secret option reads `<set>`. */
 export interface PluginRow {

@@ -26,7 +26,9 @@ import { DangerZone } from '../../shell/controls/DangerZone.js';
 const toneOf = (agent: MergedAgent): BadgeTone => {
   if (agent.status === 'standalone') return 'default';
   if (agent.status === 'configured') return 'success';
-  return agent.record?.state === 'unavailable' ? 'danger' : 'warning';
+  const state = agent.record?.state;
+  if (state === 'unavailable' || state === 'failed') return 'danger';
+  return state === 'paused' || state === 'disabled' ? 'default' : 'warning';
 };
 
 /** A record's last check, and the button that runs one again. */
@@ -107,7 +109,7 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
           uri={record === undefined ? provider : `${AGENTS.channel}${provider}`}
           state={(
             <>
-              <Badge tone={toneOf(agent)} text={t(`agents/explorer/status/${agent.status}`)} />
+              <Badge tone={toneOf(agent)} text={agent.status === 'standby' && record !== undefined ? t(`connectors/states/${record.state}`) : t(`agents/explorer/status/${agent.status}`)} />
               {signIn.some((one) => one.required) ? <Badge tone="warning" text={t('agents/page/needsSignIn')} /> : null}
             </>
           )}
@@ -116,8 +118,8 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
           {info === undefined ? null : <Button label={t('agents/newSession')} variant="primary" onClick={() => void scena.commands.execute('ahp.newSession', { host, provider })} />}
         </div>
       </div>
-      {agent.status !== 'standby' || record === undefined ? null : (
-        <Alert tone={record.state === 'unavailable' ? 'danger' : 'warning'} message={t(`agents/page/standby/${record.state}`, { engine: record.engine })} />
+      {agent.status !== 'standby' || record === undefined || record.state === 'failed' ? null : (
+        <Alert tone={record.state === 'disabled' ? 'info' : record.state === 'unavailable' ? 'danger' : 'warning'} message={t(`agents/page/standby/${record.state}`, { engine: record.engine })} />
       )}
       {tabs.length === 1 ? overview : (
         <Tabs
