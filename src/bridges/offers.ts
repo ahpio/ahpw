@@ -25,6 +25,8 @@ export interface Offers {
   providers: Record<string, Provider>;
   /** Who this connection is, `user:<id>` or `root:<host>`; absent on a host with no users. */
   principal?: string;
+  /** `true` when the host serves `vscode/removeSessionArtifact`, as its `vscode.removeSessionArtifact` flag says. */
+  removesArtifacts?: true;
 }
 
 export const NO_OFFERS: Offers = { methods: [], described: {}, channels: [], providers: {} };
@@ -77,6 +79,7 @@ export function offersOf(meta: unknown): Offers {
     channels: namesOf(ahpdKey(meta, 'channels'), 'scheme'),
     providers,
     ...(typeof principal === 'string' && principal !== '' ? { principal } : {}),
+    ...(bag(meta)?.['vscode.removeSessionArtifact'] === true ? { removesArtifacts: true as const } : {}),
   };
 }
 

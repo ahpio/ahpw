@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MessageAttachment } from '@microsoft/agent-host-protocol';
 import type { PickerAction } from '@softov/scena/types';
-import { contextItems, showsPill, typeTrigger, valueWords, type ChangedFile, type ComposerApi } from './composer-commands.js';
+import { contextItems, pullRequestItems, pullRequestRows, showsPill, typeTrigger, valueWords, type ChangedFile, type ComposerApi } from './composer-commands.js';
 
 describe('valueWords', () => {
   it('reads plain values, lists and objects', () => {
@@ -64,5 +64,36 @@ describe('typeTrigger', () => {
     expect(typeTrigger('@', 1, '/')).toEqual({ text: '/', caret: 1 });
     expect(typeTrigger('@', 1, '@')).toEqual({ text: '@', caret: 1 });
     expect(typeTrigger('fix @src', 8, '/')).toEqual({ text: 'fix /', caret: 5 });
+  });
+});
+
+describe('pullRequestItems', () => {
+  const pullRequest = { url: 'https://github.com/example/repo/pull/248', repository: 'example/repo', number: '248' };
+  const titles = (items: PickerAction[]): string[] => items.map((one) => ('title' in one ? one.title : one.commandId));
+
+  it('offers Remove only for a recorded pull request on a host that removes artifacts', () => {
+    const remove = (): void => undefined;
+    expect(titles(pullRequestItems(pullRequest, true, remove))).toEqual(['Open on GitHub', 'Copy URL']);
+    expect(titles(pullRequestItems({ ...pullRequest, artifactId: 'a1' }, false, remove))).toEqual(['Open on GitHub', 'Copy URL']);
+    expect(titles(pullRequestItems({ ...pullRequest, artifactId: 'a1' }, true, remove))).toEqual(['Open on GitHub', 'Copy URL', 'Remove']);
+  });
+
+  it('removes the recorded artifact by its id', () => {
+    const removed: string[] = [];
+    const items = pullRequestItems({ ...pullRequest, artifactId: 'a1' }, true, (id) => removed.push(id));
+    const host = { closeMenu: () => undefined } as unknown as Parameters<Extract<PickerAction, { onSelect: unknown }>['onSelect']>[0];
+    const last = items[2];
+    if (last !== undefined && 'onSelect' in last) void last.onSelect(host);
+    expect(removed).toEqual(['a1']);
+  });
+});
+
+describe('pullRequestRows', () => {
+  it('colours each glyph by the state the host sent, and none without one', () => {
+    const merged = { url: 'https://github.com/example/repo/pull/2', repository: 'example/repo', number: '2', state: 'merged' as const };
+    const unknown = { url: 'https://github.com/example/repo/pull/1', repository: 'example/repo', number: '1' };
+    const rows = pullRequestRows([merged, unknown], () => undefined);
+    expect(rows.map((one) => ('color' in one ? one.color : undefined))).toEqual(['purple', undefined]);
+    expect(rows.every((one) => 'icon' in one && one.icon === '⎇')).toBe(true);
   });
 });

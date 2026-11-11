@@ -19,13 +19,14 @@ import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { folderLabel, newId } from '../../bridges/words.js';
 import type { Send } from './Parts.js';
 import { Pill } from './pills.js';
-import { ringOf } from './status.js';
+import { isArchived, ringOf } from './status.js';
 import { AgentPicker } from './AgentPicker.js';
 import { customAgents } from './custom-agents.js';
 import {
   attachComposer,
   COMPOSER_SLOT,
   CUSTOM_AGENT_COMMAND,
+  PULL_REQUESTS_COMMAND,
   composerPath,
   optionCommandId,
   pickable,
@@ -47,11 +48,15 @@ import { EMOJIcon } from '../emojis.js';
 import { attachmentPath, fromFiles, resourceAttachment, sameAttachment, withRanges, withToken } from './attachments.js';
 import { AddButton, Attached } from './Attached.js';
 import { useComposerDrop } from './composer-drop.js';
-import { warn } from '../../shell/notify/index.js';
+import { failed, warn } from '../../shell/notify/index.js';
 import { COMPOSER_FOCUS, hostCommands, registerHostCommands, type HostCommand } from './host-commands.js';
 import { useAgentIconSrc } from '../agents/icons.js';
 import { shellsOf } from './shells.js';
 import { ShellsList, ShellsPill } from './Shells.js';
+import { allMerged, closeMerged, pullRequestsOf, readMergedClosed } from './pull-requests.js';
+import { MergedBanner, PullRequestPill } from './PullRequests.js';
+import { refKey } from '../../bridges/hosts.js';
+import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { readChoice, writeChoice } from '../../shell/explorer/choice.js';
 import { plural } from '../../i18n/locales.js';
 import './composer.css';
@@ -147,6 +152,20 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   const queued = held ?? [];
   const shells = useMemo(() => shellsOf(backgroundWork), [backgroundWork]);
   const [shellsOpen, setShellsOpen] = useState(false);
+  const pullRequests = useMemo(() => pullRequestsOf(summary._meta), [summary._meta]);
+  const removesArtifacts = (useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS).removesArtifacts === true;
+  const sessionKey = refKey(host, summary.resource);
+  // Bumped when the merged banner is closed, so the kept list is read again.
+  const [closedMerged, setClosedMerged] = useState(0);
+  const mergedOpen = useMemo(
+    () => allMerged(pullRequests) && !isArchived(summary.status) && !readMergedClosed().includes(sessionKey),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pullRequests, summary.status, sessionKey, closedMerged],
+  );
+  const removeArtifact = (artifactId: string): void => {
+    hostBridge(host).request('vscode/removeSessionArtifact' as never, { session: summary.resource, artifactId } as never)
+      .catch((error: unknown) => failed(t('sessions/pullRequests/removeFailed'), error));
+  };
   // Folded or not, kept per browser; it opens unfolded.
   const [folded, setFolded] = useState(() => readChoice(FOLDED_KEY, ['open', 'folded'], 'open') === 'folded');
   // The folded line's `+` unfolds the composer with its Add context menu open.
@@ -305,6 +324,9 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     upload: () => files.current?.click(),
     changed: () => changed,
     ...(onInfo === undefined ? {} : { toggleInfo: onInfo }),
+    pullRequests: () => pullRequests,
+    removesArtifacts: () => removesArtifacts,
+    removeArtifact,
   };
   useEffect(() => attachComposer(path, {
     models: () => api.current?.models() ?? [],
@@ -325,6 +347,9 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     upload: () => api.current?.upload(),
     changed: () => api.current?.changed() ?? [],
     ...(onInfo === undefined ? {} : { toggleInfo: () => api.current?.toggleInfo?.() }),
+    pullRequests: () => api.current?.pullRequests?.() ?? [],
+    removesArtifacts: () => api.current?.removesArtifacts?.() ?? false,
+    removeArtifact: (artifactId) => api.current?.removeArtifact?.(artifactId),
   // Only whether the page has an info matters here; the call itself is read through `api`.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [path, onInfo === undefined]);
@@ -379,12 +404,22 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   ) : (
     <button type="button" className="web-composer__round" aria-label={t('sessions/commands/stop')} title={t('sessions/composer/stopHint')} onClick={stop}>{EMOJIcon.stop}</button>
   );
+  // The merged banner, over the composer box and over the folded line alike.
+  const mergedBanner = mergedOpen ? (
+    <MergedBanner
+      pullRequests={pullRequests}
+      onArchive={() => hostBridge(host).dispatch(summary.resource, { type: 'session/isArchivedChanged', isArchived: true } as StateAction)}
+      onClose={() => { closeMerged(sessionKey); setClosedMerged((was) => was + 1); }}
+    />
+  ) : null;
+
   if (folded) {
     const said = text.trim().split('\n')[0] ?? '';
     const agentName = agent?.displayName ?? summary.provider;
     const waiting = queued.length + (steering === undefined ? 0 : 1);
     return (
       <div className="web-composer">
+        {mergedBanner}
         <div className="web-composer__box web-composer__folded" data-ring={ringOf(summary.status)}>
           <button type="button" className="web-composer__add" aria-label={t('sessions/context/title')} title={t('sessions/context/title')} onClick={() => fold(false, true)}>
             <svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true">
@@ -444,8 +479,11 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         {folder === undefined ? null : <Pill label={`${EMOJIcon.folder} ${folderLabel(folder)}`} title={t('sessions/composer/folderHint')} />}
         <Pill label={agentImage === undefined ? `${EMOJIcon.agents} ${agent?.displayName ?? summary.provider}` : agent?.displayName ?? summary.provider} image={agentImage} title={agent?.description ?? t('sessions/composer/agentHint')} />
         {shells.length === 0 ? null : <ShellsPill count={shells.length} onToggle={() => setShellsOpen((was) => !was)} />}
+        {pullRequests.length === 0 ? null : <PullRequestPill pullRequests={pullRequests} onOpen={() => openCommand(PULL_REQUESTS_COMMAND)} />}
         <button type="button" className="web-composer__fold" aria-label={t('sessions/composer/fold')} title={t('sessions/composer/fold')} onClick={() => fold(true)}>{EMOJIcon.caretDown}</button>
       </div>
+
+      {mergedBanner}
 
       <div
         className="web-composer__box"

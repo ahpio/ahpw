@@ -1552,6 +1552,33 @@
       "finished": "{name} had already finished.",
       "stopFailed": "Could not stop {name}"
     },
+    "pullRequests": {
+      "count": {
+        "one": "{count} pull request",
+        "other": "{count} pull requests"
+      },
+      "title": "Pull requests",
+      "state": {
+        "open": "Open",
+        "closed": "Closed",
+        "merged": "Merged"
+      },
+      "openOnGitHub": "Open on GitHub",
+      "copyUrl": "Copy URL",
+      "remove": "Remove",
+      "removeFailed": "Could not remove the pull request",
+      "merged": {
+        "one": "Pull request merged. Archive this session?",
+        "other": "{count} pull requests merged. Archive this session?"
+      },
+      "archiveNote": "Archived sessions leave the list. Show archived brings them back.",
+      "archive": "Archive",
+      "hint": "Open, copy or remove the session's pull requests",
+      "removeHint": "Take it off the session's artifacts",
+      "repository": "Repository",
+      "status": "Status",
+      "branches": "Branches"
+    },
     "composer": {
       "steering": "Steering",
       "remove": "Remove",

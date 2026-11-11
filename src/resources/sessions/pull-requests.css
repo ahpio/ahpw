@@ -1,0 +1,2 @@
+/* The merged banner's lines, one under another inside scena's Alert. */
+.web-merged .oo-alert__message { display: grid; justify-items: start; gap: var(--oo-spacing-xs); }
