@@ -1,6 +1,6 @@
 ---
 title: The grant cards take a bound
-status: todo
+status: implemented
 depends: []
 layer: "ahpw bridges and users"
 refs:

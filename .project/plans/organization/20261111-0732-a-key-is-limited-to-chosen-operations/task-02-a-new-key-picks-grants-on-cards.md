@@ -1,6 +1,6 @@
 ---
 title: A new key picks its grants on cards
-status: todo
+status: implemented
 depends: [task-01-the-grant-cards-take-a-bound.md]
 layer: "ahpw profile"
 refs:
