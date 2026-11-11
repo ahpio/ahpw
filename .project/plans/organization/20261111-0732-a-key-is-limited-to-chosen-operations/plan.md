@@ -8,7 +8,7 @@ revalidated: 2026-11-11
 requires:
   - plans/organization/05-a-profile-and-roles-as-pills/plan.md
 refs:
-  - git://95a3a0e - the last commit that holds the brief `a-key-is-limited-to-chosen-operations.md`, which this plan covers
+  - git://b0658e8 - the last commit that holds the brief `a-key-is-limited-to-chosen-operations.md`, which this plan covers
   - "[code://src/resources/profile/MintForm.tsx#L105-L122](../../../../src/resources/profile/MintForm.tsx#L105-L122) - the grants of a new key today: every grant, or a checkbox per grant as a role writes it"
   - "[code://src/resources/users/RoleGrants.tsx#L32-L120](../../../../src/resources/users/RoleGrants.tsx#L32-L120) - `SubjectCard`, the card per subject that the key's grants reuse"
   - "[code://src/resources/users/RoleGrants.tsx#L127-L133](../../../../src/resources/users/RoleGrants.tsx#L127-L133) - `RoleGrants`, its subjects and what *Add subject* offers"
