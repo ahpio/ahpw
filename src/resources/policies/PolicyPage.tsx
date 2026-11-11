@@ -5,7 +5,7 @@ import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import {
-  POLICIES, policiesReducer, policyManifest, putPolicy, readLimits, writesPolicies,
+  POLICIES, policiesReducer, policyManifest, policyUri, putPolicy, readLimits, writesPolicies,
   type PoliciesState, type PolicyLimits,
 } from '../../bridges/policies.js';
 import { embedMode } from '../../shell/embed/index.js';
@@ -15,6 +15,9 @@ import { timeOf } from '../automations/words.js';
 import { changedKeys } from '../host/config.js';
 import { isRecordId } from '../users/form.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
+import { SETTINGS_VIEWS } from '../editor/yamlView.js';
+import { EMOJIcon } from '../emojis.js';
+import { PageTitle } from '../../shell/HostIcon.js';
 import { policyTab } from './state.js';
 import { limitWord, usedWord } from './words.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
@@ -158,7 +161,7 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
 
   return (
     <div className="web-page web-form web-policy">
-      <Text variant="h2" text={fresh ? t('policies/commands/new') : id} />
+      <PageTitle emoji={EMOJIcon.policies} initials={fresh ? undefined : id} title={fresh ? t('policies/commands/new') : id} uri={fresh ? undefined : policyUri(offers, id)} />
       {writes ? null : <p className="web-note">{t('policies/notices/readOnly')}</p>}
       {embedMode() === 'multi' ? <DetailList items={[{ label: t('common/host'), value: <HostTag host={host} />, span: true }]} /> : null}
 
@@ -166,6 +169,7 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
       <fieldset className="web-policy__form" disabled={!writes}>
         <SchemaForm
           schema={schema}
+          views={SETTINGS_VIEWS}
           value={value}
           onChange={setDraft}
           baseline={held}

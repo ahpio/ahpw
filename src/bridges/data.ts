@@ -5,7 +5,7 @@ import { localClientIds } from './client-ids.js';
 import { WebSocketTransport } from '@microsoft/agent-host-protocol/ws';
 import { RpcError } from '@microsoft/agent-host-protocol/client';
 import { hostSaid } from './said.js';
-import type { AgentInfo, CommandMap, RootState, SessionSummary, StateAction, TerminalInfo } from '@microsoft/agent-host-protocol';
+import { rootReducer, type AgentInfo, type CommandMap, type RootState, type SessionSummary, type StateAction, type TerminalInfo } from '@microsoft/agent-host-protocol';
 import { readToken, servedDaemon, serverHoldsToken } from '../lib/api.js';
 import { embedder, embedMode, type EmbedHost } from '../shell/embed/index.js';
 import { offering } from './protocol-versions.js';
@@ -209,7 +209,23 @@ async function ready(id: string): Promise<MultiHostClient> {
 /** Why a channel could not be read, in the host's own words, without the client's `RPC error <code>:`. */
 const reasonOf = (error: unknown): string => hostSaid(error);
 
-async function snapshot(id: string, uri: string): Promise<void> {
+/**
+ * The snapshot read in flight, by host, connection and channel. Two reads of
+ * one channel share one subscribe, because the host refuses a subscribe that
+ * another subscribe to the same channel overtakes while it is read.
+ */
+const inflight = new Map<string, Promise<void>>();
+
+function snapshot(id: string, uri: string): Promise<void> {
+  const key = `${id}\u{0000}${String(dataOf(id).generation)}\u{0000}${uri}`;
+  const reading = inflight.get(key);
+  if (reading !== undefined) return reading;
+  const read = readSnapshot(id, uri).finally(() => inflight.delete(key));
+  inflight.set(key, read);
+  return read;
+}
+
+async function readSnapshot(id: string, uri: string): Promise<void> {
   const multi = client;
   const store = held;
   if (multi === undefined || store === undefined) return;
@@ -547,7 +563,7 @@ function greet(store: ReactiveStore, multi: MultiHostClient, id: string): void {
   const answers = readTrust(id);
   keepTrust(store, id, answers);
   const uris = trustedUris(answers);
-  if (uris.length > 0) void pushMissingTrust(multi, id, uris);
+  if (uris.length > 0) void pushMissingTrust(store, multi, id, uris);
   multi.client(id)?.rawClient().setServerRequestHandler((async (method: string, params: unknown) => {
     if (method !== TRUST_REQUEST) throw new RpcError(-32601, `ahpw does not answer ${method}`);
     const workspace = (params as { workspace?: unknown } | undefined)?.workspace;
@@ -558,15 +574,25 @@ function greet(store: ReactiveStore, multi: MultiHostClient, id: string): void {
   }) as never);
 }
 
-/** Push `uris` the host does not trust yet, joined to its list; nothing when it trusts them all. */
-async function pushMissingTrust(multi: MultiHostClient, id: string, uris: readonly string[]): Promise<void> {
+/**
+ * Push `uris` the host does not trust yet, joined to its list; nothing when it
+ * trusts them all. The root is read through the followed channel's snapshot,
+ * which a page showing the root shares, so the two never race.
+ */
+async function pushMissingTrust(store: ReactiveStore, multi: MultiHostClient, id: string, uris: readonly string[]): Promise<void> {
+  const release = hostBridge(id).follow(ROOT, rootReducer);
   try {
-    const result = await multi.subscribe(id, ROOT);
-    const trust = hostTrustOf(result.snapshot?.state as RootState | undefined);
+    await snapshot(id, ROOT);
+    // A read that failed leaves no answer, and a push then would replace the host's list.
+    const root = store.get<RootState>(channelPath(id, ROOT));
+    if (root === undefined || store.get(channelErrorPath(id, ROOT)) !== null) return;
+    const trust = hostTrustOf(root);
     const missing = uris.filter((uri) => !trustedOnHost(trust, uri));
     if (missing.length > 0) multi.dispatch(id, ROOT, trustAction(joinedUris(trust, missing)));
   } catch {
     // Not read: the folders are asked about again when a session needs one.
+  } finally {
+    release();
   }
 }
 
