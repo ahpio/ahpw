@@ -1,7 +1,7 @@
 ---
 title: Agents and connectors list their alerts
 domain: plugins
-status: planned
+status: built
 priority: medium
 created: 2026-11-11
 revalidated: 2026-11-11
@@ -77,8 +77,8 @@ x-ahpd-connectors:// row { state, alerts? } -> ConnectorRow -> connectors rows d
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - One alert list for every row](task-01-one-alert-list-for-every-row.md) | implemented | - |
-| [02 - Agent and connector pages draw alerts](task-02-agent-and-connector-pages-draw-alerts.md) | implemented | 01 |
+| [01 - One alert list for every row](task-01-one-alert-list-for-every-row.md) | done | - |
+| [02 - Agent and connector pages draw alerts](task-02-agent-and-connector-pages-draw-alerts.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -87,8 +87,8 @@ x-ahpd-connectors:// row { state, alerts? } -> ConnectorRow -> connectors rows d
 
 ## Resume state
 
-- **Done so far:** both tasks are implemented; see [implemented.md](implemented.md).
-- **Next action:** review and merge the PR, then mark the tasks done and the plan built.
+- **Done so far:** both tasks are done, merged in ahpio/ahpw#62; see [implemented.md](implemented.md).
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** ahpd repeats a plugin's configured problem as an alert. The plugin page filters it out, and keeps that filter before the shared list.
 

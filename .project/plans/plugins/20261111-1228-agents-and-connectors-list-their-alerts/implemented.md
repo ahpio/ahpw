@@ -2,7 +2,7 @@
 title: Agents and connectors list their alerts - implemented
 date: 2026-11-11
 refs:
-  - git://plugins/20261111-1228-alerts - the branch of the build
+  - git://4c3d21e - the merge of ahpio/ahpw#62
   - "[code://src/shell/view/AlertList.tsx](../../../../src/shell/view/AlertList.tsx)"
   - "[code://src/resources/agents/Overview.tsx](../../../../src/resources/agents/Overview.tsx)"
   - "[code://src/resources/connectors/Overview.tsx](../../../../src/resources/connectors/Overview.tsx)"

@@ -1,6 +1,6 @@
 ---
 title: One alert list for every row
-status: implemented
+status: done
 depends: []
 layer: "ahpw bridges and shell view"
 refs:

@@ -1,6 +1,6 @@
 ---
 title: Agent and connector pages draw alerts
-status: implemented
+status: done
 depends: [task-01-one-alert-list-for-every-row.md]
 layer: "ahpw agents and connectors"
 refs:
