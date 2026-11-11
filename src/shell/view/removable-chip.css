@@ -1,0 +1,19 @@
+/* A pill in its own colour: the border is set on the element, the text at full strength. */
+.web-chip[data-colored='true'] {
+  color: var(--oo-color-text);
+}
+
+/* A pill's label that opens what it names. */
+.web-chip__open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.web-chip__open:hover,
+.web-chip__open:focus-visible {
+  text-decoration: underline;
+}

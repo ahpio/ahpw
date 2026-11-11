@@ -5,6 +5,7 @@ import type { PickerAction } from '@softov/scena/types';
 import type { Icon } from '../../bridges/icons.js';
 import { EMOJIcon } from '../../resources/emojis.js';
 import { HostIcon, useHostIcon } from '../HostIcon.js';
+import { NameMark } from '../NameMark.js';
 import { HostLines } from './HostLines.js';
 
 /** The colour of a row's dot, by meaning. */
@@ -21,6 +22,8 @@ export interface Row {
   icons?: readonly Icon[];
   /** An emoji drawn in the icon's place, with the dot on its corner, while `icons` has none to draw. */
   emoji?: string;
+  /** A name drawn as two letters in a circle of its colour, in the icon's place, before `emoji`; a `quiet` dot is not drawn on it, so it hides no letter. */
+  initials?: string;
   title: string;
   time?: string;
   lines: ReactNode[];
@@ -186,13 +189,15 @@ function RowMark({ row }: { row: Row }): ReactElement {
       {row.dot === 'working' ? <><i /><i /><i /><i /></> : null}
     </span>
   );
-  if (icon === undefined && row.emoji === undefined) return dot;
+  if (icon === undefined && row.initials === undefined && row.emoji === undefined) return dot;
   return (
     <span className="web-row__mark">
-      {icon === undefined
-        ? <span className="web-row__emoji" aria-hidden="true">{row.emoji}</span>
-        : <img className="web-host-icon" src={icon.src} width={20} height={20} alt="" draggable={false} />}
-      {dot}
+      {icon !== undefined
+        ? <img className="web-host-icon" src={icon.src} width={20} height={20} alt="" draggable={false} />
+        : row.initials !== undefined
+          ? <NameMark name={row.initials} size={20} />
+          : <span className="web-row__emoji" aria-hidden="true">{row.emoji}</span>}
+      {icon === undefined && row.initials !== undefined && row.dot === 'quiet' ? null : dot}
     </span>
   );
 }

@@ -5,13 +5,13 @@ import { localClientIds } from './client-ids.js';
 import { WebSocketTransport } from '@microsoft/agent-host-protocol/ws';
 import { RpcError } from '@microsoft/agent-host-protocol/client';
 import { hostSaid } from './said.js';
-import type { AgentInfo, CommandMap, SessionSummary, StateAction, TerminalInfo } from '@microsoft/agent-host-protocol';
+import type { AgentInfo, CommandMap, RootState, SessionSummary, StateAction, TerminalInfo } from '@microsoft/agent-host-protocol';
 import { readToken, servedDaemon, serverHoldsToken } from '../lib/api.js';
 import { embedder, embedMode, type EmbedHost } from '../shell/embed/index.js';
 import { offering } from './protocol-versions.js';
 import { readingServerInfo } from './server-info.js';
 import { offersOf } from './offers.js';
-import { keepTrust, readTrust, trustAction, trustedUris } from './trust.js';
+import { hostTrustOf, joinedUris, keepTrust, readTrust, trustAction, trustedOnHost, trustedUris } from './trust.js';
 import { hostSocketUrl, plainUrl, socketUrl } from './socket.js';
 import { NOTHING_NEWER, heard, laid, listed, type Newer } from './summaries.js';
 import { countsOf } from '../resources/sessions/status.js';
@@ -539,16 +539,15 @@ function awaitEcho(id: string, channel: string, seq: number): Promise<string | n
 const TRUST_REQUEST = 'vscode/requestWorkspaceTrust';
 
 /**
- * What a client says when a host connects: the folders this browser trusts,
- * which the host keeps on this connection only, and an answer to the host's
- * own trust question. A new connection is a new client, so both are done on
- * every connect, before any session's first turn.
+ * What a client says when a host connects: the folders this browser trusts
+ * that the host does not, joined to the host's own list, and an answer to the
+ * host's own trust question. Both are done on every connect.
  */
 function greet(store: ReactiveStore, multi: MultiHostClient, id: string): void {
   const answers = readTrust(id);
   keepTrust(store, id, answers);
   const uris = trustedUris(answers);
-  if (uris.length > 0) multi.dispatch(id, ROOT, trustAction(uris));
+  if (uris.length > 0) void pushMissingTrust(multi, id, uris);
   multi.client(id)?.rawClient().setServerRequestHandler((async (method: string, params: unknown) => {
     if (method !== TRUST_REQUEST) throw new RpcError(-32601, `ahpw does not answer ${method}`);
     const workspace = (params as { workspace?: unknown } | undefined)?.workspace;
@@ -557,6 +556,18 @@ function greet(store: ReactiveStore, multi: MultiHostClient, id: string): void {
     const { answerTrust } = await import('./trust-ask.js');
     return { trusted: await answerTrust(store, id, workspace) };
   }) as never);
+}
+
+/** Push `uris` the host does not trust yet, joined to its list; nothing when it trusts them all. */
+async function pushMissingTrust(multi: MultiHostClient, id: string, uris: readonly string[]): Promise<void> {
+  try {
+    const result = await multi.subscribe(id, ROOT);
+    const trust = hostTrustOf(result.snapshot?.state as RootState | undefined);
+    const missing = uris.filter((uri) => !trustedOnHost(trust, uri));
+    if (missing.length > 0) multi.dispatch(id, ROOT, trustAction(joinedUris(trust, missing)));
+  } catch {
+    // Not read: the folders are asked about again when a session needs one.
+  }
 }
 
 async function watchChannels(store: ReactiveStore, multi: MultiHostClient): Promise<void> {

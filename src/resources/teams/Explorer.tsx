@@ -45,6 +45,7 @@ export default function TeamsExplorer(): ReactElement {
         key,
         dot: 'quiet',
         dotLabel: title,
+        initials: title,
         title,
         group: { key: kind, label: t(kind === 'teams' ? 'teams/explorer/teams' : 'teams/explorer/projects') },
         lines: [[multi ? hostName(host) : undefined, title === named.id ? undefined : named.id, t('teams/explorer/members', { count: members })]

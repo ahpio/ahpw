@@ -1004,7 +1004,6 @@
       "issuerHint": "Dónde inicia sesión, si no es en este host: github o la URL de un emisor. Déjalo vacío para quitarlo.",
       "rolesFrom": "Roles desde",
       "rolesFromHint": "Roles extra del emisor, leídos de un claim en su respuesta de inicio de sesión, como groups. Solo cuentan los roles definidos en este host, y se suman a los de arriba. Déjalo vacío para no agregar ninguno.",
-      "token": "Los tokens nunca se muestran aquí. Crea uno en el host con: ahpd user token {id}",
       "create": "Crear usuario",
       "save": "Guardar",
       "dropAdminTitle": "¿Quitarte tu propio rol de admin?",

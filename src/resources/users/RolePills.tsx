@@ -3,6 +3,7 @@ import { useI18n } from '@softov/scena/react';
 import { Button } from '@softov/scena/ui';
 import { ContextMenu } from '@softov/scena/ui/menu';
 import { RemovableChip } from '../../shell/view/RemovableChip.js';
+import { textToColor } from '../../shell/NameMark.js';
 
 interface RolePillsProps {
   /** The roles the person holds, in the record's order. */
@@ -11,14 +12,17 @@ interface RolePillsProps {
   offered: readonly string[];
   writes: boolean;
   onChange: (roles: string[]) => void;
+  /** Opens a role's page from its pill. */
+  onOpen: (role: string) => void;
 }
 
 /**
- * A person's roles as pills, each with a ✕ to remove it, and *+ Add a role*
+ * A person's roles as pills, each bordered in its role's colour, opening the
+ * role from its name and removing it with its ✕, and *+ Add a role*
  * for a menu of the ones they do not hold. A role has no second choice, so
  * this is one menu where memberships take two.
  */
-export function RolePills({ held, offered, writes, onChange }: RolePillsProps): ReactElement {
+export function RolePills({ held, offered, writes, onChange, onOpen }: RolePillsProps): ReactElement {
   const { t } = useI18n();
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
   // scena's Button gives its click no event, so the menu opens under the box around the pills.
@@ -30,6 +34,8 @@ export function RolePills({ held, offered, writes, onChange }: RolePillsProps): 
         <RemovableChip
           key={role}
           label={role}
+          color={textToColor(role)}
+          onOpen={() => onOpen(role)}
           removeLabel={t('users/user/dropRole', { role })}
           {...(writes ? { onRemove: () => onChange(held.filter((one) => one !== role)) } : {})}
         />

@@ -74,7 +74,7 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
 
   return (
     <div className="web-page web-form">
-      <PageTitle emoji={EMOJIcon.roles} title={fresh ? t('users/commands/newRole') : id} uri={fresh ? undefined : personUri(offers, 'roles', id)} />
+      <PageTitle emoji={EMOJIcon.roles} initials={fresh ? undefined : id} title={fresh ? t('users/commands/newRole') : id} uri={fresh ? undefined : personUri(offers, 'roles', id)} />
       {writes ? null : <p className="web-note">{t('users/notices/readOnly')}</p>}
       {builtIn === undefined ? null : <p className="web-note">{t('users/role/builtInNote')}</p>}
       {replaces ? <p className="web-note">{t('users/role/replacesNote')}</p> : null}
