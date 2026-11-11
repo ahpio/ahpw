@@ -1,15 +1,16 @@
 /**
- * Which folders this browser trusts on each host.
+ * Which folders this browser trusts on each host, and which the host does.
  *
- * ahpd treats a folder as untrusted until the connection pushes
- * `workspaceTrust`, and keeps the push on that connection only, so the answers
- * live here and go to the host on every connect. A no is kept with the yeses,
- * so a folder is asked about once; only the yeses are sent, since untrusted is
- * what the host assumes.
+ * ahpd keeps one `workspaceTrust` root config value, set by the last push from
+ * any client, and publishes it in its root state. A folder it trusts, itself or
+ * under a trusted parent, is not asked about. This browser's answers live here
+ * and go to the host on connect. A no is kept with the yeses, so a folder is
+ * asked about once; only the yeses are sent, joined to the host's own list, so
+ * a push never drops a folder another window trusted.
  */
 
 import type { BindingPath, ReactiveStore } from '@softov/scena/types';
-import type { StateAction } from '@microsoft/agent-host-protocol';
+import type { RootState, StateAction } from '@microsoft/agent-host-protocol';
 import { perHostKey } from '../lib/storage-keys.js';
 import { bare } from '../resources/folders/roots.js';
 import { folderUri } from './words.js';
@@ -65,7 +66,47 @@ export function trustedUris(answers: TrustAnswers): string[] {
   return Object.entries(answers).filter(([, trusted]) => trusted).map(([uri]) => uri);
 }
 
-/** The push that tells a host which folders this browser trusts; it replaces the host's list for this connection. */
+/** The host's `workspaceTrust`: whether it reads trust at all, and the folders it trusts. */
+export interface HostTrust {
+  enabled: boolean;
+  trustedUris: string[];
+}
+
+/** The host's `workspaceTrust` from its root state, or undefined when it holds none. */
+export function hostTrustOf(root: RootState | undefined): HostTrust | undefined {
+  const held = root?.config?.values['workspaceTrust'];
+  if (typeof held !== 'object' || held === null) return undefined;
+  const { enabled, trustedUris: uris } = held as { enabled?: unknown; trustedUris?: unknown };
+  return {
+    enabled: enabled !== false,
+    trustedUris: Array.isArray(uris) ? uris.filter((one): one is string => typeof one === 'string') : [],
+  };
+}
+
+/**
+ * Whether the host trusts `folder`, as ahpd reads its value: none held is
+ * untrusted, `enabled: false` trusts everything, and otherwise the folder or a
+ * parent of it is in the list. ahpd also settles symlinks and case, which a
+ * browser cannot, so a miss here only means the person is asked.
+ */
+export function trustedOnHost(trust: HostTrust | undefined, folder: string): boolean {
+  if (trust === undefined) return false;
+  if (!trust.enabled) return true;
+  const key = trustKeyOf(folder);
+  return trust.trustedUris.some((uri) => {
+    const parent = trustKeyOf(uri);
+    return key === parent || key.startsWith(parent.endsWith('/') ? parent : `${parent}/`);
+  });
+}
+
+/** The host's list with `uris` added, each folder once, the host's first. */
+export function joinedUris(trust: HostTrust | undefined, uris: readonly string[]): string[] {
+  const held = trust?.trustedUris ?? [];
+  const keys = new Set(held.map(trustKeyOf));
+  return [...held, ...uris.filter((uri) => !keys.has(trustKeyOf(uri)))];
+}
+
+/** The push that sets the host's one list of trusted folders, for every client; it replaces the list the host held. */
 export function trustAction(uris: readonly string[]): StateAction {
   return { type: 'root/configChanged', config: { workspaceTrust: { enabled: true, trustedUris: [...uris] } } } as StateAction;
 }
