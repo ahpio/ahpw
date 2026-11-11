@@ -9,9 +9,9 @@ refs:
   - "[code://src/resources/sessions/attachments.ts#L27-L30](../../src/resources/sessions/attachments.ts#L27-L30) - `resourceAttachment`, which attaches a file or a folder"
   - "[code://src/resources/sessions/Attached.tsx](../../src/resources/sessions/Attached.tsx) - `AddButton`, whose *Files and folders* types `@`"
   - git://8060ecd9b - the commit of ahpd's main the host's `completions` was checked at
-  - https://github.com/softov/ahpd/blob/8060ecd9b/packages/sdk/src/host/sessionmethods.ts#L666-L676 - ahpd answers an `@` word with `fileCompletions`, over the session's working directories
-  - https://github.com/softov/ahpd/blob/8060ecd9b/packages/sdk/src/host/filecompletions.ts#L176 - `fileCompletions`, VS Code's file provider: every file listed by ripgrep, ranked by the Quick Open scorer, 50 at most
-  - https://github.com/softov/ahpd/blob/8060ecd9b/packages/sdk/src/resources/workspacefiles.ts#L45 - `ripgrepFiles`, which runs `rg` from the path
+  - https://github.com/ahpio/ahpd/blob/8060ecd9b/packages/sdk/src/host/sessionmethods.ts#L666-L676 - ahpd answers an `@` word with `fileCompletions`, over the session's working directories
+  - https://github.com/ahpio/ahpd/blob/8060ecd9b/packages/sdk/src/host/filecompletions.ts#L176 - `fileCompletions`, VS Code's file provider: every file listed by ripgrep, ranked by the Quick Open scorer, 50 at most
+  - https://github.com/ahpio/ahpd/blob/8060ecd9b/packages/sdk/src/resources/workspacefiles.ts#L45 - `ripgrepFiles`, which runs `rg` from the path
   - https://github.com/microsoft/vscode/blob/e646868227c/src/vs/platform/agentHost/node/agentHostFileCompletionProvider.ts - VS Code's file provider, which ahpd follows
   - https://github.com/softov/ahpapp/blob/fe15bff/src/components/ContextSheet.tsx#L254-L282 - ahpapp's `@` walks the host's folders with `resourceList`, from the folder the field names
   - https://github.com/softov/ahpapp/blob/fe15bff/src/components/ContextSheet.tsx#L398-L404 - *Go back* and *Use this folder*, and when each shows
@@ -44,10 +44,10 @@ He asked for this on 2026-11-09, with a screenshot of each.
 - It lists every file under the session's working directories with ripgrep, and ranks them with the Quick Open scorer against the word.
 - It answers files only: no folder, no walk, and nothing outside the working directories.
 
-**ahpd** follows VS Code since its commit `c4a3b4861` of 2026-11-06, at [`filecompletions.ts`](https://github.com/softov/ahpd/blob/8060ecd9b/packages/sdk/src/host/filecompletions.ts#L176).
+**ahpd** follows VS Code since its commit `c4a3b4861` of 2026-11-06, at [`filecompletions.ts`](https://github.com/ahpio/ahpd/blob/8060ecd9b/packages/sdk/src/host/filecompletions.ts#L176).
 
 - The answer holds files under the session's working directories, ranked as VS Code ranks them, 50 at most.
-- The listing runs `rg` from the path, at [`workspacefiles.ts`](https://github.com/softov/ahpd/blob/8060ecd9b/packages/sdk/src/resources/workspacefiles.ts#L45). A host with no `rg` logs the failure and answers nothing.
+- The listing runs `rg` from the path, at [`workspacefiles.ts`](https://github.com/ahpio/ahpd/blob/8060ecd9b/packages/sdk/src/resources/workspacefiles.ts#L45). A host with no `rg` logs the failure and answers nothing.
 - An absolute path such as `@/home/softov/` is not a path either host walks.
 
 ## What ahpw has today

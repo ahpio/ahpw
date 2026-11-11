@@ -16,8 +16,8 @@ refs:
   - "[code://src/resources/users/RolePage.tsx#L37-L38](../../../../src/resources/users/RolePage.tsx#L37-L38) - the role page reads the host's grant catalog from root `_meta`"
   - "[code://src/resources/users/UserPage.tsx#L149](../../../../src/resources/users/UserPage.tsx#L149) - a user's page gives the form the person's grants"
   - "[code://src/resources/profile/Keys.tsx#L21](../../../../src/resources/profile/Keys.tsx#L21) - the profile gives the form the signed-in person's grants"
-  - https://github.com/softov/ahpd/blob/44b2d62123434b89415141904c2e81bdcde664ab/packages/sdk/src/access/users.ts#L350-L370 - ahpd's `holds`, which `heldBy` mirrors
-  - https://github.com/softov/ahpd/blob/44b2d62123434b89415141904c2e81bdcde664ab/packages/sdk/src/access/users.ts#L1821-L1828 - the mint refuses a grant the person does not hold
+  - https://github.com/ahpio/ahpd/blob/44b2d62123434b89415141904c2e81bdcde664ab/packages/sdk/src/access/users.ts#L350-L370 - ahpd's `holds`, which `heldBy` mirrors
+  - https://github.com/ahpio/ahpd/blob/44b2d62123434b89415141904c2e81bdcde664ab/packages/sdk/src/access/users.ts#L1821-L1828 - the mint refuses a grant the person does not hold
 ---
 
 ## Goal

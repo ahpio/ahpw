@@ -1,6 +1,6 @@
 # Get started
 
-ahpw is a client. It does not run agents or models. It connects to an AHP host, such as [ahpd](https://github.com/softov/ahpd), and shows what that host offers.
+ahpw is a client. It does not run agents or models. It connects to an AHP host, such as [ahpd](https://github.com/ahpio/ahpd), and shows what that host offers.
 
 There are two ways to run it: as a plugin inside ahpd, or on its own with `ahpw serve` in front of any AHP server.
 

@@ -12,9 +12,9 @@ refs:
   - plans/plugins/09-a-connector-signs-in-from-its-form/plan.md - the connector sign-in this follows
   - https://github.com/softov/scena/blob/9eb7037/packages/scena/src/ui/forms/SchemaForm.tsx#L39-L48 - `formatRenderers`, a field drawn by the app's own component, keyed by `format`
   - https://github.com/softov/scena/blob/9eb7037/packages/scena/src/ui/forms/SchemaForm.tsx#L475-L478 - a format renderer is asked before the form's own controls, arrays too
-  - https://github.com/softov/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/agent-claude/src/options.ts#L226-L232 - the Claude agent's `logins`, items marked `x-ahpd-connector` with the adapter `claude-login`
-  - https://github.com/softov/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/sdk/src/agents/channel.ts#L20-L24 - an agent put refuses a connector id of another adapter, or of an owner that is neither the agent's nor the host's
-  - https://github.com/softov/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/agent-claude/src/adapter.ts#L114-L157 - the `claude-login` sign-in: Claude Code's `setup-token` flow on the claude.ai code page
+  - https://github.com/ahpio/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/agent-claude/src/options.ts#L226-L232 - the Claude agent's `logins`, items marked `x-ahpd-connector` with the adapter `claude-login`
+  - https://github.com/ahpio/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/sdk/src/agents/channel.ts#L20-L24 - an agent put refuses a connector id of another adapter, or of an owner that is neither the agent's nor the host's
+  - https://github.com/ahpio/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/agent-claude/src/adapter.ts#L114-L157 - the `claude-login` sign-in: Claude Code's `setup-token` flow on the claude.ai code page
 ---
 
 # An agent signs in from its form
@@ -29,7 +29,7 @@ The change follows ahpw's own connector sign-in, from plan [09](../plans/plugins
 There, the button comes from the adapter row's `signIn`, and its label is `signIn.title`.
 A person presses it, signs in on the page that opens, and pastes the code that page shows.
 
-ahpd made a Claude login a connector, and the agent names connectors by id ([`options.ts`](https://github.com/softov/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/agent-claude/src/options.ts#L226-L232)).
+ahpd made a Claude login a connector, and the agent names connectors by id ([`options.ts`](https://github.com/ahpio/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/agent-claude/src/options.ts#L226-L232)).
 A turn tries the logins in the agent's order, and moves to the next one on a 429 or a 5xx.
 
 ## What ahpw has today
@@ -41,7 +41,7 @@ A turn tries the logins in the agent's order, and moves to the next one on a 429
 - `SchemaForm`'s own list control has no way to move an entry up or down.
 - `SignInStep` takes a host, the adapter row's `signIn`, and the connector to put ([`code://src/resources/connectors/SignInStep.tsx`](../../src/resources/connectors/SignInStep.tsx)). It calls `onDone` with the connector row the sign-in made.
 - `idFor` makes a free connector id from a title and an adapter ([`code://src/resources/connectors/form.ts`](../../src/resources/connectors/form.ts#L74)).
-- An agent put refuses a connector of another adapter, or one whose owner is neither the agent's owner nor the host ([`channel.ts`](https://github.com/softov/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/sdk/src/agents/channel.ts#L20-L24)).
+- An agent put refuses a connector of another adapter, or one whose owner is neither the agent's owner nor the host ([`channel.ts`](https://github.com/ahpio/ahpd/blob/25be79aa5418d52adf7a0c526e38483f665c0631/packages/sdk/src/agents/channel.ts#L20-L24)).
 
 ## Who writes
 

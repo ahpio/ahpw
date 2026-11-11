@@ -8,10 +8,10 @@ revalidated: 2026-11-03
 refs:
   - git://a926d56 - the commit of `main` the facts were checked at
   - git://c97d8459 - the ahpd `main` that serves both channels and `x-ahpd/invokeOperation`
-  - https://github.com/softov/ahpd/blob/c97d8459/packages/sdk/src/tunnels/channel.ts - `x-ahpd-tunnels://`, its rows and the operations each kind offers
-  - https://github.com/softov/ahpd/blob/c97d8459/packages/sdk/src/clients/channel.ts - `x-ahpd-clients://`, its rows, the traffic counters and `drop`
-  - https://github.com/softov/ahpd/blob/c97d8459/packages/sdk/src/kinds/operations.ts - `x-ahpd/invokeOperation` and the target and input it checks
-  - https://github.com/softov/ahpd/blob/c97d8459/packages/sdk/src/types/kinds.ts - `Operation`, the shape both channels list
+  - https://github.com/ahpio/ahpd/blob/c97d8459/packages/sdk/src/tunnels/channel.ts - `x-ahpd-tunnels://`, its rows and the operations each kind offers
+  - https://github.com/ahpio/ahpd/blob/c97d8459/packages/sdk/src/clients/channel.ts - `x-ahpd-clients://`, its rows, the traffic counters and `drop`
+  - https://github.com/ahpio/ahpd/blob/c97d8459/packages/sdk/src/kinds/operations.ts - `x-ahpd/invokeOperation` and the target and input it checks
+  - https://github.com/ahpio/ahpd/blob/c97d8459/packages/sdk/src/types/kinds.ts - `Operation`, the shape both channels list
   - "[code://src/shell/manage.ts#L21-L80](../../../../src/shell/manage.ts#L21-L80) - the Manage menu, where the two entries go"
   - "[code://src/resources/computers/index.ts](../../../../src/resources/computers/index.ts) - a sidebar section, its explorer, its page and its commands: the pattern to copy"
   - "[code://src/resources/computers/Explorer.tsx](../../../../src/resources/computers/Explorer.tsx) - an `ExplorerList` over `useChannelOnEach`, with a row menu and a row button"

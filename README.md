@@ -8,7 +8,7 @@
 
 A web UI for an [Agent Host Protocol](https://microsoft.github.io/agent-host-protocol/) server.
 
-Run it inside [ahpd](https://github.com/softov/ahpd) as a plugin, or on its own with `ahpw serve` in front of any AHP server.
+Run it inside [ahpd](https://github.com/ahpio/ahpd) as a plugin, or on its own with `ahpw serve` in front of any AHP server.
 
 What you get:
 

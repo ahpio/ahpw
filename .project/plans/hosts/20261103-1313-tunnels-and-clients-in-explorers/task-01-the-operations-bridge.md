@@ -7,7 +7,7 @@ refs:
   - "[code://src/resources/computers/machines.ts#L24-L44](../../../../src/resources/computers/machines.ts#L24-L44) - the records reducer this one extends with `operations`"
   - "[code://src/resources/changes/changeset.ts#L85-L104](../../../../src/resources/changes/changeset.ts#L85-L104) - the request and refusal this one copies for `x-ahpd/invokeOperation`"
   - "[code://src/shell/notify/index.ts](../../../../src/shell/notify/index.ts) - `confirm` and `failed`"
-  - https://github.com/softov/ahpd/blob/c97d8459/packages/sdk/src/kinds/operations.ts - the params the command takes
+  - https://github.com/ahpio/ahpd/blob/c97d8459/packages/sdk/src/kinds/operations.ts - the params the command takes
 ---
 
 ## Objective

@@ -15,14 +15,14 @@ refs:
   - "[code://src/bridges/offers.ts#L20-L30](../../src/bridges/offers.ts#L20-L30) - `Offers`, all that ahpw keeps of a host's `initialize` answer `_meta`"
   - "[code://src/bridges/data.ts#L660-L663](../../src/bridges/data.ts#L660-L663) - where the `initialize` answer's `_meta` becomes `Offers`, and the rest is dropped"
   - "[code://src/resources/files/index.ts#L97](../../src/resources/files/index.ts#L97) - `ahp.openFile`, which opens a host file by its URI"
-  - https://github.com/softov/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/tools/artifacts.ts#L19-L41 - `ARTIFACTS_META` and `Artifact`, one entry as ahpd keeps and sends it
-  - https://github.com/softov/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/tools/artifacts.ts#L133-L148 - `recordArtifact`, which adds, promotes or keeps an entry
-  - https://github.com/softov/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/host/facts.ts#L191-L196 - `setArtifacts`, which sends `session/metaChanged` and moves the summary
-  - https://github.com/softov/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/host/catalogue.ts#L646 - the summary carries the session state's `_meta`
-  - https://github.com/softov/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/host/vscodemethods.ts#L373-L381 - `vscode/removeSessionArtifact`, which takes `session` and `artifactId`
-  - https://github.com/softov/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/host/handshake.ts#L450-L458 - the `initialize` answer's `_meta` says `vscode.removeSessionArtifact: true`
-  - https://github.com/softov/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/tools/index.ts#L29-L31 - the three artifact tools go to every session
-  - https://github.com/softov/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/vscoderootconfig.ts#L207-L212 - the root config key `artifactTools`, which nothing in ahpd reads
+  - https://github.com/ahpio/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/tools/artifacts.ts#L19-L41 - `ARTIFACTS_META` and `Artifact`, one entry as ahpd keeps and sends it
+  - https://github.com/ahpio/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/tools/artifacts.ts#L133-L148 - `recordArtifact`, which adds, promotes or keeps an entry
+  - https://github.com/ahpio/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/host/facts.ts#L191-L196 - `setArtifacts`, which sends `session/metaChanged` and moves the summary
+  - https://github.com/ahpio/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/host/catalogue.ts#L646 - the summary carries the session state's `_meta`
+  - https://github.com/ahpio/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/host/vscodemethods.ts#L373-L381 - `vscode/removeSessionArtifact`, which takes `session` and `artifactId`
+  - https://github.com/ahpio/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/host/handshake.ts#L450-L458 - the `initialize` answer's `_meta` says `vscode.removeSessionArtifact: true`
+  - https://github.com/ahpio/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/tools/index.ts#L29-L31 - the three artifact tools go to every session
+  - https://github.com/ahpio/ahpd/blob/f48055f070657d1f05a465aeb3d73d36504e6e2a/packages/sdk/src/vscoderootconfig.ts#L207-L212 - the root config key `artifactTools`, which nothing in ahpd reads
   - https://github.com/microsoft/vscode/blob/e2be4bf6c1991595b18f236b41778acec837afbd/src/vs/platform/agentHost/common/sessionArtifacts.ts#L33-L60 - `ISessionArtifact`, with the `chat` and `origin` fields that ahpd does not send
   - https://github.com/microsoft/vscode/blob/e2be4bf6c1991595b18f236b41778acec837afbd/src/vs/platform/agentHost/common/sessionArtifacts.ts#L136 - `readSessionArtifactsNewestFirst`: every surface lists the newest entry first
   - https://github.com/microsoft/vscode/blob/e2be4bf6c1991595b18f236b41778acec837afbd/src/vs/workbench/contrib/chat/common/sessionChatPills.ts#L14-L55 - the pill kinds above a chat input, with *Artifacts* and *References*
