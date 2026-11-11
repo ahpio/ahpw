@@ -1004,7 +1004,6 @@
       "issuerHint": "Onde a pessoa entra, se não for neste host: github ou a URL de um emissor. Deixe vazio para remover.",
       "rolesFrom": "Papéis de",
       "rolesFromHint": "Papéis extras vindos do emissor, lidos de um claim da resposta de login, como groups. Só contam papéis definidos neste host, e eles se somam aos papéis acima. Deixe vazio para não adicionar nenhum.",
-      "token": "Tokens nunca são mostrados aqui. Crie um no host com: ahpd user token {id}",
       "create": "Criar usuário",
       "save": "Salvar",
       "dropAdminTitle": "Remover seu próprio papel de admin?",

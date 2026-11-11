@@ -1004,7 +1004,6 @@
       "issuerHint": "Where they sign in, if not on this host: github or an issuer URL. Leave empty to remove it.",
       "rolesFrom": "Roles from",
       "rolesFromHint": "Extra roles from the issuer, read from a claim in its sign-in response, such as groups. Only roles defined on this host count, and they're added to the roles above. Leave empty to add none.",
-      "token": "Tokens are never shown here. Create one on the host with: ahpd user token {id}",
       "create": "Create user",
       "save": "Save",
       "dropAdminTitle": "Remove your own admin role?",

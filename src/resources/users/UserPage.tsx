@@ -129,7 +129,6 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
           <Field label={t('users/user/rolesFrom')} hint={t('users/user/rolesFromHint')}>
             <input className="web-field" value={shown.rolesFrom} readOnly={!writes} onChange={(event) => set({ rolesFrom: event.target.value })} />
           </Field>
-          <p className="web-note">{t('users/user/token', { id: shown.id.trim() === '' ? '<id>' : shown.id.trim() })}</p>
         </>
       ))}
 
