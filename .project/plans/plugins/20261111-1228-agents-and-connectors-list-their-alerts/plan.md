@@ -78,7 +78,7 @@ x-ahpd-connectors:// row { state, alerts? } -> ConnectorRow -> connectors rows d
 | Task | Status | Depends on |
 | --- | --- | --- |
 | [01 - One alert list for every row](task-01-one-alert-list-for-every-row.md) | implemented | - |
-| [02 - Agent and connector pages draw alerts](task-02-agent-and-connector-pages-draw-alerts.md) | todo | 01 |
+| [02 - Agent and connector pages draw alerts](task-02-agent-and-connector-pages-draw-alerts.md) | implemented | 01 |
 
 ## Risks and tradeoffs
 
@@ -87,8 +87,8 @@ x-ahpd-connectors:// row { state, alerts? } -> ConnectorRow -> connectors rows d
 
 ## Resume state
 
-- **Done so far:** task 01 is implemented: `AlertList` draws the plugin page's alerts, and the agent and connector rows carry `alerts` and the new states.
-- **Next action:** [task-02-agent-and-connector-pages-draw-alerts.md](task-02-agent-and-connector-pages-draw-alerts.md).
+- **Done so far:** both tasks are implemented; see [implemented.md](implemented.md).
+- **Next action:** review and merge the PR, then mark the tasks done and the plan built.
 - **Open questions:** none.
 - **Watch out for:** ahpd repeats a plugin's configured problem as an alert. The plugin page filters it out, and keeps that filter before the shared list.
 

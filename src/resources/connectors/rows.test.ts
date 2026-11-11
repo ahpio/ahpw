@@ -58,6 +58,24 @@ describe('connectorRows', () => {
     expect(rows.map((one) => one.dot)).toEqual(['failed', 'failed', 'attention', 'ok']);
   });
 
+  it('turns a row red with its first error alert, and says it on its line', () => {
+    const alerts: ConnectorRow['alerts'] = [
+      { level: 'warning', text: 'The last call failed.', ref: 'call' },
+      { level: 'error', text: 'The sign-in has expired.', ref: 'check' },
+      { level: 'error', text: 'A later error.', ref: 'open' },
+    ];
+    const [red] = connectorRows([entry({ ...row('ci', 'webhook', 'user:ana', 'ready', 'CI deploys'), alerts })], 'adapter', WORDS);
+    expect(red?.dot).toBe('failed');
+    expect(red?.lines).toEqual(['ci \u{00B7} Me', 'The sign-in has expired.']);
+    const [calm] = connectorRows([entry({ ...row('ci', 'webhook', 'user:ana', 'ready', 'CI deploys'), alerts: alerts.slice(0, 1) })], 'adapter', WORDS);
+    expect([calm?.dot, calm?.lines]).toEqual(['ok', ['ci \u{00B7} Me']]);
+  });
+
+  it('gives a failed and a disabled connector their dots', () => {
+    const rows = connectorRows([entry(row('a', 'webhook', 'host', 'failed')), entry(row('b', 'webhook', 'host', 'disabled'))], 'state', WORDS);
+    expect(rows.map((one) => [one.title, one.dot])).toEqual([['a', 'failed'], ['b', 'off']]);
+  });
+
   it('shows the host\'s name first in multi mode', () => {
     const rows = connectorRows([ENTRIES[1]!], 'state', { ...WORDS, multi: true });
     expect(rows[0]?.lines).toEqual(['Host \u{00B7} GitHub \u{00B7} team:ops']);

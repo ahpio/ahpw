@@ -1359,14 +1359,6 @@
       "create": "Create",
       "searchEngines": "Search engines",
       "noEngineMatch": "No engine matches."
-    },
-    "health": {
-      "ok": "OK",
-      "unreachable": "Unreachable",
-      "failed": "Failed",
-      "never": "Not checked yet",
-      "line": "{result} at {at}",
-      "lineWith": "{result} at {at}: {message}"
     }
   },
   "commands": {
@@ -2842,7 +2834,6 @@
       "failed": "Sign-in didn't finish",
       "with": "Signed in with {provider}.",
       "as": "Signed in as {account}.",
-      "lastCheck": "Last check: {result}, {at}.",
       "again": "Sign in again"
     },
     "page": {
@@ -2864,9 +2855,7 @@
       "unknownAdapter": "{adapter} (no plugin provides it right now)",
       "noAdapter": "This connector was created by an older host and has no adapter. Delete it and create it again.",
       "noAdapterShort": "None",
-      "models": "Models",
-      "check": "Last check",
-      "lastFailure": "Last failure"
+      "models": "Models"
     },
     "capabilities": {
       "receive": "Receives",
@@ -2886,12 +2875,6 @@
         "plugin": "By plugin",
         "type": "By type"
       }
-    },
-    "health": {
-      "ok": "Works",
-      "denied": "Refused",
-      "unreachable": "Unreachable",
-      "failed": "Failed"
     },
     "models": {
       "reading": "Loading models…",

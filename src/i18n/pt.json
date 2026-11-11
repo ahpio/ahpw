@@ -1359,14 +1359,6 @@
       "create": "Criar",
       "searchEngines": "Buscar motores",
       "noEngineMatch": "Nenhum motor corresponde."
-    },
-    "health": {
-      "ok": "OK",
-      "unreachable": "Inacessível",
-      "failed": "Falhou",
-      "never": "Ainda não verificado",
-      "line": "{result} às {at}",
-      "lineWith": "{result} às {at}: {message}"
     }
   },
   "commands": {
@@ -2842,7 +2834,6 @@
       "failed": "O login não foi concluído",
       "with": "Conectado com {provider}.",
       "as": "Conectado como {account}.",
-      "lastCheck": "Última verificação: {result}, {at}.",
       "again": "Entrar de novo"
     },
     "page": {
@@ -2864,9 +2855,7 @@
       "unknownAdapter": "{adapter} (nenhum plugin o oferece no momento)",
       "noAdapter": "Este conector foi criado por um host mais antigo e não tem adaptador. Exclua-o e crie-o de novo.",
       "noAdapterShort": "Nenhum",
-      "models": "Modelos",
-      "check": "Última verificação",
-      "lastFailure": "Última falha"
+      "models": "Modelos"
     },
     "capabilities": {
       "receive": "Recebe",
@@ -2886,12 +2875,6 @@
         "plugin": "Por plugin",
         "type": "Por tipo"
       }
-    },
-    "health": {
-      "ok": "Funciona",
-      "denied": "Recusado",
-      "unreachable": "Inacessível",
-      "failed": "Falhou"
     },
     "models": {
       "reading": "Carregando modelos…",

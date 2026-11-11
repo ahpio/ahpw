@@ -52,13 +52,6 @@ export type AgentState = 'ready' | 'failed' | 'invalid' | 'unavailable' | 'pause
 
 export const AGENT_STATES: readonly AgentState[] = ['failed', 'unavailable', 'invalid', 'paused', 'disabled', 'ready'];
 
-/** What the host last found when it built an agent's backend and asked its probe. */
-export interface AgentHealth {
-  result: 'ok' | 'unreachable' | 'failed';
-  message?: string;
-  at: string;
-}
-
 /** One stored agent, as `x-ahpd-agents` lists it: its record and its state. */
 export interface AgentRow {
   id: string;
@@ -75,7 +68,6 @@ export interface AgentRow {
   /** The engine's own values, each secret as a `{ $secret }` reference. */
   config: Record<string, unknown>;
   state: AgentState;
-  health?: AgentHealth;
   /** The problems the host found on it, kept in its memory only; absent when it has none. */
   alerts?: HostAlert[];
   /** What its engine's plugin draws for it, by surface; `main` is drawn on its page. */
@@ -164,7 +156,7 @@ export async function removeAgent(host: string, id: string): Promise<void> {
   await hostBridge(host).request(AGENTS.remove as never, { id } as never);
 }
 
-/** Builds one agent's backend again and asks its probe. Answers the row with its health. */
+/** Builds one agent's backend again and asks its probe. Answers the row with its alerts. */
 export async function checkAgent(host: string, id: string): Promise<AgentRow> {
   const answer = await hostBridge(host).request(AGENTS.check as never, { id } as never) as unknown;
   if (!isRow(answer)) throw new Error(`${AGENTS.check} answered no agent`);

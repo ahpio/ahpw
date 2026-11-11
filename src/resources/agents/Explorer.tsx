@@ -18,8 +18,9 @@ import { agentTitle, mergeAgents, type MergedAgent } from './merge.js';
 import { modelsLine, signInOf } from './words.js';
 import { plural } from '../../i18n/locales.js';
 
-/** A row's dot by its status; a standby record its host cannot open is failed, and one turned off is off. */
+/** A row's dot by its status; a record with an error alert or one its host cannot open is failed, and one turned off is off. */
 const dotOf = (agent: MergedAgent): Dot => {
+  if (agent.record?.alerts?.some((alert) => alert.level === 'error') === true) return 'failed';
   if (agent.status === 'configured') return 'ok';
   if (agent.status === 'standalone') return 'quiet';
   const state = agent.record?.state;
@@ -67,6 +68,9 @@ export default function AgentExplorer(): ReactElement {
         const owner = info === undefined && record !== undefined && agent.status === 'configured' ? ownerWord(t, record.owner, me) : undefined;
         const description = info?.description || record?.description || '';
         const icons = iconsOf(host, agent.id);
+        // The first error says what is wrong, in place of the description.
+        const error = record?.alerts?.find((alert) => alert.level === 'error');
+        const second = error?.text ?? description;
         return {
           key: refKey(host, agent.id),
           dot: dotOf(agent),
@@ -84,7 +88,7 @@ export default function AgentExplorer(): ReactElement {
               info === undefined ? undefined : plural('agents/explorer/sessions', count),
               signIn ? t('agents/explorer/needsSignIn') : undefined,
             ].filter((bit) => bit !== undefined).join(' \u{00B7} '),
-            ...(description === '' ? [] : [description]),
+            ...(second === '' ? [] : [second]),
           ],
           menu: [
             { title: t('agents/explorer/open'), onSelect: (menu) => { menu.closeMenu(); open(refKey(host, agent.id)); } },

@@ -5092,15 +5092,11 @@
   padding-top: 0;
 }
 
-.web-agent__health {
+.web-agent__check {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-}
-
-.web-agent__health > .web-note {
-  margin: 0;
 }
 
 /* A model's limits as icons and sizes; each one's full words show on hover. */

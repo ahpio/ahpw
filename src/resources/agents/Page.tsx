@@ -15,7 +15,7 @@ import { deleteAgent } from './actions.js';
 import { AgentForm } from './AgentForm.js';
 import { agentTitle, mergeAgents, type MergedAgent } from './merge.js';
 import { agentIcons } from './icons.js';
-import { healthLine, Overview } from './Overview.js';
+import { Overview } from './Overview.js';
 import { AGENT_SECTION, agentTab, agentTabKey, keepAgentTabKey, type SectionAsk } from './state.js';
 import { signInOf } from './words.js';
 import { KindPanel } from './Customizations.js';
@@ -31,11 +31,10 @@ const toneOf = (agent: MergedAgent): BadgeTone => {
   return state === 'paused' || state === 'disabled' ? 'default' : 'warning';
 };
 
-/** A record's last check, and the button that runs one again. */
-function Health({ host, record }: { host: string; record: AgentRow }): ReactElement {
+/** The button that checks a record again; what the check finds shows in its alerts. */
+function Check({ host, record }: { host: string; record: AgentRow }): ReactElement {
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
-  const line = healthLine(t, record);
   const check = (): void => {
     setBusy(true);
     checkAgent(host, record.id).then(
@@ -44,8 +43,7 @@ function Health({ host, record }: { host: string; record: AgentRow }): ReactElem
     );
   };
   return (
-    <div className="web-agent__health">
-      <span className="web-note">{line ?? t('agents/health/never')}</span>
+    <div className="web-agent__check">
       <Button size="sm" label={t('agents/actions/check')} disabled={busy} onClick={check} />
     </div>
   );
@@ -85,7 +83,7 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
       title: t('agents/page/settings'),
       child: (
         <div className="web-agent__settings">
-          <Health host={host} record={record} />
+          <Check host={host} record={record} />
           <AgentForm host={host} record={record} />
           <DangerZone
             label={t('agents/actions/remove')}
