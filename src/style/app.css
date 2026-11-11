@@ -4806,13 +4806,6 @@
   gap: var(--oo-spacing-sm);
 }
 
-.web-mint__grants {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-left: var(--oo-spacing-md);
-}
-
 .web-mint__secret {
   display: flex;
   flex-direction: column;

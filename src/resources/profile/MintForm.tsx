@@ -1,11 +1,16 @@
-import { useState, type ReactElement } from 'react';
+import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
 import { Alert, Button } from '@softov/scena/ui';
+import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
+import { useChannel } from '../../bridges/channel.js';
+import { ROOT } from '../../bridges/data.js';
+import { boundSubjects, grantCatalog, subjectsOf } from '../../bridges/grants.js';
 import type { Grant } from '../../bridges/people.js';
 import { hostSaid } from '../../bridges/said.js';
 import { mintToken, type MintedToken } from '../../bridges/tokens.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { Field } from '../../shell/view/Field.js';
+import { RoleGrants } from '../users/RoleGrants.js';
 import { EXPIRY_CHOICES, expiresAt, type ExpiryChoice } from './expiry.js';
 
 interface MintFormProps {
@@ -19,7 +24,8 @@ interface MintFormProps {
 }
 
 /**
- * *New key*: a label, how long it lasts, and every grant or a few of them.
+ * *New key*: a label, how long it lasts, and every grant, or the operations
+ * picked on cards as a role's grants are, offering only what the person holds.
  * The secret the mint answers shows once, with *Copy*, and is gone on *Done*:
  * the host keeps only its hash, and nothing here keeps it either.
  */
@@ -31,9 +37,13 @@ export function MintForm({ host, user, grants, onMinted }: MintFormProps): React
   const [day, setDay] = useState('');
   const [every, setEvery] = useState(true);
   const [picked, setPicked] = useState<readonly Grant[]>([]);
+  // Subjects added from *Add subject* that no picked grant names yet.
+  const [shown, setShown] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [minted, setMinted] = useState<MintedToken | null>(null);
+  const root = useChannel<RootState>(host, ROOT, rootReducer);
+  const catalog = useMemo(() => grantCatalog(root.state?._meta), [root.state?._meta]);
 
   const reset = (): void => {
     setOpen(false);
@@ -42,6 +52,7 @@ export function MintForm({ host, user, grants, onMinted }: MintFormProps): React
     setDay('');
     setEvery(true);
     setPicked([]);
+    setShown([]);
     setFailure(null);
   };
   const ready = !busy && !(expiry === 'date' && day === '') && (every || picked.length > 0);
@@ -85,7 +96,9 @@ export function MintForm({ host, user, grants, onMinted }: MintFormProps): React
 
   if (!open) return <span><Button size="sm" label={`+ ${t('profile/keys/mint/new')}`} onClick={() => setOpen(true)} /></span>;
 
-  const toggle = (grant: Grant, on: boolean): void => setPicked(on ? [...picked, grant] : picked.filter((one) => one !== grant));
+  const cards = subjectsOf(picked, catalog, shown);
+  const addable = boundSubjects(grants, catalog).filter((subject) => !cards.includes(subject));
+  const whose = user === undefined ? '' : 'Of';
 
   return (
     <div className="web-mint web-form">
@@ -108,15 +121,23 @@ export function MintForm({ host, user, grants, onMinted }: MintFormProps): React
           <input type="checkbox" checked={every} onChange={(event) => setEvery(event.target.checked)} />
           <span>{user === undefined ? t('profile/keys/everyGrant') : t('profile/keys/everyGrantOf', { id: user })}</span>
         </label>
-        {every ? null : (
-          <span className="web-mint__grants">
-            {grants.length === 0 ? <span className="web-note">{t('profile/keys/mint/noGrants')}</span> : grants.map((grant) => (
-              <label key={grant} className="web-input__row">
-                <input type="checkbox" checked={picked.includes(grant)} onChange={(event) => toggle(grant, event.target.checked)} />
-                <code>{grant}</code>
-              </label>
-            ))}
-          </span>
+        {every ? null : grants.length === 0 ? <span className="web-note">{t('profile/keys/mint/noGrants')}</span> : (
+          <>
+            <RoleGrants
+              grants={picked}
+              catalog={catalog}
+              shown={shown}
+              onChange={setPicked}
+              onShow={setShown}
+              readOnly={false}
+              bound={grants}
+              emptyNote={t('profile/keys/mint/noSubject')}
+              {...(addable.length === 0 ? {} : { addHint: t(`profile/keys/mint/addHint${whose}`, { id: user ?? '', subjects: addable.join(', ') }) })}
+            />
+            <span className="web-note">
+              {picked.length === 0 ? t('profile/keys/mint/holdsNone') : t(`profile/keys/mint/holds${whose}`, { id: user ?? '', grants: picked.join(' ') })}
+            </span>
+          </>
         )}
         <span className="web-input__hint">{t('profile/keys/mint/grantsHint')}</span>
       </div>
