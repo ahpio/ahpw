@@ -3,9 +3,10 @@ import { useI18n } from '@softov/scena/react';
 import { Button, Chip, type ChipState } from '@softov/scena/ui';
 import { ContextMenu } from '@softov/scena/ui/menu';
 import {
-  dropSubject, EVERY, GRANT_GROUPS, groupOf, operationState, reached, splittable, subjectInfo, subjectsOf, toggleGroup, toggleOperation,
+  boundInfo, boundSubjects, dropSubject, EVERY, GRANT_GROUPS, groupOf, heldBy, operationState, reached, splittable, subjectInfo, subjectsOf, toggleGroup, toggleOperation,
   type Grant, type GrantCatalog, type GrantGroup, type GrantSubject,
 } from '../../bridges/grants.js';
+import './role-grants.css';
 
 interface RoleGrantsProps {
   grants: readonly string[];
@@ -16,6 +17,12 @@ interface RoleGrantsProps {
   onShow: (shown: string[]) => void;
   /** A host that takes no writes: the chips say, and do nothing. */
   readOnly: boolean;
+  /** The grants these may not reach past, such as a key's owner's: only what they hold is offered. */
+  bound?: readonly string[];
+  /** What no card says, in place of a role's words. */
+  emptyNote?: string;
+  /** A note beside *Add subject*. */
+  addHint?: string;
 }
 
 /** A group switch's state: held itself, held through `<subject>:*` or a wildcard subject, or not. */
@@ -29,7 +36,7 @@ function groupState(grants: readonly string[], subject: string, group: GrantGrou
 }
 
 /** One subject: its title, how much the role reaches, its groups' switch, and its operations as chips. */
-function SubjectCard({ subject, info, known, grants, onChange, onDrop, readOnly }: {
+function SubjectCard({ subject, info: whole, known, grants, onChange, onDrop, readOnly, bound, catalog }: {
   subject: string;
   info: GrantSubject;
   /** Whether the host advertises the subject; a plugin's that is not loaded is not. */
@@ -38,10 +45,15 @@ function SubjectCard({ subject, info, known, grants, onChange, onDrop, readOnly 
   onChange: (grants: Grant[]) => void;
   onDrop: () => void;
   readOnly: boolean;
+  bound: readonly string[] | undefined;
+  catalog: GrantCatalog;
 }): ReactElement {
   const { t } = useI18n();
   const [open, setOpen] = useState(true);
   const every = subject === EVERY;
+  const info = bound === undefined ? whole : boundInfo(whole, subject, bound, catalog);
+  // A bound keeps a split inside it: a grant it does not hold is dropped, not offered.
+  const change = (next: Grant[]): void => onChange(bound === undefined ? next : next.filter((one) => heldBy(bound, one, catalog)));
   // Read, write, then any operation in neither group, as a subject the host does not advertise has; an empty row is left out.
   const rows = [
     ...GRANT_GROUPS.map((group) => ({ label: t(`users/role/groups/${group}`), operations: info.groups[group] })),
@@ -76,9 +88,9 @@ function SubjectCard({ subject, info, known, grants, onChange, onDrop, readOnly 
                 key={group}
                 label={word}
                 state={state}
-                disabled={readOnly}
+                disabled={readOnly || (bound !== undefined && !heldBy(bound, `${subject}:${group}`, catalog))}
                 title={state === 'implied' ? t('users/role/chip/coveredBy', { grant: by! }) : t(`users/role/switch/${word}`, { grant: `${subject}:${group}` })}
-                onClick={() => onChange(toggleGroup(grants, subject, group))}
+                onClick={() => change(toggleGroup(grants, subject, group))}
               />
             );
           })}
@@ -106,7 +118,7 @@ function SubjectCard({ subject, info, known, grants, onChange, onDrop, readOnly 
                       state={state}
                       title={chipTitle(operation)}
                       disabled={readOnly || (state === 'implied' && !splittable(by!))}
-                      onClick={() => onChange(toggleOperation(grants, subject, operation, info))}
+                      onClick={() => change(toggleOperation(grants, subject, operation, info))}
                     />
                   );
                 })}
@@ -124,13 +136,13 @@ function SubjectCard({ subject, info, known, grants, onChange, onDrop, readOnly 
  * subject the role names, and *Add subject* for the others the host advertises
  * (decision: a role's grants are edited as cards from the host's catalog).
  */
-export function RoleGrants({ grants, catalog, shown, onChange, onShow, readOnly }: RoleGrantsProps): ReactElement {
+export function RoleGrants({ grants, catalog, shown, onChange, onShow, readOnly, bound, emptyNote, addHint }: RoleGrantsProps): ReactElement {
   const { t } = useI18n();
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
   // scena's Button gives its click no event, so the menu opens under the box around it.
   const add = useRef<HTMLDivElement>(null);
   const subjects = subjectsOf(grants, catalog, shown);
-  const addable = [EVERY, ...Object.keys(catalog)].filter((subject) => !subjects.includes(subject));
+  const addable = (bound === undefined ? [EVERY, ...Object.keys(catalog)] : boundSubjects(bound, catalog)).filter((subject) => !subjects.includes(subject));
   return (
     <div className="web-grants">
       <div className="web-grants__legend" aria-hidden="true">
@@ -138,7 +150,7 @@ export function RoleGrants({ grants, catalog, shown, onChange, onShow, readOnly 
           <span key={state} className="oo-chip" data-state={state}>{t(`users/role/legend/${state}`)}</span>
         ))}
       </div>
-      {subjects.length === 0 ? <p className="web-note">{t('users/role/noGrants')}</p> : null}
+      {subjects.length === 0 ? <p className="web-note">{emptyNote ?? t('users/role/noGrants')}</p> : null}
       {subjects.map((subject) => (
         <SubjectCard
           key={subject}
@@ -152,6 +164,8 @@ export function RoleGrants({ grants, catalog, shown, onChange, onShow, readOnly 
             onChange(dropSubject(grants, subject));
           }}
           readOnly={readOnly}
+          bound={bound}
+          catalog={catalog}
         />
       ))}
       {readOnly || addable.length === 0 ? null : (
@@ -164,6 +178,7 @@ export function RoleGrants({ grants, catalog, shown, onChange, onShow, readOnly 
               setMenu(menu === null && box !== undefined ? { x: box.left, y: box.bottom + 2 } : null);
             }}
           />
+          {addHint === undefined ? null : <span className="web-note">{addHint}</span>}
         </div>
       )}
       {menu === null ? null : (
