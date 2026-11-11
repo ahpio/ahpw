@@ -4,8 +4,7 @@
  * `quotaSnapshots`, and ahpd's own `ahpd.context` and `ahpd.account`.
  *
  * ahpd puts them on the session's `_meta` before and between turns, and on
- * each turn's usage `_meta`. A connector's health carries `quotaSnapshots`
- * and `account` for a login's account across its sessions.
+ * each turn's usage `_meta`.
  * https://github.com/microsoft/vscode/blob/289eaeb2b9d3eaa4b7f2bcb68acb0f4e22a8d5a9/src/vs/platform/agentHost/common/meta/vscode/agentUsageMeta.ts#L106-L160
  */
 

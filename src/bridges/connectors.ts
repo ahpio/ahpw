@@ -22,8 +22,8 @@ import type { PluginView } from './views.js';
 import { hostBridge } from './data.js';
 import type { Icon } from './icons.js';
 import type { Offers } from './offers.js';
+import type { HostAlert } from './plugins.js';
 import { recordsReducer } from './people.js';
-import type { PlanAccount, QuotaSnapshot } from './usage-meta.js';
 
 type Bag = Record<string, unknown>;
 
@@ -95,37 +95,13 @@ export interface AdapterRow {
  * Where a connector is: `ready` answers, `unauthorized` is open but its
  * provider refused its credential at the last check, `invalid` no longer fits
  * its adapter's schema or its adapter refused to open it, `unavailable` has no
- * plugin registering its adapter.
+ * plugin registering its adapter, `failed` could not be opened by its adapter,
+ * as when a key it reads is missing, and `disabled` is not opened, asked or
+ * served.
  */
-export type ConnectorState = 'ready' | 'unauthorized' | 'invalid' | 'unavailable';
+export type ConnectorState = 'ready' | 'unauthorized' | 'failed' | 'invalid' | 'unavailable' | 'disabled';
 
-export const CONNECTOR_STATES: readonly ConnectorState[] = ['unavailable', 'invalid', 'unauthorized', 'ready'];
-
-/** What a connector's last check found. */
-export type CheckOutcome = 'ok' | 'denied' | 'unreachable' | 'failed';
-
-/** One call a connector made or answered. */
-export interface CallRow {
-  /** When it happened, as an ISO time. */
-  at: string;
-  ok: boolean;
-  /** The status the service answered, when there was one. */
-  status?: number;
-  /** What went wrong, as the host said it. */
-  error?: string;
-}
-
-/** What the host knows of a connector's health, kept in its memory only. */
-export interface ConnectorHealth {
-  /** The last check, and when it ran. */
-  check?: { result: CheckOutcome; message?: string; at: string };
-  lastCall?: CallRow;
-  lastFailure?: CallRow;
-  /** The plan limits of a login's account, in VS Code's `quotaSnapshots` shape; an empty map is an account with none. */
-  quotaSnapshots?: Record<string, QuotaSnapshot>;
-  /** The plan type and the provider of a login's account. */
-  account?: PlanAccount;
-}
+export const CONNECTOR_STATES: readonly ConnectorState[] = ['failed', 'unavailable', 'invalid', 'unauthorized', 'disabled', 'ready'];
 
 /** One stored connector, as `x-ahpd-connectors` lists it. */
 export interface ConnectorRow {
@@ -137,8 +113,8 @@ export interface ConnectorRow {
   /** The values filled in, each secret as a `{ $secret }` reference. */
   config: Record<string, unknown>;
   state: ConnectorState;
-  /** Absent on a host from before health, and until the host knows something. */
-  health?: ConnectorHealth;
+  /** The problems the host found on it, kept in its memory only; absent when it has none. */
+  alerts?: HostAlert[];
   /** What its adapter's plugin draws for it, by surface; `main` is drawn on its page. */
   views?: Record<string, PluginView>;
 }

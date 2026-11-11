@@ -1,0 +1,24 @@
+/* A row's alerts, one list per level. */
+.web-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+/* A ref is one long word, such as a vault path; it wraps rather than leave the box. */
+.web-alerts li {
+  overflow-wrap: anywhere;
+}
+
+.web-alerts__ref,
+.web-alerts__at {
+  margin-left: var(--oo-spacing-sm);
+  color: var(--oo-color-muted);
+}
+
+.web-alerts__ref {
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-sm);
+}

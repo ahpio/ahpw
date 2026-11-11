@@ -5001,19 +5001,6 @@
   margin: 0;
 }
 
-.web-plugin__alerts {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 0;
-  padding-left: 1.1rem;
-}
-
-.web-plugin__alerts code {
-  margin-left: var(--oo-spacing-sm);
-  color: var(--oo-color-muted);
-}
-
 .web-plugin__entry {
   font-family: var(--oo-font-mono);
   font-size: var(--oo-font-size-sm);
@@ -5105,15 +5092,11 @@
   padding-top: 0;
 }
 
-.web-agent__health {
+.web-agent__check {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-}
-
-.web-agent__health > .web-note {
-  margin: 0;
 }
 
 /* A model's limits as icons and sizes; each one's full words show on hover. */

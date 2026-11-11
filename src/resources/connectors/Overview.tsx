@@ -1,21 +1,19 @@
 import type { ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
-import { receiveUrl, type AdapterRow, type Capability, type ConnectorHealth, type ConnectorRow } from '../../bridges/connectors.js';
+import { receiveUrl, type AdapterRow, type Capability, type ConnectorRow } from '../../bridges/connectors.js';
 import { ahpPaths, httpRoot } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { EMOJIcon } from '../emojis.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostIcon } from '../../shell/HostIcon.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
+import { AlertList } from '../../shell/view/AlertList.js';
 import { copyText } from '../../shell/controls/CopyButton.js';
 import { done } from '../../shell/notify/index.js';
 import { PluginViewPanel } from '../plugins/PluginViewPanel.js';
-import { when } from '../sessions/turn.js';
 import { meOn, ownerWord } from './actions.js';
 import { inputsOf } from './inputs.js';
-import { accountOf, quotasOf } from '../../bridges/usage-meta.js';
-import { PlanPart } from '../sessions/Usage.js';
 import './overview.css';
 
 /** The capability types ahpd names, in the order their groups show, with each one's icon. Another type is shown by its name, last. */
@@ -91,24 +89,9 @@ function CapabilityRow({ capability, url, view }: { capability: Capability; url:
   );
 }
 
-/** The health facts: the last check, and the last failure when there is one. */
-function healthFacts(t: (key: string, values?: Record<string, unknown>) => string, health: ConnectorHealth | undefined): DetailItem[] {
-  const out: DetailItem[] = [];
-  const check = health?.check;
-  if (check !== undefined) {
-    const words = [t(`connectors/health/${check.result}`), when(check.at), ...(check.message === undefined || check.message === '' ? [] : [check.message])];
-    out.push({ label: t('connectors/page/check'), value: words.join(' \u{00B7} ') });
-  }
-  const failure = health?.lastFailure;
-  if (failure !== undefined) {
-    const why = failure.error ?? (failure.status === undefined ? undefined : String(failure.status));
-    out.push({ label: t('connectors/page/lastFailure'), value: [when(failure.at), ...(why === undefined ? [] : [why])].join(' \u{00B7} '), span: true });
-  }
-  return out;
-}
-
 /**
- * What a connector is: the view its plugin draws for it, its adapter and the
+ * What a connector is: the problems the host found on it, the view its plugin
+ * draws for it, its adapter and the
  * plugin that offers it, whose it is, its state, and what its adapter declares
  * it does. An adapter no plugin
  * registers now is named by its name. Capabilities are grouped by type.
@@ -122,7 +105,6 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
     ...(embedMode() === 'multi' ? [{ label: t('common/host'), value: <HostTag host={host} />, span: true }] : []),
     { label: t('connectors/page/id'), value: row.id },
     { label: t('connectors/page/state'), value: t(`connectors/states/${row.state}`) },
-    ...healthFacts(t, row.health),
     {
       label: t('connectors/page/adapter'),
       value: adapter === undefined
@@ -145,8 +127,8 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
   return (
     <div className="web-connector__overview">
       {adapter === undefined || adapter.description === '' ? null : <p>{adapter.description}</p>}
+      <AlertList alerts={row.alerts ?? []} />
       <DetailList items={facts} columns={2} />
-      <PlanPart quotas={quotasOf(row.health?.quotaSnapshots)} account={accountOf(row.health?.account)} />
       <Text variant="h3" text={t('connectors/page/capabilities', { count: capabilities.length })} />
       {capabilities.length === 0 ? <p className="web-note">{t('connectors/page/noCapabilities')}</p> : (
         byType(capabilities).map((group) => (

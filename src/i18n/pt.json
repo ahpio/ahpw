@@ -202,6 +202,25 @@
       "previous": "Correspondência anterior",
       "next": "Próxima correspondência",
       "clear": "Limpar o filtro"
+    },
+    "alerts": {
+      "title": "Alertas",
+      "error": {
+        "one": "{count} erro",
+        "other": "{count} erros"
+      },
+      "warning": {
+        "one": "{count} aviso",
+        "other": "{count} avisos"
+      },
+      "info": {
+        "one": "{count} informação",
+        "other": "{count} informações"
+      },
+      "notice": {
+        "one": "{count} nota",
+        "other": "{count} notas"
+      }
     }
   },
   "close": {
@@ -1264,7 +1283,10 @@
       },
       "standby": {
         "unavailable": "o motor {engine} não está carregado",
-        "invalid": "as configurações não correspondem ao motor"
+        "invalid": "as configurações não correspondem ao motor",
+        "failed": "o motor {engine} não conseguiu abri-lo",
+        "paused": "pausado",
+        "disabled": "desativado"
       }
     },
     "page": {
@@ -1302,7 +1324,9 @@
       "settings": "Configurações",
       "standby": {
         "unavailable": "O motor {engine} não está carregado, então este agente não está disponível.",
-        "invalid": "Estas configurações não correspondem ao motor {engine}, então este agente não está disponível."
+        "invalid": "Estas configurações não correspondem ao motor {engine}, então este agente não está disponível.",
+        "paused": "Pausado. As sessões mantêm o histórico, e ele não aceita sessão nem mensagem nova até ser ativado.",
+        "disabled": "Desativado. As sessões mantêm o histórico, e o host não o abre nem o serve até ser ativado."
       }
     },
     "actions": {
@@ -1335,14 +1359,6 @@
       "create": "Criar",
       "searchEngines": "Buscar motores",
       "noEngineMatch": "Nenhum motor corresponde."
-    },
-    "health": {
-      "ok": "OK",
-      "unreachable": "Inacessível",
-      "failed": "Falhou",
-      "never": "Ainda não verificado",
-      "line": "{result} às {at}",
-      "lineWith": "{result} às {at}: {message}"
     }
   },
   "commands": {
@@ -2699,7 +2715,6 @@
       "notLoaded": "Não foi carregado, então não se sabe o que ele oferece.",
       "spec": "Como está configurado",
       "loadFailed": "Não carregou",
-      "alerts": "Alertas",
       "failing": "Tem erros"
     },
     "facts": {
@@ -2732,24 +2747,6 @@
     "running": {
       "yes": "Sim",
       "no": "Não, carrega na próxima vez que o host iniciar"
-    },
-    "alerts": {
-      "error": {
-        "one": "{count} erro",
-        "other": "{count} erros"
-      },
-      "warning": {
-        "one": "{count} aviso",
-        "other": "{count} avisos"
-      },
-      "info": {
-        "one": "{count} informação",
-        "other": "{count} informações"
-      },
-      "notice": {
-        "one": "{count} nota",
-        "other": "{count} notas"
-      }
     }
   },
   "connectors": {
@@ -2775,12 +2772,16 @@
       "ready": "Pronto",
       "unauthorized": "Não autorizado",
       "invalid": "Inválido",
-      "unavailable": "Indisponível"
+      "unavailable": "Indisponível",
+      "failed": "Falhou",
+      "paused": "Pausado",
+      "disabled": "Desativado"
     },
     "stateNotes": {
       "unauthorized": "O provedor recusou a credencial na última verificação. Entre de novo, ou atualize as configurações.",
       "invalid": "As configurações não correspondem ao adaptador, ou o adaptador não conseguiu abri-lo. Atualize as configurações para abri-lo de novo.",
-      "unavailable": "Nenhum plugin oferece o adaptador no momento. Ative o plugin que oferece {adapter} para abri-lo de novo."
+      "unavailable": "Nenhum plugin oferece o adaptador no momento. Ative o plugin que oferece {adapter} para abri-lo de novo.",
+      "disabled": "Desativado. Não responde chamadas nem lista modelos. Os agentes que o nomeiam o mantêm."
     },
     "owners": {
       "me": "Eu",
@@ -2833,7 +2834,6 @@
       "failed": "O login não foi concluído",
       "with": "Conectado com {provider}.",
       "as": "Conectado como {account}.",
-      "lastCheck": "Última verificação: {result}, {at}.",
       "again": "Entrar de novo"
     },
     "page": {
@@ -2855,9 +2855,7 @@
       "unknownAdapter": "{adapter} (nenhum plugin o oferece no momento)",
       "noAdapter": "Este conector foi criado por um host mais antigo e não tem adaptador. Exclua-o e crie-o de novo.",
       "noAdapterShort": "Nenhum",
-      "models": "Modelos",
-      "check": "Última verificação",
-      "lastFailure": "Última falha"
+      "models": "Modelos"
     },
     "capabilities": {
       "receive": "Recebe",
@@ -2877,12 +2875,6 @@
         "plugin": "Por plugin",
         "type": "Por tipo"
       }
-    },
-    "health": {
-      "ok": "Funciona",
-      "denied": "Recusado",
-      "unreachable": "Inacessível",
-      "failed": "Falhou"
     },
     "models": {
       "reading": "Carregando modelos…",

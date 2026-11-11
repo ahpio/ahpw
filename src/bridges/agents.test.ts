@@ -54,8 +54,8 @@ describe('put, check and remove', () => {
     await expect(putAgent('h', { id: 'claude', engine: 'claude', owner: 'host', name: 'Claude', config: {} })).rejects.toThrow('answered no agent');
   });
 
-  it('check sends the id and answers the row with its health', async () => {
-    const checked: AgentRow = { ...AGENT, health: { result: 'ok', at: '2026-10-24T10:00:00Z' } };
+  it('check sends the id and answers the row with its alerts', async () => {
+    const checked: AgentRow = { ...AGENT, alerts: [{ level: 'warning', text: 'The probe did not pass.', ref: 'probe', at: '2026-10-24T10:00:00Z' }] };
     request.mockResolvedValue(checked);
     await expect(checkAgent('h', 'claude')).resolves.toEqual(checked);
     expect(request).toHaveBeenLastCalledWith(AGENTS.check, { id: 'claude' });

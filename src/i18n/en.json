@@ -202,6 +202,25 @@
       "previous": "Previous match",
       "next": "Next match",
       "clear": "Clear the filter"
+    },
+    "alerts": {
+      "title": "Alerts",
+      "error": {
+        "one": "{count} error",
+        "other": "{count} errors"
+      },
+      "warning": {
+        "one": "{count} warning",
+        "other": "{count} warnings"
+      },
+      "info": {
+        "one": "{count} info",
+        "other": "{count} infos"
+      },
+      "notice": {
+        "one": "{count} notice",
+        "other": "{count} notices"
+      }
     }
   },
   "close": {
@@ -1264,7 +1283,10 @@
       },
       "standby": {
         "unavailable": "the {engine} engine isn't loaded",
-        "invalid": "the settings don't match the engine"
+        "invalid": "the settings don't match the engine",
+        "failed": "the {engine} engine couldn't open it",
+        "paused": "paused",
+        "disabled": "turned off"
       }
     },
     "page": {
@@ -1302,7 +1324,9 @@
       "settings": "Settings",
       "standby": {
         "unavailable": "The {engine} engine isn't loaded, so this agent isn't available.",
-        "invalid": "These settings don't match the {engine} engine, so this agent isn't available."
+        "invalid": "These settings don't match the {engine} engine, so this agent isn't available.",
+        "paused": "Paused. Its sessions keep their history, and it takes no new session or message until it is enabled.",
+        "disabled": "Disabled. Its sessions keep their history, and the host doesn't open or serve it until it is enabled."
       }
     },
     "actions": {
@@ -1335,14 +1359,6 @@
       "create": "Create",
       "searchEngines": "Search engines",
       "noEngineMatch": "No engine matches."
-    },
-    "health": {
-      "ok": "OK",
-      "unreachable": "Unreachable",
-      "failed": "Failed",
-      "never": "Not checked yet",
-      "line": "{result} at {at}",
-      "lineWith": "{result} at {at}: {message}"
     }
   },
   "commands": {
@@ -2699,7 +2715,6 @@
       "notLoaded": "It hasn't loaded, so what it provides is unknown.",
       "spec": "As configured",
       "loadFailed": "It didn't load",
-      "alerts": "Alerts",
       "failing": "It has errors"
     },
     "facts": {
@@ -2732,24 +2747,6 @@
     "running": {
       "yes": "Yes",
       "no": "No, it loads the next time the host starts"
-    },
-    "alerts": {
-      "error": {
-        "one": "{count} error",
-        "other": "{count} errors"
-      },
-      "warning": {
-        "one": "{count} warning",
-        "other": "{count} warnings"
-      },
-      "info": {
-        "one": "{count} info",
-        "other": "{count} infos"
-      },
-      "notice": {
-        "one": "{count} notice",
-        "other": "{count} notices"
-      }
     }
   },
   "connectors": {
@@ -2775,12 +2772,16 @@
       "ready": "Ready",
       "unauthorized": "Unauthorized",
       "invalid": "Invalid",
-      "unavailable": "Unavailable"
+      "unavailable": "Unavailable",
+      "failed": "Failed",
+      "paused": "Paused",
+      "disabled": "Disabled"
     },
     "stateNotes": {
       "unauthorized": "The provider refused its credential at the last check. Sign in again, or update its settings.",
       "invalid": "Its settings don't match its adapter, or the adapter couldn't open it. Update its settings to open it again.",
-      "unavailable": "No plugin provides its adapter right now. Enable the plugin that offers {adapter} to open it again."
+      "unavailable": "No plugin provides its adapter right now. Enable the plugin that offers {adapter} to open it again.",
+      "disabled": "Disabled. It answers no call and lists no model. Agents that name it keep it."
     },
     "owners": {
       "me": "Me",
@@ -2833,7 +2834,6 @@
       "failed": "Sign-in didn't finish",
       "with": "Signed in with {provider}.",
       "as": "Signed in as {account}.",
-      "lastCheck": "Last check: {result}, {at}.",
       "again": "Sign in again"
     },
     "page": {
@@ -2855,9 +2855,7 @@
       "unknownAdapter": "{adapter} (no plugin provides it right now)",
       "noAdapter": "This connector was created by an older host and has no adapter. Delete it and create it again.",
       "noAdapterShort": "None",
-      "models": "Models",
-      "check": "Last check",
-      "lastFailure": "Last failure"
+      "models": "Models"
     },
     "capabilities": {
       "receive": "Receives",
@@ -2877,12 +2875,6 @@
         "plugin": "By plugin",
         "type": "By type"
       }
-    },
-    "health": {
-      "ok": "Works",
-      "denied": "Refused",
-      "unreachable": "Unreachable",
-      "failed": "Failed"
     },
     "models": {
       "reading": "Loading models…",

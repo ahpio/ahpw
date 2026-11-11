@@ -15,7 +15,7 @@ import { deleteAgent } from './actions.js';
 import { AgentForm } from './AgentForm.js';
 import { agentTitle, mergeAgents, type MergedAgent } from './merge.js';
 import { agentIcons } from './icons.js';
-import { healthLine, Overview } from './Overview.js';
+import { Overview } from './Overview.js';
 import { AGENT_SECTION, agentTab, agentTabKey, keepAgentTabKey, type SectionAsk } from './state.js';
 import { signInOf } from './words.js';
 import { KindPanel } from './Customizations.js';
@@ -26,14 +26,15 @@ import { DangerZone } from '../../shell/controls/DangerZone.js';
 const toneOf = (agent: MergedAgent): BadgeTone => {
   if (agent.status === 'standalone') return 'default';
   if (agent.status === 'configured') return 'success';
-  return agent.record?.state === 'unavailable' ? 'danger' : 'warning';
+  const state = agent.record?.state;
+  if (state === 'unavailable' || state === 'failed') return 'danger';
+  return state === 'paused' || state === 'disabled' ? 'default' : 'warning';
 };
 
-/** A record's last check, and the button that runs one again. */
-function Health({ host, record }: { host: string; record: AgentRow }): ReactElement {
+/** The button that checks a record again; what the check finds shows in its alerts. */
+function Check({ host, record }: { host: string; record: AgentRow }): ReactElement {
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
-  const line = healthLine(t, record);
   const check = (): void => {
     setBusy(true);
     checkAgent(host, record.id).then(
@@ -42,8 +43,7 @@ function Health({ host, record }: { host: string; record: AgentRow }): ReactElem
     );
   };
   return (
-    <div className="web-agent__health">
-      <span className="web-note">{line ?? t('agents/health/never')}</span>
+    <div className="web-agent__check">
       <Button size="sm" label={t('agents/actions/check')} disabled={busy} onClick={check} />
     </div>
   );
@@ -83,7 +83,7 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
       title: t('agents/page/settings'),
       child: (
         <div className="web-agent__settings">
-          <Health host={host} record={record} />
+          <Check host={host} record={record} />
           <AgentForm host={host} record={record} />
           <DangerZone
             label={t('agents/actions/remove')}
@@ -107,7 +107,7 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
           uri={record === undefined ? provider : `${AGENTS.channel}${provider}`}
           state={(
             <>
-              <Badge tone={toneOf(agent)} text={t(`agents/explorer/status/${agent.status}`)} />
+              <Badge tone={toneOf(agent)} text={agent.status === 'standby' && record !== undefined ? t(`connectors/states/${record.state}`) : t(`agents/explorer/status/${agent.status}`)} />
               {signIn.some((one) => one.required) ? <Badge tone="warning" text={t('agents/page/needsSignIn')} /> : null}
             </>
           )}
@@ -116,8 +116,8 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
           {info === undefined ? null : <Button label={t('agents/newSession')} variant="primary" onClick={() => void scena.commands.execute('ahp.newSession', { host, provider })} />}
         </div>
       </div>
-      {agent.status !== 'standby' || record === undefined ? null : (
-        <Alert tone={record.state === 'unavailable' ? 'danger' : 'warning'} message={t(`agents/page/standby/${record.state}`, { engine: record.engine })} />
+      {agent.status !== 'standby' || record === undefined || record.state === 'failed' ? null : (
+        <Alert tone={record.state === 'disabled' ? 'info' : record.state === 'unavailable' ? 'danger' : 'warning'} message={t(`agents/page/standby/${record.state}`, { engine: record.engine })} />
       )}
       {tabs.length === 1 ? overview : (
         <Tabs

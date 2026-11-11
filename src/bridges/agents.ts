@@ -18,6 +18,7 @@
 
 import type { Capability } from './connectors.js';
 import type { Icon } from './icons.js';
+import type { HostAlert } from './plugins.js';
 import type { PluginView } from './views.js';
 import { hostBridge } from './data.js';
 import type { ConnectorOwner } from './connectors.js';
@@ -41,20 +42,15 @@ export const AGENTS = {
 export type AgentOwner = ConnectorOwner;
 
 /**
- * Where an agent is: `ready` is served by the host, `invalid` no longer fits
- * its engine's schema or its engine refused to open it, `unavailable` has no plugin
- * registering its engine.
+ * Where an agent is: `ready` is served by the host, `failed` could not be
+ * opened by its engine, as when a key it reads is missing, `invalid` no longer
+ * fits its engine's schema or its engine refused to open it, `unavailable` has
+ * no plugin registering its engine, `paused` starts nothing new while it stays
+ * open, and `disabled` is not opened, asked or served.
  */
-export type AgentState = 'ready' | 'invalid' | 'unavailable';
+export type AgentState = 'ready' | 'failed' | 'invalid' | 'unavailable' | 'paused' | 'disabled';
 
-export const AGENT_STATES: readonly AgentState[] = ['unavailable', 'invalid', 'ready'];
-
-/** What the host last found when it built an agent's backend and asked its probe. */
-export interface AgentHealth {
-  result: 'ok' | 'unreachable' | 'failed';
-  message?: string;
-  at: string;
-}
+export const AGENT_STATES: readonly AgentState[] = ['failed', 'unavailable', 'invalid', 'paused', 'disabled', 'ready'];
 
 /** One stored agent, as `x-ahpd-agents` lists it: its record and its state. */
 export interface AgentRow {
@@ -72,7 +68,8 @@ export interface AgentRow {
   /** The engine's own values, each secret as a `{ $secret }` reference. */
   config: Record<string, unknown>;
   state: AgentState;
-  health?: AgentHealth;
+  /** The problems the host found on it, kept in its memory only; absent when it has none. */
+  alerts?: HostAlert[];
   /** What its engine's plugin draws for it, by surface; `main` is drawn on its page. */
   views?: Record<string, PluginView>;
 }
@@ -159,7 +156,7 @@ export async function removeAgent(host: string, id: string): Promise<void> {
   await hostBridge(host).request(AGENTS.remove as never, { id } as never);
 }
 
-/** Builds one agent's backend again and asks its probe. Answers the row with its health. */
+/** Builds one agent's backend again and asks its probe. Answers the row with its alerts. */
 export async function checkAgent(host: string, id: string): Promise<AgentRow> {
   const answer = await hostBridge(host).request(AGENTS.check as never, { id } as never) as unknown;
   if (!isRow(answer)) throw new Error(`${AGENTS.check} answered no agent`);

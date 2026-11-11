@@ -9,7 +9,9 @@ export type ConnectorGrouping = 'adapter' | 'owner' | 'state';
 export const CONNECTOR_GROUPINGS: readonly ConnectorGrouping[] = ['adapter', 'owner', 'state'];
 
 const DOT: Record<ConnectorState, Dot> = {
+  failed: 'failed',
   unavailable: 'failed',
+  disabled: 'off',
   invalid: 'attention',
   unauthorized: 'attention',
   ready: 'ok',
@@ -78,9 +80,11 @@ export function connectorRows(entries: readonly ConnectorEntry[], by: ConnectorG
   return arrange(placed, (one) => one.group).map(({ entry, group }) => {
     const { row } = entry;
     const title = titleOf(row);
+    // An error is louder than the state, as on a plugin's row.
+    const error = row.alerts?.find((alert) => alert.level === 'error');
     return {
       key: refKey(entry.host, row.id),
-      dot: DOT[row.state],
+      dot: error === undefined ? DOT[row.state] : 'failed',
       dotLabel: words.state(row.state),
       title,
       ...iconsOf(entry),
@@ -91,6 +95,7 @@ export function connectorRows(entries: readonly ConnectorEntry[], by: ConnectorG
           by === 'adapter' ? undefined : adapterOf(entry),
           by === 'owner' ? undefined : words.owner(row.owner, entry.me),
         ].filter((bit) => bit !== undefined).join(' \u{00B7} '),
+        ...(error === undefined ? [] : [error.text]),
       ].filter((line) => line !== ''),
       menu: words.menu(entry),
       group: { key: group.key, label: group.label, ...(by === 'adapter' ? iconsOf(entry) : {}) },

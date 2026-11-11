@@ -7,6 +7,7 @@ import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
+import { AlertList } from '../../shell/view/AlertList.js';
 import { meOn, ownerWord } from '../connectors/actions.js';
 import { PluginViewPanel } from '../plugins/PluginViewPanel.js';
 import { customizationKinds, emptyKinds, kindCount, kindTabKey } from './kinds.js';
@@ -15,17 +16,9 @@ import { capabilitiesOf, limitsOf, modelsLine, signInOf } from './words.js';
 /** The policy states a person reads, under `agents/page/policy/<state>`; an enabled model says nothing. */
 const POLICY = new Set(['disabled', 'unconfigured']);
 
-/** What the host last found when it checked an agent, as one line. */
-export function healthLine(t: (key: string, values?: Record<string, unknown>) => string, record: AgentRow): string | undefined {
-  const { health } = record;
-  if (health === undefined) return undefined;
-  const at = new Date(health.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const said = t(`agents/health/${health.result}`);
-  return health.message === undefined ? t('agents/health/line', { at, result: said }) : t('agents/health/lineWith', { at, result: said, message: health.message });
-}
-
 /**
- * One agent's Overview: what it is, the view its plugin draws for it, its
+ * One agent's Overview: what it is, the problems the host found on it, the
+ * view its plugin draws for it, its
  * record's engine, owner and plugin, its models, what it is customized with
  * and how to sign in to it. An agent the host does not serve has its record's
  * facts only.
@@ -38,7 +31,6 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
   const capabilities = info === undefined ? [] : capabilitiesOf(info);
   const signIn = info === undefined ? [] : signInOf(info);
   const count = sessions.filter((one) => one.provider === id).length;
-  const health = record === undefined ? undefined : healthLine(t, record);
   const facts: DetailItem[] = [
     ...(embedMode() === 'multi' ? [{ label: t('common/host'), value: <HostTag host={host} /> }] : []),
     { label: t('agents/page/facts/provider'), value: <code>{id}</code> },
@@ -46,7 +38,7 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
       { label: t('agents/page/facts/engine'), value: engine?.title ?? record.engine },
       { label: t('agents/page/facts/owner'), value: ownerWord(t, record.owner, meOn(offers)) },
       ...(engine === undefined ? [] : [{ label: t('agents/page/facts/plugin'), value: <code>{engine.plugin}</code> }]),
-      { label: t('agents/page/facts/state'), value: [t(`connectors/states/${record.state}`), health].filter((bit) => bit !== undefined).join(' \u{00B7} ') },
+      { label: t('agents/page/facts/state'), value: t(`connectors/states/${record.state}`) },
     ]),
     ...(info === undefined ? [] : [
       { label: t('agents/page/facts/models'), value: modelsLine(info) },
@@ -59,6 +51,7 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
   return (
     <div className="web-agent__overview">
       {description === '' ? null : <Markdown text={description} />}
+      <AlertList alerts={record?.alerts ?? []} />
       <DetailList items={facts} columns={2} />
       {record?.views?.main === undefined || engine === undefined ? null : <PluginViewPanel host={host} plugin={engine.plugin} at={`agent:${record.id}`} view={record.views.main} />}
       {info === undefined ? null : <Served host={host} agent={info} signIn={signIn} />}

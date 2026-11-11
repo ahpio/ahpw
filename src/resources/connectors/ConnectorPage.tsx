@@ -19,6 +19,8 @@ const TONE: Record<ConnectorState, BadgeTone> = {
   invalid: 'warning',
   unauthorized: 'warning',
   unavailable: 'danger',
+  failed: 'danger',
+  disabled: 'default',
 };
 
 /** One connector: its head with its state, over Overview, Models when its adapter serves models, and Settings with Delete at its bottom. */
@@ -50,8 +52,8 @@ export default function ConnectorPage({ host, connector: id }: { host: string; c
           state={<Badge tone={TONE[row.state]} text={t(`connectors/states/${row.state}`)} />}
         />
       </div>
-      {row.state === 'ready' ? null : (
-        <Alert tone={row.state === 'unavailable' ? 'danger' : 'warning'} message={row.adapter === undefined ? t('connectors/page/noAdapter') : t(`connectors/stateNotes/${row.state}`, { adapter: row.adapter })} />
+      {row.state === 'ready' || row.state === 'failed' ? null : (
+        <Alert tone={row.state === 'disabled' ? 'info' : row.state === 'unavailable' ? 'danger' : 'warning'} message={row.adapter === undefined ? t('connectors/page/noAdapter') : t(`connectors/stateNotes/${row.state}`, { adapter: row.adapter })} />
       )}
       <Tabs
         tabs={[

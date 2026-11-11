@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
 import { Alert, DetailList, Markdown, Text, type DetailItem } from '@softov/scena/ui';
-import type { PluginAlert, PluginRow } from '../../bridges/plugins.js';
-import { plural } from '../../i18n/locales.js';
+import type { PluginRow } from '../../bridges/plugins.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
+import { AlertList } from '../../shell/view/AlertList.js';
 import { RemovableChip } from '../../shell/view/RemovableChip.js';
 import { categoryWord } from './Explorer.js';
 import { PluginViewPanel } from './PluginViewPanel.js';
@@ -12,9 +12,6 @@ import { PROVIDE_ORDER, providedGroups } from './provides.js';
 
 /** A state that is a problem, and how loud it is. */
 const PROBLEM_TONE: Partial<Record<PluginRow['state'], 'danger' | 'warning'>> = { error: 'danger', missing: 'danger', incompatible: 'warning', unconfigured: 'warning' };
-
-/** The alert levels, loudest first, and the tone each is drawn in. */
-const ALERT_LEVELS: [PluginAlert['level'], 'danger' | 'warning' | 'info'][] = [['error', 'danger'], ['warning', 'warning'], ['info', 'info'], ['notice', 'info']];
 
 /**
  * What a plugin is: its description and problem, the view it draws on its page, the facts of where it comes
@@ -58,26 +55,7 @@ export function Overview({ host, id, row }: { host: string; id: string; row: Plu
         </div>
       )}
 
-      {alerts.length === 0 ? null : (
-        <>
-          <Text variant="h3" text={t('plugins/page/alerts')} />
-          {ALERT_LEVELS.map(([level, alertTone]) => {
-            const said = alerts.filter((alert) => alert.level === level);
-            return said.length === 0 ? null : (
-              <Alert key={level} tone={alertTone} title={plural(`plugins/alerts/${level}`, said.length)}>
-                <ul className="web-plugin__alerts">
-                  {said.map((alert, at) => (
-                    <li key={alert.ref ?? `#${String(at)}`}>
-                      {alert.text}
-                      {alert.ref === undefined ? null : <code className="web-plugin__entry">{alert.ref}</code>}
-                    </li>
-                  ))}
-                </ul>
-              </Alert>
-            );
-          })}
-        </>
-      )}
+      <AlertList alerts={alerts} />
 
       <Text variant="h3" text={t('plugins/page/provides')} />
       {row.undeclared === true ? <p className="web-note">{t('plugins/page/undeclared')}</p>

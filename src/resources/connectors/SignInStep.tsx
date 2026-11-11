@@ -4,7 +4,7 @@ import { Alert, Button, CheckBox, TextField } from '@softov/scena/ui';
 import { awaitSignIn, finishSignIn, startSignIn, type ConnectorRow, type ConnectorWanted, type SignInRow, type SignInStarted } from '../../bridges/connectors.js';
 import { hostSaid } from '../../bridges/said.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
-import { when } from '../sessions/turn.js';
+import { ALERT_LEVELS } from '../../shell/view/AlertList.js';
 import { signedInOf } from './form.js';
 import './signin.css';
 
@@ -54,7 +54,8 @@ export function SignInStep({ host, signIn, held, provider, wanted, disabled, byH
   // What the host lists wins over what the sign-in answered, since a later check changes it.
   const row = held ?? signedIn ?? undefined;
   const kept = row === undefined ? undefined : signedInOf(row.config, signIn);
-  const check = row?.health?.check;
+  // The host's alert on the last check; it is gone once a check passes.
+  const check = row?.alerts?.find((alert) => alert.ref === 'check');
   const failed = (caught: unknown): void => { end(); setFailure(hostSaid(caught)); };
 
   const start = (): void => {
@@ -91,10 +92,10 @@ export function SignInStep({ host, signIn, held, provider, wanted, disabled, byH
 
   return (
     <div className="web-connector-form__signin">
+      {check === undefined ? null : <Alert tone={ALERT_LEVELS.find(([level]) => level === check.level)?.[1] ?? 'info'} message={check.text} />}
       {started === null && (signedIn !== null || kept !== undefined) ? (
         <>
           <p className="web-connector-form__signed-in">{kept?.account === undefined ? t('connectors/signIn/with', { provider }) : t('connectors/signIn/as', { account: kept.account })}</p>
-          {check === undefined ? null : <p className="web-note">{t('connectors/signIn/lastCheck', { result: t(`connectors/health/${check.result}`), at: when(check.at) })}</p>}
           <div className="web-connector-form__signin-start">
             <Button label={t('connectors/signIn/again')} disabled={disabled || busy} onClick={start} />
           </div>
