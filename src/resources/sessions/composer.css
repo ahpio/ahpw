@@ -52,7 +52,7 @@
   z-index: 1;
   margin-top: calc(-1 * var(--web-composer-fade));
   padding-top: var(--web-composer-fade);
-  background: linear-gradient(to top, var(--oo-color-surface) 0%, var(--oo-color-surface) 70%, transparent 90%);
+  background: linear-gradient(to top, var(--oo-color-canvas) 0%, var(--oo-color-canvas) 70%, transparent 90%);
 }
 
 /* The picker opens from the composer's top row, not from the top of its fade. */

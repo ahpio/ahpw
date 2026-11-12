@@ -210,7 +210,7 @@
   gap: var(--oo-spacing-sm);
   padding: var(--oo-spacing-lg) var(--web-chat-gutter) 32px;
   margin-bottom: calc(-1 * var(--oo-spacing-lg));
-  background: linear-gradient(to bottom, var(--oo-color-surface) 0%, var(--oo-color-surface) 70%, transparent 90%);
+  background: linear-gradient(to bottom, var(--oo-color-canvas) 0%, var(--oo-color-canvas) 70%, transparent 90%);
 }
 
 /* The scroll spans the page, so the head's fade does too; the turns keep the gutter. Its scrollbar shows while the pointer is over the chat, and keeps its room, so nothing moves when it does. */
