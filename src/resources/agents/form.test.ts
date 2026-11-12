@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EngineRow } from '../../bridges/agents.js';
 import { idFor } from '../connectors/form.js';
-import { agentConfigForForm, agentConfigForPut, agentWanted, engineSchema, hasSecrets, SECRET_NAME, startOf } from './form.js';
+import { agentConfigForForm, agentConfigForPut, agentTopSchema, agentWanted, engineSchema, hasSecrets, SECRET_NAME, startOf } from './form.js';
 
 const ENGINE: EngineRow = {
   name: 'claude',
@@ -143,5 +143,16 @@ describe('a new record', () => {
     expect(startOf(engine, -1)).toEqual({ top: { name: '', description: '', model: '' }, config: {} });
     expect(idFor('Claude Code', 'claude', ['claude-code'])).toBe('claude-code-2');
     expect(idFor('', 'claude', [])).toBe('claude');
+  });
+});
+
+describe('agentTopSchema', () => {
+  const words = { name: 'Name', id: 'ID', idHint: '', owner: 'Owner', description: 'Description', model: 'Model', modelHint: 'Leave empty to let the agent choose.' };
+
+  it('lists the models with no empty choice, which the form adds itself', () => {
+    const schema = agentTopSchema([{ value: 'host', label: 'Host' }], true, words, [{ value: 'opus', label: 'Opus' }, { value: 'sonnet', label: 'Sonnet' }]);
+    const model = (schema.properties as Record<string, { enum?: string[]; description?: string }>).model;
+    expect(model?.enum).toEqual(['opus', 'sonnet']);
+    expect(model?.description).toBe(words.modelHint);
   });
 });

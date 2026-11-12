@@ -139,7 +139,6 @@ export function AgentForm({ host, record }: { host: string; record?: AgentRow })
     description: t('agents/form/description'),
     model: t('agents/form/model'),
     modelHint: t('agents/form/modelHint'),
-    modelDefault: t('agents/form/modelDefault'),
   }, models);
   const fields: JsonSchemaObject | undefined = engine === undefined ? undefined : engineSchema(engine, heldConfig, top.owner, t('connectors/form/secretKept'));
 
