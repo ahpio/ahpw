@@ -1,0 +1,28 @@
+/* An agent's models: a search over the table, which scrolls sideways on a narrow page. */
+.web-agent-models {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  padding-top: var(--oo-spacing-md);
+}
+
+.web-agent-models__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}
+
+.web-agent-models__search {
+  flex: 1 1 140px;
+  min-width: 120px;
+}
+
+.web-agent-models__head > .web-note {
+  margin: 0;
+}
+
+.web-agent-models__table {
+  min-width: 0;
+  overflow-x: auto;
+}
