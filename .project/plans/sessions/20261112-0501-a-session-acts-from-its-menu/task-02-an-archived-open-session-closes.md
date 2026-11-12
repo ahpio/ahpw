@@ -1,6 +1,6 @@
 ---
 title: An archived open session closes
-status: todo
+status: implemented
 depends: [task-01-the-header-menu-has-the-acts.md]
 layer: "ahpw sessions and UI settings"
 refs:
