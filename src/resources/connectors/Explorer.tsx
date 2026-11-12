@@ -13,6 +13,9 @@ import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList } from '../../shell/explorer/ExplorerList.js';
 import { connectorOff, deleteConnector, mayTurn, meOn, ownerWord, turnConnector, turnMethod } from './actions.js';
 import { useOwnGrantsOnEach } from '../../bridges/own-grants.js';
+import { rowOperations, type OperationsState } from '../../bridges/operations.js';
+import { runnableBy } from '../../bridges/own-grants.js';
+import { operationItems } from '../operations/run.js';
 import { connectorRows, type ConnectorEntry, type ConnectorGrouping } from './rows.js';
 import { ACTIVE_CONNECTOR, connectorTab, CONNECTORS_GROUP } from './state.js';
 
@@ -27,7 +30,7 @@ export default function ConnectorsExplorer(): ReactElement {
   const hosts = useServingHosts(shown, CONNECTORS.scheme);
   const hostName = useHostNames();
   const multi = embedMode() === 'multi';
-  const { states, errors } = useChannelOnEach<PeopleState<ConnectorRow>>(hosts, CONNECTORS.channel, connectorsReducer);
+  const { states, errors } = useChannelOnEach<OperationsState<ConnectorRow>>(hosts, CONNECTORS.channel, connectorsReducer);
   // The adapters title the groups; a host that refuses them leaves each named by its adapter's name.
   const adapterStates = useChannelOnEach<PeopleState<AdapterRow>>(hosts, ADAPTERS.channel, adaptersReducer).states;
   const offers = useEach<Offers>(hosts.map((host) => ahpPaths(host).offers));
@@ -49,6 +52,15 @@ export default function ConnectorsExplorer(): ReactElement {
     const menu = ({ host, row }: ConnectorEntry): PickerAction[] => {
       const at = hosts.indexOf(host);
       const held = offers[at] ?? NO_OFFERS;
+      const listed = states[at];
+      // A host that lists the connectors' operations names the row's acts; an older host gets ahpw's own.
+      if (listed?.operations !== undefined) {
+        return [
+          { title: t('connectors/actions/open'), onSelect: (picker) => { picker.closeMenu(); open(refKey(host, row.id)); } },
+          ...operationItems(scena, { host, channel: CONNECTORS.channel, target: row.id, held: row as unknown as Record<string, unknown> }, runnableBy(rowOperations(listed, row), grants[at] ?? null))
+            .map((item) => ({ ...item, group: 'more' })),
+        ];
+      }
       return [
         { title: t('connectors/actions/open'), onSelect: (picker) => { picker.closeMenu(); open(refKey(host, row.id)); } },
         ...(mayTurn(held, row, grants[at] ?? null) ? [{

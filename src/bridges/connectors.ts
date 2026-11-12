@@ -24,6 +24,7 @@ import type { Icon } from './icons.js';
 import type { Offers } from './offers.js';
 import type { HostAlert } from './plugins.js';
 import { recordsReducer } from './people.js';
+import { operationsReducer } from './operations-state.js';
 
 type Bag = Record<string, unknown>;
 
@@ -119,10 +120,13 @@ export interface ConnectorRow {
   alerts?: HostAlert[];
   /** What its adapter's plugin draws for it, by surface; `main` is drawn on its page. */
   views?: Record<string, PluginView>;
+  /** The ids of the operations it offers now, from a host that lists them. */
+  operations?: string[];
 }
 
 export const adaptersReducer = recordsReducer<AdapterRow>(ADAPTERS.scheme);
-export const connectorsReducer = recordsReducer<ConnectorRow>(CONNECTORS.scheme);
+/** The connectors channel: its records, and the operations a host that lists them offers. */
+export const connectorsReducer = operationsReducer<ConnectorRow>(CONNECTORS.scheme);
 
 /** Whether a host lists connectors to this reader: the channel is among its offers. */
 export function servesConnectors(offers: Offers): boolean {
