@@ -91,6 +91,11 @@ describe('the config', () => {
     expect(agentConfigForPut(ENGINE, { env: { ANTHROPIC_API_KEY: 'sk-new' } }, {}, 'host')).toEqual({ apiKey: '', env: { ANTHROPIC_API_KEY: 'sk-new' } });
   });
 
+  it('leaves out an env entry taken out of the form, and keeps a declared one that is left empty', () => {
+    const held = { env: { ANTHROPIC_API_KEY: KEPT, OTHER_KEY: { $secret: 'host/agent/claude/env.OTHER_KEY' } } };
+    expect(agentConfigForPut(ENGINE, { env: {} }, held, 'host')).toEqual({ apiKey: '', env: { ANTHROPIC_API_KEY: '' } });
+  });
+
   it('drops the host-only fields from a record the host does not own', () => {
     expect(agentConfigForPut(ENGINE, { extraArgs: { x: null }, env: { ANTHROPIC_API_KEY: 'k' } }, {}, 'user:ana')).toEqual({ apiKey: '', env: { ANTHROPIC_API_KEY: 'k' } });
   });
@@ -110,6 +115,13 @@ describe('a kept secret where the schema offers a reference', () => {
 
   it('sends the reference left as it is as "", so the host keeps the secret', () => {
     expect(agentConfigForPut(REFS, agentConfigForForm(held, REFS.schema), held, 'host')).toEqual({ env: { ANTHROPIC_API_KEY: '', DEBUG: '1' } });
+  });
+
+  it('leaves out a kept env entry taken out of the form, so the host drops it and its secret', () => {
+    const two = { env: { DEEPSEEK_API_KEY: { $secret: 'host:agent/pi/env.DEEPSEEK_API_KEY' }, OPENROUTER_API_KEY: { $secret: 'host:agent/pi/env.OPENROUTER_API_KEY' } } };
+    const form = agentConfigForForm(two, REFS.schema) as { env: Record<string, unknown> };
+    delete form.env['DEEPSEEK_API_KEY'];
+    expect(agentConfigForPut(REFS, form, two, 'host')).toEqual({ env: { OPENROUTER_API_KEY: '' } });
   });
 
   it('sends a reference changed to another name, or a typed value, as it is', () => {
