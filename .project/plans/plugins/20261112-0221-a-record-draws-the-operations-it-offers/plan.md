@@ -8,6 +8,7 @@ revalidated: 2026-11-12
 requires:
   - plans/plugins/20261111-1228-an-agent-or-connector-turns-off/plan.md
 refs:
+  - git://d833fac - the last commit that holds the brief `a-record-shows-only-the-operations-it-offers.md`, which this plan covers
   - git://3199308 - the commit of ahpw this plan was checked at
   - https://github.com/ahpio/ahpd/blob/4a0eb9705/.project/plans/plugin/20261112-0145-a-record-lists-the-operations-it-offers/plan.md - the ahpd plan that makes each record list its operation ids, and moves agents and connectors to an operations list
   - "[code://src/bridges/operations.ts#L78-L83](../../../../src/bridges/operations.ts#L78-L83) - `rowOperations`, the one place a row's operations are picked, by `kind` only"
@@ -56,7 +57,16 @@ x-ahpd-<scheme>:// state -> record.operations (ids) -> rowOperations keeps those
 | Agents and connectors draw their buttons from the operations list, through `Buttons` and the row menu | Softov, 2026-11-11, in ahpd: "Move them to the operations list" | 02, 03 |
 | The buttons stay where plan plugins/20261111-1228 put them: the page head and the row menu | Softov, 2026-11-11: "A: head buttons + menu" | 02, 03 |
 | An operation's label is the host's, as a tunnel operation's is | (defaulted: a client draws only what the host sends) | 02, 03 |
-| No mockup: the layout of plan plugins/20261111-1228 stays, and only which buttons show changes | (defaulted: no new screen) | - |
+| Each offered operation is one button in the host's words, as mockup A shows; a pair is never one switch | Softov, 2026-11-12: "A now" | 02, 03 |
+| The head buttons follow the host's order in `operations` | (defaulted: a client draws only what the host sends) | 01 |
+| An operation with an input, such as Anonymous access, opens its form and does not show its value | Softov, 2026-11-12: "A now" | 01 |
+
+## Mockups
+
+- `mock-ops/a.png` - the chosen head: a button per offered operation, for a running devtunnel and a paused agent.
+- `mock-ops/b.png` - switches and a mode control, not chosen.
+
+The mockups are in `/home/softov/.local/cache/tmp/claude-1000/-home-softov/b87363c7-8544-4005-8ce4-17e80b7f0cd4/scratchpad/mock-ops/`.
 
 ## Proposed architecture
 
@@ -91,4 +101,5 @@ x-ahpd-<scheme>:// state -> record.operations (ids) -> rowOperations keeps those
 - [ ] A paused agent's page shows Enable and Disable, and not Pause.
 - [ ] Against a daemon without the ahpd plan, the agent and connector buttons are as today.
 - [ ] The devtunnel form shows a Person field from the schema, with no change in ahpw.
+- [ ] The tunnel and agent heads match mockup A at 1400 and 390 px.
 - [ ] `pnpm typecheck` and the test suite pass.
