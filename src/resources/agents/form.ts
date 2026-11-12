@@ -35,8 +35,6 @@ export interface AgentTopWords {
   description: string;
   model: string;
   modelHint: string;
-  /** The model choice that names none, so the agent picks its own. */
-  modelDefault: string;
 }
 
 /**
@@ -45,7 +43,6 @@ export interface AgentTopWords {
  * text otherwise.
  */
 export function agentTopSchema(owners: readonly EnumOption[], editing: boolean, words: AgentTopWords, models: readonly EnumOption[] = []): JsonSchemaObject {
-  const choices = [{ value: '', label: words.modelDefault }, ...models];
   const properties: Bag = {
     name: { type: 'string', title: words.name },
     ...(editing ? {} : { id: { type: 'string', title: words.id, description: words.idHint } }),
@@ -53,7 +50,8 @@ export function agentTopSchema(owners: readonly EnumOption[], editing: boolean, 
     description: { type: 'string', title: words.description },
     model: models.length === 0
       ? { type: 'string', title: words.model, description: words.modelHint }
-      : { type: 'string', title: words.model, enum: choices.map((one) => one.value), 'x-enumOptions': choices },
+      // The form puts its own empty choice first, which leaves the model to the agent.
+      : { type: 'string', title: words.model, description: words.modelHint, enum: models.map((one) => one.value), 'x-enumOptions': [...models] },
   };
   return { type: 'object', properties, required: editing ? ['name', 'owner'] : ['name', 'id', 'owner'] } as JsonSchemaObject;
 }

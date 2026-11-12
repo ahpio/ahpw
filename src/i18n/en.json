@@ -1353,7 +1353,6 @@
       "description": "Description",
       "model": "Model",
       "modelHint": "Leave empty to let the agent choose.",
-      "modelDefault": "Agent's choice",
       "engine": "Engine",
       "startFrom": "Start from",
       "blank": "Blank",

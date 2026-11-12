@@ -1353,7 +1353,6 @@
       "description": "Descrição",
       "model": "Modelo",
       "modelHint": "Deixe vazio para o agente escolher.",
-      "modelDefault": "Escolha do agente",
       "engine": "Motor",
       "startFrom": "Começar de",
       "blank": "Em branco",

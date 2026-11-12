@@ -352,7 +352,8 @@ function makeBridge(id: string): HostBridge {
     async readOnce<S>(uri: string) {
       const multi = await ready(id);
       const result = await multi.subscribe(id, uri);
-      if (!dataOf(id).followed.has(uri)) void multi.unsubscribe(id, uri).catch(() => undefined);
+      // The root stays subscribed for the whole connection: the host sends its session list and the echo of a root action only to a watcher.
+      if (uri !== ROOT && !dataOf(id).followed.has(uri)) void multi.unsubscribe(id, uri).catch(() => undefined);
       return result.snapshot?.state as S | undefined;
     },
     async readText(uri) {
