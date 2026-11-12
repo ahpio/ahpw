@@ -160,16 +160,26 @@ export function agentConfigForForm(config: Bag, schema: Bag): Bag {
  * empty or holds its own reference, so the host keeps it. A put that names the
  * record's own secret takes it out of the vault, so the reference is never sent
  * back as it is.
+ *
+ * A field the schema declares stays in the form when it is left empty, so one
+ * missing from the form is kept. An entry of an open map, such as `env`, is one
+ * the person can take out, so one missing from the form is left out of the put
+ * and the host drops it with its secret.
  */
-function keepSecrets(form: Bag, held: Bag): Bag {
+function keepSecrets(form: Bag, held: Bag, schema: Bag): Bag {
   const out: Bag = { ...form };
+  const declared = bagOf(schema.properties);
   for (const [name, value] of Object.entries(held)) {
+    const sent = out[name];
     if (isSecretRef(value)) {
-      const sent = out[name];
-      if (sent === undefined || sent === null || (isSecretRef(sent) && sent.$secret === value.$secret)) out[name] = '';
+      if (sent === undefined || sent === null) {
+        if (name in declared) out[name] = '';
+      } else if (isSecretRef(sent) && sent.$secret === value.$secret) {
+        out[name] = '';
+      }
     } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      const inner = out[name];
-      if (inner === undefined || (typeof inner === 'object' && inner !== null && !Array.isArray(inner))) out[name] = keepSecrets(bagOf(inner), value as Bag);
+      const inner = name in declared ? bagOf(declared[name]) : bagOf(schema.additionalProperties);
+      if (sent === undefined || (typeof sent === 'object' && sent !== null && !Array.isArray(sent))) out[name] = keepSecrets(bagOf(sent), value as Bag, inner);
     }
   }
   return out;
@@ -182,7 +192,7 @@ function keepSecrets(form: Bag, held: Bag): Bag {
  * the host does not own.
  */
 export function agentConfigForPut(engine: EngineRow, form: Bag, held: Bag, owner: string): Bag {
-  const out = keepSecrets(configForPut(form, engine.schema), held);
+  const out = keepSecrets(configForPut(form, engine.schema), held, engine.schema);
   if (owner !== 'host') for (const field of engine.hostOnly ?? []) delete out[field];
   return out;
 }
