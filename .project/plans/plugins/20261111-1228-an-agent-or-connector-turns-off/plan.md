@@ -1,7 +1,7 @@
 ---
 title: An agent or connector turns off
 domain: plugins
-status: planned
+status: active
 priority: medium
 created: 2026-11-11
 revalidated: 2026-11-11
@@ -60,7 +60,10 @@ Disable on the connector page or row menu -> x-ahpd/connectors/disable { id } ->
 | A session on a paused or disabled agent shows a note above its composer, and send is disabled. | Softov, 2026-11-11: "Yes, a note in the session" | 03 |
 | The words are the plugin's: *Enable*, *Disable*, and *Pause* for an agent. | (defaulted: the plugin page's words, as in the mockups) | 02 |
 | Pause and disable ask no confirmation. | (defaulted: a plugin's disable asks none, and both undo with *Enable*) | 02 |
-| A button shows only when the host offers its method. | (defaulted: `mayToggle`'s rule) | 02 |
+| A button shows only when the host offers its method and the reader holds `agent:put` or `connector:put`. ahpd lists every method to every caller. | Softov, 2026-11-11: "Hide without the grant" | 01 |
+| An agent row's menu also offers *Check now* and *Remove*, as mockup A shows. *Check now* is hidden while the agent is off. | Softov, 2026-11-11: "Add both" | 02 |
+| The head buttons stay under the title, as on every ahpw page head. | Softov, 2026-11-11: "Under the title" | 02 |
+| A paused or disabled row keeps *standby* on its first line. | Softov, 2026-11-11: "Keep standby" | 02 |
 | *Check now* and *New session* are not offered while the agent is off. | Brief, *The change*; ahpd refuses both | 02 |
 | A refusal shows the host's words. | (defaulted: `togglePlugin`'s rule) | 01 |
 
@@ -83,9 +86,9 @@ The mockups are in the session's scratchpad; the build compares each screen to t
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The bridges turn a record off](task-01-the-bridges-turn-a-record-off.md) | todo | - |
-| [02 - The pages and rows offer the switch](task-02-the-pages-and-rows-offer-the-switch.md) | todo | 01 |
-| [03 - A session says its agent is off](task-03-a-session-says-its-agent-is-off.md) | todo | 01 |
+| [01 - The bridges turn a record off](task-01-the-bridges-turn-a-record-off.md) | implemented | - |
+| [02 - The pages and rows offer the switch](task-02-the-pages-and-rows-offer-the-switch.md) | implemented | 01 |
+| [03 - A session says its agent is off](task-03-a-session-says-its-agent-is-off.md) | implemented | 01 |
 
 ## Risks and tradeoffs
 
@@ -94,16 +97,16 @@ The mockups are in the session's scratchpad; the build compares each screen to t
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** finish the sibling plan, then [task-01-the-bridges-turn-a-record-off.md](task-01-the-bridges-turn-a-record-off.md).
+- **Done so far:** the three tasks are implemented, as [implemented.md](implemented.md) says.
+- **Next action:** Softov reviews the PR.
 - **Open questions:** none.
 - **Watch out for:** a disabled agent shows no alerts; its page must not read that as healthy.
 
 ## Final verification checklist
 
-- [ ] On a test daemon, *Pause* on an agent page makes it paused; *Enable* brings it back.
-- [ ] *Disable* from an agent row's menu makes it disabled, and its sessions stay listed.
-- [ ] A connector disabled from its page lists no model, and *Enable* brings it back.
-- [ ] A session on a paused agent shows the note, and send is disabled.
-- [ ] A person whose grants lack `agent:put` sees no button.
-- [ ] The pages match mockups A and C at 1400 and 390 px.
+- [x] On a test daemon, *Pause* on an agent page makes it paused; *Enable* brings it back.
+- [x] *Disable* from an agent row's menu makes it disabled, and its sessions stay listed.
+- [x] A connector disabled from its page lists no model, and *Enable* brings it back.
+- [x] A session on a paused agent shows the note, and send is disabled.
+- [x] A person whose grants lack `agent:put` sees no button.
+- [x] The pages show at 1400 and 390 px, and match mockups A and C except where *Answers* says.

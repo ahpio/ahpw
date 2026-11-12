@@ -1,6 +1,6 @@
 ---
 title: A session says its agent is off
-status: todo
+status: implemented
 depends: [task-01-the-bridges-turn-a-record-off.md]
 layer: "ahpw sessions"
 refs:

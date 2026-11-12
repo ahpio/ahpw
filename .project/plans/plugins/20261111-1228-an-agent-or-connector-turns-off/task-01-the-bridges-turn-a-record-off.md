@@ -1,6 +1,6 @@
 ---
 title: The bridges turn a record off
-status: todo
+status: implemented
 depends: []
 layer: "ahpw bridges and actions"
 refs:

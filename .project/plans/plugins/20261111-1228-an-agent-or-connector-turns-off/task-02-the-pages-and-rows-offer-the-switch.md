@@ -1,6 +1,6 @@
 ---
 title: The pages and rows offer the switch
-status: todo
+status: implemented
 depends: [task-01-the-bridges-turn-a-record-off.md]
 layer: "ahpw agents and connectors"
 refs:
