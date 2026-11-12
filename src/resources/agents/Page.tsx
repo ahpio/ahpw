@@ -12,6 +12,9 @@ import { PageAlert } from '../../shell/view/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
 import { agentModes, checkOne, isAgentOff, deleteAgent, setMode } from './actions.js';
 import { useOwnGrants } from '../../bridges/own-grants.js';
+import { rowOperations, type OperationsState } from '../../bridges/operations.js';
+import { runnableBy } from '../../bridges/own-grants.js';
+import { DangerOperations, OperationButtons } from '../operations/Buttons.js';
 import { AgentForm } from './AgentForm.js';
 import { agentTitle, mergeAgents, type MergedAgent } from './merge.js';
 import { agentIcons } from './icons.js';
@@ -62,7 +65,7 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
   const infos = useStore<AgentInfo[]>(ahpPaths(host).agents) ?? [];
   const ask = useStore<SectionAsk>(AGENT_SECTION);
   const grants = useOwnGrants(host, offers);
-  const records = useChannel<PeopleState<AgentRow>>(host, servesAgents(offers) ? AGENTS.channel : undefined, agentsReducer).state;
+  const records = useChannel<OperationsState<AgentRow>>(host, servesAgents(offers) ? AGENTS.channel : undefined, agentsReducer).state;
   const engines = useChannel<PeopleState<EngineRow>>(host, servesEngines(offers) ? ENGINES.channel : undefined, enginesReducer).state;
   const agent = useMemo(
     () => mergeAgents(infos.filter((one) => one.provider === provider), (records?.records ?? []).map((one) => one.record).filter((one) => one.id === provider))[0],
@@ -76,6 +79,13 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
   const icons = agentIcons(record, engines?.records ?? []);
   const overview = <Overview host={host} {...(info === undefined ? {} : { info })} {...(record === undefined ? {} : { record })} {...(engine === undefined ? {} : { engine })} />;
 
+  // A host that lists the agents' operations draws a record's buttons from them; an older host gets ahpw's own.
+  const operations = record === undefined || records?.operations === undefined ? undefined : runnableBy(rowOperations(records, record), grants);
+  const place = record === undefined ? undefined : { host, channel: AGENTS.channel, target: record.id, held: record as unknown as Record<string, unknown> };
+  const newSession = isAgentOff(record)
+    ? <Button label={t('agents/newSession')} variant="primary" disabled />
+    : info === undefined ? null : <Button label={t('agents/newSession')} variant="primary" onClick={() => void scena.commands.execute('ahp.newSession', { host, provider })} />;
+
   const kinds = customizationKinds(info?.customizations);
   const tabs = [
     { key: 'overview', title: t('agents/page/overview'), child: overview },
@@ -86,12 +96,14 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
       title: t('agents/page/settings'),
       child: (
         <div className="web-agent__settings">
-          {isAgentOff(record) ? null : <Check host={host} record={record} />}
+          {operations !== undefined || isAgentOff(record) ? null : <Check host={host} record={record} />}
           <AgentForm host={host} record={record} />
-          <DangerZone
-            label={t('agents/actions/remove')}
-            onClick={() => void deleteAgent(host, record).then((gone) => { if (gone) scena.surfaces.close(agentTab(host, provider)); })}
-          />
+          {operations !== undefined && place !== undefined ? <DangerOperations place={place} operations={operations} /> : (
+            <DangerZone
+              label={t('agents/actions/remove')}
+              onClick={() => void deleteAgent(host, record).then((gone) => { if (gone) scena.surfaces.close(agentTab(host, provider)); })}
+            />
+          )}
         </div>
       ),
     }]),
@@ -115,14 +127,14 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
             </>
           )}
         />
-        <div className="web-page__actions">
-          {record === undefined ? null : agentModes(offers, record, grants).map((mode) => (
-            <Button key={mode} label={t(`agents/actions/${mode}`)} {...said(offers.described[AGENTS[mode]])} onClick={() => void setMode(host, record, mode)} />
-          ))}
-          {isAgentOff(record)
-            ? <Button label={t('agents/newSession')} variant="primary" disabled />
-            : info === undefined ? null : <Button label={t('agents/newSession')} variant="primary" onClick={() => void scena.commands.execute('ahp.newSession', { host, provider })} />}
-        </div>
+        {operations !== undefined && place !== undefined ? <OperationButtons place={place} operations={operations}>{newSession}</OperationButtons> : (
+          <div className="web-page__actions">
+            {record === undefined ? null : agentModes(offers, record, grants).map((mode) => (
+              <Button key={mode} label={t(`agents/actions/${mode}`)} {...said(offers.described[AGENTS[mode]])} onClick={() => void setMode(host, record, mode)} />
+            ))}
+            {newSession}
+          </div>
+        )}
       </div>
       {agent.status !== 'standby' || record === undefined || record.state === 'failed' ? null : (
         <Alert tone={record.state === 'disabled' ? 'info' : record.state === 'unavailable' ? 'danger' : 'warning'} message={t(`agents/page/standby/${record.state}`, { engine: record.engine })} />

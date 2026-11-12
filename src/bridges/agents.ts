@@ -24,6 +24,7 @@ import { hostBridge } from './data.js';
 import type { ConnectorOwner } from './connectors.js';
 import type { Offers } from './offers.js';
 import { recordsReducer } from './people.js';
+import { operationsReducer } from './operations-state.js';
 
 export const ENGINES = {
   scheme: 'x-ahpd-engines',
@@ -78,6 +79,8 @@ export interface AgentRow {
   alerts?: HostAlert[];
   /** What its engine's plugin draws for it, by surface; `main` is drawn on its page. */
   views?: Record<string, PluginView>;
+  /** The ids of the operations it offers now, from a host that lists them. */
+  operations?: string[];
 }
 
 /** What a new record starts from, as an engine offers it. */
@@ -111,7 +114,8 @@ export interface EngineRow {
 }
 
 export const enginesReducer = recordsReducer<EngineRow>(ENGINES.scheme);
-export const agentsReducer = recordsReducer<AgentRow>(AGENTS.scheme);
+/** The agents channel: its records, and the operations a host that lists them offers. */
+export const agentsReducer = operationsReducer<AgentRow>(AGENTS.scheme);
 
 /** Whether a host serves agents to this reader: the channel is among its offers. */
 export function servesAgents(offers: Offers): boolean {
