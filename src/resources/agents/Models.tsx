@@ -3,7 +3,7 @@ import { useI18n } from '@softov/scena/react';
 import { TextField } from '@softov/scena/ui';
 import type { AgentInfo } from '@microsoft/agent-host-protocol';
 import { plural } from '../../i18n/locales.js';
-import { matchesModel } from './models.js';
+import { matchesModel } from './model-search.js';
 import { limitsOf } from './words.js';
 import './models.css';
 

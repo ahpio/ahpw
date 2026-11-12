@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { matchesModel, type AgentModel } from './models.js';
+import { matchesModel, type AgentModel } from './model-search.js';
 
 const model = (id: string, name: string): AgentModel => ({ id, name } as AgentModel);
 

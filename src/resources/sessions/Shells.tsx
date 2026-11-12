@@ -12,7 +12,7 @@ import { EMOJIcon } from '../emojis.js';
 import { useNow } from './clock.js';
 import { Block } from './Parts.js';
 import { Pill } from './pills.js';
-import { statusOf, type Shell } from './shells.js';
+import { statusOf, type Shell } from './shell-list.js';
 import { stripAnsi } from './tool.js';
 import { when } from './turn.js';
 

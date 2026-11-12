@@ -6,7 +6,7 @@ import { Button, Markdown } from '@softov/scena/ui';
 import { ContextMenu } from '@softov/scena/ui/menu';
 import { textOf } from '../../bridges/words.js';
 import { EMOJIcon } from '../emojis.js';
-import { confirmLayout } from './confirm.js';
+import { confirmLayout } from './confirm-layout.js';
 import './confirm.css';
 
 const PENDING_CONFIRMATION = 'pending-confirmation';

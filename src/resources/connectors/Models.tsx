@@ -7,7 +7,7 @@ import { getLocale } from '@softov/scena';
 import { plural } from '../../i18n/locales.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { tokens, when } from '../sessions/turn.js';
-import { matches, priceLine } from './models.js';
+import { matches, priceLine } from './model-rows.js';
 import './models.css';
 
 /**

@@ -51,7 +51,7 @@ import { useComposerDrop } from './composer-drop.js';
 import { failed, warn } from '../../shell/notify/index.js';
 import { COMPOSER_FOCUS, hostCommands, registerHostCommands, type HostCommand } from './host-commands.js';
 import { useAgentIconSrc } from '../agents/icons.js';
-import { shellsOf } from './shells.js';
+import { shellsOf } from './shell-list.js';
 import { ShellsList, ShellsPill } from './Shells.js';
 import { allMerged, closeMerged, pullRequestsOf, readMergedClosed } from './pull-requests.js';
 import { MergedBanner, PullRequestPill } from './PullRequests.js';
