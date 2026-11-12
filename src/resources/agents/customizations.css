@@ -9,3 +9,45 @@
 .web-custom-item__head > .web-custom-item__actions {
   margin-left: auto;
 }
+
+/* The arrow of a row that opens in place. */
+.web-custom-row__caret {
+  flex: none;
+  width: 12px;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}
+
+/* What an open MCP server row shows: a label and its value per line, under the row. */
+.web-custom-mcp {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--oo-spacing-xs) var(--oo-spacing-md);
+  margin: 0;
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm) var(--oo-spacing-sm) calc(var(--oo-spacing-sm) + 20px);
+  border-bottom: 1px solid var(--oo-color-border);
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-custom-mcp dt {
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.web-custom-mcp dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.web-custom-mcp code {
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+}
+
+.web-custom-mcp__type {
+  margin-left: var(--oo-spacing-sm);
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}

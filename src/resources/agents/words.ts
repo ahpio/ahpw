@@ -18,6 +18,7 @@ import { folderLabel } from '../../bridges/words.js';
 import { tokens } from '../sessions/turn.js';
 import { EMOJIcon } from '../emojis.js';
 import { plural } from '../../i18n/locales.js';
+import { mcpFacts, type McpFacts } from './mcp.js';
 
 /** How many models an agent offers, in words. */
 export function modelsLine(agent: AgentInfo): string {
@@ -91,6 +92,8 @@ export interface ChildRow {
   open?: FileSpot;
   /** Whether its file may be edited: an agent or skill in a folder the host lets clients write into. */
   editable: boolean;
+  /** What an MCP server's open row shows; absent for every other kind. */
+  mcp?: McpFacts;
 }
 
 /** A file, and the line its declaration starts at when it is one part of the file. */
@@ -116,6 +119,8 @@ export interface CustomizationRow {
   /** What a new file in this folder is: set only on a folder the host lets clients write agents or skills into. */
   newKind?: NewKind;
   children: ChildRow[];
+  /** What an MCP server's open row shows; absent for every other kind. */
+  mcp?: McpFacts;
 }
 
 /** The kinds of file a client makes in a writable folder. */
@@ -168,7 +173,11 @@ export function stateOf(item: Customization | ChildCustomization): StateWord | u
         const reason = String((state as McpServerAuthRequiredState).reason);
         return { tone: 'warning', text: AUTH.has(reason) ? translate(`agents/auth/${reason}`) : reason };
       }
-      case 'error': return { tone: 'danger', text: (state as McpServerErrorState).error.message };
+      case 'error': {
+        // The row says it in a word; the whole message shows when the row is open.
+        const { errorType } = (state as McpServerErrorState).error;
+        return { tone: 'danger', text: translate(String(errorType) === 'mcpAuthRequired' ? 'agents/auth/required' : 'agents/states/error') };
+      }
       case 'stopped': return { tone: 'default', text: translate('agents/states/stopped') };
       default: return { tone: 'default', text: String(state.kind) };
     }
@@ -244,6 +253,7 @@ export function childRow(child: ChildCustomization, writable = false): ChildRow 
     ...(state === undefined ? {} : { state }),
     ...(open === undefined ? {} : { open }),
     editable: writable && open !== undefined && NEW_KINDS.has(String(child.type)),
+    ...(String(child.type) === 'mcpServer' ? { mcp: mcpFacts(child as McpServerCustomization, shortPath) } : {}),
   };
 }
 
@@ -283,6 +293,7 @@ export function customizationRows(items: readonly Customization[] | undefined): 
       uri: item.uri,
       ...(writable && NEW_KINDS.has(contents) ? { newKind: contents as NewKind } : {}),
       children: ((item as { children?: ChildCustomization[] }).children ?? []).map((child) => childRow(child, writable)),
+      ...(type === 'mcpServer' ? { mcp: mcpFacts(item as McpServerCustomization, shortPath) } : {}),
     };
   });
 }

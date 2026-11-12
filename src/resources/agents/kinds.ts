@@ -1,6 +1,7 @@
 import type { Customization } from '@microsoft/agent-host-protocol';
 import { translate } from '@softov/scena';
 import { counted, customizationRows, shortPath, type FileSpot, type NewKind, type StateWord } from './words.js';
+import type { McpFacts } from './mcp.js';
 
 /** The kinds in the order their tabs show; a kind the host sends that is not here comes after them. */
 export const KIND_ORDER = ['agent', 'skill', 'prompt', 'rule', 'hook', 'mcpServer', 'plugin'] as const;
@@ -24,6 +25,8 @@ export interface KindItem {
   plugin?: string;
   open?: FileSpot;
   editable: boolean;
+  /** What an MCP server's open row shows. */
+  mcp?: McpFacts;
 }
 
 /** Items of one kind from one source: a folder, the plugins, or the host's own MCP servers. */
@@ -79,6 +82,7 @@ export function customizationKinds(items: readonly Customization[] | undefined):
       add('mcpServer', groupOf('mcpServer', 'host', ''), {
         id: row.id, name: row.name, label: row.name, line: '', description: '', flags: row.meta, enabled: row.enabled,
         ...(row.state === undefined ? {} : { state: row.state }), path: row.path, ...(row.open === undefined ? {} : { open: row.open }), editable: false,
+        ...(row.mcp === undefined ? {} : { mcp: row.mcp }),
       });
       continue;
     }
@@ -104,6 +108,7 @@ export function customizationKinds(items: readonly Customization[] | undefined):
         enabled: child.enabled && row.enabled, ...(child.state === undefined ? {} : { state: child.state }),
         path: child.open === undefined ? row.path : shortPath(child.open.uri), ...(plugin ? { plugin: row.name } : {}),
         ...(child.open === undefined ? {} : { open: child.open }), editable: child.editable,
+        ...(child.mcp === undefined ? {} : { mcp: child.mcp }),
       });
     }
   }

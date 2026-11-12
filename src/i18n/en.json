@@ -1226,7 +1226,8 @@
       "starting": "Starting",
       "startingBlocking": "Starting; the next turn waits for it",
       "stopped": "Stopped",
-      "loading": "Loading"
+      "loading": "Loading",
+      "error": "Error"
     },
     "flags": {
       "userOnly": "user only",
@@ -1261,7 +1262,6 @@
         "mcpServer": "MCP servers",
         "plugin": "Plugins"
       },
-      "none": "No customizations.",
       "noneOf": "None: {kinds}",
       "search": "Search",
       "noMatch": "Nothing matches."
@@ -1293,7 +1293,6 @@
       "gone": "This host no longer offers this agent.",
       "facts": {
         "provider": "Provider",
-        "models": "Models",
         "sessions": "Sessions",
         "can": "Can",
         "engine": "Engine",
@@ -1303,7 +1302,6 @@
       },
       "oneChat": "One chat in one folder per session",
       "needsSignIn": "Needs sign-in",
-      "models": "Models",
       "noModels": "This agent doesn't list models; it chooses its own.",
       "columns": {
         "name": "Name",
@@ -1327,7 +1325,9 @@
         "invalid": "These settings don't match the {engine} engine, so this agent isn't available.",
         "paused": "Paused. Its sessions keep their history, and it takes no new session or message until it is enabled.",
         "disabled": "Disabled. Its sessions keep their history, and the host doesn't open or serve it until it is enabled."
-      }
+      },
+      "noModelMatch": "No model matches.",
+      "modelsTab": "Models {count}"
     },
     "actions": {
       "check": "Check",
@@ -1366,6 +1366,16 @@
       "create": "Create",
       "searchEngines": "Search engines",
       "noEngineMatch": "No engine matches."
+    },
+    "mcp": {
+      "state": "State",
+      "declared": "Declared in",
+      "inSession": "In a session",
+      "id": "ID",
+      "onByDefault": "On by default; a session can turn it off.",
+      "offByDefault": "Off by default; a session can turn it on.",
+      "copyId": "Copy ID",
+      "claudeCli": "The Claude CLI; no file here declares it"
     }
   },
   "commands": {
