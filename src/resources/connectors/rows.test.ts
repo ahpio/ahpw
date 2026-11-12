@@ -73,7 +73,7 @@ describe('connectorRows', () => {
 
   it('gives a failed and a disabled connector their dots', () => {
     const rows = connectorRows([entry(row('a', 'webhook', 'host', 'failed')), entry(row('b', 'webhook', 'host', 'disabled'))], 'state', WORDS);
-    expect(rows.map((one) => [one.title, one.dot])).toEqual([['a', 'failed'], ['b', 'off']]);
+    expect(rows.map((one) => [one.title, one.dot])).toEqual([['a', 'failed'], ['b', 'quiet']]);
   });
 
   it('shows the host\'s name first in multi mode', () => {
