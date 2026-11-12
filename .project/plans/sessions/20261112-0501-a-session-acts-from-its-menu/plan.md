@@ -1,7 +1,7 @@
 ---
 title: A session acts from its menu
 domain: sessions
-status: active
+status: built
 priority: medium
 created: 2026-11-12
 revalidated: 2026-11-12
@@ -76,9 +76,9 @@ page opens | a turn ends -> session/isReadChanged { isRead: true }
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The header's menu has the session's acts](task-01-the-header-menu-has-the-acts.md) | implemented | - |
-| [02 - An archived open session closes](task-02-an-archived-open-session-closes.md) | implemented | 01 |
-| [03 - Mark unread holds](task-03-mark-unread-holds.md) | implemented | - |
+| [01 - The header's menu has the session's acts](task-01-the-header-menu-has-the-acts.md) | done | - |
+| [02 - An archived open session closes](task-02-an-archived-open-session-closes.md) | done | 01 |
+| [03 - Mark unread holds](task-03-mark-unread-holds.md) | done | - |
 
 ## Risks and tradeoffs
 
@@ -87,8 +87,8 @@ page opens | a turn ends -> session/isReadChanged { isRead: true }
 
 ## Resume state
 
-- **Done so far:** the three tasks are implemented, as [implemented.md](implemented.md) says.
-- **Next action:** Softov reviews the PR.
+- **Done so far:** the three tasks are done and merged in ahpio/ahpw#65, as [implemented.md](implemented.md) says.
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** a session beside another, in the right sidebar, does not mark itself read today; keep that.
 

@@ -1,6 +1,6 @@
 ---
 title: An MCP server row opens in place
-status: implemented
+status: done
 depends: []
 layer: "ahpw agents"
 refs:

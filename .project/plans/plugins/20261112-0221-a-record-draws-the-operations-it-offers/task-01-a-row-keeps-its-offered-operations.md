@@ -1,6 +1,6 @@
 ---
 title: A row keeps the operations its record offers
-status: implemented
+status: done
 depends: []
 layer: "bridges"
 refs:

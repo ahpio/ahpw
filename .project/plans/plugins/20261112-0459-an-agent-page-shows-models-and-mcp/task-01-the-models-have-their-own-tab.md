@@ -1,6 +1,6 @@
 ---
 title: The models have their own tab
-status: implemented
+status: done
 depends: []
 layer: "ahpw agents"
 refs:

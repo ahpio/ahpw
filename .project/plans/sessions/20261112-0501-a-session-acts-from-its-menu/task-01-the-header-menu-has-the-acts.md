@@ -1,6 +1,6 @@
 ---
 title: The header's menu has the session's acts
-status: implemented
+status: done
 depends: []
 layer: "ahpw sessions"
 refs:

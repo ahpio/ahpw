@@ -1,7 +1,7 @@
 ---
 title: An agent page shows its models and MCP servers
 domain: plugins
-status: active
+status: built
 priority: medium
 created: 2026-11-12
 revalidated: 2026-11-12
@@ -83,8 +83,8 @@ The `~/.claude.json` path in mockup A is an example; the row shows the real file
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The models have their own tab](task-01-the-models-have-their-own-tab.md) | implemented | - |
-| [02 - An MCP server row opens in place](task-02-an-mcp-server-row-opens-in-place.md) | implemented | - |
+| [01 - The models have their own tab](task-01-the-models-have-their-own-tab.md) | done | - |
+| [02 - An MCP server row opens in place](task-02-an-mcp-server-row-opens-in-place.md) | done | - |
 
 ## Risks and tradeoffs
 
@@ -93,8 +93,8 @@ The `~/.claude.json` path in mockup A is an example; the row shows the real file
 
 ## Resume state
 
-- **Done so far:** both tasks are implemented, as [implemented.md](implemented.md) says.
-- **Next action:** Softov reviews the PR.
+- **Done so far:** both tasks are done and merged in ahpio/ahpw#66, as [implemented.md](implemented.md) says.
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** `ahp.openAgent` takes a `section`; keep `overview` working for a link that names it.
 

@@ -79,9 +79,9 @@ The mockups are in `/home/softov/.local/cache/tmp/claude-1000/-home-softov/b8736
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A row keeps the operations its record offers](task-01-a-row-keeps-its-offered-operations.md) | implemented | - |
-| [02 - Agents draw the host's operations](task-02-agents-draw-the-hosts-operations.md) | implemented | 01 |
-| [03 - Connectors draw the host's operations](task-03-connectors-draw-the-hosts-operations.md) | implemented | 01 |
+| [01 - A row keeps the operations its record offers](task-01-a-row-keeps-its-offered-operations.md) | done | - |
+| [02 - Agents draw the host's operations](task-02-agents-draw-the-hosts-operations.md) | done | 01 |
+| [03 - Connectors draw the host's operations](task-03-connectors-draw-the-hosts-operations.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -90,8 +90,8 @@ The mockups are in `/home/softov/.local/cache/tmp/claude-1000/-home-softov/b8736
 
 ## Resume state
 
-- **Done so far:** the three tasks are implemented against ahpio/ahpd#302 at `9e648f384`, as [implemented.md](implemented.md) says.
-- **Next action:** Softov reviews the PR; the devtunnel checks wait in [operations-tunnel-checks.md](../../../pending/operations-tunnel-checks.md).
+- **Done so far:** the three tasks are done and merged in ahpio/ahpw#67, as [implemented.md](implemented.md) says.
+- **Next action:** Softov runs [operations-tunnel-checks.md](../../../pending/operations-tunnel-checks.md); ahpd sends the agents and connectors operations list.
 - **Open questions:** none.
 - **Watch out for:** a host on an older ahpd must still see the turn-off buttons.
 
