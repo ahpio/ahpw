@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ConfirmationOption } from '@microsoft/agent-host-protocol';
-import { confirmLayout } from './confirm.js';
+import { confirmLayout } from './confirm-layout.js';
 
 /** One option as a host sends it; the protocol's kind is a const enum of these two words. */
 const option = (id: string, label: string, kind: 'approve' | 'deny', group: number): ConfirmationOption => ({ id, label, kind, group }) as unknown as ConfirmationOption;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ConnectorModel } from '../../bridges/connectors.js';
-import { matches, perMillion, priceLine } from './models.js';
+import { matches, perMillion, priceLine } from './model-rows.js';
 
 const CLAUDE: ConnectorModel = { id: 'anthropic/claude-sonnet', model: 'or/anthropic/claude-sonnet', name: 'Anthropic: Claude Sonnet', pricing: { prompt: '0.000003', completion: '0.000015' } };
 

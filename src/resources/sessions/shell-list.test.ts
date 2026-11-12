@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BackgroundWork, TerminalState } from '@microsoft/agent-host-protocol';
-import { shellsOf, statusOf } from './shells.js';
+import { shellsOf, statusOf } from './shell-list.js';
 
 /** Rows as the host sends them; `kind` is a plain string, as on the wire. */
 const rows = (...given: Record<string, unknown>[]): BackgroundWork[] => given as unknown as BackgroundWork[];
