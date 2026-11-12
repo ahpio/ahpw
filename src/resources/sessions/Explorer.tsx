@@ -3,8 +3,8 @@ import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Spinner } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
-import type { AgentInfo, SessionSummary, StateAction } from '@microsoft/agent-host-protocol';
-import { ahpPaths, hostBridge, type Connection } from '../../bridges/data.js';
+import type { AgentInfo, SessionSummary } from '@microsoft/agent-host-protocol';
+import { ahpPaths, type Connection } from '../../bridges/data.js';
 import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { folderLabel } from '../../bridges/words.js';
@@ -15,9 +15,7 @@ import { SESSIONS_PINS, togglePin } from './pins.js';
 import { plural, dateFormat } from '../../i18n/locales.js';
 import { activityLabel, activityOf, isArchived, isRead, shows, type Activity, type SessionShow } from './status.js';
 import { arrangeTwo, groupOf, type Group, type Grouping } from './grouping.js';
-import { confirm, failed } from '../../shell/notify/index.js';
-import { EMOJIcon } from '../emojis.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { sessionActs } from './acts.js';
 
 const sameDay = dateFormat({ hour: '2-digit', minute: '2-digit' });
 const otherDay = dateFormat({ month: 'short', day: 'numeric' });
@@ -34,37 +32,11 @@ const DOT: Record<Activity, Dot> = { input: 'attention', running: 'working', err
 /** A folder's last segment, which is what tells two sessions apart. */
 const baseOf = (uri: string): string => folderLabel(uri).replace(/\/+$/, '').split('/').pop() ?? uri;
 
-/** What the menu of a session on the host `host` offers; `pin` pins or unpins it. */
+/** What the menu of a session on the host `host` offers: *Open*, then the session's acts. */
 function menuOf(host: string, session: SessionSummary, open: () => void, pinned: boolean, pin: () => void): PickerAction[] {
-  const read = isRead(session.status);
-  const archived = isArchived(session.status);
-  const say = (action: StateAction): void => hostBridge(host).dispatch(session.resource, action);
   return [
     { title: translate('sessions/explorer/open'), onSelect: (menu) => { menu.closeMenu(); open(); } },
-    { title: translate(pinned ? 'sessions/explorer/unpin' : 'sessions/explorer/pin'), icon: EMOJIcon.pin, onSelect: (menu) => { menu.closeMenu(); pin(); } },
-    {
-      title: translate('sessions/explorer/rename'),
-      onSelect: (menu) => {
-        menu.closeMenu();
-        const title = window.prompt(translate('sessions/explorer/renamePrompt'), session.title)?.trim();
-        if (title !== undefined && title !== '' && title !== session.title) say({ type: 'session/titleChanged', title } as StateAction);
-      },
-    },
-    { title: translate(read ? 'sessions/explorer/markUnread' : 'sessions/explorer/markRead'), onSelect: (menu) => { menu.closeMenu(); say({ type: 'session/isReadChanged', isRead: !read } as StateAction); } },
-    { title: translate(archived ? 'sessions/explorer/unarchive' : 'sessions/explorer/archive'), onSelect: (menu) => { menu.closeMenu(); say({ type: 'session/isArchivedChanged', isArchived: !archived } as StateAction); } },
-    { title: translate('sessions/explorer/copyLink'), group: 'more', onSelect: (menu) => { menu.closeMenu(); void copyText(session.resource); } },
-    {
-      title: translate('sessions/explorer/delete'),
-      group: 'more',
-      color: 'red',
-      onSelect: (menu) => {
-        menu.closeMenu();
-        const title = session.title || translate('sessions/untitled');
-        void confirm({ title: translate('sessions/explorer/deleteTitle', { title }), body: translate('sessions/explorer/deleteBody'), confirmLabel: translate('sessions/explorer/delete'), tone: 'danger' }).then((yes) => {
-          if (yes) void hostBridge(host).request('disposeSession', { channel: session.resource }).catch((error: unknown) => failed(translate('sessions/explorer/deleteFailed'), error));
-        });
-      },
-    },
+    ...sessionActs(host, session, { pinned, pin }),
   ];
 }
 
