@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Button, useChatPicker } from '@softov/scena/ui';
 import type { HostCtx, PickerAction } from '@softov/scena/types';
@@ -97,7 +97,7 @@ const FOLDED_KEY = 'ahpw.composerFolded';
  * and send, queue, steer and stop. Folded, it is one line: the `+`, the
  * draft's first line or the agent and model, what waits, and send or stop.
  */
-export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, usage, onUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false, onEngage, onInfo }: {
+export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, usage, onUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false, blocked = false, notice, onEngage, onInfo }: {
   /** The session's host. */
   host: string;
   chatUri: string;
@@ -126,6 +126,10 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   placeholder?: string;
   /** Whether a message sent while a turn runs always steers it, as a bot's chat does, rather than waiting its turn. */
   steers?: boolean;
+  /** Whether the session's agent takes no message now, as a paused or disabled one: send, steer and queue are off. */
+  blocked?: boolean;
+  /** Drawn over the box, folded or not, as why it takes no message. */
+  notice?: ReactNode;
   /** Called when the person turns to the composer: its text takes focus, or it unfolds. */
   onEngage?: () => void;
   /** Shows the session's info in place of its chat, or the chat again: what `/session.info` does. */
@@ -377,7 +381,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
 
   function submit(kind: 'send' | 'steer'): void {
     const said = text.trim();
-    if (said === '') return;
+    if (said === '' || blocked) return;
     const message = messageOf(said, model, attachments, customAgent);
     if (active === undefined) {
       send({ type: 'chat/turnStarted', turnId: newId(), startedAt: new Date().toISOString(), message } as StateAction);
@@ -400,7 +404,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   };
   // Send while nothing runs, or while a bot's chat steers with what is typed; else stop.
   const round = active === undefined || (steers && text.trim() !== '') ? (
-    <button type="button" className="web-composer__round" aria-label={t('sessions/composer/send')} title={t('sessions/composer/sendHint')} disabled={text.trim() === ''} onClick={() => submit('send')}>{EMOJIcon.send}</button>
+    <button type="button" className="web-composer__round" aria-label={t('sessions/composer/send')} title={t('sessions/composer/sendHint')} disabled={blocked || text.trim() === ''} onClick={() => submit('send')}>{EMOJIcon.send}</button>
   ) : (
     <button type="button" className="web-composer__round" aria-label={t('sessions/commands/stop')} title={t('sessions/composer/stopHint')} onClick={stop}>{EMOJIcon.stop}</button>
   );
@@ -420,6 +424,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     return (
       <div className="web-composer">
         {mergedBanner}
+        {notice}
         <div className="web-composer__box web-composer__folded" data-ring={ringOf(summary.status)}>
           <button type="button" className="web-composer__add" aria-label={t('sessions/context/title')} title={t('sessions/context/title')} onClick={() => fold(false, true)}>
             <svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true">
@@ -484,6 +489,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
       </div>
 
       {mergedBanner}
+      {notice}
 
       <div
         className="web-composer__box"
@@ -560,8 +566,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
               <Pill label={t('sessions/usage/title')} title={t('sessions/usage/open')} onOpen={onUsage} />
             ) : readout === null ? null : <span className="web-composer__context" title={readout.title}>{readout.text}</span>}
           </div>
-          {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/steer')} size="sm" title={t('sessions/composer/steerHint')} onClick={() => submit('steer')} />}
-          {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/queue')} variant="primary" size="sm" title={t('sessions/composer/queueHint')} onClick={() => submit('send')} />}
+          {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/steer')} size="sm" title={t('sessions/composer/steerHint')} disabled={blocked} onClick={() => submit('steer')} />}
+          {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/queue')} variant="primary" size="sm" title={t('sessions/composer/queueHint')} disabled={blocked} onClick={() => submit('send')} />}
           {round}
         </div>
       </div>
