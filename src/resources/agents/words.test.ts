@@ -65,7 +65,8 @@ describe('stateOf', () => {
     expect(stateOf(mcp(state({ kind: 'starting' })))).toEqual({ tone: 'info', text: 'Starting' });
     expect(stateOf(mcp(state({ kind: 'starting', blocking: true })))).toEqual({ tone: 'info', text: 'Starting; the next turn waits for it' });
     expect(stateOf(mcp(state({ kind: 'authRequired', reason: 'expired', resource: { resource: 'https://mcp' } })))).toEqual({ tone: 'warning', text: 'Sign-in expired' });
-    expect(stateOf(mcp(state({ kind: 'error', error: { errorType: 'spawn', message: 'Not found: npx' } })))).toEqual({ tone: 'danger', text: 'Not found: npx' });
+    expect(stateOf(mcp(state({ kind: 'error', error: { errorType: 'spawn', message: 'Not found: npx' } })))).toEqual({ tone: 'danger', text: 'Error' });
+    expect(stateOf(mcp(state({ kind: 'error', error: { errorType: 'mcpAuthRequired', message: 'This server needs signing in.' } })))).toEqual({ tone: 'danger', text: 'Needs sign-in' });
     expect(stateOf(mcp(state({ kind: 'stopped' })))).toEqual({ tone: 'default', text: 'Stopped' });
   });
 

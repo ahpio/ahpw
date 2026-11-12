@@ -7,6 +7,7 @@ import { linkClicks } from '../files/clicks.js';
 import { useFileText } from '../files/text.js';
 import { extOf } from '../files/viewers.js';
 import { frontmatterOf, withoutFrontmatter, type FileSpot, type NewKind, type StateWord } from './words.js';
+import type { McpFacts } from './mcp.js';
 import { kindTitle, searchKind, type KindItem, type KindTab } from './kinds.js';
 import { customFileTitle, newCustomFile, openCustomFile } from './custom-files.js';
 import { FileModal } from './FileModal.js';
@@ -75,21 +76,39 @@ function ItemRow({ item, selected, expanded, onSelect }: { item: KindItem; selec
   return (
     <button type="button" className="web-custom-row" data-enabled={item.enabled ? 'true' : 'false'} aria-current={selected ? 'true' : undefined} aria-expanded={expanded} onClick={onSelect}>
       <span className="web-custom-row__head">
+        {expanded === undefined ? null : <span className="web-custom-row__caret" aria-hidden="true">{expanded ? '\u{25BE}' : '\u{25B8}'}</span>}
         <span className="web-custom-row__name">{item.label}</span>
         {item.plugin === undefined ? null : <span className="web-custom-row__tag">{item.plugin}</span>}
         {item.flags.map((flag) => <span key={flag} className="web-custom-row__tag">{flag}</span>)}
         {stateMark(item.state)}
       </span>
       {text === '' ? null : <span className="web-custom-row__line">{text}</span>}
-      {expanded === true ? <span className="web-custom-row__path">{item.plugin === undefined ? item.path : `${item.plugin} · ${item.path}`}</span> : null}
+      {expanded === true && item.mcp === undefined ? <span className="web-custom-row__path">{item.plugin === undefined ? item.path : `${item.plugin} · ${item.path}`}</span> : null}
     </button>
+  );
+}
+
+/** What an open MCP server row shows: its state in full, where it is declared, its session default and its ID. */
+function McpDetails({ facts }: { facts: McpFacts }): ReactElement {
+  const { t } = useI18n();
+  return (
+    <dl className="web-custom-mcp">
+      <dt>{t('agents/mcp/state')}</dt>
+      <dd>{facts.state}{facts.errorType === undefined ? null : <span className="web-custom-mcp__type">{facts.errorType}</span>}</dd>
+      <dt>{t('agents/mcp/declared')}</dt>
+      <dd>{facts.declared}</dd>
+      <dt>{t('agents/mcp/inSession')}</dt>
+      <dd>{t(facts.onInSession ? 'agents/mcp/onByDefault' : 'agents/mcp/offByDefault')}</dd>
+      <dt>{t('agents/mcp/id')}</dt>
+      <dd><code>{facts.id}</code> <CopyButton text={facts.id} label={t('agents/mcp/copyId')} /></dd>
+    </dl>
   );
 }
 
 /**
  * One kind of an agent's customizations, as a tab of the agent page: a list grouped by source.
  * A click on an item shows it in place of the list, with a link back to the list.
- * A prompt has no more to show than its description, so a click on it expands its row instead.
+ * A prompt has no more to show than its description, and an MCP server than what the host sent of it, so a click on either expands its row instead.
  */
 export function KindPanel({ host, tab }: { host: string; tab: KindTab }): ReactElement {
   const { t } = useI18n();
@@ -111,7 +130,7 @@ export function KindPanel({ host, tab }: { host: string; tab: KindTab }): ReactE
     void newCustomFile(scena, host, folder, kind, (shown) => setEditing({ spot: shown, title: customFileTitle(shown.uri) }));
   };
   const { newFolder, newKind } = tab;
-  const expands = tab.kind === 'prompt';
+  const expands = tab.kind === 'prompt' || tab.kind === 'mcpServer';
   const toggle = (key: string): void => setExpanded((now) => {
     const next = new Set(now);
     if (!next.delete(key)) next.add(key);
@@ -130,7 +149,12 @@ export function KindPanel({ host, tab }: { host: string; tab: KindTab }): ReactE
           <section key={group.key} className="web-custom-kinds__group">
             {group.title === '' ? null : <h4 className="web-custom-kinds__heading"><span>{group.title}</span><span>{group.items.length}</span></h4>}
             {group.items.map((one) => expands
-              ? <ItemRow key={one.key} item={one} selected={false} expanded={expanded.has(one.key)} onSelect={() => toggle(one.key)} />
+              ? (
+                <div key={one.key} className="web-custom-kinds__item">
+                  <ItemRow item={one} selected={false} expanded={expanded.has(one.key)} onSelect={() => toggle(one.key)} />
+                  {expanded.has(one.key) && one.mcp !== undefined ? <McpDetails facts={one.mcp} /> : null}
+                </div>
+              )
               : <ItemRow key={one.key} item={one} selected={one.key === selected} onSelect={() => { scrolled.current = list.current?.scrollTop ?? 0; setSelected(one.key); }} />)}
           </section>
         ))}

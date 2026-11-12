@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
-import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, DetailList, Markdown, Text, type DetailItem } from '@softov/scena/ui';
+import { useI18n, useStore } from '@softov/scena/react';
+import { DetailList, Markdown, Text, type DetailItem } from '@softov/scena/ui';
 import type { AgentInfo, SessionSummary } from '@microsoft/agent-host-protocol';
 import type { EngineRow, AgentRow } from '../../bridges/agents.js';
 import { ahpPaths } from '../../bridges/data.js';
@@ -10,17 +10,14 @@ import { HostTag } from '../../shell/explorer/HostLines.js';
 import { AlertList } from '../../shell/view/AlertList.js';
 import { meOn, ownerWord } from '../connectors/actions.js';
 import { PluginViewPanel } from '../plugins/PluginViewPanel.js';
-import { customizationKinds, emptyKinds, kindCount, kindTabKey } from './kinds.js';
-import { capabilitiesOf, limitsOf, modelsLine, signInOf } from './words.js';
-
-/** The policy states a person reads, under `agents/page/policy/<state>`; an enabled model says nothing. */
-const POLICY = new Set(['disabled', 'unconfigured']);
+import { customizationKinds, emptyKinds } from './kinds.js';
+import { capabilitiesOf, signInOf } from './words.js';
 
 /**
- * One agent's Overview: what it is, the problems the host found on it, the
- * view its plugin draws for it, its
- * record's engine, owner and plugin, its models, what it is customized with
- * and how to sign in to it. An agent the host does not serve has its record's
+ * One agent's Overview: what it is, the problems the host found on it, its
+ * facts, the view its plugin draws for it, and how to sign in to it. Its
+ * models and customizations have tabs of their own; the facts name only the
+ * kinds it has none of. An agent the host does not serve has its record's
  * facts only.
  */
 export function Overview({ host, info, record, engine }: { host: string; info?: AgentInfo; record?: AgentRow; engine?: EngineRow }): ReactElement {
@@ -31,6 +28,8 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
   const capabilities = info === undefined ? [] : capabilitiesOf(info);
   const signIn = info === undefined ? [] : signInOf(info);
   const count = sessions.filter((one) => one.provider === id).length;
+  // The kinds the tabs have none of; an agent that lists no customizations at all says nothing of them.
+  const missing = (info?.customizations ?? []).length === 0 ? [] : emptyKinds(customizationKinds(info?.customizations).filter((tab) => tab.count > 0));
   const facts: DetailItem[] = [
     ...(embedMode() === 'multi' ? [{ label: t('common/host'), value: <HostTag host={host} /> }] : []),
     { label: t('agents/page/facts/provider'), value: <code>{id}</code> },
@@ -41,9 +40,9 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
       { label: t('agents/page/facts/state'), value: t(`connectors/states/${record.state}`) },
     ]),
     ...(info === undefined ? [] : [
-      { label: t('agents/page/facts/models'), value: modelsLine(info) },
       { label: t('agents/page/facts/sessions'), value: String(count) },
       { label: t('agents/page/facts/can'), value: capabilities.length === 0 ? t('agents/page/oneChat') : capabilities.join('; ') },
+      ...(missing.length === 0 ? [] : [{ label: t('agents/page/customizations'), value: t('agents/customizations/noneOf', { kinds: missing.join(', ') }) }]),
     ]),
   ];
   const description = info?.description || record?.description || '';
@@ -54,77 +53,28 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
       <AlertList alerts={record?.alerts ?? []} />
       <DetailList items={facts} columns={2} />
       {record?.views?.main === undefined || engine === undefined ? null : <PluginViewPanel host={host} plugin={engine.plugin} at={`agent:${record.id}`} view={record.views.main} />}
-      {info === undefined ? null : <Served host={host} agent={info} signIn={signIn} />}
+      <Served signIn={signIn} />
     </div>
   );
 }
 
-/** What the host serves of an agent: its models, its customizations and its sign-in. */
-function Served({ host, agent, signIn }: { host: string; agent: AgentInfo; signIn: ReturnType<typeof signInOf> }): ReactElement {
+/** How a person signs in to what the agent serves. */
+function Served({ signIn }: { signIn: ReturnType<typeof signInOf> }): ReactElement | null {
   const { t } = useI18n();
-  const scena = useScena();
-  const kinds = customizationKinds(agent.customizations).filter((tab) => tab.count > 0);
-  const empty = emptyKinds(kinds);
+  if (signIn.length === 0) return null;
   return (
     <>
-      <Text variant="h3" text={t('agents/page/models')} />
-      {agent.models.length === 0 ? <p className="web-note">{t('agents/page/noModels')}</p> : (
-        <table className="web-runs web-table">
-          <thead>
-            <tr><th>{t('agents/page/columns/name')}</th><th>{t('agents/page/columns/id')}</th><th>{t('agents/page/columns/limits')}</th><th /></tr>
-          </thead>
-          <tbody>
-            {agent.models.map((model) => (
-              <tr key={model.id}>
-                <td>{model.name}</td>
-                <td><code>{model.id}</code></td>
-                <td>
-                  <span className="web-limits">
-                    {limitsOf(model).map((limit) => (
-                      <span key={limit.title} title={limit.title} aria-label={limit.title}><span aria-hidden="true">{limit.icon}</span>{limit.text}</span>
-                    ))}
-                  </span>
-                </td>
-                <td>{model.policyState !== undefined && POLICY.has(String(model.policyState)) ? t(`agents/page/policy/${String(model.policyState)}`) : ''}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      {(agent.customizations ?? []).length === 0 ? null : (
-        <>
-          <Text variant="h3" text={t('agents/page/customizations')} />
-          <div className="web-agent__kinds">
-            {kinds.length === 0 ? <span>{t('agents/customizations/none')}</span> : kinds.map((tab) => (
-              <Button
-                key={tab.kind}
-                size="sm"
-                variant="ghost"
-                label={kindCount(tab)}
-                onClick={() => void scena.commands.execute('ahp.openAgent', { host, provider: agent.provider, section: kindTabKey(tab.kind) })}
-              />
-            ))}
-            {empty.length === 0 ? null : <span className="web-note">{t('agents/customizations/noneOf', { kinds: empty.join(', ') })}</span>}
-          </div>
-        </>
-      )}
-
-      {signIn.length === 0 ? null : (
-        <>
-          <Text variant="h3" text={t('agents/page/signIn')} />
-          <table className="web-runs web-table">
-            <thead>
-              <tr><th>{t('agents/page/columns/resource')}</th><th>{t('agents/page/columns/scopes')}</th><th /></tr>
-            </thead>
-            <tbody>
-              {signIn.map((one) => (
-                <tr key={one.name}><td>{one.name}</td><td>{one.scopes}</td><td>{t(one.required ? 'agents/page/required' : 'agents/page/optional')}</td></tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
+      <Text variant="h3" text={t('agents/page/signIn')} />
+      <table className="web-runs web-table">
+        <thead>
+          <tr><th>{t('agents/page/columns/resource')}</th><th>{t('agents/page/columns/scopes')}</th><th /></tr>
+        </thead>
+        <tbody>
+          {signIn.map((one) => (
+            <tr key={one.name}><td>{one.name}</td><td>{one.scopes}</td><td>{t(one.required ? 'agents/page/required' : 'agents/page/optional')}</td></tr>
+          ))}
+        </tbody>
+      </table>
     </>
   );
 }

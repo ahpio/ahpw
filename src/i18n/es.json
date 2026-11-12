@@ -1226,7 +1226,8 @@
       "starting": "Iniciando",
       "startingBlocking": "Iniciando; el próximo turno lo espera",
       "stopped": "Detenido",
-      "loading": "Cargando"
+      "loading": "Cargando",
+      "error": "Error"
     },
     "flags": {
       "userOnly": "solo usuario",
@@ -1261,7 +1262,6 @@
         "mcpServer": "Servidores MCP",
         "plugin": "Plugins"
       },
-      "none": "Sin personalizaciones.",
       "noneOf": "Ninguno: {kinds}",
       "search": "Buscar",
       "noMatch": "Nada coincide."
@@ -1293,7 +1293,6 @@
       "gone": "Este host ya no ofrece este agente.",
       "facts": {
         "provider": "Proveedor",
-        "models": "Modelos",
         "sessions": "Sesiones",
         "can": "Puede",
         "engine": "Motor",
@@ -1303,7 +1302,6 @@
       },
       "oneChat": "Un chat en una carpeta por sesión",
       "needsSignIn": "Requiere iniciar sesión",
-      "models": "Modelos",
       "noModels": "Este agente no muestra una lista de modelos; elige el suyo.",
       "columns": {
         "name": "Nombre",
@@ -1327,7 +1325,9 @@
         "invalid": "Estos ajustes no coinciden con el motor {engine}, así que este agente no está disponible.",
         "paused": "En pausa. Sus sesiones conservan su historial, y no acepta sesiones ni mensajes nuevos hasta que se active.",
         "disabled": "Desactivado. Sus sesiones conservan su historial, y el host no lo abre ni lo sirve hasta que se active."
-      }
+      },
+      "noModelMatch": "Ningún modelo coincide.",
+      "modelsTab": "Modelos {count}"
     },
     "actions": {
       "check": "Comprobar",
@@ -1366,6 +1366,16 @@
       "create": "Crear",
       "searchEngines": "Buscar motores",
       "noEngineMatch": "Ningún motor coincide."
+    },
+    "mcp": {
+      "state": "Estado",
+      "declared": "Declarado en",
+      "inSession": "En una sesión",
+      "id": "ID",
+      "onByDefault": "Activado por defecto; una sesión puede desactivarlo.",
+      "offByDefault": "Desactivado por defecto; una sesión puede activarlo.",
+      "copyId": "Copiar ID",
+      "claudeCli": "La CLI de Claude; ningún archivo de aquí lo declara"
     }
   },
   "commands": {

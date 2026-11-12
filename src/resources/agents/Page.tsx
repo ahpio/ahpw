@@ -16,6 +16,7 @@ import { AgentForm } from './AgentForm.js';
 import { agentTitle, mergeAgents, type MergedAgent } from './merge.js';
 import { agentIcons } from './icons.js';
 import { Overview } from './Overview.js';
+import { Models } from './Models.js';
 import { AGENT_SECTION, agentTab, agentTabKey, keepAgentTabKey, type SectionAsk } from './state.js';
 import { signInOf } from './words.js';
 import { KindPanel } from './Customizations.js';
@@ -78,6 +79,7 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
   const kinds = customizationKinds(info?.customizations);
   const tabs = [
     { key: 'overview', title: t('agents/page/overview'), child: overview },
+    ...(info === undefined ? [] : [{ key: 'models', title: t('agents/page/modelsTab', { count: String(info.models.length) }), child: <Models agent={info} /> }]),
     ...kinds.map((kind) => ({ key: kindTabKey(kind.kind), title: kindTabTitle(kind), child: <KindPanel host={host} tab={kind} /> })),
     ...(record === undefined ? [] : [{
       key: 'settings',

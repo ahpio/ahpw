@@ -1226,7 +1226,8 @@
       "starting": "Iniciando",
       "startingBlocking": "Iniciando; o próximo turno espera por ele",
       "stopped": "Parado",
-      "loading": "Carregando"
+      "loading": "Carregando",
+      "error": "Erro"
     },
     "flags": {
       "userOnly": "só usuário",
@@ -1261,7 +1262,6 @@
         "mcpServer": "Servidores MCP",
         "plugin": "Plugins"
       },
-      "none": "Nenhuma personalização.",
       "noneOf": "Nenhum: {kinds}",
       "search": "Buscar",
       "noMatch": "Nada encontrado."
@@ -1293,7 +1293,6 @@
       "gone": "Este host não oferece mais este agente.",
       "facts": {
         "provider": "Provedor",
-        "models": "Modelos",
         "sessions": "Sessões",
         "can": "Pode",
         "engine": "Motor",
@@ -1303,7 +1302,6 @@
       },
       "oneChat": "Um chat em uma pasta por sessão",
       "needsSignIn": "Requer login",
-      "models": "Modelos",
       "noModels": "Este agente não lista modelos; ele escolhe o seu.",
       "columns": {
         "name": "Nome",
@@ -1327,7 +1325,9 @@
         "invalid": "Estas configurações não correspondem ao motor {engine}, então este agente não está disponível.",
         "paused": "Pausado. As sessões mantêm o histórico, e ele não aceita sessão nem mensagem nova até ser ativado.",
         "disabled": "Desativado. As sessões mantêm o histórico, e o host não o abre nem o serve até ser ativado."
-      }
+      },
+      "noModelMatch": "Nenhum modelo corresponde.",
+      "modelsTab": "Modelos {count}"
     },
     "actions": {
       "check": "Verificar",
@@ -1366,6 +1366,16 @@
       "create": "Criar",
       "searchEngines": "Buscar motores",
       "noEngineMatch": "Nenhum motor corresponde."
+    },
+    "mcp": {
+      "state": "Estado",
+      "declared": "Declarado em",
+      "inSession": "Em uma sessão",
+      "id": "ID",
+      "onByDefault": "Ativado por padrão; uma sessão pode desativá-lo.",
+      "offByDefault": "Desativado por padrão; uma sessão pode ativá-lo.",
+      "copyId": "Copiar ID",
+      "claudeCli": "A CLI do Claude; nenhum arquivo daqui o declara"
     }
   },
   "commands": {

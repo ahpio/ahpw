@@ -1,7 +1,7 @@
 ---
 title: An agent page shows its models and MCP servers
 domain: plugins
-status: planned
+status: active
 priority: medium
 created: 2026-11-12
 revalidated: 2026-11-12
@@ -61,7 +61,7 @@ root AgentInfo.customizations -> customizationKinds -> KindPanel (MCP servers) -
 | An open row shows only what the host sends today | Softov, 2026-11-11: "present info" | 02 |
 | The agent page has no switch for an MCP server; a session keeps its own | Softov, 2026-11-11: "Per session only" | 02 |
 | A row's state word is short: *Ready*, *Starting*, *Stopped*, *Needs sign-in* or *Error* | (defaulted: mockup A) | 02 |
-| A server whose `uri` is `claude-internal:` is declared in *Claude account* | (defaulted: agent-claude gives that uri to a server no file declares) | 02 |
+| A server whose `uri` is `claude-internal:` is declared in *The Claude CLI; no file here declares it* | (defaulted: agent-claude gives that uri to any server no file it reads declares, not only to the claude.ai connectors) | 02 |
 | An open row says nothing about where a claude.ai connector signs in | (defaulted: where it signs in is not checked) | 02 |
 
 ## Mockups
@@ -83,8 +83,8 @@ The `~/.claude.json` path in mockup A is an example; the row shows the real file
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The models have their own tab](task-01-the-models-have-their-own-tab.md) | todo | - |
-| [02 - An MCP server row opens in place](task-02-an-mcp-server-row-opens-in-place.md) | todo | - |
+| [01 - The models have their own tab](task-01-the-models-have-their-own-tab.md) | implemented | - |
+| [02 - An MCP server row opens in place](task-02-an-mcp-server-row-opens-in-place.md) | implemented | - |
 
 ## Risks and tradeoffs
 
@@ -93,16 +93,16 @@ The `~/.claude.json` path in mockup A is an example; the row shows the real file
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-the-models-have-their-own-tab.md](task-01-the-models-have-their-own-tab.md).
+- **Done so far:** both tasks are implemented, as [implemented.md](implemented.md) says.
+- **Next action:** Softov reviews the PR.
 - **Open questions:** none.
 - **Watch out for:** `ahp.openAgent` takes a `section`; keep `overview` working for a link that names it.
 
 ## Final verification checklist
 
-- [ ] An agent with models shows *Models N* after Overview, and the search narrows its table.
-- [ ] The Overview shows no models table, no Models fact and no Customizations line.
-- [ ] An agent with no prompts shows *Customizations: None: Prompts* in the grid; one with every kind shows no such fact.
-- [ ] An MCP server in `error` shows *Error* or *Needs sign-in* on its row, and its whole message when open.
-- [ ] An open row shows where the server is declared, its session default and its ID with a copy button.
-- [ ] The page matches mockup A at 1400 and 390 px.
+- [x] An agent with models shows *Models N* after Overview, and the search narrows its table.
+- [x] The Overview shows no models table, no Models fact and no Customizations line.
+- [x] An agent with no prompts shows *Customizations: None: Prompts* in the grid; one with every kind shows no such fact.
+- [x] An MCP server in `error` shows *Error* or *Needs sign-in* on its row, and its whole message when open.
+- [x] An open row shows where the server is declared, its session default and its ID with a copy button.
+- [x] The page matches mockup A at 1400 and 390 px.
