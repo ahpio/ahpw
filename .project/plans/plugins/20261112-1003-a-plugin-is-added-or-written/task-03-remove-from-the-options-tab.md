@@ -1,6 +1,6 @@
 ---
 title: Remove from the Options tab
-status: todo
+status: implemented
 depends:
   - task-01-the-bridge-installs-writes-removes.md
 layer: "ahpw plugins screen"
@@ -44,3 +44,5 @@ A checkbox keeps the package installed, and Remove asks before it runs.
 - The other pages that use `DangerZone` look as before.
 
 ## Resume
+
+`DangerZone` takes children, and `removeOne` asks first. The danger zone is drawn by `PluginPage.tsx` under the Options tab, as `ConnectorPage.tsx` draws Delete under its Settings, so `Options.tsx` is unchanged.

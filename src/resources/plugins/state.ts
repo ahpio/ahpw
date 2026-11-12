@@ -6,6 +6,9 @@ export const PLUGINS_SERVED = '$/ahp/plugins/served' as BindingPath;
 /** Whether any host this page connects to offers to load what its configuration file names; the list's Apply shows while one does. */
 export const PLUGINS_APPLY = '$/ahp/plugins/apply' as BindingPath;
 
+/** Whether any host this page connects to offers to install or write a plugin; New plugin shows while one does. */
+export const PLUGINS_ADD = '$/ahp/plugins/add' as BindingPath;
+
 /** The plugin open in `main`, as `{ host, id }`. */
 export const ACTIVE_PLUGIN = '$/ahp/plugins/active' as BindingPath;
 
@@ -13,6 +16,9 @@ export const ACTIVE_PLUGIN = '$/ahp/plugins/active' as BindingPath;
 export const PLUGINS_GROUP = '$/ahp/plugins/group' as BindingPath;
 
 export const GROUP_KEY = 'ahpd-web.plugins-group';
+
+/** The New plugin tab of one host. */
+export const newPluginTab = (host: string): string => `plugins:new:${host}`;
 
 /** A plugin's tab key: one tab each. */
 export const pluginTab = (host: string, id: string): string => `plugins:${host}:${id}`;

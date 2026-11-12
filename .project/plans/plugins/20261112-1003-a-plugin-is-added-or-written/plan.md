@@ -1,7 +1,7 @@
 ---
 title: A plugin is added or written from ahpw
 domain: plugins
-status: planned
+status: active
 priority: medium
 created: 2026-11-12
 revalidated: 2026-11-12
@@ -99,9 +99,9 @@ Options tab -> DangerZone Remove -> confirm -> removePlugin(host, id, keep) -> x
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The bridge installs, writes and removes](task-01-the-bridge-installs-writes-removes.md) | todo | - |
-| [02 - The New plugin form adds and writes](task-02-the-new-plugin-form.md) | todo | 01 |
-| [03 - Remove from the Options tab](task-03-remove-from-the-options-tab.md) | todo | 01 |
+| [01 - The bridge installs, writes and removes](task-01-the-bridge-installs-writes-removes.md) | implemented | - |
+| [02 - The New plugin form adds and writes](task-02-the-new-plugin-form.md) | implemented | 01 |
+| [03 - Remove from the Options tab](task-03-remove-from-the-options-tab.md) | implemented | 01 |
 
 ## Risks and tradeoffs
 
@@ -111,8 +111,8 @@ Options tab -> DangerZone Remove -> confirm -> removePlugin(host, id, keep) -> x
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-the-bridge-installs-writes-removes.md](task-01-the-bridge-installs-writes-removes.md).
+- **Done so far:** tasks 01, 02 and 03 are implemented on the branch `plugins/20261112-1003-a-plugin-is-added-or-written`, and wait for review. See [implemented.md](implemented.md).
+- **Next action:** Softov reviews the diff and the screens.
 - **Open questions:** none.
 - **Watch out for:** compare each screen with the mockup at 1400 and 390 px, light and dark, and stop at any difference.
 

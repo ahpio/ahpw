@@ -2698,7 +2698,8 @@
     },
     "commands": {
       "show": "Mostrar plugins",
-      "open": "Abrir plugin"
+      "open": "Abrir plugin",
+      "new": "Nuevo plugin"
     },
     "states": {
       "error": "Error",
@@ -2727,6 +2728,34 @@
       "viewFailed": "{id} no pudo hacer eso",
       "apply": "Aplicar configuración",
       "applyFailed": "No se pudo aplicar la configuración"
+    },
+    "new": {
+      "title": "Nuevo plugin",
+      "how": "Cómo",
+      "add": "Añadir desde una fuente",
+      "addHint": "Un paquete npm, un repositorio de GitHub, una URL git, una URL de tarball o una ruta en el host.",
+      "write": "Escribir uno",
+      "writeHint": "Un archivo TypeScript y su package.json. El host instala lo que nombra.",
+      "source": "Fuente",
+      "sourceHint": "Un nombre de paquete, `github:dueño/repo`, una URL `git+ssh:`, una URL de tarball o una ruta en el host.",
+      "id": "ID",
+      "idHint": "Letras minúsculas, números y guiones. No podrás cambiarlo después.",
+      "addButton": "Añadir",
+      "adding": "Añadiendo…",
+      "create": "Crear",
+      "creating": "Creando…",
+      "waiting": "npm lo está instalando en el host. Esto puede tardar minutos.",
+      "addFailed": "No se añadió el plugin",
+      "writeFailed": "No se creó el plugin"
+    },
+    "remove": {
+      "button": "Quitar",
+      "note": "Quitarlo lo saca de la configuración.",
+      "keep": "Mantener el paquete instalado",
+      "confirmTitle": "¿Quitar {title}?",
+      "confirmKeep": "El host lo descarga y lo saca de la configuración. Su paquete sigue instalado.",
+      "confirmUninstall": "El host lo descarga, lo saca de la configuración y desinstala su paquete.",
+      "failed": "No se pudo quitar {title}"
     },
     "notices": {
       "reading": "Cargando plugins…",

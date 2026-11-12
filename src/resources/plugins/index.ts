@@ -10,10 +10,10 @@ import { trackServed } from '../../bridges/served.js';
 import { registerChoice } from '../../shell/explorer/choice.js';
 import { readLastHost, startHost } from '../sessions/last-host.js';
 import { EMOJIcon } from '../emojis.js';
-import { english } from '../../i18n/locales.js';
+import { bound, english } from '../../i18n/locales.js';
 import { PLUGIN_GROUPINGS } from './rows.js';
 import { applyAll } from './actions.js';
-import { ACTIVE_PLUGIN, GROUP_KEY, pluginTab, PLUGINS_APPLY, PLUGINS_GROUP, PLUGINS_SERVED } from './state.js';
+import { ACTIVE_PLUGIN, GROUP_KEY, newPluginTab, pluginTab, PLUGINS_ADD, PLUGINS_APPLY, PLUGINS_GROUP, PLUGINS_SERVED } from './state.js';
 
 /** The display size class the modus backend publishes. */
 const MODUS_CLASS = '$/modus/class' as BindingPath;
@@ -35,6 +35,7 @@ export function registerPlugins(scena: Scena): Disposable {
   const offersOf = (host: string): Offers => scena.store.get<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
   const servingHosts = (): string[] => shownHosts(scena.store).filter((host) => servesPlugins(offersOf(host)));
   const served = (): boolean => scena.store.get<boolean>(PLUGINS_SERVED) === true;
+  const adds = (offers: Offers): boolean => offers.methods.includes(PLUGINS.install) || offers.methods.includes(PLUGINS.write);
 
   const open = (_ctx: unknown, args: unknown): void => {
     const target = (args ?? {}) as PluginArgs;
@@ -60,6 +61,7 @@ export function registerPlugins(scena: Scena): Disposable {
     scena.components.register({ component: 'KeyValue', category: 'inline', renderer: { kind: 'react', load: () => import('./KeyValue.js') } }),
     trackServed(scena, PLUGINS.scheme, PLUGINS_SERVED),
     trackServed(scena, (offers) => offers.methods.includes(PLUGINS.apply), PLUGINS_APPLY),
+    trackServed(scena, adds, PLUGINS_ADD),
     registerChoice(scena, { resource: 'plugins', name: 'group', slot: GROUP_SLOT, path: PLUGINS_GROUP, values: PLUGIN_GROUPINGS, usual: 'state', key: GROUP_KEY }),
     scena.components.register({
       component: 'PluginsExplorer',
@@ -68,6 +70,7 @@ export function registerPlugins(scena: Scena): Disposable {
       props: {
         title: { t: 'plugins/explorer/title' },
         actions: [
+          { command: 'ahp.newPlugin', icon: '+', label: { t: 'plugins/commands/new' }, when: `${PLUGINS_ADD} == true` },
           { command: 'plugins.reload', icon: EMOJIcon.reload, label: { t: 'common/reload' } },
           { command: 'plugins.apply', icon: EMOJIcon.apply, label: { t: 'plugins/actions/apply' }, when: `${PLUGINS_APPLY} == true` },
           { command: 'plugins.group', menu: GROUP_SLOT, icon: EMOJIcon.group, label: { t: 'plugins/explorer/group' }, active: `${PLUGINS_GROUP} != null` },
@@ -75,6 +78,7 @@ export function registerPlugins(scena: Scena): Disposable {
         ],
       },
     }),
+    scena.components.register({ component: 'NewPluginPage', category: 'page', props: { icon: EMOJIcon.hostPlugins }, renderer: { kind: 'react', load: () => import('./NewPluginPage.js') } }),
     scena.components.register({ component: 'PluginPage', category: 'page', props: { icon: EMOJIcon.hostPlugins }, renderer: { kind: 'react', load: () => import('./PluginPage.js') } }),
     scena.commands.register({
       id: 'plugins.reload',
@@ -94,6 +98,20 @@ export function registerPlugins(scena: Scena): Disposable {
       slots: [PALETTE_SLOT],
       when: served,
       run: (ctx) => ctx.commands.execute('sidebar.activate', { section: PLUGINS_SECTION }),
+    }),
+    scena.commands.register({
+      id: 'ahp.newPlugin',
+      title: () => translate('plugins/commands/new'),
+      keywords: [english('plugins/commands/new')],
+      category: 'Plugins',
+      slots: [PALETTE_SLOT],
+      when: () => scena.store.get<boolean>(PLUGINS_ADD) === true,
+      run: (_ctx, args) => {
+        const host = (args as PluginArgs | undefined)?.host ?? startHost(servingHosts().filter((one) => adds(offersOf(one))), readLastHost());
+        if (host === undefined) return;
+        scena.surfaces.open({ surface: 'main', key: newPluginTab(host), resource: { component: 'NewPluginPage', host }, props: { title: bound('plugins/new/title') } });
+        hideOverlaidSidebar(scena, scena.store.get<ModusClass>(MODUS_CLASS) ?? 'large');
+      },
     }),
     scena.commands.register({ id: 'ahp.openPlugin', title: () => translate('plugins/commands/open'), run: open }),
     scena.surfaces.mount({

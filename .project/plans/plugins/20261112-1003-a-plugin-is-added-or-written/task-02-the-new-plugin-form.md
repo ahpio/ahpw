@@ -1,6 +1,6 @@
 ---
 title: The New plugin form adds and writes
-status: todo
+status: implemented
 depends:
   - task-01-the-bridge-installs-writes-removes.md
 layer: "ahpw plugins screen"
@@ -57,3 +57,7 @@ A `+` in the Plugins toolbar opens New plugin in a tab.
 - By hand on an isolated ahpd: add `@ahpd/push`, write the starter as `weather`, and add a wrong source.
 
 ## Resume
+
+The page, the command, the toolbar `+`, the starter and the catalogs are built.
+The page calls the bridge itself, because it shows a refusal in the form. `actions.ts` gets no helper for it.
+*How* hides when the host offers only one way.

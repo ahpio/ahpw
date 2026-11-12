@@ -1,9 +1,10 @@
 /**
  * The host's plugins, through ahpd's `x-ahpd-plugins://` records channel and
- * its `x-ahpd/plugins/enable`, `/disable`, `/options`, `/reload` and `/apply`
- * commands. Reading takes `plugin:list`, and each command its own grant:
- * `plugin:enable`, `plugin:disable`, `plugin:options`, `plugin:reload`,
- * `plugin:apply`. A host refuses the rest in its own words. It applies a
+ * its `x-ahpd/plugins/enable`, `/disable`, `/options`, `/reload`, `/apply`,
+ * `/install`, `/write` and `/remove` commands. Reading takes `plugin:list`, and
+ * each command its own grant: `plugin:enable`, `plugin:disable`,
+ * `plugin:options`, `plugin:reload`, `plugin:apply`, and `plugin:install` for
+ * the last three. A host refuses the rest in its own words. It applies a
  * change at once, and sets `ahpd.restartNeeded` in its root config only when a
  * plugin that holds a port or a URI scheme is in the way.
  *
@@ -29,6 +30,9 @@ export const PLUGINS = {
   options: 'x-ahpd/plugins/options',
   reload: 'x-ahpd/plugins/reload',
   apply: 'x-ahpd/plugins/apply',
+  install: 'x-ahpd/plugins/install',
+  write: 'x-ahpd/plugins/write',
+  remove: 'x-ahpd/plugins/remove',
 } as const;
 
 /**
@@ -153,6 +157,37 @@ export async function callPluginMethod(host: string, method: string, params: Rec
 export async function applyPlugins(host: string): Promise<void> {
   await hostBridge(host).request(PLUGINS.apply as never, {} as never);
 }
+
+/** What an install, a write or a remove answers: the plugin's id, and whether only a restart applies the change. */
+export interface PluginChanged {
+  id: string;
+  restart: boolean;
+}
+
+async function change(host: string, method: string, params: Record<string, unknown>): Promise<PluginChanged> {
+  const answer = await hostBridge(host).request(method as never, params as never) as Partial<PluginChanged> | null;
+  if (typeof answer !== 'object' || answer === null || typeof answer.id !== 'string') throw new Error(`${method} answered no plugin`);
+  return { id: answer.id, restart: answer.restart === true };
+}
+
+/**
+ * Installs a plugin from `source`: a package name, a path, a tarball URL,
+ * `github:<owner>/<repo>` or a `git+ssh:` spec. The host runs npm, names it in
+ * its configuration and loads it before it answers, which can take minutes.
+ */
+export const installPlugin = (host: string, source: string): Promise<PluginChanged> => change(host, PLUGINS.install, { source });
+
+/**
+ * Writes a plugin as one TypeScript file and its package.json. The host runs
+ * npm in a staging folder and swaps it in only when npm succeeds, so a failed
+ * write leaves a running plugin as it was.
+ */
+export const writePlugin = (host: string, id: string, source: string, packageJson: string): Promise<PluginChanged> =>
+  change(host, PLUGINS.write, { id, source, packageJson });
+
+/** Takes a plugin out of the configuration; `keep` leaves its package or written folder in place. */
+export const removePlugin = (host: string, id: string, keep: boolean): Promise<PluginChanged> =>
+  change(host, PLUGINS.remove, keep ? { id, keep: true } : { id });
 
 /**
  * Whether the host holds a configuration change that only a restart applies.

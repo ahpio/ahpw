@@ -2698,7 +2698,8 @@
     },
     "commands": {
       "show": "Show plugins",
-      "open": "Open plugin"
+      "open": "Open plugin",
+      "new": "New plugin"
     },
     "states": {
       "error": "Error",
@@ -2727,6 +2728,34 @@
       "viewFailed": "{id} couldn't do that",
       "apply": "Apply configuration",
       "applyFailed": "Couldn't apply the configuration"
+    },
+    "new": {
+      "title": "New plugin",
+      "how": "How",
+      "add": "Add from a source",
+      "addHint": "An npm package, a GitHub repository, a git URL, a tarball URL or a path on the host.",
+      "write": "Write one",
+      "writeHint": "One TypeScript file and its package.json. The host installs what it names.",
+      "source": "Source",
+      "sourceHint": "A package name, `github:owner/repo`, a `git+ssh:` URL, a tarball URL or a path on the host.",
+      "id": "ID",
+      "idHint": "Lowercase letters, numbers and dashes. You can't change it later.",
+      "addButton": "Add",
+      "adding": "Adding…",
+      "create": "Create",
+      "creating": "Creating…",
+      "waiting": "npm is installing it on the host. This can take minutes.",
+      "addFailed": "The plugin was not added",
+      "writeFailed": "The plugin was not created"
+    },
+    "remove": {
+      "button": "Remove",
+      "note": "Removing takes it out of the configuration.",
+      "keep": "Keep the package installed",
+      "confirmTitle": "Remove {title}?",
+      "confirmKeep": "The host unloads it and takes it out of the configuration. Its package stays installed.",
+      "confirmUninstall": "The host unloads it, takes it out of the configuration and uninstalls its package.",
+      "failed": "Couldn't remove {title}"
     },
     "notices": {
       "reading": "Loading plugins…",

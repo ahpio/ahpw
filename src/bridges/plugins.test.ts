@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RootState } from '@microsoft/agent-host-protocol';
 import { NO_OFFERS } from './offers.js';
-import { disablePlugin, enablePlugin, PLUGINS, pluginsReducer, restartNeeded, servesPlugins, specEnabled, type PluginRow } from './plugins.js';
+import { disablePlugin, enablePlugin, installPlugin, PLUGINS, pluginsReducer, removePlugin, restartNeeded, servesPlugins, specEnabled, writePlugin, type PluginRow } from './plugins.js';
 
 const request = vi.hoisted(() => vi.fn());
 
@@ -41,6 +41,35 @@ describe('enable and disable', () => {
   it('refuse an answer that names no plugin', async () => {
     request.mockResolvedValue({});
     await expect(enablePlugin('h', 'bot')).rejects.toThrow('answered no plugin');
+  });
+});
+
+describe('install, write and remove', () => {
+  it('install sends the source and reads the id and the restart', async () => {
+    request.mockResolvedValue({ id: 'weather', restart: true });
+    await expect(installPlugin('h', 'github:example/weather')).resolves.toEqual({ id: 'weather', restart: true });
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.install, { source: 'github:example/weather' });
+  });
+
+  it('write sends the id and both files as given', async () => {
+    request.mockResolvedValue({ id: 'weather' });
+    await expect(writePlugin('h', 'weather', 'export function apply() {}', '{"name":"weather"}')).resolves.toEqual({ id: 'weather', restart: false });
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.write, { id: 'weather', source: 'export function apply() {}', packageJson: '{"name":"weather"}' });
+  });
+
+  it('remove sends keep only when it is asked for', async () => {
+    request.mockResolvedValue({ id: 'bot', restart: false });
+    await removePlugin('h', 'bot', false);
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.remove, { id: 'bot' });
+    await removePlugin('h', 'bot', true);
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.remove, { id: 'bot', keep: true });
+  });
+
+  it('refuse an answer that names no plugin', async () => {
+    request.mockResolvedValue({ restart: true });
+    await expect(installPlugin('h', 'x')).rejects.toThrow('answered no plugin');
+    request.mockResolvedValue(null);
+    await expect(removePlugin('h', 'bot', false)).rejects.toThrow('answered no plugin');
   });
 });
 
