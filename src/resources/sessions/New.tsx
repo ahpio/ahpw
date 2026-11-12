@@ -490,7 +490,8 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
     if (provider === '') return;
     setBusy(true);
     setError(null);
-    const resource = `${provider}:/${newId()}`;
+    // The session's own scheme, as the protocol names one; the provider goes in `provider`.
+    const resource = `ahp-session:/${newId()}`;
     const said = text.trim();
     const { model: _model, ...config } = chosen;
     try {
