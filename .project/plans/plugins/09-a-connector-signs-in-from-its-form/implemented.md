@@ -28,7 +28,7 @@ A typed key still works.
 
 - `pnpm -s typecheck`, `pnpm -s test` and `pnpm -s build` passed.
 - `connectors.test.ts`, `form.test.ts` and `log.test.ts` test the two calls, `configForSignIn` and the mask.
-- The checks by hand wait in [`plugins-09-sign-in-checks.md`](../../../pending/plugins-09-sign-in-checks.md).
+- Softov reviewed the checks by hand on 2026-11-12, and the pending file is removed.
 
 ## Departures from the plan
 

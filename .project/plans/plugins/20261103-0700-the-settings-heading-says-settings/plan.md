@@ -1,7 +1,7 @@
 ---
 title: The settings heading says Settings
 domain: plugins
-status: active
+status: built
 priority: medium
 created: 2026-11-03
 revalidated: 2026-11-03
@@ -52,7 +52,7 @@ form -> Adapter card (icon, title, description) -> settings section (heading, de
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The heading says Settings](task-01-the-heading-says-settings.md) | implemented | - |
+| [01 - The heading says Settings](task-01-the-heading-says-settings.md) | done | - |
 
 ## Risks and tradeoffs
 
@@ -60,8 +60,8 @@ form -> Adapter card (icon, title, description) -> settings section (heading, de
 
 ## Resume state
 
-- **Done so far:** task 01 is implemented and waits for review.
-- **Next action:** Softov reviews the diff.
+- **Done so far:** task 01 is done, merged in #36 and reviewed by Softov on 2026-11-12. See [implemented.md](implemented.md).
+- **Next action:** none. The plan is built.
 - **Open questions:** none.
 - **Watch out for:** the section's `aria-label` uses the same string as the heading.
 

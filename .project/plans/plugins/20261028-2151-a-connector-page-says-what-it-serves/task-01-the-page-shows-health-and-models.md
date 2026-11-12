@@ -1,6 +1,6 @@
 ---
 title: The page shows the health and the models
-status: implemented
+status: done
 depends: []
 layer: "bridge, connectors, i18n, docs"
 refs:

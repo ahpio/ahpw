@@ -28,12 +28,13 @@ The sign-in step of a made connector says it is signed in, with Sign in again.
 
 - `pnpm typecheck` and `pnpm test` passed. `models.test.ts` and `connectors.test.ts` test the price and the bridge.
 - On a test host, at two widths, the Overview and the Models tab showed. The done sign-in step and a dimmed row were not seen.
-- The checks by hand wait in [`plugins-09-sign-in-checks.md`](../../../pending/plugins-09-sign-in-checks.md), steps 10 to 12.
+- Softov reviewed the checks by hand on 2026-11-12, and the pending file is removed.
 
 ## Departures from the plan
 
 - The Models tab shows only for a `ready` connector whose adapter has a `models` capability. The plan named the capability only.
 - The plan was built with plugins 09 and merged in the same commit, as its answers say.
+- The Overview's last check and last failure were removed by [plugins/20261111-1228-agents-and-connectors-list-their-alerts](../20261111-1228-agents-and-connectors-list-their-alerts/plan.md). The page shows the host's alerts in their place.
 
 ## Left for later
 

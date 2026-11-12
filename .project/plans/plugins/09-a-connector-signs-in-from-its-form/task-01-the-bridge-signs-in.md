@@ -1,6 +1,6 @@
 ---
 title: The bridge signs in, and the log hides the code
-status: implemented
+status: done
 depends: []
 layer: "bridges, connectors screen, log"
 refs:

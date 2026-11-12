@@ -1,7 +1,7 @@
 ---
 title: A connector page says it is signed in and what it serves
 domain: plugins
-status: active
+status: built
 priority: medium
 created: 2026-10-28
 revalidated: 2026-10-28
@@ -72,7 +72,7 @@ Models tab -> readConnectorModels(host, id) -> x-ahpd/connectors/models { id } -
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The page shows the health and the models](task-01-the-page-shows-health-and-models.md) | implemented | - |
+| [01 - The page shows the health and the models](task-01-the-page-shows-health-and-models.md) | done | - |
 
 ## Risks and tradeoffs
 
@@ -81,8 +81,8 @@ Models tab -> readConnectorModels(host, id) -> x-ahpd/connectors/models { id } -
 
 ## Resume state
 
-- **Done so far:** task 01 is implemented and merged in #15 with plugins 09. See [implemented.md](implemented.md).
-- **Next action:** Softov runs steps 10 to 12 in [`plugins-09-sign-in-checks.md`](../../../pending/plugins-09-sign-in-checks.md).
+- **Done so far:** task 01 is done, merged in #15 with plugins 09 and reviewed by Softov on 2026-11-12. See [implemented.md](implemented.md).
+- **Next action:** none. The plan is built.
 - **Open questions:** none.
 - **Watch out for:** the ahpd answer's shape. A change there changes the bridge.
 
