@@ -1,7 +1,7 @@
 ---
 title: A session acts from its menu
 domain: sessions
-status: planned
+status: active
 priority: medium
 created: 2026-11-12
 revalidated: 2026-11-12
@@ -76,9 +76,9 @@ page opens | a turn ends -> session/isReadChanged { isRead: true }
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The header's menu has the session's acts](task-01-the-header-menu-has-the-acts.md) | todo | - |
-| [02 - An archived open session closes](task-02-an-archived-open-session-closes.md) | todo | 01 |
-| [03 - Mark unread holds](task-03-mark-unread-holds.md) | todo | - |
+| [01 - The header's menu has the session's acts](task-01-the-header-menu-has-the-acts.md) | implemented | - |
+| [02 - An archived open session closes](task-02-an-archived-open-session-closes.md) | implemented | 01 |
+| [03 - Mark unread holds](task-03-mark-unread-holds.md) | implemented | - |
 
 ## Risks and tradeoffs
 
@@ -87,16 +87,16 @@ page opens | a turn ends -> session/isReadChanged { isRead: true }
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-the-header-menu-has-the-acts.md](task-01-the-header-menu-has-the-acts.md).
+- **Done so far:** the three tasks are implemented, as [implemented.md](implemented.md) says.
+- **Next action:** Softov reviews the PR.
 - **Open questions:** none.
 - **Watch out for:** a session beside another, in the right sidebar, does not mark itself read today; keep that.
 
 ## Final verification checklist
 
-- [ ] The header's `...` menu shows *Session* after *Display*, with Pin, Rename, Mark read or unread, Archive, Copy link and Delete.
-- [ ] The list's menu shows the same words as before.
-- [ ] Archiving an open session closes its tab; with the setting on *Stay*, it stays open.
-- [ ] A session opened from the archived list stays open.
-- [ ] *Mark unread* on an open session holds until a turn ends.
-- [ ] The setting shows in the settings window and not in the command palette.
+- [x] The header's `...` menu shows *Session* after *Display*, with Pin, Rename, Mark read or unread, Archive, Copy link and Delete.
+- [x] The list's menu shows the same words as before.
+- [x] Archiving an open session closes its tab; with the setting on *Stay*, it stays open.
+- [x] A session opened from the archived list stays open.
+- [x] *Mark unread* on an open session holds until a turn ends.
+- [x] The setting shows in the settings window and not in the command palette.

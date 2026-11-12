@@ -2223,6 +2223,12 @@
           "description": "Onde os arquivos de agentes e skills abrem para edição.",
           "panel": "Novo painel",
           "modal": "Diálogo"
+        },
+        "archivedSessionOpen": {
+          "title": "Sessão arquivada",
+          "description": "O que uma sessão aberta faz quando é arquivada.",
+          "close": "Fechar a aba",
+          "stay": "Continuar aberta"
         }
       },
       "tabs": {

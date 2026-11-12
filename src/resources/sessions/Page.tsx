@@ -35,7 +35,10 @@ import { groupParts, stepWaits } from './activity-parts.js';
 import { Composer } from './Composer.js';
 import { HeaderLine, SessionInfo } from './HeaderInfo.js';
 import { SessionHostContext, WorkspaceContext } from './workspace.js';
-import { ACTIVITY_TONE, activityLabel, activityOf, isRead } from './status.js';
+import { ACTIVITY_TONE, activityLabel, activityOf, isArchived, isRead } from './status.js';
+import { closesOnArchive } from './archived.js';
+import { marksRead, type ReadMark } from './read-marks.js';
+import { ARCHIVED_SESSION_OPEN } from './view-settings.js';
 import { plural } from '../../i18n/locales.js';
 import { factsOf, replyText, tokens, when, type TurnFacts } from './turn.js';
 import { attachmentIcon, attachmentLabel, hasPreview, previewOf, type AttachmentPreviewOf } from './attachments.js';
@@ -407,11 +410,26 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
     if (following.current && !infoOpen && active?.highlight !== true) end.current?.scrollIntoView({ block: 'end' });
   }, [turns, streamed, infoOpen, active]);
 
-  // Opening a session is reading it, as far as the unread dot is concerned.
+  // Opening a session reads it, and so does a turn that ends while it is open; a Mark unread holds until then.
   const unread = !beside && summary !== undefined && !isRead(summary.status);
+  const lastRead = useRef<ReadMark | undefined>(undefined);
   useEffect(() => {
-    if (unread && resource !== undefined) hostBridge(host).dispatch(resource, { type: 'session/isReadChanged', isRead: true } as StateAction);
-  }, [unread, resource, turns]);
+    if (summary === undefined || resource === undefined) return;
+    const activity = activityOf(summary.status);
+    const now = { resource, working: activity === 'running' || activity === 'input' };
+    const marks = marksRead(lastRead.current, now);
+    lastRead.current = now;
+    if (marks && unread) hostBridge(host).dispatch(resource, { type: 'session/isReadChanged', isRead: true } as StateAction);
+  }, [unread, resource, summary?.status]);
+
+  // A session archived while it is open closes its tab, unless the person chose to keep it.
+  const archived = summary !== undefined && isArchived(summary.status);
+  const wasArchived = useRef<boolean | undefined>(undefined);
+  useEffect(() => {
+    if (summary === undefined || resource === undefined) return;
+    if (closesOnArchive(wasArchived.current, archived, ARCHIVED_SESSION_OPEN.read(scena.store))) scena.surfaces.close(sessionKey(host, resource));
+    wasArchived.current = archived;
+  }, [archived, resource, summary === undefined]);
 
   if (summary === undefined) return <PageAlert tone="warning" message={t('sessions/chat/gone')} />;
   // A subagent's chat opens here when it is this session's; another session's, as a bot's back session, opens that session.

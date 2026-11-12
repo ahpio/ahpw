@@ -11,6 +11,10 @@ import type { BotMark } from '../bots/chat/mark.js';
 import { viewEntries } from '../../shell/right-sidebar.js';
 import { claimedTerminals, subagentChats, subagentsOf } from './header.js';
 import { canvasName, useCanvasAutoOpen, useChatCanvases } from '../canvases/canvases.js';
+import { refKey } from '../../bridges/hosts.js';
+import { sessionActs } from './acts.js';
+import { sessionKey } from './focus.js';
+import { SESSIONS_PINS, togglePin } from './pins.js';
 
 /**
  * The session's terminals: the ones it holds by claim, and the others whose
@@ -116,6 +120,13 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
   }));
   const views = t('sessions/header/views');
   const reads = t('sessions/header/reads');
+  const pinKey = refKey(host, summary.resource);
+  const pinned = (useStore<string[]>(SESSIONS_PINS) ?? []).includes(pinKey);
+  const acts = sessionActs(host, summary, {
+    pinned,
+    pin: () => togglePin(scena.store, pinKey),
+    onDeleted: () => scena.surfaces.close(sessionKey(host, summary.resource)),
+  }).map((act): PickerAction => ({ ...act, group: 'Session' }));
   const viewMenu = (event: MouseEvent<HTMLButtonElement>): void => show(event, [
     ...viewEntries(scena).map((one): PickerAction => ({ title: one.title, icon: one.icon, group: views, onSelect: (picked) => { picked.closeMenu(); run(`ahp.view.${one.key}`); } })),
     ...(folder === undefined ? [] : [{ title: t('sessions/header/newTerminal'), icon: EMOJIcon.terminal, group: views, onSelect: (picked) => { picked.closeMenu(); run('ahp.newTerminal', { host, cwd: folder }); } } satisfies PickerAction]),
@@ -123,6 +134,7 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
     ...(onUsage === undefined ? [] : [{ title: t('sessions/usage/title'), icon: EMOJIcon.usage, group: reads, onSelect: (picked) => { picked.closeMenu(); onUsage(); } } satisfies PickerAction]),
     { title: t('sessions/raw/button'), icon: EMOJIcon.data, group: reads, active: raw, onSelect: () => onRaw(!raw) },
     ...(calls === undefined ? [] : [{ title: t('sessions/header/hideCalls'), icon: EMOJIcon.callsHidden, group: reads, active: calls.hidden, onSelect: () => calls.onHidden(!calls.hidden) }]),
+    ...acts,
   ]);
 
   return (

@@ -47,3 +47,6 @@ export const TOOLS_EXPANDED = chatChoice('$/sessions/toolsExpanded' as BindingPa
 
 /** Whether the agent's text is drawn as Markdown or as plain text, as `ui.sessionMarkdown` sets it. */
 export const SESSION_MARKDOWN = chatChoice('$/sessions/markdown' as BindingPath, 'ahpw.sessionMarkdown', ['enabled', 'disabled'], 'enabled');
+
+/** Whether an open session's tab closes when the session is archived, as `ui.archivedSessionOpen` sets it. */
+export const ARCHIVED_SESSION_OPEN = chatChoice('$/sessions/archivedSessionOpen' as BindingPath, 'ahpw.archivedSessionOpen', ['close', 'stay'], 'close');
