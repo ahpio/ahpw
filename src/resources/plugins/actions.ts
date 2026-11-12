@@ -1,8 +1,8 @@
 import { translate } from '@softov/scena';
 import { hostBridge, ROOT } from '../../bridges/data.js';
 import type { Offers } from '../../bridges/offers.js';
-import { applyPlugins, callPluginMethod, disablePlugin, enablePlugin, PLUGINS, reloadPlugin, specEnabled, type PluginRow } from '../../bridges/plugins.js';
-import { failed } from '../../shell/notify/index.js';
+import { applyPlugins, callPluginMethod, disablePlugin, enablePlugin, PLUGINS, reloadPlugin, removePlugin, specEnabled, type PluginRow } from '../../bridges/plugins.js';
+import { confirm, failed } from '../../shell/notify/index.js';
 
 /** Whether the host offers the command that turns this plugin the other way. */
 export function mayToggle(offers: Offers, row: PluginRow): boolean {
@@ -14,6 +14,31 @@ export const toggleMethod = (row: PluginRow): string => (specEnabled(row.spec) ?
 
 /** Whether the host offers to import a plugin's code again. */
 export const mayReload = (offers: Offers): boolean => offers.methods.includes(PLUGINS.reload);
+
+/** Whether the host offers to take a plugin out of its configuration. */
+export const mayRemove = (offers: Offers): boolean => offers.methods.includes(PLUGINS.remove);
+
+/**
+ * Takes a plugin out of the configuration once the person says so; `keep`
+ * leaves its package installed. Answers whether it went, so the page closes
+ * its tab. A refusal is the host's, in its words.
+ */
+export async function removeOne(host: string, id: string, title: string, keep: boolean): Promise<boolean> {
+  if (!(await confirm({
+    title: translate('plugins/remove/confirmTitle', { title }),
+    body: translate(keep ? 'plugins/remove/confirmKeep' : 'plugins/remove/confirmUninstall'),
+    confirmLabel: translate('plugins/remove/button'),
+    tone: 'danger',
+  }))) return false;
+  try {
+    await removePlugin(host, id, keep);
+    await rereadAfterChange(host);
+    return true;
+  } catch (error) {
+    failed(translate('plugins/remove/failed', { title }), error);
+    return false;
+  }
+}
 
 /** What the host says a command does, as a button's tooltip. */
 export const saidOf = (offers: Offers, method: string): string | undefined => offers.described[method];

@@ -1,0 +1,23 @@
+/* The New plugin form: a file of a written plugin in the code editor, and the button with the wait beside it. */
+.web-new-plugin__editor {
+  height: 12rem;
+  min-height: 6rem;
+  overflow: hidden;
+  resize: vertical;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-color-canvas);
+}
+
+.web-new-plugin__submit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--oo-spacing-md);
+}
+
+.web-new-plugin__submit .oo-spinner-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}

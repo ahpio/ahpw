@@ -1,7 +1,7 @@
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, Spinner, Tabs, Text, type BadgeTone } from '@softov/scena/ui';
+import { Alert, Badge, Button, CheckBox, Spinner, Tabs, Text, type BadgeTone } from '@softov/scena/ui';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
@@ -9,10 +9,11 @@ import type { PeopleState } from '../../bridges/people.js';
 import { PLUGINS, pluginsReducer, restartNeeded, specEnabled, type PluginRow, type PluginState } from '../../bridges/plugins.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
-import { mayReload, mayToggle, reloadOne, saidOf, toggleMethod, togglePlugin } from './actions.js';
+import { mayReload, mayRemove, mayToggle, reloadOne, removeOne, saidOf, toggleMethod, togglePlugin } from './actions.js';
+import { DangerZone } from '../../shell/controls/DangerZone.js';
 import { Options } from './Options.js';
 import { Overview } from './Overview.js';
-import { keepPluginTabKey, pluginTabKey } from './state.js';
+import { keepPluginTabKey, pluginTab, pluginTabKey } from './state.js';
 import { mayRestart } from '../../bridges/restart.js';
 import { RESTART_HOST } from '../host/restart.js';
 import { PageTitle } from '../../shell/HostIcon.js';
@@ -29,7 +30,23 @@ const TONE: Record<PluginState, BadgeTone> = {
 /** A button's tooltip, when the host says what its command does. */
 const said = (text: string | undefined): { title?: string } => (text === undefined ? {} : { title: text });
 
-/** One of the host's plugins: its head with its state and Enable or Disable, over Overview and Options. */
+/** The end of the Options tab: Remove, with a choice to keep the package installed. */
+function RemoveZone({ host, id, title }: { host: string; id: string; title: string }): ReactElement {
+  const scena = useScena();
+  const { t } = useI18n();
+  const [keep, setKeep] = useState(false);
+  return (
+    <DangerZone
+      label={t('plugins/remove/button')}
+      note={t('plugins/remove/note')}
+      onClick={() => void removeOne(host, id, title, keep).then((gone) => { if (gone) scena.surfaces.close(pluginTab(host, id)); })}
+    >
+      <CheckBox label={t('plugins/remove/keep')} value={keep} onChange={setKeep} />
+    </DangerZone>
+  );
+}
+
+/** One of the host's plugins: its head with its state and Enable or Disable, over Overview and Options, with Remove at the end of Options. */
 export default function PluginPage({ host, plugin: id }: { host: string; plugin: string }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
@@ -79,7 +96,12 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
       <Tabs
         tabs={[
           { key: 'overview', title: t('plugins/page/overview'), child: <Overview host={host} id={id} row={row} /> },
-          { key: 'options', title: t('plugins/page/options'), child: <Options host={host} id={id} row={row} /> },
+          { key: 'options', title: t('plugins/page/options'), child: (
+            <>
+              <Options host={host} id={id} row={row} />
+              {mayRemove(offers) ? <RemoveZone host={host} id={id} title={title} /> : null}
+            </>
+          ) },
         ]}
         defaultValue={pluginTabKey()}
         onChange={keepPluginTabKey}

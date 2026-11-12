@@ -1,6 +1,6 @@
 ---
 title: The bridge installs, writes and removes
-status: todo
+status: implemented
 depends: []
 layer: "ahpw bridges"
 refs:
@@ -36,3 +36,5 @@ The plugins bridge sends `x-ahpd/plugins/install`, `x-ahpd/plugins/write` and `x
 - `pnpm vitest run src/bridges/plugins.test.ts` passes.
 
 ## Resume
+
+`installPlugin`, `writePlugin` and `removePlugin` send the commands and read `PluginChanged`. One answer type serves all three, so the plan's `PluginAdded` is named `PluginChanged`.

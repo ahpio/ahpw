@@ -2698,7 +2698,8 @@
     },
     "commands": {
       "show": "Mostrar plugins",
-      "open": "Abrir plugin"
+      "open": "Abrir plugin",
+      "new": "Novo plugin"
     },
     "states": {
       "error": "Erro",
@@ -2727,6 +2728,34 @@
       "viewFailed": "{id} não conseguiu fazer isso",
       "apply": "Aplicar configuração",
       "applyFailed": "Não foi possível aplicar a configuração"
+    },
+    "new": {
+      "title": "Novo plugin",
+      "how": "Como",
+      "add": "Adicionar de uma fonte",
+      "addHint": "Um pacote npm, um repositório do GitHub, uma URL git, uma URL de tarball ou um caminho no host.",
+      "write": "Escrever um",
+      "writeHint": "Um arquivo TypeScript e seu package.json. O host instala o que ele cita.",
+      "source": "Fonte",
+      "sourceHint": "Um nome de pacote, `github:dono/repo`, uma URL `git+ssh:`, uma URL de tarball ou um caminho no host.",
+      "id": "ID",
+      "idHint": "Letras minúsculas, números e hífens. Você não pode mudá-lo depois.",
+      "addButton": "Adicionar",
+      "adding": "Adicionando…",
+      "create": "Criar",
+      "creating": "Criando…",
+      "waiting": "O npm está instalando no host. Isso pode levar minutos.",
+      "addFailed": "O plugin não foi adicionado",
+      "writeFailed": "O plugin não foi criado"
+    },
+    "remove": {
+      "button": "Remover",
+      "note": "Remover o tira da configuração.",
+      "keep": "Manter o pacote instalado",
+      "confirmTitle": "Remover {title}?",
+      "confirmKeep": "O host o descarrega e o tira da configuração. O pacote continua instalado.",
+      "confirmUninstall": "O host o descarrega, o tira da configuração e desinstala o pacote.",
+      "failed": "Não foi possível remover {title}"
     },
     "notices": {
       "reading": "Carregando plugins…",
