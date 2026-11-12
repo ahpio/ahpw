@@ -36,7 +36,13 @@ export const AGENTS = {
   put: 'x-ahpd/agents/put',
   remove: 'x-ahpd/agents/remove',
   check: 'x-ahpd/agents/check',
+  enable: 'x-ahpd/agents/enable',
+  pause: 'x-ahpd/agents/pause',
+  disable: 'x-ahpd/agents/disable',
 } as const;
+
+/** What a record's `mode` is set to: served, holding what is open but starting nothing, or not opened. */
+export type AgentMode = 'enable' | 'pause' | 'disable';
 
 /** Whose agent it is: the host's, a team's or a person's, as a connector's owner. */
 export type AgentOwner = ConnectorOwner;
@@ -160,5 +166,13 @@ export async function removeAgent(host: string, id: string): Promise<void> {
 export async function checkAgent(host: string, id: string): Promise<AgentRow> {
   const answer = await hostBridge(host).request(AGENTS.check as never, { id } as never) as unknown;
   if (!isRow(answer)) throw new Error(`${AGENTS.check} answered no agent`);
+  return answer;
+}
+
+/** Enables, pauses or disables one agent; its sessions are kept. Answers the row it now lists. */
+export async function setAgentMode(host: string, id: string, mode: AgentMode): Promise<AgentRow> {
+  const method = AGENTS[mode];
+  const answer = await hostBridge(host).request(method as never, { id } as never) as unknown;
+  if (!isRow(answer)) throw new Error(`${method} answered no agent`);
   return answer;
 }
