@@ -1,6 +1,6 @@
 ---
 title: Connectors draw the host's operations
-status: todo
+status: implemented
 depends: [task-01-a-row-keeps-its-offered-operations.md]
 layer: "bridges, resources/connectors"
 refs:

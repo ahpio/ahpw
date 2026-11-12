@@ -1,7 +1,7 @@
 ---
 title: A record draws the operations it offers
 domain: plugins
-status: planned
+status: active
 priority: medium
 created: 2026-11-12
 revalidated: 2026-11-12
@@ -79,9 +79,9 @@ The mockups are in `/home/softov/.local/cache/tmp/claude-1000/-home-softov/b8736
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A row keeps the operations its record offers](task-01-a-row-keeps-its-offered-operations.md) | todo | - |
-| [02 - Agents draw the host's operations](task-02-agents-draw-the-hosts-operations.md) | todo | 01 |
-| [03 - Connectors draw the host's operations](task-03-connectors-draw-the-hosts-operations.md) | todo | 01 |
+| [01 - A row keeps the operations its record offers](task-01-a-row-keeps-its-offered-operations.md) | implemented | - |
+| [02 - Agents draw the host's operations](task-02-agents-draw-the-hosts-operations.md) | implemented | 01 |
+| [03 - Connectors draw the host's operations](task-03-connectors-draw-the-hosts-operations.md) | implemented | 01 |
 
 ## Risks and tradeoffs
 
@@ -90,16 +90,16 @@ The mockups are in `/home/softov/.local/cache/tmp/claude-1000/-home-softov/b8736
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** wait for the ahpd plan to merge, then [task-01-a-row-keeps-its-offered-operations.md](task-01-a-row-keeps-its-offered-operations.md).
+- **Done so far:** the three tasks are implemented against ahpio/ahpd#302 at `9e648f384`, as [implemented.md](implemented.md) says.
+- **Next action:** Softov reviews the PR; the devtunnel checks wait in [operations-tunnel-checks.md](../../../pending/operations-tunnel-checks.md).
 - **Open questions:** none.
 - **Watch out for:** a host on an older ahpd must still see the turn-off buttons.
 
 ## Final verification checklist
 
 - [ ] Against a daemon with the ahpd plan, a running devtunnel page shows Disable, Stop, Restart and Anonymous access, and not Enable or Start.
-- [ ] A paused agent's page shows Enable and Disable, and not Pause.
-- [ ] Against a daemon without the ahpd plan, the agent and connector buttons are as today.
+- [x] A paused agent's page shows Enable and Disable, and not Pause.
+- [x] Against a daemon without the ahpd plan, the agent and connector buttons are as today.
 - [ ] The devtunnel form shows a Person field from the schema, with no change in ahpw.
 - [ ] The tunnel and agent heads match mockup A at 1400 and 390 px.
-- [ ] `pnpm typecheck` and the test suite pass.
+- [x] `pnpm typecheck` and the test suite pass.

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { holds } from '../resources/connectors/form.js';
 import { NO_OFFERS, type Offers } from './offers.js';
 import { readOwnUser, selfId, type Grant } from './people.js';
+import type { Operation } from './operations.js';
 
 /** What the reader holds on one host: their grants, or `null` where nothing is held back. */
 export type OwnGrants = readonly Grant[] | null;
@@ -41,3 +42,13 @@ export function useOwnGrantsOnEach(hosts: readonly string[], offers: readonly (O
 
 /** The reader's grants on one host. */
 export const useOwnGrants = (host: string, offers: Offers): OwnGrants => useOwnGrantsOnEach([host], [offers])[0] ?? null;
+
+/**
+ * The operations a reader may run: the host admits a caller holding
+ * `operation:invoke`, or the grant the operation names. `null` grants hold
+ * every one.
+ */
+export function runnableBy(operations: readonly Operation[], grants: OwnGrants): Operation[] {
+  if (mayDo(grants, 'operation:invoke')) return [...operations];
+  return operations.filter((one) => mayDo(grants, one.grant));
+}

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { INVOKE_OPERATION, invokeOperation, listOperations, madeId, operationsReducer, rowOperations, startingInput, type Operation, type OperationsState } from './operations.js';
+import { runnableBy } from './own-grants.js';
 
 const request = vi.hoisted(() => vi.fn());
 
@@ -44,6 +45,21 @@ describe('a channel with operations', () => {
     const state: OperationsState = { records: [], operations: TUNNEL_OPS };
     expect(listOperations(state).map((one) => one.id)).toEqual(['devtunnel/create', 'cloudflare/create']);
     expect(rowOperations(state, { id: 'a', kind: 'devtunnel' }).map((one) => one.id)).toEqual(['devtunnel/remove']);
+  });
+
+  it('keeps only the ids a record offers now, when it lists them', () => {
+    const state: OperationsState = { records: [], operations: [op('devtunnel/enable', 'devtunnel', ['tunnel']), op('devtunnel/disable', 'devtunnel', ['tunnel']), op('devtunnel/stop', 'devtunnel', ['tunnel']), op('devtunnel/start', 'devtunnel', ['tunnel'])] };
+    expect(rowOperations(state, { id: 'a', kind: 'devtunnel', operations: ['devtunnel/disable', 'devtunnel/stop'] }).map((one) => one.id)).toEqual(['devtunnel/disable', 'devtunnel/stop']);
+    expect(rowOperations(state, { id: 'a', kind: 'devtunnel', operations: [] })).toEqual([]);
+    expect(rowOperations(state, { id: 'a', kind: 'devtunnel' })).toHaveLength(4);
+  });
+
+  it('gives a reader the operations their grants run', () => {
+    const ops = [{ ...op('enable', 'host', ['agent']), grant: 'agent:put' }, { ...op('remove', 'host', ['agent']), grant: 'agent:remove' }];
+    expect(runnableBy(ops, null).map((one) => one.id)).toEqual(['enable', 'remove']);
+    expect(runnableBy(ops, ['agent:put']).map((one) => one.id)).toEqual(['enable']);
+    expect(runnableBy(ops, ['operation:invoke']).map((one) => one.id)).toEqual(['enable', 'remove']);
+    expect(runnableBy(ops, ['agent:list'])).toEqual([]);
   });
 
   it('gives a row with no kind every record operation', () => {

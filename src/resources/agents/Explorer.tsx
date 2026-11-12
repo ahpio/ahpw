@@ -6,7 +6,6 @@ import { useChannelOnEach } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
-import type { PeopleState } from '../../bridges/people.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList, type Dot, type Row } from '../../shell/explorer/ExplorerList.js';
@@ -14,6 +13,9 @@ import { EMOJIcon } from '../emojis.js';
 import { meOn, ownerWord } from '../connectors/actions.js';
 import { agentModes, checkOne, deleteAgent, isAgentOff, mayCheck, mayRemove, setMode } from './actions.js';
 import { useOwnGrantsOnEach } from '../../bridges/own-grants.js';
+import { rowOperations, type OperationsState } from '../../bridges/operations.js';
+import { runnableBy } from '../../bridges/own-grants.js';
+import { operationItems } from '../operations/run.js';
 import { useAgentIcons } from './icons.js';
 import { ACTIVE_AGENT, agentTab } from './state.js';
 import { agentTitle, mergeAgents, type MergedAgent } from './merge.js';
@@ -48,7 +50,7 @@ export default function AgentExplorer(): ReactElement {
   const sessionLists = useEach<SessionSummary[]>(hosts.map((host) => ahpPaths(host).sessions));
   // Records are read only on a host that offers the agents channel; elsewhere every agent is standalone.
   const serving = useServingHosts(hosts, AGENTS.scheme);
-  const recordStates = useChannelOnEach<PeopleState<AgentRow>>(serving, AGENTS.channel, agentsReducer).states;
+  const recordStates = useChannelOnEach<OperationsState<AgentRow>>(serving, AGENTS.channel, agentsReducer).states;
   const iconsOf = useAgentIcons(hosts);
   const offers = useEach<Offers>(hosts.map((host) => ahpPaths(host).offers));
   const grants = useOwnGrantsOnEach(hosts, offers);
@@ -63,6 +65,7 @@ export default function AgentExplorer(): ReactElement {
     () => hosts.flatMap((host, at) => {
       const served = serving.indexOf(host);
       const records = served === -1 ? [] : (recordStates[served]?.records ?? []).map((one) => one.record);
+      const listed = served === -1 || recordStates[served]?.operations === undefined ? undefined : recordStates[served];
       const me = meOn(offers[at] ?? NO_OFFERS);
       return mergeAgents(agentLists[at] ?? [], records).map((agent) => {
         const { info, record } = agent;
@@ -104,19 +107,22 @@ export default function AgentExplorer(): ReactElement {
           menu: [
             { title: t('agents/explorer/open'), onSelect: (menu) => { menu.closeMenu(); open(refKey(host, agent.id)); } },
             ...(info === undefined ? [] : [{ title: t('agents/newSession'), onSelect: (menu: { closeMenu: () => void }) => { menu.closeMenu(); start(host, agent.id); } }]),
-            ...(record === undefined || !mayCheck(held, record, mine) ? [] : [{
+            // A host that lists the agents' operations names the row's acts; an older host gets ahpw's own.
+            ...(record === undefined || listed === undefined ? [] : operationItems(scena, { host, channel: AGENTS.channel, target: record.id, held: record as unknown as Record<string, unknown> }, runnableBy(rowOperations(listed, record), mine))
+              .map((item) => ({ ...item, group: 'more' }))),
+            ...(record === undefined || listed !== undefined || !mayCheck(held, record, mine) ? [] : [{
               title: t('agents/actions/checkNow'),
               group: 'more',
               onSelect: (menu: { closeMenu: () => void }) => { menu.closeMenu(); void checkOne(host, record); },
               ...tooltip(held.described[AGENTS.check]),
             }]),
-            ...(record === undefined ? [] : modes.map((mode: AgentMode) => ({
+            ...(record === undefined || listed !== undefined ? [] : modes.map((mode: AgentMode) => ({
               title: t(`agents/actions/${mode}`),
               group: 'more',
               onSelect: (menu: { closeMenu: () => void }) => { menu.closeMenu(); void setMode(host, record, mode); },
               ...tooltip(held.described[AGENTS[mode]]),
             }))),
-            ...(record === undefined || !mayRemove(held, mine) ? [] : [{
+            ...(record === undefined || listed !== undefined || !mayRemove(held, mine) ? [] : [{
               title: t('agents/actions/remove'),
               group: 'more',
               onSelect: (menu: { closeMenu: () => void }) => {
