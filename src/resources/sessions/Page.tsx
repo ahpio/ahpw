@@ -15,6 +15,10 @@ import {
 } from '@microsoft/agent-host-protocol';
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
+import { AGENTS, agentsReducer, servesAgents, type AgentRow } from '../../bridges/agents.js';
+import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
+import type { PeopleState } from '../../bridges/people.js';
+import { agentOff } from './agent-off.js';
 import { elapsed } from '../../bridges/words.js';
 import { Part, type Send } from './Parts.js';
 import { RawView } from './RawView.js';
@@ -289,6 +293,12 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   // The Usage view, opened from the composer's readout or the header's menu.
   const [usageOpen, setUsageOpen] = useState(false);
   const chat = useChannel<ChatState>(host, chatUri, chatReducer);
+  // The agent's record says whether it takes a message; a reader the host does not serve the channel to sees only the host's refusal.
+  const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
+  const agentRows = useChannel<PeopleState<AgentRow>>(host, servesAgents(offers) ? AGENTS.channel : undefined, agentsReducer).state;
+  const provider = summary?.provider;
+  const rows = useMemo(() => (agentRows?.records ?? []).map((one) => one.record), [agentRows]);
+  const off = provider === undefined ? undefined : agentOff(rows, provider);
   const end = useRef<HTMLDivElement>(null);
   // Following the newest turn, until a person scrolls up to read an older one.
   const following = useRef(true);
@@ -549,6 +559,16 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           backgroundWork={chat.state.backgroundWork}
           summary={summary}
           send={send}
+          blocked={off !== undefined}
+          {...(off === undefined || provider === undefined ? {} : {
+            notice: (
+              <Alert className="web-composer__notice" tone={off === 'paused' ? 'warning' : 'info'}>
+                {t(`sessions/agentOff/${off}`, { name: rows.find((one) => one.id === provider)?.name || provider })}
+                {' '}
+                <button type="button" className="web-link" onClick={() => void scena.commands.execute('ahp.openAgent', { host, provider })}>{t('sessions/agentOff/open')}</button>
+              </Alert>
+            ),
+          })}
           {...(infoOpen ? { onEngage: () => toggleInfo(false) } : {})}
           onInfo={flipInfo}
         />

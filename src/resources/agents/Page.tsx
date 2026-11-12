@@ -2,16 +2,16 @@ import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Badge, Button, Tabs, type BadgeTone } from '@softov/scena/ui';
 import type { AgentInfo } from '@microsoft/agent-host-protocol';
-import { ENGINES, AGENTS, enginesReducer, agentsReducer, checkAgent, servesEngines, servesAgents, type EngineRow, type AgentRow } from '../../bridges/agents.js';
+import { ENGINES, AGENTS, enginesReducer, agentsReducer, servesEngines, servesAgents, type EngineRow, type AgentRow } from '../../bridges/agents.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import type { PeopleState } from '../../bridges/people.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
-import { failed } from '../../shell/notify/index.js';
 import { EMOJIcon } from '../emojis.js';
-import { deleteAgent } from './actions.js';
+import { agentModes, checkOne, isAgentOff, deleteAgent, setMode } from './actions.js';
+import { useOwnGrants } from '../../bridges/own-grants.js';
 import { AgentForm } from './AgentForm.js';
 import { agentTitle, mergeAgents, type MergedAgent } from './merge.js';
 import { agentIcons } from './icons.js';
@@ -28,8 +28,11 @@ const toneOf = (agent: MergedAgent): BadgeTone => {
   if (agent.status === 'configured') return 'success';
   const state = agent.record?.state;
   if (state === 'unavailable' || state === 'failed') return 'danger';
-  return state === 'paused' || state === 'disabled' ? 'default' : 'warning';
+  return state === 'disabled' ? 'default' : 'warning';
 };
+
+/** A button's tooltip, when the host says what its command does. */
+const said = (text: string | undefined): { title?: string } => (text === undefined ? {} : { title: text });
 
 /** The button that checks a record again; what the check finds shows in its alerts. */
 function Check({ host, record }: { host: string; record: AgentRow }): ReactElement {
@@ -37,10 +40,7 @@ function Check({ host, record }: { host: string; record: AgentRow }): ReactEleme
   const [busy, setBusy] = useState(false);
   const check = (): void => {
     setBusy(true);
-    checkAgent(host, record.id).then(
-      () => setBusy(false),
-      (caught: unknown) => { setBusy(false); failed(t('agents/actions/checkFailed', { name: record.name || record.id }), caught); },
-    );
+    void checkOne(host, record).finally(() => setBusy(false));
   };
   return (
     <div className="web-agent__check">
@@ -60,6 +60,7 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
   const infos = useStore<AgentInfo[]>(ahpPaths(host).agents) ?? [];
   const ask = useStore<SectionAsk>(AGENT_SECTION);
+  const grants = useOwnGrants(host, offers);
   const records = useChannel<PeopleState<AgentRow>>(host, servesAgents(offers) ? AGENTS.channel : undefined, agentsReducer).state;
   const engines = useChannel<PeopleState<EngineRow>>(host, servesEngines(offers) ? ENGINES.channel : undefined, enginesReducer).state;
   const agent = useMemo(
@@ -83,7 +84,7 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
       title: t('agents/page/settings'),
       child: (
         <div className="web-agent__settings">
-          <Check host={host} record={record} />
+          {isAgentOff(record) ? null : <Check host={host} record={record} />}
           <AgentForm host={host} record={record} />
           <DangerZone
             label={t('agents/actions/remove')}
@@ -113,7 +114,12 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
           )}
         />
         <div className="web-page__actions">
-          {info === undefined ? null : <Button label={t('agents/newSession')} variant="primary" onClick={() => void scena.commands.execute('ahp.newSession', { host, provider })} />}
+          {record === undefined ? null : agentModes(offers, record, grants).map((mode) => (
+            <Button key={mode} label={t(`agents/actions/${mode}`)} {...said(offers.described[AGENTS[mode]])} onClick={() => void setMode(host, record, mode)} />
+          ))}
+          {isAgentOff(record)
+            ? <Button label={t('agents/newSession')} variant="primary" disabled />
+            : info === undefined ? null : <Button label={t('agents/newSession')} variant="primary" onClick={() => void scena.commands.execute('ahp.newSession', { host, provider })} />}
         </div>
       </div>
       {agent.status !== 'standby' || record === undefined || record.state === 'failed' ? null : (

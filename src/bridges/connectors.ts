@@ -40,6 +40,8 @@ export const CONNECTORS = {
   signin: 'x-ahpd/connectors/signin',
   signinFinish: 'x-ahpd/connectors/signin-finish',
   models: 'x-ahpd/connectors/models',
+  enable: 'x-ahpd/connectors/enable',
+  disable: 'x-ahpd/connectors/disable',
 } as const;
 
 /** `receive` answers calls, `command` adds a `/` command, `action` is offered to run, `view` names a surface its records show a view on. Another is shown by its title. */
@@ -271,6 +273,14 @@ export async function readConnectorModels(host: string, id: string): Promise<Con
   const held = answer as Partial<ConnectorModels> | null;
   if (typeof held !== 'object' || held === null || !Array.isArray(held.models)) throw new Error(`${CONNECTORS.models} answered no models`);
   return { models: held.models.filter(isModel), ...(typeof held.at === 'string' ? { at: held.at } : {}) };
+}
+
+/** Turns one connector on, which opens and checks it, or off, which closes it. Answers the row it now lists. */
+export async function setConnectorOn(host: string, id: string, on: boolean): Promise<ConnectorRow> {
+  const method = on ? CONNECTORS.enable : CONNECTORS.disable;
+  const answer = await hostBridge(host).request(method as never, { id } as never) as unknown;
+  if (!isRow(answer)) throw new Error(`${method} answered no connector`);
+  return answer;
 }
 
 /** Closes one connector and takes it, and its secrets, off the host. */

@@ -59,3 +59,8 @@
 .web-chat > .web-composer > .web-composer__picker {
   bottom: calc(100% - var(--web-composer-fade));
 }
+
+/* Why the agent takes no message, over the box. */
+.web-composer__notice {
+  margin-bottom: var(--oo-spacing-xs);
+}

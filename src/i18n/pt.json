@@ -1335,7 +1335,14 @@
       "remove": "Remover",
       "removeTitle": "Remover {name}?",
       "removeBody": "O host deixa de oferecê-lo e exclui seus segredos. Isso não pode ser desfeito.",
-      "removeFailed": "Não foi possível remover {name}"
+      "removeFailed": "Não foi possível remover {name}",
+      "enable": "Ativar",
+      "pause": "Pausar",
+      "disable": "Desativar",
+      "enableFailed": "Não foi possível ativar {name}",
+      "pauseFailed": "Não foi possível pausar {name}",
+      "disableFailed": "Não foi possível desativar {name}",
+      "checkNow": "Verificar agora"
     },
     "form": {
       "newTitle": "Novo agente",
@@ -2017,6 +2024,11 @@
         "question": "Pergunta",
         "notification": "Notificação"
       }
+    },
+    "agentOff": {
+      "paused": "{name} está pausado, então não aceita mensagem até ser ativado.",
+      "disabled": "{name} está desativado, então não aceita mensagem até ser ativado.",
+      "open": "Abrir o agente"
     }
   },
   "host": {
@@ -2794,7 +2806,11 @@
       "delete": "Excluir",
       "deleteTitle": "Excluir {title}?",
       "deleteBody": "O host o fecha e exclui seus segredos. Isso não pode ser desfeito.",
-      "deleteFailed": "Não foi possível excluir {title}"
+      "deleteFailed": "Não foi possível excluir {title}",
+      "enable": "Ativar",
+      "disable": "Desativar",
+      "enableFailed": "Não foi possível ativar {title}",
+      "disableFailed": "Não foi possível desativar {title}"
     },
     "notices": {
       "reading": "Carregando conectores…",

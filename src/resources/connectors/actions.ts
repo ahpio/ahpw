@@ -1,8 +1,9 @@
 import { translate } from '@softov/scena';
 import type { ReactiveStore } from '@softov/scena/types';
-import { removeConnector, type ConnectorOwner, type ConnectorRow } from '../../bridges/connectors.js';
+import { CONNECTORS, removeConnector, setConnectorOn, type ConnectorOwner, type ConnectorRow } from '../../bridges/connectors.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
+import { mayDo, type OwnGrants } from '../../bridges/own-grants.js';
 import { selfId } from '../../bridges/people.js';
 import { confirm, failed } from '../../shell/notify/index.js';
 
@@ -39,5 +40,25 @@ export async function deleteConnector(host: string, row: ConnectorRow): Promise<
   } catch (error) {
     failed(translate('connectors/actions/deleteFailed', { title }), error);
     return false;
+  }
+}
+
+/** Whether a connector is turned off. */
+export const connectorOff = (row: ConnectorRow): boolean => row.state === 'disabled';
+
+/** The command that turns this connector the other way. */
+export const turnMethod = (row: ConnectorRow): string => (connectorOff(row) ? CONNECTORS.enable : CONNECTORS.disable);
+
+/** Whether the host offers the command that turns this connector the other way, to a reader holding `connector:put`. */
+export const mayTurn = (offers: Offers, row: ConnectorRow, grants: OwnGrants): boolean =>
+  offers.methods.includes(turnMethod(row)) && mayDo(grants, 'connector:put');
+
+/** Turns a connector the other way; a refusal is the host's, in its words. */
+export async function turnConnector(host: string, row: ConnectorRow): Promise<void> {
+  const on = connectorOff(row);
+  try {
+    await setConnectorOn(host, row.id, on);
+  } catch (error) {
+    failed(translate(on ? 'connectors/actions/enableFailed' : 'connectors/actions/disableFailed', { title: row.title || row.id }), error);
   }
 }

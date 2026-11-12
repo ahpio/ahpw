@@ -1,12 +1,15 @@
 import { useMemo, type ReactElement } from 'react';
-import { useI18n, useScena } from '@softov/scena/react';
+import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Badge, Button, Spinner, Tabs, Text, type BadgeTone } from '@softov/scena/ui';
 import { useChannel } from '../../bridges/channel.js';
 import { ADAPTERS, adaptersReducer, CONNECTORS, connectorsReducer, type AdapterRow, type ConnectorRow, type ConnectorState } from '../../bridges/connectors.js';
+import { ahpPaths } from '../../bridges/data.js';
+import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import type { PeopleState } from '../../bridges/people.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
-import { deleteConnector } from './actions.js';
+import { connectorOff, deleteConnector, mayTurn, turnConnector, turnMethod } from './actions.js';
+import { useOwnGrants } from '../../bridges/own-grants.js';
 import { ConnectorForm } from './ConnectorForm.js';
 import { Models } from './Models.js';
 import { Overview } from './Overview.js';
@@ -23,10 +26,15 @@ const TONE: Record<ConnectorState, BadgeTone> = {
   disabled: 'default',
 };
 
+/** A button's tooltip, when the host says what its command does. */
+const said = (text: string | undefined): { title?: string } => (text === undefined ? {} : { title: text });
+
 /** One connector: its head with its state, over Overview, Models when its adapter serves models, and Settings with Delete at its bottom. */
 export default function ConnectorPage({ host, connector: id }: { host: string; connector: string }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
+  const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
+  const grants = useOwnGrants(host, offers);
   const { state, error } = useChannel<PeopleState<ConnectorRow>>(host, CONNECTORS.channel, connectorsReducer);
   const adapters = useChannel<PeopleState<AdapterRow>>(host, ADAPTERS.channel, adaptersReducer).state;
   const connectors = useMemo(() => (state?.records ?? []).map((one) => one.record), [state]);
@@ -51,6 +59,15 @@ export default function ConnectorPage({ host, connector: id }: { host: string; c
           uri={`${CONNECTORS.channel}${id}`}
           state={<Badge tone={TONE[row.state]} text={t(`connectors/states/${row.state}`)} />}
         />
+        {mayTurn(offers, row, grants) ? (
+          <div className="web-page__actions">
+            <Button
+              label={t(connectorOff(row) ? 'connectors/actions/enable' : 'connectors/actions/disable')}
+              {...said(offers.described[turnMethod(row)])}
+              onClick={() => void turnConnector(host, row)}
+            />
+          </div>
+        ) : null}
       </div>
       {row.state === 'ready' || row.state === 'failed' ? null : (
         <Alert tone={row.state === 'disabled' ? 'info' : row.state === 'unavailable' ? 'danger' : 'warning'} message={row.adapter === undefined ? t('connectors/page/noAdapter') : t(`connectors/stateNotes/${row.state}`, { adapter: row.adapter })} />
