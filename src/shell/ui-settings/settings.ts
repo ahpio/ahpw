@@ -20,7 +20,7 @@ import { SESSION_VIEWS, VIEWS_PLACES, type Placing } from '../right-sidebar.js';
 import { BOT_CHAT_OPENS } from '../../resources/bots/sidebar.js';
 import { CANVAS_AUTO_OPEN, CANVAS_OPENS } from '../../resources/canvases/settings.js';
 import { CUSTOM_FILE_OPENS } from '../../resources/agents/custom-files.js';
-import { SESSION_MARKDOWN, TOOLS_EXPANDED, type ChatChoice } from '../../resources/sessions/view-settings.js';
+import { ARCHIVED_SESSION_OPEN, SESSION_MARKDOWN, TOOLS_EXPANDED, type ChatChoice } from '../../resources/sessions/view-settings.js';
 
 /** A UI setting's key: `ui.<name>`, flat, as the host's keys are. */
 export type UiKey = `ui.${string}`;
@@ -125,6 +125,7 @@ export const UI_SETTINGS: readonly UiSetting[] = [
   placeSetting('ui.sessionViewsPlace', SESSION_VIEWS),
   chatSetting('ui.toolsExpanded', TOOLS_EXPANDED),
   chatSetting('ui.sessionMarkdown', SESSION_MARKDOWN),
+  chatSetting('ui.archivedSessionOpen', ARCHIVED_SESSION_OPEN),
   chatSetting('ui.botChatOpens', BOT_CHAT_OPENS),
   chatSetting('ui.canvasOpens', CANVAS_OPENS),
   chatSetting('ui.canvasAutoOpen', CANVAS_AUTO_OPEN),

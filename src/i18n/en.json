@@ -2223,6 +2223,12 @@
           "description": "Where agent and skill files open for editing.",
           "panel": "New panel",
           "modal": "Dialog"
+        },
+        "archivedSessionOpen": {
+          "title": "Archived session",
+          "description": "What an open session does when it is archived.",
+          "close": "Close its tab",
+          "stay": "Stay open"
         }
       },
       "tabs": {
