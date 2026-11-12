@@ -1,7 +1,7 @@
 ---
 title: An agent or connector turns off
 domain: plugins
-status: active
+status: built
 priority: medium
 created: 2026-11-11
 revalidated: 2026-11-11
@@ -86,9 +86,9 @@ The mockups are in the session's scratchpad; the build compares each screen to t
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The bridges turn a record off](task-01-the-bridges-turn-a-record-off.md) | implemented | - |
-| [02 - The pages and rows offer the switch](task-02-the-pages-and-rows-offer-the-switch.md) | implemented | 01 |
-| [03 - A session says its agent is off](task-03-a-session-says-its-agent-is-off.md) | implemented | 01 |
+| [01 - The bridges turn a record off](task-01-the-bridges-turn-a-record-off.md) | done | - |
+| [02 - The pages and rows offer the switch](task-02-the-pages-and-rows-offer-the-switch.md) | done | 01 |
+| [03 - A session says its agent is off](task-03-a-session-says-its-agent-is-off.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -97,8 +97,8 @@ The mockups are in the session's scratchpad; the build compares each screen to t
 
 ## Resume state
 
-- **Done so far:** the three tasks are implemented, as [implemented.md](implemented.md) says.
-- **Next action:** Softov reviews the PR.
+- **Done so far:** the three tasks are done and merged in ahpio/ahpw#63, as [implemented.md](implemented.md) says.
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** a disabled agent shows no alerts; its page must not read that as healthy.
 
