@@ -7,7 +7,10 @@
  * names the scopes it runs on: `list` is the channel as a whole, any other
  * scope is one record, which an invocation names as `target: { id }`. A record
  * operation belongs to a `kind`; a record that has a `kind` takes only that
- * kind's operations, and a record with none takes them all.
+ * kind's operations, and a record with none takes them all. A record that
+ * lists `operations`, the ids it offers now, takes only those, so an enabled
+ * record offers Disable and not Enable; a record from an older host lists none
+ * and takes every operation of its kind.
  */
 
 import { translate } from '@softov/scena';
@@ -15,56 +18,14 @@ import { confirm } from '../shell/notify/confirm.js';
 import { failed } from '../shell/notify/say.js';
 import { textOf } from './words.js';
 import { hostBridge } from './data.js';
-import { recordsReducer } from './people.js';
+import type { Operation, OperationsState } from './operations-state.js';
+
+export { operationsReducer, type Operation, type OperationsState, type OperationStatus } from './operations-state.js';
 
 type Bag = Record<string, unknown>;
 
 /** The command every channel with operations is served by. */
 export const INVOKE_OPERATION = 'x-ahpd/invokeOperation';
-
-/** How the last invocation of an operation went. */
-export type OperationStatus = 'idle' | 'running' | 'error';
-
-/** One operation as a channel lists it. */
-export interface Operation {
-  id: string;
-  /** The `name` of the kind that declared it. */
-  kind: string;
-  label?: string;
-  description?: string;
-  icon?: string;
-  /** The JSON Schema its input is drawn from; absent, it takes none. */
-  input?: Bag;
-  /** The question to ask first; its presence says the operation is destructive. */
-  confirmation?: string;
-  scopes: string[];
-  grant: string;
-  status: OperationStatus;
-  error?: string;
-}
-
-export interface OperationsState<R = Bag> {
-  records: { id: string; record: R }[];
-  operations?: Operation[];
-}
-
-type OperationsAction<R> =
-  | { type: string; id: string; record: R }
-  | { type: string; id: string }
-  | { type: string; operations: Operation[] };
-
-/** Folds `<scheme>/added`, `/changed`, `/removed` and `/operations` into `{ records, operations }`. */
-export function operationsReducer<R = Bag>(scheme: string): (state: OperationsState<R>, action: OperationsAction<R>) => OperationsState<R> {
-  const records = recordsReducer<R>(scheme);
-  return (state, action) => {
-    if (action.type === `${scheme}/operations`) {
-      return 'operations' in action && Array.isArray(action.operations) ? { ...state, operations: action.operations } : state;
-    }
-    if (!('id' in action)) return state;
-    const folded = records({ records: state.records }, action);
-    return folded.records === state.records ? state : { ...state, records: folded.records };
-  };
-}
 
 /** What a person reads for an operation: its label, or its id when it has none. */
 export const labelOf = (operation: Operation): string => operation.label ?? operation.id;
@@ -74,12 +35,21 @@ export function listOperations(state: OperationsState<unknown> | undefined): Ope
   return (state?.operations ?? []).filter((one) => one.scopes.includes('list'));
 }
 
-/** The operations that run on one record: those of its `kind`, or every record operation when it has no `kind`. */
+/**
+ * The operations that run on one record now: those of its `kind`, or every
+ * record operation when it has no `kind`, and only the ids its `operations`
+ * names when it names them.
+ */
 export function rowOperations(state: OperationsState<unknown> | undefined, record: unknown): Operation[] {
-  const kind = typeof record === 'object' && record !== null ? (record as Bag).kind : undefined;
+  const held = typeof record === 'object' && record !== null ? record as Bag : {};
+  const kind = held.kind;
+  const offered = Array.isArray(held.operations) ? held.operations.filter((one): one is string => typeof one === 'string') : undefined;
   return (state?.operations ?? []).filter((one) =>
-    one.scopes.some((scope) => scope !== 'list') && (typeof kind !== 'string' || one.kind === kind));
+    one.scopes.some((scope) => scope !== 'list')
+    && (typeof kind !== 'string' || one.kind === kind)
+    && (offered === undefined || offered.includes(one.id)));
 }
+
 
 /** The params `x-ahpd/invokeOperation` takes; a target and an input go only when given. */
 export function invokeParams(channel: string, operation: Operation, target?: string, input?: Bag): Bag {
