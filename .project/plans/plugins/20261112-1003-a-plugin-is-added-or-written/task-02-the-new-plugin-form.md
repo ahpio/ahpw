@@ -1,6 +1,6 @@
 ---
 title: The New plugin form adds and writes
-status: implemented
+status: done
 depends:
   - task-01-the-bridge-installs-writes-removes.md
 layer: "ahpw plugins screen"

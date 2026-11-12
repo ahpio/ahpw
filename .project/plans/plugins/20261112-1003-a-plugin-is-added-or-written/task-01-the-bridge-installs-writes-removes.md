@@ -1,6 +1,6 @@
 ---
 title: The bridge installs, writes and removes
-status: implemented
+status: done
 depends: []
 layer: "ahpw bridges"
 refs:

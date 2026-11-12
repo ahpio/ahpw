@@ -2,7 +2,7 @@
 title: A plugin is added or written from ahpw - implemented
 date: 2026-11-12
 refs:
-  - git://bb9b6ae - the commit of main the branch starts from
+  - git://1fdbfe3 - the merge of #71 into main
   - "[code://src/resources/plugins/NewPluginPage.tsx](../../../../src/resources/plugins/NewPluginPage.tsx)"
   - "[code://src/bridges/plugins.ts](../../../../src/bridges/plugins.ts)"
 ---

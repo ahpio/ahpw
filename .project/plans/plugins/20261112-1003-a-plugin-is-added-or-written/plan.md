@@ -1,7 +1,7 @@
 ---
 title: A plugin is added or written from ahpw
 domain: plugins
-status: active
+status: built
 priority: medium
 created: 2026-11-12
 revalidated: 2026-11-12
@@ -99,9 +99,9 @@ Options tab -> DangerZone Remove -> confirm -> removePlugin(host, id, keep) -> x
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The bridge installs, writes and removes](task-01-the-bridge-installs-writes-removes.md) | implemented | - |
-| [02 - The New plugin form adds and writes](task-02-the-new-plugin-form.md) | implemented | 01 |
-| [03 - Remove from the Options tab](task-03-remove-from-the-options-tab.md) | implemented | 01 |
+| [01 - The bridge installs, writes and removes](task-01-the-bridge-installs-writes-removes.md) | done | - |
+| [02 - The New plugin form adds and writes](task-02-the-new-plugin-form.md) | done | 01 |
+| [03 - Remove from the Options tab](task-03-remove-from-the-options-tab.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -111,17 +111,17 @@ Options tab -> DangerZone Remove -> confirm -> removePlugin(host, id, keep) -> x
 
 ## Resume state
 
-- **Done so far:** tasks 01, 02 and 03 are implemented on the branch `plugins/20261112-1003-a-plugin-is-added-or-written`, and wait for review. See [implemented.md](implemented.md).
-- **Next action:** Softov reviews the diff and the screens.
+- **Done so far:** tasks 01, 02 and 03 are done, merged in #71 and reviewed by Softov on 2026-11-12. See [implemented.md](implemented.md).
+- **Next action:** none. The plan is built. What waits is in [deferred.md](deferred.md).
 - **Open questions:** none.
-- **Watch out for:** compare each screen with the mockup at 1400 and 390 px, light and dark, and stop at any difference.
+- **Watch out for:** the starter in `starter.ts` copies ahpd's plugin contract.
 
 ## Final verification checklist
 
-- [ ] `pnpm typecheck` passes.
-- [ ] The vitest suite passes, one suite at a time.
-- [ ] On an isolated ahpd, an npm source adds a plugin and its page opens.
-- [ ] A written plugin loads, and its page opens.
-- [ ] A wrong source shows the host's refusal in the form.
-- [ ] Remove, with and without "Keep the package installed", takes the row out of the list.
-- [ ] Each screen matches the mockup at 1400 and 390 px, light and dark.
+- [x] `pnpm typecheck` passes.
+- [x] The vitest suite passes, one suite at a time.
+- [x] On an isolated ahpd, an npm source adds a plugin and its page opens.
+- [x] A written plugin loads, and its page opens.
+- [x] A wrong source shows the host's refusal in the form.
+- [x] Remove, with and without "Keep the package installed", takes the row out of the list.
+- [x] Each screen matches the mockup at 1400 and 390 px, light and dark.

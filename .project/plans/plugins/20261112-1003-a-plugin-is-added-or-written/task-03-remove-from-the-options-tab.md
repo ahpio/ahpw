@@ -1,6 +1,6 @@
 ---
 title: Remove from the Options tab
-status: implemented
+status: done
 depends:
   - task-01-the-bridge-installs-writes-removes.md
 layer: "ahpw plugins screen"
