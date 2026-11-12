@@ -31,7 +31,7 @@ refs:
 Softov wants an admin to add a plugin and to write a plugin from ahpw, on 2026-11-12.
 Today an admin does both from the terminal with `ahpd plugin install`.
 ahpd serves every command for it since its plan `plugin/64`, and that plan names the ahpw page as the next plan.
-The change gives the Plugins explorer a New plugin form, and gives the plugin page Remove, Update and Edit.
+The change gives the Plugins explorer a New plugin form, and gives the plugin page Remove, Update and a Source tab.
 
 ## What others do
 
@@ -80,20 +80,22 @@ Each one runs in the host's one-at-a-time turn, and the plugins channel sends th
 
 ## The change
 
-- The Plugins explorer gets a New plugin action, shown when the host offers `x-ahpd/plugins/install` or `x-ahpd/plugins/write`.
-- New plugin opens a form in a tab, with two choices: add from a source, or write one.
-- Add takes one source field, and sends `x-ahpd/plugins/install`. The form shows that it waits while npm runs.
+The mockup is `.scratch/mockups/mock-plugins-<theme>-<width>.png`, in light and dark, at 1400 and 390 px. Softov chose each layout choice on 2026-11-12, as the mockup draws it.
+
+- The Plugins explorer gets a New plugin action, `+`, first in its toolbar. It shows when the host offers `x-ahpd/plugins/install` or `x-ahpd/plugins/write`.
+- New plugin opens one form in a tab. Its *How* choice picks "Add from a source" or "Write one", as the agent form's *Start from* does. Softov chose one form over two toolbar actions.
+- Add takes one source field, and sends `x-ahpd/plugins/install`. The button says "Adding…" with a spinner and a note while npm runs.
 - Write takes an id, the text of `index.ts` and the `package.json`, in `CodeEditor`, and sends `x-ahpd/plugins/write`.
-- A finished add or write opens the new plugin's page, as a made connector does. A refusal shows the host's message in an alert.
-- The plugin page gets Remove, with a choice to keep the package or the folder, and Update.
-- A written plugin's page gets Edit, which reads `x-ahpd/plugins/source` into the same editor and saves with `x-ahpd/plugins/write`.
+- A finished add or write opens the new plugin's page, as a made connector does. A refusal shows the host's message in an alert, and the form keeps what was typed.
+- The plugin page gets Update beside Reimport and Disable.
+- Remove is a danger zone at the bottom of the Options tab, with "Keep the package installed", as Delete is on a connector's Settings tab. Softov chose this over a button in the page actions.
+- A written plugin's page gets a Source tab. It reads `x-ahpd/plugins/source` into two editors, and Save sends `x-ahpd/plugins/write`. Softov chose a tab over an Edit button that opens the form.
 - An answer with `restart: true` shows the restart note the page already has.
 
 ## Open points
 
-- ahpw must know which plugin is written, to show Edit. The row does not say it.
+- ahpw must know which plugin is written, to show the Source tab. The row does not say it.
 - ahpw does not infer it from a path. ahpd can add a field to the row, or an operations list as tunnels have.
 - Update fits only a plugin that npm installed. The row does not say which plugins those are.
-- The text a new written plugin starts with is not decided. ahpd's docs give the contract, an `apply` export, and the host sends no template.
+- The text a new written plugin starts with is not decided. ahpd's docs give the contract, an `apply` export, and the host sends no template. The mockup's starter text is a proposal.
 - Not checked: whether the host offers `install` to a reader without `plugin:install`. The agent page shows Check and Remove to a reader without their grant, so offers may not follow grants.
-- A mockup of the form and the page actions comes before the plan.
