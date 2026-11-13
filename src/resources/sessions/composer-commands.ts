@@ -10,6 +10,9 @@ import { EMOJIcon } from '../emojis.js';
 import type { CustomAgent } from './custom-agents.js';
 import { pullRequestFacts, pullRequestName, STATE_COLOR, type PullRequest } from './pull-requests.js';
 import { PullRequestCard } from './PullRequests.js';
+import { ARTIFACT_ICON, ARTIFACT_TYPES, artifactName, copyOf, openOf, relativeOf, type Artifact } from './artifact-list.js';
+import { downloadFile } from '../folders/actions.js';
+import { failed } from '../../shell/notify/index.js';
 import { copyText } from '../../shell/controls/CopyButton.js';
 
 /** The slot the composer's `/` commands are offered in. */
@@ -62,10 +65,16 @@ export interface ComposerApi {
   toggleInfo?(): void;
   /** The session's GitHub pull requests, which `/session.pr` lists; absent before a session exists. */
   pullRequests?(): PullRequest[];
+  /** The session's artifacts, which `/session.artifacts` lists, newest first; absent before a session exists. */
+  artifacts?(): Artifact[];
+  /** The session's references, which `/session.references` lists, newest first. */
+  references?(): Artifact[];
+  /** The session's folder, which a file's relative path is counted from. */
+  folder?(): string | undefined;
   /** Whether the host removes a recorded artifact, so a recorded pull request offers *Remove*. */
   removesArtifacts?(): boolean;
-  /** Remove the artifact `artifactId` from the session. */
-  removeArtifact?(artifactId: string): void;
+  /** Remove the artifact `artifactId` from the session; `name` says which in a failure. */
+  removeArtifact?(artifactId: string, name?: string): void;
 }
 
 /** A file the session changed, as Add context lists it. */
@@ -277,6 +286,95 @@ export function pullRequestItems(pullRequest: PullRequest, removes: boolean, rem
   ];
 }
 
+/** The commands behind the Artifacts and References pills, and `/session.artifacts` and `/session.references`. */
+export const ARTIFACTS_COMMAND = 'ahp.composer.artifacts';
+export const REFERENCES_COMMAND = 'ahp.composer.references';
+
+/**
+ * One row per entry, under its type's section in VS Code's order, newest
+ * first; choosing one opens what can be done with it.
+ */
+export function artifactRows(entries: readonly Artifact[], open: (host: HostCtx, artifact: Artifact) => void): PickerAction[] {
+  return entries.map((artifact) => ({
+    title: artifactName(artifact),
+    description: artifact.link ?? artifact.uri ?? artifact.commitHash ?? '',
+    icon: ARTIFACT_ICON[artifact.type],
+    group: translate(`sessions/artifacts/types/${artifact.type}`),
+    onSelect: (host: HostCtx) => open(host, artifact),
+  }));
+}
+
+/** The section labels in VS Code's order, for the picker's `groupOrder`. */
+const artifactGroupOrder = (): string[] => ARTIFACT_TYPES.map((type) => translate(`sessions/artifacts/types/${type}`));
+
+/**
+ * The picker entries of one artifact or reference: open it, copy what it
+ * points at, copy a file's path from the session's folder and download it,
+ * and remove it when the host allows.
+ */
+export function artifactItems(artifact: Artifact, at: { host: string; folder: string | undefined; removes: boolean; remove: (artifactId: string, name: string) => void; run: (command: string, args: unknown) => void }): PickerAction[] {
+  const close = (host: HostCtx): void => host.closeMenu();
+  const target = openOf(artifact);
+  const copy = copyOf(artifact);
+  const relative = relativeOf(artifact, at.folder);
+  const kind = artifact.isArtifact ? 'artifacts' : 'references';
+  return [
+    ...(target.kind === 'web' ? [{ title: translate('sessions/artifacts/openTab'), description: target.url, onSelect: (host: HostCtx) => { close(host); window.open(target.url, '_blank', 'noopener,noreferrer'); } }] : []),
+    ...(target.kind === 'file' ? [{ title: translate('sessions/artifacts/openFile'), description: artifactName(artifact), onSelect: (host: HostCtx) => { close(host); at.run('ahp.openFile', { host: at.host, uri: target.uri }); } }] : []),
+    ...(copy === undefined ? [] : [{ title: copy.label, description: copy.text, onSelect: (host: HostCtx) => { close(host); void copyText(copy.text); } }]),
+    ...(relative === undefined ? [] : [{ title: translate('sessions/artifacts/copyRelativePath'), description: relative, onSelect: (host: HostCtx) => { close(host); void copyText(relative); } }]),
+    ...(target.kind === 'file'
+      ? [{
+          title: translate('sessions/artifacts/download'),
+          description: artifactName(artifact),
+          onSelect: (host: HostCtx) => {
+            close(host);
+            downloadFile(at.host, target.uri).catch((error: unknown) => failed(translate('sessions/artifacts/downloadFailed', { name: artifactName(artifact) }), error));
+          },
+        }]
+      : []),
+    ...(at.removes
+      ? [{ title: translate(`sessions/${kind}/remove`, { name: artifactName(artifact) }), onSelect: (host: HostCtx) => { close(host); at.remove(artifact.id, artifactName(artifact)); } }]
+      : []),
+  ];
+}
+
+/** The command that lists a session's artifacts or its references. */
+function artifactsCommand(scena: Scena, kind: 'artifacts' | 'references'): Disposable {
+  const id = kind === 'artifacts' ? ARTIFACTS_COMMAND : REFERENCES_COMMAND;
+  const shortcut = `/session.${kind}`;
+  return share(scena, {
+    id,
+    title: () => translate(`sessions/${kind}/title`),
+    description: () => translate(`sessions/${kind}/hint`),
+    category: 'Session',
+    shortcut,
+    slots: [COMPOSER_SLOT],
+    disabled: (ctx) => (apiOf(ctx)?.[kind]?.().length ?? 0) === 0,
+    run: (ctx) => {
+      const api = apiOf(ctx);
+      if (api === undefined) return;
+      const at = {
+        host: api.host(),
+        folder: api.folder?.(),
+        removes: api.removesArtifacts?.() ?? false,
+        remove: (artifactId: string, name: string): void => api.removeArtifact?.(artifactId, name),
+        run: (command: string, args: unknown): void => { void ctx.scena.commands.execute(command, args); },
+      };
+      ctx.host?.pushList({
+        title: translate(`sessions/${kind}/title`),
+        sentinel: shortcut,
+        groupOrder: artifactGroupOrder(),
+        items: artifactRows(api[kind]?.() ?? [], (host, artifact) => host.pushList({
+          title: artifactName(artifact),
+          sentinel: shortcut,
+          items: artifactItems(artifact, at),
+        })),
+      });
+    },
+  });
+}
+
 /** The commands every composer has: the model, the custom agent, stopping a turn, and a new session. */
 export function registerComposerCommands(scena: Scena): Disposable {
   return combineDisposables(
@@ -412,6 +510,8 @@ export function registerComposerCommands(scena: Scena): Disposable {
         });
       },
     }),
+    artifactsCommand(scena, 'artifacts'),
+    artifactsCommand(scena, 'references'),
     share(scena, {
       id: 'ahp.composer.changes',
       title: () => translate('sessions/commands/changes'),

@@ -2063,9 +2063,12 @@
       "copyPullRequestUrl": "Copiar URL de la pull request",
       "copyIssueUrl": "Copiar URL de la incidencia",
       "copyWebsiteUrl": "Copiar URL del sitio web",
-      "copied": "Copiado {text}",
-      "removed": "{name} quitado de la sesión.",
-      "removeFailed": "No se pudo quitar {name} de esta sesión"
+      "removeFailed": "No se pudo quitar {name} de esta sesión",
+      "openTab": "Abrir en una pestaña nueva",
+      "openFile": "Abrir",
+      "copyRelativePath": "Copiar ruta relativa",
+      "download": "Descargar",
+      "downloadFailed": "No se pudo descargar {name}"
     },
     "references": {
       "count": {

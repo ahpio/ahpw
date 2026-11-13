@@ -6,6 +6,7 @@
 
 import { translate } from '@softov/scena';
 import { EMOJIcon } from '../emojis.js';
+import { relativePathOf } from '../folders/menu.js';
 import { ARTIFACTS_META, pullRequestsOf, urlKey } from './pull-requests.js';
 
 export type ArtifactType = 'pullRequest' | 'issue' | 'commit' | 'website' | 'file' | 'resource';
@@ -93,6 +94,13 @@ export function pathOf(uri: string): string {
 export function artifactName(one: Artifact): string {
   if (one.type !== 'file' || one.uri === undefined) return one.label;
   return pathOf(one.uri).split('/').filter((part) => part !== '').at(-1) ?? one.label;
+}
+
+/** A file's path from the session's folder, as the folder explorer copies it; nothing for a file outside it or any other entry. */
+export function relativeOf(one: Artifact, folder: string | undefined): string | undefined {
+  if (one.type !== 'file' || !isFileUri(one.uri) || folder === undefined) return undefined;
+  const relative = relativePathOf(one.uri, folder);
+  return relative === pathOf(one.uri) ? undefined : relative;
 }
 
 /** The glyph of each type, after VS Code's codicons. */

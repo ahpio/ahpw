@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { artifactName, artifactPills, artifactSections, copyOf, openOf, readArtifacts, type Artifact } from './artifact-list.js';
+import { artifactName, artifactPills, artifactSections, copyOf, openOf, readArtifacts, relativeOf, type Artifact } from './artifact-list.js';
 
 const meta = (entries: unknown[]) => ({ 'agentHost/sessionArtifacts': entries });
 
@@ -76,5 +76,16 @@ describe('an entry', () => {
     expect(copyOf(commit)?.text).toBe('https://github.com/o/r/commit/abc123');
     expect(copyOf(hashOnly)?.text).toBe('abc123');
     expect(copyOf(resource)?.text).toBe('s3://bucket/key');
+  });
+});
+
+describe('relativeOf', () => {
+  const file: Artifact = { id: 'f', type: 'file', label: 'Notes', isArtifact: true, uri: 'file:///work/docs/notes.md' };
+
+  it('counts a file inside the session folder from it, and gives nothing otherwise', () => {
+    expect(relativeOf(file, 'file:///work')).toBe('docs/notes.md');
+    expect(relativeOf(file, 'file:///other')).toBeUndefined();
+    expect(relativeOf(file, undefined)).toBeUndefined();
+    expect(relativeOf({ ...file, type: 'website', link: 'https://example.com/' }, 'file:///work')).toBeUndefined();
   });
 });

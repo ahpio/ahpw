@@ -2063,9 +2063,12 @@
       "copyPullRequestUrl": "Copy Pull Request URL",
       "copyIssueUrl": "Copy Issue URL",
       "copyWebsiteUrl": "Copy Website URL",
-      "copied": "Copied {text}",
-      "removed": "{name} removed from session.",
-      "removeFailed": "Could not remove {name} from this session"
+      "removeFailed": "Could not remove {name} from this session",
+      "openTab": "Open in a new tab",
+      "openFile": "Open",
+      "copyRelativePath": "Copy Relative Path",
+      "download": "Download",
+      "downloadFailed": "Could not download {name}"
     },
     "references": {
       "count": {

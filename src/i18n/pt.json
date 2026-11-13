@@ -2063,9 +2063,12 @@
       "copyPullRequestUrl": "Copiar URL da pull request",
       "copyIssueUrl": "Copiar URL da issue",
       "copyWebsiteUrl": "Copiar URL do site",
-      "copied": "{text} copiado",
-      "removed": "{name} removido da sessão.",
-      "removeFailed": "Não foi possível remover {name} desta sessão"
+      "removeFailed": "Não foi possível remover {name} desta sessão",
+      "openTab": "Abrir em uma nova aba",
+      "openFile": "Abrir",
+      "copyRelativePath": "Copiar caminho relativo",
+      "download": "Baixar",
+      "downloadFailed": "Não foi possível baixar {name}"
     },
     "references": {
       "count": {

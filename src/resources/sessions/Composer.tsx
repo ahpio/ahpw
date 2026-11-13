@@ -26,7 +26,9 @@ import {
   attachComposer,
   COMPOSER_SLOT,
   CUSTOM_AGENT_COMMAND,
+  ARTIFACTS_COMMAND,
   PULL_REQUESTS_COMMAND,
+  REFERENCES_COMMAND,
   composerPath,
   optionCommandId,
   pickable,
@@ -48,15 +50,15 @@ import { EMOJIcon } from '../emojis.js';
 import { attachmentPath, fromFiles, resourceAttachment, sameAttachment, withRanges, withToken } from './attachments.js';
 import { AddButton, Attached } from './Attached.js';
 import { useComposerDrop } from './composer-drop.js';
-import { done, failed, warn } from '../../shell/notify/index.js';
+import { failed, warn } from '../../shell/notify/index.js';
 import { COMPOSER_FOCUS, hostCommands, registerHostCommands, type HostCommand } from './host-commands.js';
 import { useAgentIconSrc } from '../agents/icons.js';
 import { shellsOf } from './shell-list.js';
 import { ShellsList, ShellsPill } from './Shells.js';
-import { ArtifactsList, ArtifactsPill } from './Artifacts.js';
-import { artifactPills, type Artifact } from './artifact-list.js';
 import { allMerged, closeMerged, pullRequestsOf, readMergedClosed } from './pull-requests.js';
 import { MergedBanner, PullRequestPill } from './PullRequests.js';
+import { ArtifactsPill } from './ArtifactsPill.js';
+import { artifactPills } from './artifact-list.js';
 import { refKey } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { readChoice, writeChoice } from '../../shell/explorer/choice.js';
@@ -157,9 +159,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   const active = activeId === undefined ? undefined : { id: activeId, startedAt: activeStart ?? '' };
   const queued = held ?? [];
   const shells = useMemo(() => shellsOf(backgroundWork), [backgroundWork]);
-  // The one list open above the box, from its pill: the shells, the artifacts or the references.
-  const [listOpen, setListOpen] = useState<'shells' | 'artifacts' | 'references' | null>(null);
-  const toggleList = (list: 'shells' | 'artifacts' | 'references'): void => setListOpen((was) => (was === list ? null : list));
+  const [shellsOpen, setShellsOpen] = useState(false);
   const pullRequests = useMemo(() => pullRequestsOf(summary._meta), [summary._meta]);
   const { artifacts, references } = useMemo(() => artifactPills(summary._meta), [summary._meta]);
   const removesArtifacts = (useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS).removesArtifacts === true;
@@ -171,15 +171,9 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pullRequests, summary.status, sessionKey, closedMerged],
   );
-  const removeArtifact = (artifactId: string): void => {
+  const removeArtifact = (artifactId: string, name?: string): void => {
     hostBridge(host).request('vscode/removeSessionArtifact' as never, { session: summary.resource, artifactId } as never)
-      .catch((error: unknown) => failed(t('sessions/pullRequests/removeFailed'), error));
-  };
-  // The list follows the host's next `session/metaChanged`.
-  const removeEntry = (artifact: Artifact): void => {
-    hostBridge(host).request('vscode/removeSessionArtifact' as never, { session: summary.resource, artifactId: artifact.id } as never)
-      .then(() => done(t('sessions/artifacts/removed', { name: artifact.label })))
-      .catch((error: unknown) => failed(t('sessions/artifacts/removeFailed', { name: artifact.label }), error));
+      .catch((error: unknown) => failed(name === undefined ? t('sessions/pullRequests/removeFailed') : t('sessions/artifacts/removeFailed', { name }), error));
   };
   // Folded or not, kept per browser; it opens unfolded.
   const [folded, setFolded] = useState(() => readChoice(FOLDED_KEY, ['open', 'folded'], 'open') === 'folded');
@@ -340,6 +334,9 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     changed: () => changed,
     ...(onInfo === undefined ? {} : { toggleInfo: onInfo }),
     pullRequests: () => pullRequests,
+    artifacts: () => artifacts,
+    references: () => references,
+    ...(folder === undefined ? {} : { folder: () => folder }),
     removesArtifacts: () => removesArtifacts,
     removeArtifact,
   };
@@ -363,8 +360,11 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     changed: () => api.current?.changed() ?? [],
     ...(onInfo === undefined ? {} : { toggleInfo: () => api.current?.toggleInfo?.() }),
     pullRequests: () => api.current?.pullRequests?.() ?? [],
+    artifacts: () => api.current?.artifacts?.() ?? [],
+    references: () => api.current?.references?.() ?? [],
+    folder: () => api.current?.folder?.(),
     removesArtifacts: () => api.current?.removesArtifacts?.() ?? false,
-    removeArtifact: (artifactId) => api.current?.removeArtifact?.(artifactId),
+    removeArtifact: (artifactId, name) => api.current?.removeArtifact?.(artifactId, name),
   // Only whether the page has an info matters here; the call itself is read through `api`.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [path, onInfo === undefined]);
@@ -489,17 +489,15 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         </ul>
       )}
 
-      {listOpen === 'shells' && shells.length > 0 ? <ShellsList host={host} chatUri={chatUri} shells={shells} /> : null}
-      {listOpen === 'artifacts' && artifacts.length > 0 ? <ArtifactsList host={host} kind="artifacts" entries={artifacts} {...(removesArtifacts ? { onRemove: removeEntry } : {})} /> : null}
-      {listOpen === 'references' && references.length > 0 ? <ArtifactsList host={host} kind="references" entries={references} {...(removesArtifacts ? { onRemove: removeEntry } : {})} /> : null}
+      {shellsOpen && shells.length > 0 ? <ShellsList host={host} chatUri={chatUri} shells={shells} /> : null}
 
       <div className="web-composer__where">
         {folder === undefined ? null : <Pill label={`${EMOJIcon.folder} ${folderLabel(folder)}`} title={t('sessions/composer/folderHint')} />}
         <Pill label={agentImage === undefined ? `${EMOJIcon.agents} ${agent?.displayName ?? summary.provider}` : agent?.displayName ?? summary.provider} image={agentImage} title={agent?.description ?? t('sessions/composer/agentHint')} />
-        {shells.length === 0 ? null : <ShellsPill count={shells.length} onToggle={() => toggleList('shells')} />}
+        {shells.length === 0 ? null : <ShellsPill count={shells.length} onToggle={() => setShellsOpen((was) => !was)} />}
         {pullRequests.length === 0 ? null : <PullRequestPill pullRequests={pullRequests} onOpen={() => openCommand(PULL_REQUESTS_COMMAND)} />}
-        {artifacts.length === 0 ? null : <ArtifactsPill kind="artifacts" count={artifacts.length} onToggle={() => toggleList('artifacts')} />}
-        {references.length === 0 ? null : <ArtifactsPill kind="references" count={references.length} onToggle={() => toggleList('references')} />}
+        {artifacts.length === 0 ? null : <ArtifactsPill kind="artifacts" count={artifacts.length} onOpen={() => openCommand(ARTIFACTS_COMMAND)} />}
+        {references.length === 0 ? null : <ArtifactsPill kind="references" count={references.length} onOpen={() => openCommand(REFERENCES_COMMAND)} />}
         <button type="button" className="web-composer__fold" aria-label={t('sessions/composer/fold')} title={t('sessions/composer/fold')} onClick={() => fold(true)}>{EMOJIcon.caretDown}</button>
       </div>
 
