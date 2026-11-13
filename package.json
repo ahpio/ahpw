@@ -1,6 +1,6 @@
 {
   "name": "@ahpd/web",
-  "version": "0.9.0-rc.1",
+  "version": "0.9.0-rc.2",
   "type": "module",
   "packageManager": "pnpm@11.21.0",
   "description": "A web UI for an AHP server, as an ahpd plugin or on its own with ahpw serve",
@@ -65,7 +65,7 @@
     }
   },
   "devDependencies": {
-    "@ahpd/sdk": "^0.15.0-rc.1",
+    "@ahpd/sdk": "^0.15.0-rc.2",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-cpp": "^6.0.3",

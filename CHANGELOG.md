@@ -5,6 +5,47 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.9.0-rc.2] - 2026-11-12
+
+A candidate for ahpd 0.15.0-rc.2, on npm's `next` tag. Adding, writing and removing a plugin need a host that offers `x-ahpd/plugins/install`, `write` and `remove`.
+
+### Added
+
+- **A plugin is added or written from ahpw.** New plugin adds one from a source, or writes `index.ts` and `package.json` from a starter. The Options tab removes it, and can keep the package installed.
+- **A session shows its context and plan usage** as a ring in the composer, and a Usage view with what fills the context and the plan's windows.
+- **A session's header opens its info and summary**: its turns, working time and tokens, and cards for the newest turns, the tools, the MCP servers and the skills.
+- **A session filters its chat** by text and type, and the Raw view with it.
+- **A session acts from its menu**: Pin, Rename, Mark read or unread, Archive, Copy link and Delete.
+- **A session's pull requests show in a pill**, coloured by state. A merged one offers to archive the session.
+- **An agent or a connector turns off**: enable, pause or disable it from its page and its row's menu.
+- **Agents and connectors list their alerts**, and a row with an error turns red.
+- **An agent page shows its models and MCP servers**, with a Models tab and an MCP row that opens in place.
+- **A record draws the operations it offers**, in the host's words and order.
+- **A connector and an agent show their view**, from a plugin's A2UI view.
+- **A key is limited to chosen operations**, picked on cards from what the person holds.
+- A tool confirmation's other options open from a caret beside its main button.
+- People, roles, teams and projects show their initials in a coloured circle.
+- The policy form has a yaml view.
+- The usage pool page reloads from its range row.
+
+### Changed
+
+- Trust reads the host's `workspaceTrust` first, and a yes joins the host's list.
+- An env secret the host keeps shows as its `{ $secret }` reference, and an env name like a secret draws as a password.
+- A new session is `ahp-session:/<uuid>`, as the protocol names one.
+- The chat head and the composer fade into the canvas colour.
+- ahpw imports scena's look, and styles sit beside their components.
+- scena 0.5.18 to 0.6.2, and `@ahpd/sdk` `^0.15.0-rc.2` for development.
+- Links point at `ahpio/ahpd` and `ahpio.github.io`.
+
+### Fixed
+
+- A one-off read no longer unsubscribes the root, so a new session shows and trusting a folder answers.
+- Settings load after a reconnect, with one root subscribe instead of two.
+- An env secret taken out of the agent form is dropped.
+- The agent form's model picker has one empty choice.
+- The agents page loads on Windows: no two source files differ only in case.
+
 ## [0.9.0-rc.1] - 2026-11-04
 
 A candidate for ahpd 0.15.0-rc.1, on npm's `next` tag. Its tunnels and clients explorers need a host that serves those channels.
@@ -345,7 +386,8 @@ The first release: a web UI for an [Agent Host Protocol](https://microsoft.githu
 - Page components load lazily, one chunk per page.
 - CI, an npm release with provenance, and screenshots.
 
-[Unreleased]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.1...HEAD
+[Unreleased]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.2...HEAD
+[0.9.0-rc.2]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.1...v0.9.0-rc.2
 [0.9.0-rc.1]: https://github.com/ahpio/ahpw/compare/v0.8.0...v0.9.0-rc.1
 [0.8.0]: https://github.com/ahpio/ahpw/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/ahpio/ahpw/compare/v0.7.0...v0.7.1
