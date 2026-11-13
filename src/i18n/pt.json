@@ -2123,6 +2123,8 @@
     "restart": {
       "button": "Reiniciar",
       "done": "O host está reiniciando",
+      "held": "O host reinicia quando os turnos em andamento terminarem",
+      "heldFor": "Aguardando {sessions}.",
       "failed": "Não foi possível reiniciar o host",
       "anyway": "Reiniciar mesmo assim",
       "note": "Reiniciar o host desconecta todos os clientes por um momento. Eles podem se reconectar assim que ele voltar a rodar.",

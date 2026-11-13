@@ -1,4 +1,5 @@
 import type { BindingPath, Disposable, ReactiveStore, Scena } from '@softov/scena/types';
+import type { SessionSummary } from '@microsoft/agent-host-protocol';
 import { PALETTE_SLOT } from '../../shell/CommandPalette.js';
 import { combineDisposables, translate, type ModusClass } from '@softov/scena';
 import { bound, english } from '../../i18n/locales.js';
@@ -80,7 +81,12 @@ export function registerHost(scena: Scena): Disposable {
         const asked = (args ?? {}) as RestartArgs;
         const host = asked.host ?? (embedMode() === 'multi' ? shownHosts(ctx.store).find((one) => mayRestart(offersOf(one))) : windowHost());
         if (host === undefined || !mayRestart(offersOf(host))) return;
-        return restartWithNotice(host, asked.force === true);
+        const sessions = ctx.store.get<SessionSummary[]>(ahpPaths(host).sessions) ?? [];
+        const nameOf = (uri: string): string => {
+          const found = sessions.find((session) => session.resource === uri);
+          return found === undefined ? uri : found.title === '' ? translate('sessions/untitled') : found.title;
+        };
+        return restartWithNotice(host, asked.force === true, nameOf);
       },
     }),
     // A settings tab's *Open in*: the places, in the palette, from the tab's strip.

@@ -142,8 +142,10 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
   useEffect(() => fitToText(area.current), [text]);
 
   // The host says which settings a session would have, given what is chosen so far.
+  // Asked again on each connection, which a change of language makes, so the text is in the new one.
+  const generation = useStore<Connection>(ahpPaths(host).connection)?.generation ?? 0;
   const where = folder.trim() === '' ? undefined : folderUri(folder);
-  const asked = JSON.stringify([provider, where, chosen]);
+  const asked = JSON.stringify([provider, where, chosen, generation]);
   useEffect(() => {
     if (provider === '') return;
     let alive = true;
@@ -175,7 +177,7 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
     }
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dynamicKeys, provider, where]);
+  }, [dynamicKeys, provider, where, generation]);
 
   const agent = agents.find((one) => one.provider === provider);
   const agentsOfHarness = useMemo(() => customAgents(agent?.customizations), [agent]);
