@@ -5,6 +5,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.9.0-rc.3] - 2026-11-13
+
+A candidate for ahpd 0.15.0-rc.2, on npm's `next` tag. The artifacts and references pills need a host that records `agentHost/sessionArtifacts`, and Remove needs one that offers `vscode/removeSessionArtifact`.
+
+### Added
+
+- **New session and the command palette dock beside the bots.** They drag, group, float, lock and hide as a bot does. A pill holds two or more actions side by side, fits the title bar, and stacks on a side edge. Interface settings has an Actions section, and the palette shows a hidden action again.
+- **A session shows its artifacts and references** in two composer pills. They open `/session.artifacts` and `/session.references` in the composer's picker, in VS Code's sections, to open, copy, copy a relative path, download or remove.
+- **Every schema form offers yaml**: plugin Options, the operation dialog and both settings tabs. New computer has a head form and a Settings section.
+- The yaml view suggests keys and values from the form's schema.
+- New session opens in the right sidebar from its button's menu.
+
+### Changed
+
+- The title bar's mark is 24 px.
+- The bot layer is the dock layer, and the bots' places carry over.
+
+### Fixed
+
+- A new session's page no longer says the subscription was cancelled. A follow, a refresh and a one-off read share one subscribe per channel, and an unsubscribe waits for it.
+- A release on `next` is marked a pre-release on GitHub.
+
 ## [0.9.0-rc.2] - 2026-11-12
 
 A candidate for ahpd 0.15.0-rc.2, on npm's `next` tag. Adding, writing and removing a plugin need a host that offers `x-ahpd/plugins/install`, `write` and `remove`.
@@ -386,7 +408,8 @@ The first release: a web UI for an [Agent Host Protocol](https://microsoft.githu
 - Page components load lazily, one chunk per page.
 - CI, an npm release with provenance, and screenshots.
 
-[Unreleased]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.2...HEAD
+[Unreleased]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.3...HEAD
+[0.9.0-rc.3]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.2...v0.9.0-rc.3
 [0.9.0-rc.2]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.1...v0.9.0-rc.2
 [0.9.0-rc.1]: https://github.com/ahpio/ahpw/compare/v0.8.0...v0.9.0-rc.1
 [0.8.0]: https://github.com/ahpio/ahpw/compare/v0.7.1...v0.8.0
