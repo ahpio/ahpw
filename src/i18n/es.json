@@ -857,6 +857,7 @@
       "host": "Host",
       "name": "Nombre",
       "nameHint": "No podrás cambiar el nombre después.",
+      "settings": "Ajustes",
       "nameSlash": "Los nombres no pueden contener / \\ ni ?.",
       "nameDots": "Los nombres no pueden ser . ni ..",
       "noCreate": "Este host no permite crear computadoras.",

@@ -10,6 +10,7 @@ import { interfaceGroups, settingsGroups } from './sections.js';
 import { keepSettingsTab, settingsTab, type SettingsPlace } from './place.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
+import { yamlView } from '../editor/yamlView.js';
 
 /**
  * A host's unsaved edits and the view last chosen on each tab, kept while the
@@ -45,7 +46,7 @@ function HostSettings({ host }: { host: string }): ReactElement {
   const schema = config?.schema as unknown as JsonSchemaObject | undefined;
   // The section titles are translated when the groups are built, so a language switch builds them again.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const views = useMemo(() => (schema === undefined ? [] : [fieldsView, jsonView, sectionsView(settingsGroups(schema))]), [schema, locale]);
+  const views = useMemo(() => (schema === undefined ? [] : [fieldsView, jsonView, yamlView, sectionsView(settingsGroups(schema))]), [schema, locale]);
 
   // What the host holds, again whenever it changes; a draft carried in from another place survives the first read.
   const first = useRef(true);
@@ -119,7 +120,7 @@ function InterfaceSettings(): ReactElement {
     [locale, ui, scena],
   );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const views = useMemo(() => [fieldsView, jsonView, sectionsView(interfaceGroups())], [locale]);
+  const views = useMemo(() => [fieldsView, jsonView, yamlView, sectionsView(interfaceGroups())], [locale]);
   // A key taken out, by its Reset or the JSON view, goes back to its usual value.
   const change = (next: Record<string, unknown>): void => {
     for (const one of UI_SETTINGS) writeUi(scena, one.key, next[one.key]);

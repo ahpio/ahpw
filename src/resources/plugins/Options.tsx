@@ -4,6 +4,7 @@ import { Alert, Button, SchemaForm, type JsonSchemaObject } from '@softov/scena/
 import { setPluginOption, type PluginRow } from '../../bridges/plugins.js';
 import { hostSaid } from '../../bridges/said.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
+import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import { rereadAfterChange } from './actions.js';
 
 type Bag = Record<string, unknown>;
@@ -59,7 +60,7 @@ export function Options({ host, id, row }: { host: string; id: string; row: Plug
 
   return (
     <div className="web-plugin__tab">
-      <SchemaForm schema={schema} value={values} baseline={held} onChange={(next) => { setEdited(next); setSaved(false); setFailure(null); }} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} fieldActions />
+      <SchemaForm schema={schema} value={values} baseline={held} onChange={(next) => { setEdited(next); setSaved(false); setFailure(null); }} views={SETTINGS_VIEWS} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} fieldActions />
       {failure === null ? null : <Alert tone="danger" title={t('plugins/options/failed')} message={failure} />}
       <div className="web-page__actions">
         <Button label={t('plugins/options/save')} variant="primary" disabled={changed.length === 0 || busy || !jsonValid} {...(jsonValid ? {} : { title: t('host/settings/fixJson') })} onClick={() => void save()} />

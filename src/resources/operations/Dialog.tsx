@@ -5,6 +5,7 @@ import { askFirst, invokeOperation, labelOf, startingInput } from '../../bridges
 import { hostSaid } from '../../bridges/said.js';
 import { adapterSchema, configForForm, configForPut } from '../connectors/form.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
+import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import { OPERATION_DIALOG, openMade, refusedTitle, type OpenDialog } from './run.js';
 
 type Bag = Record<string, unknown>;
@@ -48,7 +49,7 @@ function OperationForm({ open, onClose }: { open: OpenDialog; onClose: () => voi
     <Modal open title={label} onClose={onClose}>
       <div className="web-changeset-form">
         {open.operation.description === undefined ? null : <p className="web-note">{open.operation.description}</p>}
-        <SchemaForm schema={schema} value={value} onChange={setValue} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} />
+        <SchemaForm schema={schema} value={value} onChange={setValue} views={SETTINGS_VIEWS} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} />
         {failure === null ? null : <Alert tone="danger" title={refusedTitle(open.operation)} message={failure} />}
         <div className="web-changeset-form__actions">
           <Button label={t('operations/cancel')} variant="ghost" onClick={onClose} />
