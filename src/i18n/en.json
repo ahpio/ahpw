@@ -2039,6 +2039,42 @@
       "paused": "{name} is paused, so it takes no message until it is enabled.",
       "disabled": "{name} is disabled, so it takes no message until it is enabled.",
       "open": "Open the agent"
+    },
+    "artifacts": {
+      "count": {
+        "one": "{count} artifact",
+        "other": "{count} artifacts"
+      },
+      "title": "Artifacts",
+      "hint": "What the session made",
+      "remove": "Remove Artifact {name} from Session",
+      "types": {
+        "pullRequest": "Pull Requests",
+        "issue": "Issues",
+        "commit": "Commits",
+        "website": "Websites",
+        "file": "Files",
+        "resource": "Resources"
+      },
+      "copyPath": "Copy Path",
+      "copyUri": "Copy URI",
+      "copyCommitUrl": "Copy Commit URL",
+      "copyCommitHash": "Copy Commit Hash",
+      "copyPullRequestUrl": "Copy Pull Request URL",
+      "copyIssueUrl": "Copy Issue URL",
+      "copyWebsiteUrl": "Copy Website URL",
+      "copied": "Copied {text}",
+      "removed": "{name} removed from session.",
+      "removeFailed": "Could not remove {name} from this session"
+    },
+    "references": {
+      "count": {
+        "one": "{count} reference",
+        "other": "{count} references"
+      },
+      "title": "References",
+      "hint": "What the session points you at",
+      "remove": "Remove Reference {name} from Session"
     }
   },
   "host": {
