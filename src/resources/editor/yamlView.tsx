@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { EditorState } from '@codemirror/state';
 import { fieldsView, jsonView, type SchemaFormView, type SchemaFormViewProps } from '@softov/scena/ui';
 import { parse, stringify } from 'yaml';
 import CodeEditor from './CodeEditor.js';
+import { yamlCompletions } from './yaml-hints.js';
 
 /** A form's value as YAML text; an empty value is empty text, which reads back as `{}`. */
 export function yamlOf(value: Record<string, unknown>): string {
@@ -25,7 +27,15 @@ export function yamlProblem(text: string): { parsed: Record<string, unknown>; er
  * parse stays on screen with its error; a value it did not send replaces the
  * text, as a reset or the host's own change.
  */
-function YamlView({ value, onChange }: SchemaFormViewProps): ReactElement {
+function YamlView({ schema, value, onChange }: SchemaFormViewProps): ReactElement {
+  // The editor reads its extensions once, so the hints read the schema the form holds now.
+  const held = useRef(schema);
+  held.current = schema;
+  // One source for the editor's life: CodeMirror tells a completion source by identity, and a new one each time never finishes.
+  const hints = useMemo(() => {
+    const data = [{ autocomplete: yamlCompletions(() => held.current as Record<string, unknown>) }];
+    return EditorState.languageData.of(() => data);
+  }, []);
   const shown = JSON.stringify(value);
   const [text, setText] = useState(() => yamlOf(value));
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +57,7 @@ function YamlView({ value, onChange }: SchemaFormViewProps): ReactElement {
   return (
     <>
       <div className="oo-schema-form__json-editor">
-        <CodeEditor value={text} language="yaml" onChange={edit} />
+        <CodeEditor value={text} language="yaml" onChange={edit} extensions={hints} />
       </div>
       {error === null ? null : <p className="oo-schema-form__json-error" role="alert">{error}</p>}
     </>
