@@ -23,6 +23,9 @@ class Queue<T> implements AsyncIterableIterator<T> {
 /** The fake client's hosts: each one's status, and what its requests answer. */
 const status = new Map<string, string>();
 const subscribed: [string, string][] = [];
+const unsubscribed: [string, string][] = [];
+/** While set, every subscribe waits for it before it answers. */
+let answers: Promise<void> | undefined;
 const removed: string[] = [];
 /** The hosts each `addHost` named, in order. */
 const added: string[] = [];
@@ -52,9 +55,12 @@ class FakeMultiHostClient {
   }
   async subscribe(id: string, uri: string) {
     subscribed.push([id, uri]);
+    if (answers !== undefined) await answers;
     return { snapshot: { state: { host: id, uri } } };
   }
-  async unsubscribe(): Promise<void> {}
+  async unsubscribe(id: string, uri: string): Promise<void> {
+    unsubscribed.push([id, uri]);
+  }
   dispatch() {
     return { clientSeq: 1 };
   }
@@ -93,6 +99,9 @@ const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 beforeEach(async () => {
   status.clear();
   subscribed.length = 0;
+  unsubscribed.length = 0;
+  answers = undefined;
+  store.set.mockClear();
   removed.length = 0;
   added.length = 0;
   reconnected.length = 0;
@@ -152,6 +161,73 @@ describe('hostBridge', () => {
     status.set('b', 'connected');
     hostEvents.push({ type: 'connected', hostId: 'b', generation: 1 });
     await expect(onB).resolves.toEqual({ host: 'b', method: 'listSessions' });
+  });
+});
+
+describe('one subscribe per channel', () => {
+  const session = 'ahp-session:/one';
+  /** Holds every subscribe's answer until the returned function is called. */
+  const holdAnswers = (): (() => void) => {
+    let open = (): void => undefined;
+    answers = new Promise((resolve) => { open = resolve; });
+    return open;
+  };
+  const errorsSet = () => store.set.mock.calls.filter(([path, value]) => path === data.channelErrorPath('a', session) && value !== null);
+
+  it('shares a page\'s subscribe with a one-off read that comes while it is read', async () => {
+    status.set('a', 'connected');
+    const answer = holdAnswers();
+    data.hostBridge('a').follow(session, reducer);
+    const read = data.hostBridge('a').readOnce(session);
+    await settle();
+    answer();
+    await expect(read).resolves.toEqual({ host: 'a', uri: session });
+    await settle();
+    expect(subscribed).toEqual([['a', session]]);
+    expect(unsubscribed).toEqual([]);
+    expect(store.set).toHaveBeenCalledWith(data.channelPath('a', session), { host: 'a', uri: session });
+    expect(errorsSet()).toEqual([]);
+  });
+
+  it('shares a one-off read\'s subscribe with a page that opens while it is read, and keeps it', async () => {
+    status.set('a', 'connected');
+    const answer = holdAnswers();
+    const read = data.hostBridge('a').readOnce(session);
+    await settle();
+    data.hostBridge('a').follow(session, reducer);
+    answer();
+    await read;
+    await settle();
+    expect(subscribed).toEqual([['a', session]]);
+    expect(unsubscribed).toEqual([]);
+    expect(store.set).toHaveBeenCalledWith(data.channelPath('a', session), { host: 'a', uri: session });
+  });
+
+  it('lets a one-off read go once it is answered, when no page follows the channel', async () => {
+    status.set('a', 'connected');
+    await data.hostBridge('a').readOnce(session);
+    expect(subscribed).toEqual([['a', session]]);
+    expect(unsubscribed).toEqual([['a', session]]);
+  });
+
+  it('unsubscribes a released page only after the subscribe in flight is answered', async () => {
+    vi.useFakeTimers();
+    try {
+      status.set('a', 'connected');
+      const answer = holdAnswers();
+      const stop = data.hostBridge('a').follow(session, reducer);
+      const read = data.hostBridge('a').readOnce(session);
+      stop();
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(unsubscribed).toEqual([]);
+      answer();
+      await read;
+      await vi.advanceTimersByTimeAsync(0);
+      expect(subscribed).toEqual([['a', session]]);
+      expect(unsubscribed).toEqual([['a', session]]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
