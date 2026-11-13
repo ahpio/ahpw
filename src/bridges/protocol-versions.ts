@@ -12,9 +12,10 @@
  * contract of `1.0.0`, and adds only the canvas actions, which the SDK's
  * reducers already fold. A host that answers `0.10.0` is read as a `1.0.0` host.
  *
- * The same rewrite adds the page's language as `locale` to `initialize` and
- * `reconnect`, which the SDK's host runtime leaves out; a host that reads it
- * answers in that language.
+ * The same rewrite adds the page's language, which the SDK's host runtime
+ * leaves out: as `locale` on `initialize`, and on `reconnect`, which has no
+ * `locale` field, as `_meta["ahpd.locale"]`, where ahpd reads it. A host that
+ * reads it answers in that language.
  */
 
 import { getLocale } from '@softov/scena';
@@ -31,6 +32,9 @@ export const OFFERED_PROTOCOL_VERSIONS: readonly string[] = Object.freeze(
   ),
 );
 
+/** The `_meta` key a `reconnect` carries the language under. */
+export const RECONNECT_LOCALE = 'ahpd.locale';
+
 /**
  * An `initialize` request offering `OFFERED_PROTOCOL_VERSIONS`, and an
  * `initialize` or `reconnect` carrying `locale` when one is given; any other
@@ -40,11 +44,10 @@ export function offeringEveryVersion<T>(message: T, locale?: string): T {
   const body = record(typeof message === 'string' ? parsed(message) : message);
   if (body?.method !== 'initialize' && body?.method !== 'reconnect') return message;
   if (body.method === 'reconnect' && locale === undefined) return message;
-  const params = {
-    ...record(body.params),
-    ...(body.method === 'initialize' ? { protocolVersions: [...OFFERED_PROTOCOL_VERSIONS] } : {}),
-    ...(locale === undefined ? {} : { locale }),
-  };
+  const given = record(body.params);
+  const params = body.method === 'initialize'
+    ? { ...given, protocolVersions: [...OFFERED_PROTOCOL_VERSIONS], ...(locale === undefined ? {} : { locale }) }
+    : { ...given, _meta: { ...record(given?._meta), [RECONNECT_LOCALE]: locale } };
   const rewritten = { ...body, params };
   return (typeof message === 'string' ? JSON.stringify(rewritten) : rewritten) as T;
 }

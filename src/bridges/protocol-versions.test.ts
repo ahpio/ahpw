@@ -12,7 +12,7 @@ import {
 import type { AhpTransport, JsonRpcMessage, TransportFrame } from '@microsoft/agent-host-protocol/client';
 import { MultiHostClient, type HostHandle } from '@microsoft/agent-host-protocol/hosts';
 
-import { offering, offeringEveryVersion, OFFERED_PROTOCOL_VERSIONS } from './protocol-versions.js';
+import { offering, offeringEveryVersion, OFFERED_PROTOCOL_VERSIONS, RECONNECT_LOCALE } from './protocol-versions.js';
 
 const initialize = {
   jsonrpc: '2.0',
@@ -44,10 +44,12 @@ test('any other frame goes as it came', () => {
   expect(offeringEveryVersion('not json')).toBe('not json');
 });
 
-test('an initialize and a reconnect carry the locale given', () => {
+test('an initialize carries the locale given, and a reconnect carries it in _meta', () => {
   expect(offeringEveryVersion(initialize, 'pt-BR').params).toEqual({ channel: 'ahp-root://', clientId: 'c', protocolVersions: [...OFFERED_PROTOCOL_VERSIONS], locale: 'pt-BR' });
   const reconnect = { jsonrpc: '2.0', id: 2, method: 'reconnect', params: { clientId: 'c' } };
-  expect(offeringEveryVersion(reconnect, 'pt-BR').params).toEqual({ clientId: 'c', locale: 'pt-BR' });
+  expect(offeringEveryVersion(reconnect, 'pt-BR').params).toEqual({ clientId: 'c', _meta: { [RECONNECT_LOCALE]: 'pt-BR' } });
+  const declared = { jsonrpc: '2.0', id: 2, method: 'reconnect', params: { clientId: 'c', _meta: { other: 1 } } };
+  expect(offeringEveryVersion(declared, 'pt-BR').params).toEqual({ clientId: 'c', _meta: { other: 1, [RECONNECT_LOCALE]: 'pt-BR' } });
 });
 
 test('a frame other than initialize or reconnect goes as it came with a locale', () => {

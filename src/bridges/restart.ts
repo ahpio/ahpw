@@ -10,18 +10,17 @@ export const RESTART = 'x-ahpd/restart';
 /** The code a host refuses a caller with who may never restart it; forcing changes nothing. */
 const REFUSED = -32009;
 
-/** What the host answers once it has agreed to restart. */
-export interface Restarting {
-  restarting: true;
-  pid: number;
-}
+/** What the host answers: it restarts now, or it waits for the turns of the sessions in `parked` to end. */
+export type RestartAnswer =
+  | { restarting: true; pid: number; restartDelayMs?: number }
+  | { restarting: false; pid: number; parked: string[] };
 
 /** Whether the host offers its restart. */
 export const mayRestart = (offers: Offers): boolean => offers.methods.includes(RESTART);
 
 /** Asks the host to restart; `force` restarts it while a turn is running. */
-export async function restartHost(host: string, force = false): Promise<Restarting> {
-  return await hostBridge(host).request(RESTART as never, (force ? { force: true } : {}) as never) as Restarting;
+export async function restartHost(host: string, force = false): Promise<RestartAnswer> {
+  return await hostBridge(host).request(RESTART as never, (force ? { force: true } : {}) as never) as RestartAnswer;
 }
 
 /** Whether forcing could change a refusal: every refusal but the one of a caller who may never restart. */

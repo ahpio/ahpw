@@ -2123,6 +2123,8 @@
     "restart": {
       "button": "Restart",
       "done": "The host is restarting",
+      "held": "The host restarts when the running turns end",
+      "heldFor": "Waiting for {sessions}.",
       "failed": "Couldn't restart the host",
       "anyway": "Restart anyway",
       "note": "Restarting the host temporarily disconnects all clients. They can reconnect once it's running again.",
