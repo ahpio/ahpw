@@ -420,7 +420,6 @@ export default function DockLayer(): ReactElement | null {
     >
       {drawn.map(({ dock, shown }) => {
         const { shown: drawnItems, more } = splitCluster(shown, isBot);
-        const inBar = isRow(dock.place) && !isFloating(dock.place);
         const grouped = pill && shown.length > 1 && shown.some(isAction);
         const itemOf = (key: string): ReactElement => {
           const moving = drag?.items.includes(key) === true;
@@ -522,7 +521,7 @@ export default function DockLayer(): ReactElement | null {
             data-bots={shown.some(isBot) ? 'true' : 'false'}
             style={(isFloating(dock.place) ? { left: `${dock.place.float.x * 100}%`, top: `${dock.place.float.y * 100}%` } : { '--at': dock.place.at }) as CSSProperties}
           >
-            {inBar && grouped
+            {grouped
               ? runsOf(drawnItems, isAction).map((run) => (run.length > 1 && isAction(run[0]!)
                 ? <span key={`pill:${run[0]}`} className="web-dock__pill">{run.map(itemOf)}</span>
                 : run.map(itemOf)))

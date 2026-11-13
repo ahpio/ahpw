@@ -128,17 +128,9 @@
 .web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='right'] { right: 6px; }
 .web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='left'] { left: 6px; }
 
+/* A pill holds a run of two or more actions side by side; a bot breaks the run and keeps its own size beside it. */
 .web-dock[data-pill='true'] {
-  gap: 2px;
-  padding: 2px;
-  border: 1px solid var(--oo-color-border);
-  border-radius: 999px;
-  background: var(--oo-color-raised);
-  box-shadow: var(--oo-shadow-md);
-}
-
-.web-dock[data-pill='true'][data-bots='true'] {
-  padding: 4px;
+  gap: 4px;
 }
 
 .web-dock[data-pill='false']:has(.web-act) {
@@ -206,7 +198,8 @@
   75% { transform: translateX(3px); }
 }
 
-.web-dock[data-pill='false'] .web-act {
+/* An action outside a pill stands on its own, with its own shadow. */
+.web-dock > .web-act {
   box-shadow: var(--oo-shadow-md);
 }
 
@@ -219,10 +212,6 @@
   height: 36px;
 }
 
-.web-dock[data-pill='true'] .web-act--newSession:not(:hover, :focus-visible, [data-open='true']) {
-  border-color: transparent;
-  background: transparent;
-}
 
 /* The palette: a search field where a row has room, a short one where it has less, a square in a column. */
 .web-act--palette {
@@ -341,22 +330,26 @@
   width: calc(var(--web-dock-pill) - 4px);
 }
 
-.web-dock:is([data-edge='top'], [data-edge='bottom'])[data-pill='true'] {
-  gap: 4px;
-  padding: 0;
-  border: 0;
-  background: none;
-  box-shadow: none;
-}
-
 .web-dock__pill {
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 1px;
+  padding: 2px;
   border: 1px solid var(--oo-color-border);
   border-radius: 999px;
   background: var(--oo-color-raised);
+  box-shadow: var(--oo-shadow-md);
+}
+
+/* On a side edge a pill stacks its actions. */
+.web-dock:is([data-edge='left'], [data-edge='right']) .web-dock__pill {
+  flex-direction: column;
+}
+
+/* In a bar the pill is the bar's own height, so it takes the thinner padding and no shadow. */
+.web-dock:is([data-edge='top'], [data-edge='bottom']) .web-dock__pill {
+  padding: 1px;
+  box-shadow: none;
 }
 
 .web-dock__pill .web-act--newSession:not(:hover, :focus-visible, [data-open='true']) {
