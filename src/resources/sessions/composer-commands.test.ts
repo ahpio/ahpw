@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MessageAttachment } from '@microsoft/agent-host-protocol';
 import type { PickerAction } from '@softov/scena/types';
-import { contextItems, pullRequestItems, pullRequestRows, showsPill, typeTrigger, valueWords, type ChangedFile, type ComposerApi } from './composer-commands.js';
+import { artifactItems, artifactRows, contextItems, pullRequestItems, pullRequestRows, showsPill, typeTrigger, valueWords, type ChangedFile, type ComposerApi } from './composer-commands.js';
 
 describe('valueWords', () => {
   it('reads plain values, lists and objects', () => {
@@ -95,5 +95,31 @@ describe('pullRequestRows', () => {
     const rows = pullRequestRows([merged, unknown], () => undefined);
     expect(rows.map((one) => ('color' in one ? one.color : undefined))).toEqual(['purple', undefined]);
     expect(rows.every((one) => 'icon' in one && one.icon === '⎇')).toBe(true);
+  });
+});
+
+describe('artifactItems', () => {
+  const titles = (items: PickerAction[]): string[] => items.map((one) => ('title' in one ? one.title : one.commandId));
+  const at = { host: 'h', folder: 'file:///work', removes: true, remove: (): void => undefined, run: (): void => undefined };
+  const file = { id: 'f', type: 'file' as const, label: 'Notes', isArtifact: true, uri: 'file:///work/docs/notes.md' };
+
+  it('offers a file its open, both paths, a download and remove', () => {
+    expect(titles(artifactItems(file, at))).toEqual(['Open', 'Copy Path', 'Copy Relative Path', 'Download', 'Remove Artifact notes.md from Session']);
+  });
+
+  it('leaves out the relative path for a file outside the folder, and remove on a host that cannot', () => {
+    expect(titles(artifactItems({ ...file, uri: 'file:///elsewhere/notes.md' }, { ...at, removes: false }))).toEqual(['Open', 'Copy Path', 'Download']);
+  });
+
+  it('opens a website in a tab and copies its URL; a reference removes as a reference', () => {
+    const site = { id: 's', type: 'website' as const, label: 'Preview', isArtifact: false, link: 'https://example.com/' };
+    expect(titles(artifactItems(site, at))).toEqual(['Open in a new tab', 'Copy Website URL', 'Remove Reference Preview from Session']);
+  });
+});
+
+describe('artifactRows', () => {
+  it('puts each entry under its type, named as the list names it', () => {
+    const rows = artifactRows([{ id: 'f', type: 'file', label: 'Notes', isArtifact: true, uri: 'file:///work/notes.md' }], () => undefined);
+    expect(rows.map((one) => ('title' in one ? [one.title, one.group] : []))).toEqual([['notes.md', 'Files']]);
   });
 });

@@ -93,11 +93,7 @@ const RUN: Record<EntryAction, (scena: Scena, host: string, entry: MenuEntry) =>
     if (!await copyText(relativePathOf(uri, rootUri))) throw new Error('copy');
     done(translate('folders/relativePathCopied'));
   },
-  download: async (_scena, host, { uri }) => {
-    const read = await hostBridge(host).readBase64(uri);
-    const type = read.contentType ?? 'application/octet-stream';
-    saveFile(leafOf(uri), read.encoding === 'base64' ? new Blob([bytesOf(read.data)], { type }) : new Blob([read.data], { type }));
-  },
+  download: async (_scena, host, { uri }) => downloadFile(host, uri),
   rename: async (scena, host, { uri }) => {
     const name = await askFor(translate('folders/entry/rename'), translate('folders/entry/rename'), leafOf(uri));
     if (name === null || name === leafOf(uri)) return;
@@ -126,6 +122,13 @@ const RUN: Record<EntryAction, (scena: Scena, host: string, entry: MenuEntry) =>
   },
 };
 
+
+/** Saves a host file on this computer, under its own name. */
+export async function downloadFile(host: string, uri: string): Promise<void> {
+  const read = await hostBridge(host).readBase64(uri);
+  const type = read.contentType ?? 'application/octet-stream';
+  saveFile(leafOf(uri), read.encoding === 'base64' ? new Blob([bytesOf(read.data)], { type }) : new Blob([read.data], { type }));
+}
 
 /** A file or folder row's commands, each shown on the rows it applies to. */
 export function registerEntryCommands(scena: Scena): Disposable {

@@ -2071,6 +2071,45 @@
       "paused": "{name} está pausado, então não aceita mensagem até ser ativado.",
       "disabled": "{name} está desativado, então não aceita mensagem até ser ativado.",
       "open": "Abrir o agente"
+    },
+    "artifacts": {
+      "count": {
+        "one": "{count} artefato",
+        "other": "{count} artefatos"
+      },
+      "title": "Artefatos",
+      "hint": "O que a sessão fez",
+      "remove": "Remover o artefato {name} da sessão",
+      "types": {
+        "pullRequest": "Pull requests",
+        "issue": "Issues",
+        "commit": "Commits",
+        "website": "Sites",
+        "file": "Arquivos",
+        "resource": "Recursos"
+      },
+      "copyPath": "Copiar caminho",
+      "copyUri": "Copiar URI",
+      "copyCommitUrl": "Copiar URL do commit",
+      "copyCommitHash": "Copiar hash do commit",
+      "copyPullRequestUrl": "Copiar URL da pull request",
+      "copyIssueUrl": "Copiar URL da issue",
+      "copyWebsiteUrl": "Copiar URL do site",
+      "removeFailed": "Não foi possível remover {name} desta sessão",
+      "openTab": "Abrir em uma nova aba",
+      "openFile": "Abrir",
+      "copyRelativePath": "Copiar caminho relativo",
+      "download": "Baixar",
+      "downloadFailed": "Não foi possível baixar {name}"
+    },
+    "references": {
+      "count": {
+        "one": "{count} referência",
+        "other": "{count} referências"
+      },
+      "title": "Referências",
+      "hint": "O que a sessão aponta para você",
+      "remove": "Remover a referência {name} da sessão"
     }
   },
   "host": {

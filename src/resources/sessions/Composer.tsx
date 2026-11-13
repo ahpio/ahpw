@@ -26,7 +26,9 @@ import {
   attachComposer,
   COMPOSER_SLOT,
   CUSTOM_AGENT_COMMAND,
+  ARTIFACTS_COMMAND,
   PULL_REQUESTS_COMMAND,
+  REFERENCES_COMMAND,
   composerPath,
   optionCommandId,
   pickable,
@@ -55,6 +57,8 @@ import { shellsOf } from './shell-list.js';
 import { ShellsList, ShellsPill } from './Shells.js';
 import { allMerged, closeMerged, pullRequestsOf, readMergedClosed } from './pull-requests.js';
 import { MergedBanner, PullRequestPill } from './PullRequests.js';
+import { ArtifactsPill } from './ArtifactsPill.js';
+import { artifactPills } from './artifact-list.js';
 import { refKey } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { readChoice, writeChoice } from '../../shell/explorer/choice.js';
@@ -157,6 +161,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   const shells = useMemo(() => shellsOf(backgroundWork), [backgroundWork]);
   const [shellsOpen, setShellsOpen] = useState(false);
   const pullRequests = useMemo(() => pullRequestsOf(summary._meta), [summary._meta]);
+  const { artifacts, references } = useMemo(() => artifactPills(summary._meta), [summary._meta]);
   const removesArtifacts = (useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS).removesArtifacts === true;
   const sessionKey = refKey(host, summary.resource);
   // Bumped when the merged banner is closed, so the kept list is read again.
@@ -166,9 +171,9 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pullRequests, summary.status, sessionKey, closedMerged],
   );
-  const removeArtifact = (artifactId: string): void => {
+  const removeArtifact = (artifactId: string, name?: string): void => {
     hostBridge(host).request('vscode/removeSessionArtifact' as never, { session: summary.resource, artifactId } as never)
-      .catch((error: unknown) => failed(t('sessions/pullRequests/removeFailed'), error));
+      .catch((error: unknown) => failed(name === undefined ? t('sessions/pullRequests/removeFailed') : t('sessions/artifacts/removeFailed', { name }), error));
   };
   // Folded or not, kept per browser; it opens unfolded.
   const [folded, setFolded] = useState(() => readChoice(FOLDED_KEY, ['open', 'folded'], 'open') === 'folded');
@@ -329,6 +334,9 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     changed: () => changed,
     ...(onInfo === undefined ? {} : { toggleInfo: onInfo }),
     pullRequests: () => pullRequests,
+    artifacts: () => artifacts,
+    references: () => references,
+    ...(folder === undefined ? {} : { folder: () => folder }),
     removesArtifacts: () => removesArtifacts,
     removeArtifact,
   };
@@ -352,8 +360,11 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     changed: () => api.current?.changed() ?? [],
     ...(onInfo === undefined ? {} : { toggleInfo: () => api.current?.toggleInfo?.() }),
     pullRequests: () => api.current?.pullRequests?.() ?? [],
+    artifacts: () => api.current?.artifacts?.() ?? [],
+    references: () => api.current?.references?.() ?? [],
+    folder: () => api.current?.folder?.(),
     removesArtifacts: () => api.current?.removesArtifacts?.() ?? false,
-    removeArtifact: (artifactId) => api.current?.removeArtifact?.(artifactId),
+    removeArtifact: (artifactId, name) => api.current?.removeArtifact?.(artifactId, name),
   // Only whether the page has an info matters here; the call itself is read through `api`.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [path, onInfo === undefined]);
@@ -485,6 +496,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         <Pill label={agentImage === undefined ? `${EMOJIcon.agents} ${agent?.displayName ?? summary.provider}` : agent?.displayName ?? summary.provider} image={agentImage} title={agent?.description ?? t('sessions/composer/agentHint')} />
         {shells.length === 0 ? null : <ShellsPill count={shells.length} onToggle={() => setShellsOpen((was) => !was)} />}
         {pullRequests.length === 0 ? null : <PullRequestPill pullRequests={pullRequests} onOpen={() => openCommand(PULL_REQUESTS_COMMAND)} />}
+        {artifacts.length === 0 ? null : <ArtifactsPill kind="artifacts" count={artifacts.length} onOpen={() => openCommand(ARTIFACTS_COMMAND)} />}
+        {references.length === 0 ? null : <ArtifactsPill kind="references" count={references.length} onOpen={() => openCommand(REFERENCES_COMMAND)} />}
         <button type="button" className="web-composer__fold" aria-label={t('sessions/composer/fold')} title={t('sessions/composer/fold')} onClick={() => fold(true)}>{EMOJIcon.caretDown}</button>
       </div>
 

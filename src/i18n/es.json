@@ -2071,6 +2071,45 @@
       "paused": "{name} está en pausa, así que no acepta mensajes hasta que se active.",
       "disabled": "{name} está desactivado, así que no acepta mensajes hasta que se active.",
       "open": "Abrir el agente"
+    },
+    "artifacts": {
+      "count": {
+        "one": "{count} artefacto",
+        "other": "{count} artefactos"
+      },
+      "title": "Artefactos",
+      "hint": "Lo que hizo la sesión",
+      "remove": "Quitar el artefacto {name} de la sesión",
+      "types": {
+        "pullRequest": "Pull requests",
+        "issue": "Incidencias",
+        "commit": "Commits",
+        "website": "Sitios web",
+        "file": "Archivos",
+        "resource": "Recursos"
+      },
+      "copyPath": "Copiar ruta",
+      "copyUri": "Copiar URI",
+      "copyCommitUrl": "Copiar URL del commit",
+      "copyCommitHash": "Copiar hash del commit",
+      "copyPullRequestUrl": "Copiar URL de la pull request",
+      "copyIssueUrl": "Copiar URL de la incidencia",
+      "copyWebsiteUrl": "Copiar URL del sitio web",
+      "removeFailed": "No se pudo quitar {name} de esta sesión",
+      "openTab": "Abrir en una pestaña nueva",
+      "openFile": "Abrir",
+      "copyRelativePath": "Copiar ruta relativa",
+      "download": "Descargar",
+      "downloadFailed": "No se pudo descargar {name}"
+    },
+    "references": {
+      "count": {
+        "one": "{count} referencia",
+        "other": "{count} referencias"
+      },
+      "title": "Referencias",
+      "hint": "Lo que la sesión te señala",
+      "remove": "Quitar la referencia {name} de la sesión"
     }
   },
   "host": {
