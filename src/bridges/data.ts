@@ -209,28 +209,62 @@ async function ready(id: string): Promise<MultiHostClient> {
 /** Why a channel could not be read, in the host's own words, without the client's `RPC error <code>:`. */
 const reasonOf = (error: unknown): string => hostSaid(error);
 
-/**
- * The snapshot read in flight, by host, connection and channel. Two reads of
- * one channel share one subscribe, because the host refuses a subscribe that
- * another subscribe to the same channel overtakes while it is read.
- */
-const inflight = new Map<string, Promise<void>>();
+/** What a subscribe answers. */
+type Subscribed = Awaited<ReturnType<MultiHostClient['subscribe']>>;
 
-function snapshot(id: string, uri: string): Promise<void> {
-  const key = `${id}\u{0000}${String(dataOf(id).generation)}\u{0000}${uri}`;
+/**
+ * The subscribe in flight, by host, connection and channel. Every read of a
+ * channel shares it, a page's and a one-off read's alike, because the host
+ * refuses a subscribe that another subscribe or an unsubscribe of the same
+ * channel overtakes while it is read.
+ */
+const inflight = new Map<string, Promise<Subscribed>>();
+
+const inflightKey = (id: string, uri: string): string => `${id}\u{0000}${String(dataOf(id).generation)}\u{0000}${uri}`;
+
+/** The channel's subscribe: the one in flight, or a new one. */
+function subscribeShared(multi: MultiHostClient, id: string, uri: string): Promise<Subscribed> {
+  const key = inflightKey(id, uri);
   const reading = inflight.get(key);
   if (reading !== undefined) return reading;
-  const read = readSnapshot(id, uri).finally(() => inflight.delete(key));
+  const read = multi.subscribe(id, uri).finally(() => inflight.delete(key));
   inflight.set(key, read);
   return read;
 }
 
-async function readSnapshot(id: string, uri: string): Promise<void> {
+/** The channels whose unsubscribe waits for the subscribe in flight, by the same key. */
+const leaving = new Set<string>();
+
+/**
+ * Unsubscribes a channel no page follows, after the subscribe in flight for it
+ * has its answer, and once for any number of callers. The root is never let
+ * go: the host sends its session list and the echo of a root action only to a
+ * watcher.
+ */
+function unsubscribeIdle(id: string, uri: string): void {
+  if (uri === ROOT || dataOf(id).followed.has(uri)) return;
+  const key = inflightKey(id, uri);
+  const reading = inflight.get(key);
+  if (reading !== undefined) {
+    if (leaving.has(key)) return;
+    leaving.add(key);
+    const after = (): void => {
+      if (leaving.delete(key)) unsubscribeIdle(id, uri);
+    };
+    void reading.then(after, after);
+    return;
+  }
+  leaving.delete(key);
+  void client?.unsubscribe(id, uri).catch(() => undefined);
+}
+
+/** Reads a followed channel's snapshot into the store, or its refusal into its error. */
+async function snapshot(id: string, uri: string): Promise<void> {
   const multi = client;
   const store = held;
   if (multi === undefined || store === undefined) return;
   try {
-    const result = await multi.subscribe(id, uri);
+    const result = await subscribeShared(multi, id, uri);
     if (!dataOf(id).followed.has(uri)) return;
     if (result.snapshot !== undefined) {
       // A snapshot is newer than anything folded before it.
@@ -334,7 +368,7 @@ function makeBridge(id: string): HostBridge {
         current.release = setTimeout(() => {
           if (followed.get(uri) !== current || current.count > 0) return;
           followed.delete(uri);
-          void client?.unsubscribe(id, uri).catch(() => undefined);
+          unsubscribeIdle(id, uri);
         }, RELEASE_DELAY_MS);
       };
     },
@@ -351,9 +385,8 @@ function makeBridge(id: string): HostBridge {
     },
     async readOnce<S>(uri: string) {
       const multi = await ready(id);
-      const result = await multi.subscribe(id, uri);
-      // The root stays subscribed for the whole connection: the host sends its session list and the echo of a root action only to a watcher.
-      if (uri !== ROOT && !dataOf(id).followed.has(uri)) void multi.unsubscribe(id, uri).catch(() => undefined);
+      const result = await subscribeShared(multi, id, uri);
+      unsubscribeIdle(id, uri);
       return result.snapshot?.state as S | undefined;
     },
     async readText(uri) {
@@ -847,6 +880,7 @@ export const ahpProvider: DataProviderDefinition = {
       for (const data of hosts.values()) for (const entry of data.followed.values()) clearTimeout(entry.release);
       hosts.clear();
       pending.clear();
+      leaving.clear();
       hostsDue.clear();
       store.clearNamespace('ahp');
       await multi?.shutdown();
