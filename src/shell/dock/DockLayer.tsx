@@ -60,6 +60,17 @@ interface Drag {
   place: DockPlace | null;
 }
 
+/** The items in runs: each run of actions together, each other item on its own. */
+function runsOf(items: readonly string[], isAction: (key: string) => boolean): string[][] {
+  const runs: string[][] = [];
+  for (const item of items) {
+    const last = runs.at(-1);
+    if (last !== undefined && isAction(item) && isAction(last[0]!)) last.push(item);
+    else runs.push([item]);
+  }
+  return runs;
+}
+
 /** The popover's size, as its CSS draws it, so it opens clear of the dock it came from. */
 const POPOVER = { width: 320, height: 132 };
 
@@ -87,6 +98,23 @@ const FIND = (
 const LOCK = (
   <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><rect x="1.5" y="4.5" width="7" height="5" rx="1" fill="currentColor" /><path d="M3 4.5V3a2 2 0 0 1 4 0v1.5" fill="none" stroke="currentColor" strokeWidth="1.2" /></svg>
 );
+
+/** How tall the title bar and the status bar are, so a dock on the top or bottom edge fits the bar it rests on. */
+function useBarHeights(layout: ScenaLayout): { top: number; bottom: number } {
+  const [heights, setHeights] = useState({ top: 22, bottom: 22 });
+  useEffect(() => {
+    const bars = (['titlebar', 'statusbar'] as const).map((name) => document.querySelector<HTMLElement>(`[data-surface="${name}"]`));
+    const measure = (): void => {
+      const [top, bottom] = bars.map((bar) => bar?.getBoundingClientRect().height ?? 0);
+      setHeights((was) => (was.top === top && was.bottom === bottom ? was : { top: top || 22, bottom: bottom || 22 }));
+    };
+    measure();
+    const watch = new ResizeObserver(measure);
+    for (const bar of bars) if (bar !== null) watch.observe(bar);
+    return () => watch.disconnect();
+  }, [layout]);
+  return heights;
+}
 
 function useWindowWidth(): number {
   const [width, setWidth] = useState(() => window.innerWidth);
@@ -160,6 +188,7 @@ export default function DockLayer(): ReactElement | null {
       closed.dispose();
     };
   }, [scena]);
+  const bars = useBarHeights(layout);
   const sessionLists = useEach<SessionSummary[]>(hosts.map((host) => ahpPaths(host).sessions));
   const away = useMemo(
     () => botsInShownChats(shownMountKeys(layout, (surface) => scena.surfaces.listAt(surface).map((mount) => mount.key)), hosts, sessionLists),
@@ -384,9 +413,98 @@ export default function DockLayer(): ReactElement | null {
   };
 
   return (
-    <div className="web-bots web-dock-layer" data-dragging={drag === null ? 'false' : 'true'}>
+    <div
+      className="web-bots web-dock-layer"
+      data-dragging={drag === null ? 'false' : 'true'}
+      style={{ '--web-dock-top-bar': `${bars.top}px`, '--web-dock-bottom-bar': `${bars.bottom}px` } as CSSProperties}
+    >
       {drawn.map(({ dock, shown }) => {
         const { shown: drawnItems, more } = splitCluster(shown, isBot);
+        const inBar = isRow(dock.place) && !isFloating(dock.place);
+        const grouped = pill && shown.length > 1 && shown.some(isAction);
+        const itemOf = (key: string): ReactElement => {
+          const moving = drag?.items.includes(key) === true;
+          const keep = (element: HTMLElement | null): void => {
+            if (element === null) itemBoxes.current.delete(key);
+            else itemBoxes.current.set(key, element);
+          };
+          const handlers = {
+            onPointerDown: (event: PointerEvent<HTMLButtonElement>) => down(event, key, dock),
+            onPointerMove: move,
+            onPointerUp: up,
+            onPointerCancel: cancel,
+            onContextMenu: (event: MouseEvent<HTMLButtonElement>) => {
+              // A right click, or a touch screen's own long press: the menu, and no click or drag after it.
+              event.preventDefault();
+              cancel();
+              setOpened(null);
+              setMenu({ key, x: event.clientX, y: event.clientY });
+            },
+          };
+          const one = actionOf(key);
+          if (one !== undefined) {
+            const label = `${t(`shell/dock/${one.id}`)} (${keysOf(one)})`;
+            return (
+              <button
+                key={key}
+                ref={keep}
+                type="button"
+                className={`web-act web-act--${one.id}`}
+                data-moving={moving ? 'true' : 'false'}
+                data-locked={one.position.read(scena.store) === 'locked' ? 'true' : 'false'}
+                data-refused={refused === key ? 'true' : 'false'}
+                data-arrive={arriving?.items.has(key) === true ? String(arriving.at) : undefined}
+                data-open={menu?.key === key ? 'true' : 'false'}
+                data-look={one.id === 'palette' ? look : undefined}
+                title={label}
+                aria-label={label}
+                {...handlers}
+                onKeyDown={(event) => {
+                  if (event.key !== 'Enter' && event.key !== ' ') return;
+                  event.preventDefault();
+                  void scena.commands.execute(one.command);
+                }}
+              >
+                {one.id === 'newSession' ? PLUS : (
+                  <>
+                    <span className="web-act__find">{FIND}</span>
+                    <span className="web-act__text web-act__long">{t('shell/dock/searchLong')}</span>
+                    <span className="web-act__text web-act__short">{t('shell/dock/searchShort')}</span>
+                    <kbd className="web-act__keys">{keysOf(one)}</kbd>
+                  </>
+                )}
+                <span className="web-act__lock" aria-hidden="true">{LOCK}</span>
+              </button>
+            );
+          }
+          const bot = bots.get(key)!;
+          const mood = moving ? 'observing' : opened?.key === key ? 'happy' : hovered === key ? 'observing' : 'idle';
+          const transit = arriving?.items.get(key);
+          return (
+            <button
+              key={key}
+              ref={keep}
+              type="button"
+              className="web-bot-puck__bot"
+              data-open={opened?.key === key ? 'true' : 'false'}
+              data-moving={moving ? 'true' : 'false'}
+              data-away={away.has(key) ? 'true' : 'false'}
+              tabIndex={away.has(key) ? -1 : undefined}
+              title={bot.name}
+              aria-label={bot.name}
+              onMouseEnter={() => setHovered(key)}
+              onMouseLeave={() => setHovered((held) => (held === key ? null : held))}
+              {...handlers}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                setOpened(opened?.key === key ? null : { key, ...besideOf(event.currentTarget.getBoundingClientRect(), dock.place) });
+              }}
+            >
+              <Bood body={bot.body} color={bot.color} mood={mood} width={WIDTH} arrive={transit === undefined ? undefined : { transit, at: arriving!.at }} away={away.has(key)} />
+            </button>
+          );
+        };
         const look = lookOf(dock, shown);
         return (
           <div
@@ -399,94 +517,16 @@ export default function DockLayer(): ReactElement | null {
             data-edge={isFloating(dock.place) ? 'float' : dock.place.edge}
             data-target={drag?.target?.dock === dock.id ? 'true' : 'false'}
             data-armed={armed === dock.id ? 'true' : 'false'}
-            data-pill={pill && shown.length > 1 && shown.some(isAction) ? 'true' : 'false'}
+            data-pill={grouped ? 'true' : 'false'}
             data-alone={shown.length === 1 ? 'true' : 'false'}
             data-bots={shown.some(isBot) ? 'true' : 'false'}
             style={(isFloating(dock.place) ? { left: `${dock.place.float.x * 100}%`, top: `${dock.place.float.y * 100}%` } : { '--at': dock.place.at }) as CSSProperties}
           >
-            {drawnItems.map((key) => {
-              const moving = drag?.items.includes(key) === true;
-              const keep = (element: HTMLElement | null): void => {
-                if (element === null) itemBoxes.current.delete(key);
-                else itemBoxes.current.set(key, element);
-              };
-              const handlers = {
-                onPointerDown: (event: PointerEvent<HTMLButtonElement>) => down(event, key, dock),
-                onPointerMove: move,
-                onPointerUp: up,
-                onPointerCancel: cancel,
-                onContextMenu: (event: MouseEvent<HTMLButtonElement>) => {
-                  // A right click, or a touch screen's own long press: the menu, and no click or drag after it.
-                  event.preventDefault();
-                  cancel();
-                  setOpened(null);
-                  setMenu({ key, x: event.clientX, y: event.clientY });
-                },
-              };
-              const one = actionOf(key);
-              if (one !== undefined) {
-                const label = `${t(`shell/dock/${one.id}`)} (${keysOf(one)})`;
-                return (
-                  <button
-                    key={key}
-                    ref={keep}
-                    type="button"
-                    className={`web-act web-act--${one.id}`}
-                    data-moving={moving ? 'true' : 'false'}
-                    data-locked={one.position.read(scena.store) === 'locked' ? 'true' : 'false'}
-                    data-refused={refused === key ? 'true' : 'false'}
-                    data-arrive={arriving?.items.has(key) === true ? String(arriving.at) : undefined}
-                    data-open={menu?.key === key ? 'true' : 'false'}
-                    data-look={one.id === 'palette' ? look : undefined}
-                    title={label}
-                    aria-label={label}
-                    {...handlers}
-                    onKeyDown={(event) => {
-                      if (event.key !== 'Enter' && event.key !== ' ') return;
-                      event.preventDefault();
-                      void scena.commands.execute(one.command);
-                    }}
-                  >
-                    {one.id === 'newSession' ? PLUS : (
-                      <>
-                        <span className="web-act__find">{FIND}</span>
-                        <span className="web-act__text web-act__long">{t('shell/dock/searchLong')}</span>
-                        <span className="web-act__text web-act__short">{t('shell/dock/searchShort')}</span>
-                        <kbd className="web-act__keys">{keysOf(one)}</kbd>
-                      </>
-                    )}
-                    <span className="web-act__lock" aria-hidden="true">{LOCK}</span>
-                  </button>
-                );
-              }
-              const bot = bots.get(key)!;
-              const mood = moving ? 'observing' : opened?.key === key ? 'happy' : hovered === key ? 'observing' : 'idle';
-              const transit = arriving?.items.get(key);
-              return (
-                <button
-                  key={key}
-                  ref={keep}
-                  type="button"
-                  className="web-bot-puck__bot"
-                  data-open={opened?.key === key ? 'true' : 'false'}
-                  data-moving={moving ? 'true' : 'false'}
-                  data-away={away.has(key) ? 'true' : 'false'}
-                  tabIndex={away.has(key) ? -1 : undefined}
-                  title={bot.name}
-                  aria-label={bot.name}
-                  onMouseEnter={() => setHovered(key)}
-                  onMouseLeave={() => setHovered((held) => (held === key ? null : held))}
-                  {...handlers}
-                  onKeyDown={(event) => {
-                    if (event.key !== 'Enter' && event.key !== ' ') return;
-                    event.preventDefault();
-                    setOpened(opened?.key === key ? null : { key, ...besideOf(event.currentTarget.getBoundingClientRect(), dock.place) });
-                  }}
-                >
-                  <Bood body={bot.body} color={bot.color} mood={mood} width={WIDTH} arrive={transit === undefined ? undefined : { transit, at: arriving!.at }} away={away.has(key)} />
-                </button>
-              );
-            })}
+            {inBar && grouped
+              ? runsOf(drawnItems, isAction).map((run) => (run.length > 1 && isAction(run[0]!)
+                ? <span key={`pill:${run[0]}`} className="web-dock__pill">{run.map(itemOf)}</span>
+                : run.map(itemOf)))
+              : drawnItems.map(itemOf)}
             {more.length === 0 ? null : (
               <button
                 type="button"

@@ -124,11 +124,9 @@
   transform: translate(-50%, -50%);
 }
 
-/* A dock of actions, or a pill, sits just inside the edge; bots alone keep their tuck. */
+/* A dock of actions, or a pill, sits just inside a side edge, and in the bar on the top and bottom edges; bots alone keep their tuck. */
 .web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='right'] { right: 6px; }
 .web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='left'] { left: 6px; }
-.web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='top'] { top: 1px; }
-.web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='bottom'] { bottom: 1px; }
 
 .web-dock[data-pill='true'] {
   gap: 2px;
@@ -286,21 +284,87 @@
   }
 }
 
-/* On the top and bottom edges, without bots, the actions fit the bar they rest on. */
-.web-dock[data-bots='false'][data-edge='top'] .web-act,
-.web-dock[data-bots='false'][data-edge='bottom'] .web-act {
-  height: 20px;
-  min-width: 20px;
+/*
+ * On the top and bottom edges the actions fit the bar they rest on: the pill
+ * is the bar's height less 2 px above and below, never under 18 px or over
+ * 28 px, centred in the bar. A pill there holds the actions only, and a bot
+ * beside it keeps its size and hangs past the bar, as a bot on that edge does
+ * alone. The layer sets the bars' heights as it measures them.
+ */
+.web-dock[data-edge='top'] {
+  --web-dock-bar: var(--web-dock-top-bar, 22px);
+  align-items: flex-start;
 }
 
-.web-dock[data-bots='false'][data-edge='top'] .web-act--newSession,
-.web-dock[data-bots='false'][data-edge='bottom'] .web-act--newSession {
-  width: 20px;
+.web-dock[data-edge='bottom'] {
+  --web-dock-bar: var(--web-dock-bottom-bar, 22px);
+  align-items: flex-end;
 }
 
-.web-dock[data-bots='false'][data-edge='top'][data-pill='true'],
-.web-dock[data-bots='false'][data-edge='bottom'][data-pill='true'] {
+.web-dock[data-edge='top']:has(.web-act) {
+  top: max(1px, calc((var(--web-dock-bar) - var(--web-dock-pill)) / 2));
+}
+
+.web-dock[data-edge='bottom']:has(.web-act) {
+  bottom: max(1px, calc((var(--web-dock-bar) - var(--web-dock-pill)) / 2));
+}
+
+/* A bot beside the actions keeps the tuck it has on that edge alone: 6 px past the window's edge, whatever the pill's offset. */
+.web-dock[data-edge='top']:has(.web-act) .web-bot-puck__bot {
+  margin-top: calc(-6px - max(1px, calc((var(--web-dock-bar) - var(--web-dock-pill)) / 2)));
+}
+
+.web-dock[data-edge='bottom']:has(.web-act) .web-bot-puck__bot {
+  margin-bottom: calc(-6px - max(1px, calc((var(--web-dock-bar) - var(--web-dock-pill)) / 2)));
+}
+
+.web-dock:is([data-edge='top'], [data-edge='bottom']) {
+  --web-dock-pill: clamp(18px, calc(var(--web-dock-bar) - 4px), 28px);
+}
+
+/* An action on its own is as tall as a pill; one in a pill fills it, less the pill's border and padding. */
+.web-dock:is([data-edge='top'], [data-edge='bottom']) .web-act {
+  height: var(--web-dock-pill);
+  min-width: var(--web-dock-pill);
+}
+
+.web-dock:is([data-edge='top'], [data-edge='bottom']) .web-act--newSession {
+  width: var(--web-dock-pill);
+}
+
+.web-dock:is([data-edge='top'], [data-edge='bottom']) .web-dock__pill .web-act {
+  height: calc(var(--web-dock-pill) - 4px);
+  min-width: calc(var(--web-dock-pill) - 4px);
+}
+
+.web-dock:is([data-edge='top'], [data-edge='bottom']) .web-dock__pill .web-act--newSession {
+  width: calc(var(--web-dock-pill) - 4px);
+}
+
+.web-dock:is([data-edge='top'], [data-edge='bottom'])[data-pill='true'] {
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.web-dock__pill {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   padding: 1px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 999px;
+  background: var(--oo-color-raised);
+}
+
+.web-dock__pill .web-act--newSession:not(:hover, :focus-visible, [data-open='true']) {
+  border-color: transparent;
+  background: transparent;
+}
+
+.web-dock__pill .web-act {
   box-shadow: none;
 }
 
