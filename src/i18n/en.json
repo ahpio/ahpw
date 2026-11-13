@@ -221,6 +221,38 @@
         "one": "{count} notice",
         "other": "{count} notices"
       }
+    },
+    "dock": {
+      "newSession": "New session",
+      "palette": "Command palette",
+      "newSessionRight": "New session in sidebar",
+      "openPalette": "Open command palette",
+      "searchLong": "Search commands",
+      "searchShort": "Search",
+      "placeGroup": "Place",
+      "move": "Move or dock…",
+      "back": "Back",
+      "moveGroup": "Move the group",
+      "moveOne": "Move {name}",
+      "top": "Top edge",
+      "right": "Right edge",
+      "bottom": "Bottom edge",
+      "left": "Left edge",
+      "floatHere": "Float here",
+      "join": "Join",
+      "with": "With {names}",
+      "takeOut": "Take out of the group",
+      "lock": "Lock position",
+      "unlock": "Unlock position",
+      "hide": "Hide",
+      "hidden": "{name} hidden",
+      "hiddenHow": "Show it again from Settings or the command palette.",
+      "undo": "Undo",
+      "settings": "Action settings",
+      "show": "Show {name}",
+      "showKeyword": "Show",
+      "showAction": "Show an action",
+      "reset": "Reset actions"
     }
   },
   "close": {
@@ -2156,7 +2188,8 @@
           "session": "Session",
           "bot": "Bot",
           "canvas": "Canvas",
-          "agents": "Agents"
+          "agents": "Agents",
+          "actions": "Actions"
         },
         "theme": {
           "title": "Theme",
@@ -2239,6 +2272,72 @@
           "description": "What an open session does when it is archived.",
           "close": "Close its tab",
           "stay": "Stay open"
+        },
+        "actionGroups": {
+          "title": "Groups",
+          "description": "How actions that rest together draw.",
+          "pill": "In a pill",
+          "apart": "Each on its own"
+        },
+        "dockButton": {
+          "shown": "Shown",
+          "hidden": "Hidden"
+        },
+        "dockPlace": {
+          "top": "Top edge",
+          "right": "Right edge",
+          "bottom": "Bottom edge",
+          "left": "Left edge",
+          "floating": "Floating"
+        },
+        "dockGroup": {
+          "alone": "Alone",
+          "bots": "With the bots",
+          "with": "With {name}"
+        },
+        "dockPosition": {
+          "movable": "Movable",
+          "locked": "Locked"
+        },
+        "newSessionButton": {
+          "title": "New session",
+          "description": "Whether it shows. A hidden action is still in the palette."
+        },
+        "newSessionPlace": {
+          "title": "New session: place",
+          "description": "Where it rests. Its group moves with it."
+        },
+        "newSessionGroup": {
+          "title": "New session: group",
+          "description": "Alone, or beside another action or the bots."
+        },
+        "newSessionOrder": {
+          "title": "New session: order",
+          "description": "Its place in its group, from the top or the left."
+        },
+        "newSessionPosition": {
+          "title": "New session: position",
+          "description": "Locked stops a drag. Its menu and this form still move it."
+        },
+        "paletteButton": {
+          "title": "Command palette",
+          "description": "Whether it shows. A hidden action is still in the palette."
+        },
+        "palettePlace": {
+          "title": "Command palette: place",
+          "description": "Where it rests. Its group moves with it."
+        },
+        "paletteGroup": {
+          "title": "Command palette: group",
+          "description": "Alone, or beside another action or the bots."
+        },
+        "paletteOrder": {
+          "title": "Command palette: order",
+          "description": "Its place in its group, from the top or the left."
+        },
+        "palettePosition": {
+          "title": "Command palette: position",
+          "description": "Locked stops a drag. Its menu and this form still move it."
         }
       },
       "tabs": {

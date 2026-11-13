@@ -36,6 +36,7 @@ import { ahpPaths, windowHost } from '../bridges/data.js';
 import { EMOJIcon } from '../resources/emojis.js';
 import { registerHost } from '../resources/host/index.js';
 import { registerView } from './view/index.js';
+import { registerDock } from './dock/index.js';
 import { registerProfile } from './ui-settings/profile.js';
 import { registerFiles } from '../resources/files/index.js';
 import { registerChanges } from '../resources/changes/index.js';
@@ -335,6 +336,7 @@ export function registerShell(scena: Scena): Disposable {
     registerTunnels(scena),
     registerClients(scena),
     registerBots(scena),
+    registerDock(scena),
     registerCanvases(scena),
     registerUsers(scena),
     registerProfilePage(scena),

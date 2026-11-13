@@ -1,0 +1,388 @@
+/*
+ * The dock layer: docks resting on the window's edges, tucked a little past
+ * the edge, or floating over it, under the toasts. Only the items take the pointer.
+ */
+.web-bots {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  pointer-events: none;
+}
+
+.web-bot-puck {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.web-bot-puck[data-edge='right'],
+.web-bot-puck[data-edge='left'] {
+  top: calc(var(--at) * 100%);
+  flex-direction: column;
+  transform: translateY(-50%);
+}
+
+.web-bot-puck[data-edge='right'] { right: -6px; }
+.web-bot-puck[data-edge='left'] { left: -6px; }
+
+.web-bot-puck[data-edge='top'],
+.web-bot-puck[data-edge='bottom'] {
+  left: calc(var(--at) * 100%);
+  transform: translateX(-50%);
+}
+
+.web-bot-puck[data-edge='top'] { top: -6px; }
+.web-bot-puck[data-edge='bottom'] { bottom: -6px; }
+
+.web-bot-puck__bot {
+  display: flex;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 160ms ease;
+}
+
+/* The bodies overlap a little, as ahpapp's clusters do; the one under the pointer comes forward. */
+.web-bot-puck[data-edge='right'] .web-bot-puck__bot + .web-bot-puck__bot,
+.web-bot-puck[data-edge='left'] .web-bot-puck__bot + .web-bot-puck__bot {
+  margin-top: -4px;
+}
+
+.web-bot-puck[data-edge='top'] .web-bot-puck__bot + .web-bot-puck__bot,
+.web-bot-puck[data-edge='bottom'] .web-bot-puck__bot + .web-bot-puck__bot {
+  margin-left: -8px;
+}
+
+.web-bot-puck__bot:hover,
+.web-bot-puck__bot[data-open='true'] {
+  z-index: 1;
+  background: none;
+  transform: scale(1.08);
+}
+
+.web-bot-puck__more {
+  min-width: 26px;
+  margin: 2px;
+  padding: 1px 6px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 999px;
+  background: var(--oo-color-surface);
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* The popover and the overflow menu open inside the layer, so they take the pointer back from it. */
+.web-bots .oo-popup {
+  pointer-events: auto;
+}
+
+
+/* A drag: the bots it moves fade where they were, a ghost follows the pointer, and the puck it would join is ringed. */
+.web-bot-puck__bot[data-moving='true'] {
+  opacity: 0.35;
+}
+
+.web-bot-puck[data-target='true'] {
+  border-radius: 999px;
+  outline: 2px dashed var(--oo-color-accent);
+  outline-offset: 2px;
+}
+
+.web-bots[data-dragging='true'] {
+  cursor: grabbing;
+}
+
+.web-bot-ghost {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* A bot whose chat is on screen: gone, its place kept, and nothing to click. */
+.web-bot-puck__bot[data-away='true'] {
+  pointer-events: none;
+}
+
+.web-bot-puck__bot {
+  position: relative;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* A floating dock is centred on its point, in a row. */
+.web-dock[data-edge='float'] {
+  flex-direction: row;
+  transform: translate(-50%, -50%);
+}
+
+/* A dock of actions, or a pill, sits just inside the edge; bots alone keep their tuck. */
+.web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='right'] { right: 6px; }
+.web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='left'] { left: 6px; }
+.web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='top'] { top: 1px; }
+.web-dock:is([data-bots='false'], [data-pill='true'])[data-edge='bottom'] { bottom: 1px; }
+
+.web-dock[data-pill='true'] {
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 999px;
+  background: var(--oo-color-raised);
+  box-shadow: var(--oo-shadow-md);
+}
+
+.web-dock[data-pill='true'][data-bots='true'] {
+  padding: 4px;
+}
+
+.web-dock[data-pill='false']:has(.web-act) {
+  gap: 6px;
+}
+
+/* A press held on a dock of more than one: the whole dock is ready to carry. */
+.web-dock[data-armed='true'] {
+  border-radius: 999px;
+  outline: 1px dashed color-mix(in srgb, var(--oo-color-accent) 70%, transparent);
+  outline-offset: 3px;
+}
+
+/* An action: a round button, or the palette's search field. */
+.web-act {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 30px;
+  min-width: 30px;
+  padding: 0;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 999px;
+  background: var(--oo-color-surface);
+  color: var(--oo-color-text);
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.web-act:hover,
+.web-act:focus-visible,
+.web-act[data-open='true'] {
+  border-color: color-mix(in srgb, var(--oo-color-accent) 50%, var(--oo-color-border));
+  background: var(--oo-color-hover);
+}
+
+.web-act[data-moving='true'] {
+  opacity: 0.35;
+}
+
+.web-act[data-arrive] {
+  animation: web-act-arrive 320ms ease-out;
+}
+
+@keyframes web-act-arrive {
+  from { opacity: 0; transform: scale(0.4); }
+  70% { opacity: 1; transform: scale(1.08); }
+  to { transform: scale(1); }
+}
+
+.web-act[data-refused='true'] {
+  animation: web-act-refused 220ms ease;
+}
+
+@keyframes web-act-refused {
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+.web-dock[data-pill='false'] .web-act {
+  box-shadow: var(--oo-shadow-md);
+}
+
+.web-act--newSession {
+  width: 30px;
+}
+
+.web-dock[data-alone='true'] .web-act--newSession {
+  width: 36px;
+  height: 36px;
+}
+
+.web-dock[data-pill='true'] .web-act--newSession:not(:hover, :focus-visible, [data-open='true']) {
+  border-color: transparent;
+  background: transparent;
+}
+
+/* The palette: a search field where a row has room, a short one where it has less, a square in a column. */
+.web-act--palette {
+  padding: 0 8px;
+  border-radius: 7px;
+  background: var(--oo-color-surface);
+  color: var(--oo-color-muted);
+}
+
+.web-act--palette[data-look='wide'] {
+  width: 250px;
+  justify-content: flex-start;
+}
+
+.web-act--palette[data-look='wide'] .web-act__long {
+  flex: 1;
+  text-align: left;
+}
+
+.web-act--palette[data-look='icon'] {
+  width: 30px;
+  padding: 0;
+}
+
+.web-act__text {
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-act__short,
+.web-act--palette[data-look='short'] .web-act__long,
+.web-act--palette[data-look='short'] .web-act__keys,
+.web-act--palette[data-look='icon'] .web-act__text,
+.web-act--palette[data-look='icon'] .web-act__keys {
+  display: none;
+}
+
+.web-act--palette[data-look='short'] .web-act__short {
+  display: inline;
+}
+
+.web-act__find {
+  display: inline-flex;
+}
+
+.web-act__keys {
+  padding: 0 5px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 4px;
+  color: var(--oo-color-muted);
+  font: inherit;
+  font-size: var(--oo-font-size-xs);
+  line-height: 16px;
+}
+
+/* A touch screen has no keys to show. */
+@media (pointer: coarse) {
+  .web-act__keys {
+    display: none;
+  }
+}
+
+/* On the top and bottom edges, without bots, the actions fit the bar they rest on. */
+.web-dock[data-bots='false'][data-edge='top'] .web-act,
+.web-dock[data-bots='false'][data-edge='bottom'] .web-act {
+  height: 20px;
+  min-width: 20px;
+}
+
+.web-dock[data-bots='false'][data-edge='top'] .web-act--newSession,
+.web-dock[data-bots='false'][data-edge='bottom'] .web-act--newSession {
+  width: 20px;
+}
+
+.web-dock[data-bots='false'][data-edge='top'][data-pill='true'],
+.web-dock[data-bots='false'][data-edge='bottom'][data-pill='true'] {
+  padding: 1px;
+  box-shadow: none;
+}
+
+/* A locked action shows its lock on hover, and when a drag is refused. */
+.web-act__lock {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: none;
+  width: 14px;
+  height: 14px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 999px;
+  background: var(--oo-color-raised);
+  color: var(--oo-color-muted);
+  pointer-events: none;
+}
+
+.web-act[data-locked='true']:hover > .web-act__lock,
+.web-act[data-refused='true'] > .web-act__lock {
+  display: inline-flex;
+}
+
+.web-act[data-refused='true'] > .web-act__lock {
+  border-color: var(--oo-color-accent);
+  color: var(--oo-color-accent);
+}
+
+/* Where a drop lands: the caret among a dock's items, the bar on an edge. */
+.web-dock__caret {
+  position: fixed;
+  z-index: 2;
+  border-radius: 2px;
+  background: var(--oo-color-accent);
+  pointer-events: none;
+}
+
+.web-dock__snap {
+  position: absolute;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--oo-color-accent) 70%, transparent);
+  pointer-events: none;
+}
+
+.web-dock__snap[data-edge='left'],
+.web-dock__snap[data-edge='right'] {
+  top: calc(var(--at) * 100%);
+  width: 4px;
+  height: 96px;
+  transform: translateY(-50%);
+}
+
+.web-dock__snap[data-edge='left'] { left: 0; }
+.web-dock__snap[data-edge='right'] { right: 0; }
+
+.web-dock__snap[data-edge='top'],
+.web-dock__snap[data-edge='bottom'] {
+  left: calc(var(--at) * 100%);
+  width: 96px;
+  height: 4px;
+  transform: translateX(-50%);
+}
+
+.web-dock__snap[data-edge='top'] { top: 0; }
+.web-dock__snap[data-edge='bottom'] { bottom: 0; }
+
+.web-bot-ghost {
+  flex-direction: row;
+  gap: 4px;
+}
+
+.web-dock__ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--oo-color-accent);
+  border-radius: 999px;
+  background: var(--oo-color-raised);
+  color: var(--oo-color-text);
+  box-shadow: var(--oo-shadow-md);
+}

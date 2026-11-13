@@ -228,10 +228,22 @@ export function registerSessions(scena: Scena): Disposable {
       // A browser keeps Ctrl+N for a new window, so Alt+N is there too.
       keys: ['ctrl+n', 'alt+n'],
       run: (ctx, args) => {
-        const { provider, host } = (args as { provider?: string; host?: string } | undefined) ?? {};
+        const { provider, host, place = 'main' } = (args as { provider?: string; host?: string; place?: 'main' | 'right' } | undefined) ?? {};
         // A page already open keeps its own choices, so one asked for an agent or a host starts afresh.
         if (provider !== undefined || host !== undefined) ctx.scena.surfaces.close('session:new');
-        ctx.surfaces.open({ surface: 'main', key: 'session:new', resource: { component: 'NewSessionPage', ...(provider === undefined ? {} : { provider }), ...(host === undefined ? {} : { host }) }, props: { title: bound('sessions/commands/newSession') } });
+        // One New session page: opening it in one place takes it from the other.
+        const other = place === 'main' ? RIGHT_SIDEBAR : 'main';
+        if (ctx.surfaces.listAt(other).some((mount) => mount.key === 'session:new')) ctx.surfaces.close('session:new');
+        const resource = { component: 'NewSessionPage', ...(provider === undefined ? {} : { provider }), ...(host === undefined ? {} : { host }) };
+        const props = { title: bound('sessions/commands/newSession') };
+        if (place === 'right') {
+          ctx.surfaces.open({ surface: RIGHT_SIDEBAR, key: 'session:new', resource, props });
+          const right = ctx.scena.layout.get().surfaces[RIGHT_SIDEBAR];
+          ctx.scena.layout.setSurface(RIGHT_SIDEBAR, { ...right, visible: true, activeContainerKey: 'session:new' });
+          hideOverlaidSidebar(ctx.scena, ctx.store.get<ModusClass>(MODUS_CLASS) ?? 'large');
+          return;
+        }
+        ctx.surfaces.open({ surface: 'main', key: 'session:new', resource, props });
         hideOverlaidSidebar(ctx.scena, ctx.store.get<ModusClass>(MODUS_CLASS) ?? 'large');
       },
     }),

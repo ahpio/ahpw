@@ -76,9 +76,6 @@ export function registerBots(scena: Scena): Disposable {
       },
     }),
     scena.components.register({ component: 'BotPage', category: 'page', props: { icon: EMOJIcon.bots }, renderer: { kind: 'react', load: () => import('./Page.js') } }),
-    scena.components.register({ component: 'BotLayer', category: 'chrome', renderer: { kind: 'react', load: () => import('./layer/BotLayer.js') } }),
-    // The floating bots, while a host serves them.
-    scena.surfaces.mount({ surface: 'overlay', key: 'bots:layer', when: `${BOTS_SERVED} == true`, resource: { component: 'BotLayer' } }),
     scena.components.register({ component: 'BotEditPage', category: 'page', props: { icon: EMOJIcon.bots }, renderer: { kind: 'react', load: () => import('./Edit.js') } }),
     scena.commands.register({
       id: 'bots.reload',
