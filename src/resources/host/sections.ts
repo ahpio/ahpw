@@ -1,5 +1,6 @@
 import { translate } from '@softov/scena';
 import type { JsonSchemaObject, SchemaFormGroup, SchemaFormSection } from '@softov/scena/ui';
+import { DOCK_KEYS } from '../../shell/dock/settings.js';
 
 /** A section as this file names it: its id, which is also its title's key, and its keys. */
 type Named = [id: string, keys: readonly string[]];
@@ -41,6 +42,7 @@ const UI: readonly Named[] = [
   ['dialogs', ['ui.confirmStyle']],
   ['session', ['ui.sessionViewsPlace', 'ui.toolsExpanded', 'ui.sessionMarkdown', 'ui.archivedSessionOpen']],
   ['bot', ['ui.botChatOpens']],
+  ['actions', DOCK_KEYS],
   ['canvas', ['ui.canvasOpens', 'ui.canvasAutoOpen']],
   ['agents', ['ui.customFileOpens']],
 ];

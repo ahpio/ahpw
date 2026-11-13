@@ -221,6 +221,38 @@
         "one": "{count} nota",
         "other": "{count} notas"
       }
+    },
+    "dock": {
+      "newSession": "Nueva sesión",
+      "palette": "Paleta de comandos",
+      "newSessionRight": "Nueva sesión en la barra lateral",
+      "openPalette": "Abrir la paleta de comandos",
+      "searchLong": "Buscar comandos",
+      "searchShort": "Buscar",
+      "placeGroup": "Lugar",
+      "move": "Mover o acoplar…",
+      "back": "Atrás",
+      "moveGroup": "Mover el grupo",
+      "moveOne": "Mover {name}",
+      "top": "Borde superior",
+      "right": "Borde derecho",
+      "bottom": "Borde inferior",
+      "left": "Borde izquierdo",
+      "floatHere": "Flotar aquí",
+      "join": "Unir",
+      "with": "Con {names}",
+      "takeOut": "Sacar del grupo",
+      "lock": "Bloquear posición",
+      "unlock": "Desbloquear posición",
+      "hide": "Ocultar",
+      "hidden": "{name} oculto",
+      "hiddenHow": "Muéstralo otra vez desde Ajustes o la paleta de comandos.",
+      "undo": "Deshacer",
+      "settings": "Ajustes de acciones",
+      "show": "Mostrar {name}",
+      "showKeyword": "Mostrar",
+      "showAction": "Mostrar una acción",
+      "reset": "Restablecer acciones"
     }
   },
   "close": {
@@ -2156,7 +2188,8 @@
           "session": "Sesión",
           "bot": "Bot",
           "canvas": "Lienzo",
-          "agents": "Agentes"
+          "agents": "Agentes",
+          "actions": "Acciones"
         },
         "theme": {
           "title": "Tema",
@@ -2239,6 +2272,72 @@
           "description": "Qué hace una sesión abierta cuando se archiva.",
           "close": "Cerrar su pestaña",
           "stay": "Seguir abierta"
+        },
+        "actionGroups": {
+          "title": "Grupos",
+          "description": "Cómo se dibujan las acciones que están juntas.",
+          "pill": "En una píldora",
+          "apart": "Cada una por separado"
+        },
+        "dockButton": {
+          "shown": "Visible",
+          "hidden": "Oculto"
+        },
+        "dockPlace": {
+          "top": "Borde superior",
+          "right": "Borde derecho",
+          "bottom": "Borde inferior",
+          "left": "Borde izquierdo",
+          "floating": "Flotante"
+        },
+        "dockGroup": {
+          "alone": "Sola",
+          "bots": "Con los bots",
+          "with": "Con {name}"
+        },
+        "dockPosition": {
+          "movable": "Movible",
+          "locked": "Bloqueada"
+        },
+        "newSessionButton": {
+          "title": "Nueva sesión",
+          "description": "Si se muestra. Una acción oculta sigue en la paleta."
+        },
+        "newSessionPlace": {
+          "title": "Nueva sesión: lugar",
+          "description": "Dónde descansa. Su grupo se mueve con ella."
+        },
+        "newSessionGroup": {
+          "title": "Nueva sesión: grupo",
+          "description": "Sola, o junto a otra acción o a los bots."
+        },
+        "newSessionOrder": {
+          "title": "Nueva sesión: orden",
+          "description": "Su lugar en el grupo, desde arriba o desde la izquierda."
+        },
+        "newSessionPosition": {
+          "title": "Nueva sesión: posición",
+          "description": "Bloqueada impide arrastrarla. Su menú y este formulario aún la mueven."
+        },
+        "paletteButton": {
+          "title": "Paleta de comandos",
+          "description": "Si se muestra. Una acción oculta sigue en la paleta."
+        },
+        "palettePlace": {
+          "title": "Paleta de comandos: lugar",
+          "description": "Dónde descansa. Su grupo se mueve con ella."
+        },
+        "paletteGroup": {
+          "title": "Paleta de comandos: grupo",
+          "description": "Sola, o junto a otra acción o a los bots."
+        },
+        "paletteOrder": {
+          "title": "Paleta de comandos: orden",
+          "description": "Su lugar en el grupo, desde arriba o desde la izquierda."
+        },
+        "palettePosition": {
+          "title": "Paleta de comandos: posición",
+          "description": "Bloqueada impide arrastrarla. Su menú y este formulario aún la mueven."
         }
       },
       "tabs": {

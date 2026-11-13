@@ -221,6 +221,38 @@
         "one": "{count} nota",
         "other": "{count} notas"
       }
+    },
+    "dock": {
+      "newSession": "Nova sessão",
+      "palette": "Paleta de comandos",
+      "newSessionRight": "Nova sessão na barra lateral",
+      "openPalette": "Abrir a paleta de comandos",
+      "searchLong": "Buscar comandos",
+      "searchShort": "Buscar",
+      "placeGroup": "Lugar",
+      "move": "Mover ou acoplar…",
+      "back": "Voltar",
+      "moveGroup": "Mover o grupo",
+      "moveOne": "Mover {name}",
+      "top": "Borda superior",
+      "right": "Borda direita",
+      "bottom": "Borda inferior",
+      "left": "Borda esquerda",
+      "floatHere": "Flutuar aqui",
+      "join": "Juntar",
+      "with": "Com {names}",
+      "takeOut": "Tirar do grupo",
+      "lock": "Travar posição",
+      "unlock": "Destravar posição",
+      "hide": "Ocultar",
+      "hidden": "{name} oculto",
+      "hiddenHow": "Mostre de novo pelas Configurações ou pela paleta de comandos.",
+      "undo": "Desfazer",
+      "settings": "Configurações das ações",
+      "show": "Mostrar {name}",
+      "showKeyword": "Mostrar",
+      "showAction": "Mostrar uma ação",
+      "reset": "Redefinir ações"
     }
   },
   "close": {
@@ -2156,7 +2188,8 @@
           "session": "Sessão",
           "bot": "Bot",
           "canvas": "Canvas",
-          "agents": "Agentes"
+          "agents": "Agentes",
+          "actions": "Ações"
         },
         "theme": {
           "title": "Tema",
@@ -2239,6 +2272,72 @@
           "description": "O que uma sessão aberta faz quando é arquivada.",
           "close": "Fechar a aba",
           "stay": "Continuar aberta"
+        },
+        "actionGroups": {
+          "title": "Grupos",
+          "description": "Como as ações que ficam juntas são desenhadas.",
+          "pill": "Numa pílula",
+          "apart": "Cada uma separada"
+        },
+        "dockButton": {
+          "shown": "Visível",
+          "hidden": "Oculto"
+        },
+        "dockPlace": {
+          "top": "Borda superior",
+          "right": "Borda direita",
+          "bottom": "Borda inferior",
+          "left": "Borda esquerda",
+          "floating": "Flutuante"
+        },
+        "dockGroup": {
+          "alone": "Sozinha",
+          "bots": "Com os bots",
+          "with": "Com {name}"
+        },
+        "dockPosition": {
+          "movable": "Móvel",
+          "locked": "Travada"
+        },
+        "newSessionButton": {
+          "title": "Nova sessão",
+          "description": "Se aparece. Uma ação oculta continua na paleta."
+        },
+        "newSessionPlace": {
+          "title": "Nova sessão: lugar",
+          "description": "Onde fica. O grupo se move junto."
+        },
+        "newSessionGroup": {
+          "title": "Nova sessão: grupo",
+          "description": "Sozinha, ou ao lado de outra ação ou dos bots."
+        },
+        "newSessionOrder": {
+          "title": "Nova sessão: ordem",
+          "description": "O lugar no grupo, de cima ou da esquerda."
+        },
+        "newSessionPosition": {
+          "title": "Nova sessão: posição",
+          "description": "Travada impede arrastar. O menu e este formulário ainda a movem."
+        },
+        "paletteButton": {
+          "title": "Paleta de comandos",
+          "description": "Se aparece. Uma ação oculta continua na paleta."
+        },
+        "palettePlace": {
+          "title": "Paleta de comandos: lugar",
+          "description": "Onde fica. O grupo se move junto."
+        },
+        "paletteGroup": {
+          "title": "Paleta de comandos: grupo",
+          "description": "Sozinha, ou ao lado de outra ação ou dos bots."
+        },
+        "paletteOrder": {
+          "title": "Paleta de comandos: ordem",
+          "description": "O lugar no grupo, de cima ou da esquerda."
+        },
+        "palettePosition": {
+          "title": "Paleta de comandos: posição",
+          "description": "Travada impede arrastar. O menu e este formulário ainda a movem."
         }
       },
       "tabs": {
