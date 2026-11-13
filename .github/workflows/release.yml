@@ -134,7 +134,9 @@ jobs:
           exit "$code"
 
       # The tag's page on GitHub: its CHANGELOG section as the notes, and the
-      # packed tarball. A re-run finds the release there and leaves it alone.
+      # packed tarball. A version on `next` is a pre-release, so GitHub does
+      # not show it as the latest. A re-run finds the release there and leaves
+      # it alone.
       - name: Create the GitHub Release
         if: ${{ inputs.dry_run != true && startsWith(github.ref, 'refs/tags/') }}
         env:
@@ -157,5 +159,7 @@ jobs:
             echo "::error::CHANGELOG.md has no section for $version."
             exit 1
           fi
+          prerelease=""
+          if [ "$CHANNEL" = "next" ]; then prerelease="--prerelease"; fi
           gh release create "$GITHUB_REF_NAME" "${{ runner.temp }}/ahpd-web-$version.tgz" \
-            --verify-tag --title "@ahpd/web $GITHUB_REF_NAME" --notes-file "$notes"
+            --verify-tag --title "@ahpd/web $GITHUB_REF_NAME" --notes-file "$notes" $prerelease
