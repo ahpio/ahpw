@@ -28,8 +28,8 @@ importers:
         version: 2.9.1
     devDependencies:
       '@ahpd/sdk':
-        specifier: ^0.15.0-rc.1
-        version: 0.15.0-rc.1
+        specifier: ^0.15.0-rc.2
+        version: 0.15.0-rc.2
       '@codemirror/autocomplete':
         specifier: ^6.20.3
         version: 6.20.3
@@ -150,8 +150,8 @@ packages:
   '@acemir/cssom@0.9.31':
     resolution: {integrity: sha512-ZnR3GSaH+/vJ0YlHau21FjfLYjMpYVIzTD8M8vIEQvIGxeOXyXdzCI140rrCY862p/C/BbzWsjc1dgnM9mkoTA==}
 
-  '@ahpd/sdk@0.15.0-rc.1':
-    resolution: {integrity: sha512-qntDjoyX41B1+RK0wsw1bX+0x1Y32FYAQzNNB9j6IX7Du2sJHb4QkSPUDRCIrhn3RuCmGbXjUVxJji16jpoolA==}
+  '@ahpd/sdk@0.15.0-rc.2':
+    resolution: {integrity: sha512-N4cdrRbizwIXSBd3avaEOfugh6LjSMXxnBeVkpWSFLQJ5kTjUMXFVjCdkYHjkWEzTW3a2pq3mF3JquZ+qJx5ew==}
     engines: {node: '>=22.1'}
 
   '@algolia/abtesting@1.26.0':
@@ -1778,7 +1778,7 @@ snapshots:
   '@acemir/cssom@0.9.31':
     optional: true
 
-  '@ahpd/sdk@0.15.0-rc.1':
+  '@ahpd/sdk@0.15.0-rc.2':
     dependencies:
       '@microsoft/agent-host-protocol': 1.0.0
     optionalDependencies:
