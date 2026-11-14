@@ -3145,7 +3145,8 @@
       "purpose": "Propósito",
       "enabled": "Activado",
       "yes": "Sí",
-      "no": "No"
+      "no": "No",
+      "unset": "Sin definir"
     },
     "purpose": {
       "system": "Mantenido por el host",

@@ -22,7 +22,7 @@ export const tunnelsReducer = operationsReducer(TUNNELS_SCHEME);
 export type TunnelStatus = 'running' | 'stopped' | 'error';
 
 /** The fields that are not one of the kind's settings. */
-const HOST_FIELDS: ReadonlySet<string> = new Set(['id', 'kind', 'plugin', 'purpose', 'enabled', 'owner', 'status', 'url', 'error', 'operation']);
+const HOST_FIELDS: ReadonlySet<string> = new Set(['id', 'kind', 'plugin', 'purpose', 'enabled', 'owner', 'status', 'url', 'error', 'operation', 'operations']);
 
 /** What a row says, as the host sent it. */
 export interface TunnelFacts {
@@ -61,6 +61,35 @@ export function factsOf(record: Bag): TunnelFacts {
     ...(operation === undefined ? {} : { operation }),
     settings: Object.fromEntries(Object.entries(record).filter(([field]) => !HOST_FIELDS.has(field))),
   };
+}
+
+/** The schema a kind's settings follow: the input of its `<kind>/create` operation, which every kind has. */
+export function kindSchema(state: OperationsState | undefined, kind: string): Bag | undefined {
+  return state?.operations?.find((one) => one.id === `${kind}/create`)?.input;
+}
+
+/** One setting as the page lists it. */
+export interface SettingRow {
+  field: string;
+  /** The schema's title for it, else its field name. */
+  label: string;
+  /** What the record holds, else the schema's default; undefined when neither says. */
+  value: unknown;
+}
+
+/**
+ * The settings the page lists: each field the kind's schema names, in its
+ * order, held or not, so a field left at its default still shows. With no
+ * schema, every setting the record holds, by field name.
+ */
+export function settingRows(schema: Bag | undefined, settings: Bag): SettingRow[] {
+  const fields = schema?.properties !== null && typeof schema?.properties === 'object' ? schema.properties as Record<string, Bag> : undefined;
+  if (fields === undefined) return Object.entries(settings).map(([field, value]) => ({ field, label: field, value }));
+  return Object.entries(fields).map(([field, def]) => ({
+    field,
+    label: typeof def.title === 'string' && def.title !== '' ? def.title : field,
+    value: settings[field] ?? def.default,
+  }));
 }
 
 /** Whether an operation is running on the tunnel now. */

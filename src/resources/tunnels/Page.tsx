@@ -12,7 +12,7 @@ import { PageAlert } from '../../shell/view/PageAlert.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { EMOJIcon } from '../emojis.js';
 import { DangerOperations, OperationButtons } from '../operations/Buttons.js';
-import { factsOf, statusKey, TUNNELS, tunnelsReducer, type TunnelFacts, type TunnelsState } from './tunnels.js';
+import { factsOf, kindSchema, settingRows, statusKey, TUNNELS, tunnelsReducer, type TunnelFacts, type TunnelsState } from './tunnels.js';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 const TONE: Record<ReturnType<typeof statusKey>, Tone> = { busy: 'info', running: 'success', error: 'danger', stopped: 'default', disabled: 'default' };
@@ -30,12 +30,18 @@ function factsList(host: string, facts: TunnelFacts): DetailItem[] {
   return items;
 }
 
-/** The kind's settings, a kept secret as a word and never its value. */
-function settingsList(facts: TunnelFacts): DetailItem[] {
-  return Object.entries(facts.settings).map(([field, value]) => ({
-    label: field,
-    value: isSecretRef(value) ? translate('operations/kept') : typeof value === 'string' ? value : JSON.stringify(value),
-  }));
+/** A setting's value in words: a kept secret as a word and never its value, a switch as yes or no. */
+function settingWords(value: unknown): string {
+  if (isSecretRef(value)) return translate('operations/kept');
+  if (typeof value === 'boolean') return translate(value ? 'tunnels/facts/yes' : 'tunnels/facts/no');
+  if (value === undefined || value === null || value === '') return translate('tunnels/facts/unset');
+  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  return JSON.stringify(value);
+}
+
+/** The kind's settings, as its schema names them. */
+function settingsList(schema: Record<string, unknown> | undefined, facts: TunnelFacts): DetailItem[] {
+  return settingRows(schema, facts.settings).map((row) => ({ label: row.label, value: settingWords(row.value) }));
 }
 
 /** One tunnel: its state, its address, its settings, and the operations the host offers on it. */
@@ -52,7 +58,7 @@ export default function TunnelPage({ host, tunnel: id }: { host: string; tunnel?
   const key = statusKey(facts);
   const operations = rowOperations(state, entry.record);
   const place = { host, channel: TUNNELS, target: id, held: facts.settings };
-  const settings = settingsList(facts);
+  const settings = settingsList(kindSchema(state, facts.kind), facts);
   const failedOperation = facts.operation?.status === 'error' ? facts.operation : undefined;
 
   return (
@@ -76,7 +82,7 @@ export default function TunnelPage({ host, tunnel: id }: { host: string; tunnel?
 
       {settings.length === 0 ? null : (
         <>
-          <Text variant="h3" text={t('tunnels/page/settings')} />
+          <Text variant="h3" text={`${EMOJIcon.settings} ${t('tunnels/page/settings')}`} />
           <DetailList items={settings} columns={2} />
         </>
       )}
