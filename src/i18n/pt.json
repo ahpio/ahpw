@@ -3145,7 +3145,8 @@
       "purpose": "Finalidade",
       "enabled": "Ativado",
       "yes": "Sim",
-      "no": "Não"
+      "no": "Não",
+      "unset": "Não definido"
     },
     "purpose": {
       "system": "Mantido pelo host",

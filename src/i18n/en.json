@@ -3145,7 +3145,8 @@
       "purpose": "Purpose",
       "enabled": "Enabled",
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "unset": "Not set"
     },
     "purpose": {
       "system": "Kept by the host",
