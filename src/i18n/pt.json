@@ -46,6 +46,14 @@
       "sessions": "Sessões",
       "unread": "não lidas",
       "working": "em andamento",
+      "errors": {
+        "one": "erro",
+        "other": "erros"
+      },
+      "warnings": {
+        "one": "aviso",
+        "other": "avisos"
+      },
       "explorer": "Explorador",
       "automations": "Automações",
       "host": "Host",
