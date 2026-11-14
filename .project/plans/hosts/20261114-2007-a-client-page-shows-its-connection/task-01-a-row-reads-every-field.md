@@ -1,6 +1,6 @@
 ---
 title: A row reads every field
-status: todo
+status: done
 depends: []
 layer: "clients"
 refs:
@@ -37,3 +37,5 @@ refs:
 - `pnpm typecheck` passes.
 
 ## Resume
+
+Built as the steps say. `whoOf` answers the person or *Host token*, so the page and the line share it.
