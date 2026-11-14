@@ -2181,7 +2181,23 @@
       "terminalState": "Estado",
       "running": "Em execução",
       "exited": "Encerrado",
-      "exitedCode": "Encerrado ({code})"
+      "exitedCode": "Encerrado ({code})",
+      "server": "Servidor",
+      "software": "Software",
+      "version": "Versão",
+      "build": "Build",
+      "machine": "Máquina",
+      "platform": "Plataforma",
+      "cpus": "CPUs",
+      "memory": "Memória",
+      "signedInAs": "Conectado como",
+      "followingValue": "{channels} · seq {seq}",
+      "agentChatWith": "Conversar com {agent}",
+      "models": {
+        "one": "{count} modelo",
+        "other": "{count} modelos"
+      },
+      "agentSettings": "Configurações dos agentes"
     },
     "settings": {
       "tab": "Configurações",
@@ -3234,6 +3250,31 @@
       "watching": "Canais que segue",
       "authenticated": "Recursos em que se autenticou",
       "sessions": "Sessões em que está"
+    },
+    "channels": {
+      "root": {
+        "title": "Host",
+        "description": "Os agentes do host e as sessões que ele mantém."
+      },
+      "session": {
+        "title": "Sessão",
+        "description": "Uma sessão: seus chats, arquivos e alterações."
+      },
+      "chat": {
+        "title": "Chat",
+        "titleIn": "Chat em {session}",
+        "description": "Os turnos e as mensagens de um chat."
+      },
+      "uncommitted": {
+        "title": "Alterações sem commit",
+        "titleIn": "Alterações sem commit em {session}",
+        "description": "Os arquivos que a sessão alterou e não fez commit."
+      },
+      "changes": {
+        "title": "Alterações",
+        "titleIn": "Alterações em {session}",
+        "description": "Um conjunto de arquivos que a sessão alterou."
+      }
     }
   }
 }

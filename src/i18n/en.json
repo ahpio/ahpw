@@ -2181,7 +2181,23 @@
       "terminalState": "State",
       "running": "Running",
       "exited": "Exited",
-      "exitedCode": "Exited ({code})"
+      "exitedCode": "Exited ({code})",
+      "server": "Server",
+      "software": "Software",
+      "version": "Version",
+      "build": "Build",
+      "machine": "Machine",
+      "platform": "Platform",
+      "cpus": "CPUs",
+      "memory": "Memory",
+      "signedInAs": "Signed in as",
+      "followingValue": "{channels} · seq {seq}",
+      "agentChatWith": "Chat with {agent}",
+      "models": {
+        "one": "{count} model",
+        "other": "{count} models"
+      },
+      "agentSettings": "Agent settings"
     },
     "settings": {
       "tab": "Settings",
@@ -3234,6 +3250,31 @@
       "watching": "Channels it follows",
       "authenticated": "Resources it signed in to",
       "sessions": "Sessions it is in"
+    },
+    "channels": {
+      "root": {
+        "title": "Host",
+        "description": "The host's agents and the sessions it holds."
+      },
+      "session": {
+        "title": "Session",
+        "description": "A session: its chats, files and changes."
+      },
+      "chat": {
+        "title": "Chat",
+        "titleIn": "Chat in {session}",
+        "description": "A chat's turns and messages."
+      },
+      "uncommitted": {
+        "title": "Uncommitted changes",
+        "titleIn": "Uncommitted changes in {session}",
+        "description": "The files the session changed and did not commit."
+      },
+      "changes": {
+        "title": "Changes",
+        "titleIn": "Changes in {session}",
+        "description": "A set of files the session changed."
+      }
     }
   }
 }

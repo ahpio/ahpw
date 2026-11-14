@@ -37,13 +37,18 @@ function parsed(text: string): unknown {
   }
 }
 
-/** The `_meta` of the answer that carries a `serverInfo`, where ahpd names what its plugins offer. */
-export function answerMetaOf(message: unknown): unknown {
-  return record(record(typeof message === 'string' ? parsed(message) : message)?.result)?._meta;
+/** The result of an answer, or null. */
+function resultOf(message: unknown): Record<string, unknown> | null {
+  return record(record(typeof message === 'string' ? parsed(message) : message)?.result);
 }
 
-/** The same transport, telling `onInfo` the `serverInfo` of each answer that carries one, and that answer's `_meta`. */
-export function readingServerInfo(inner: AhpTransport, onInfo: (info: ServerInfo, meta: unknown) => void): AhpTransport {
+/** The `_meta` of the answer that carries a `serverInfo`, where ahpd names what its plugins offer. */
+export function answerMetaOf(message: unknown): unknown {
+  return resultOf(message)?._meta;
+}
+
+/** The same transport, telling `onInfo` the `serverInfo` of each answer that carries one, that answer's `_meta`, and its whole result. */
+export function readingServerInfo(inner: AhpTransport, onInfo: (info: ServerInfo, meta: unknown, result: unknown) => void): AhpTransport {
   return {
     send: (message) => inner.send(message),
     close: () => inner.close(),
@@ -51,7 +56,7 @@ export function readingServerInfo(inner: AhpTransport, onInfo: (info: ServerInfo
       const frame = await inner.recv();
       const message = frame?.kind === 'text' ? frame.text : frame?.kind === 'parsed' ? frame.message : null;
       const info = message === null ? null : serverInfoOf(message);
-      if (info !== null) onInfo(info, answerMetaOf(message));
+      if (info !== null) onInfo(info, answerMetaOf(message), resultOf(message));
       return frame;
     },
   };

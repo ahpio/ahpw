@@ -106,8 +106,8 @@ describe('push with the tab closed', () => {
 
   it('is offered by a host whose push provider allows write', () => {
     expect(servesPush(undefined)).toBe(false);
-    expect(servesPush({ methods: [], described: {}, channels: [], providers: { push: { title: 'Push', root: 'push://', operations: ['read'] } } })).toBe(false);
-    expect(servesPush({ methods: [], described: {}, channels: [], providers: { push: { title: 'Push', root: 'push://', operations: ['read', 'write'] } } })).toBe(true);
+    expect(servesPush({ methods: [], described: {}, channels: [], channelWords: {}, providers: { push: { title: 'Push', root: 'push://', operations: ['read'] } } })).toBe(false);
+    expect(servesPush({ methods: [], described: {}, channels: [], channelWords: {}, providers: { push: { title: 'Push', root: 'push://', operations: ['read', 'write'] } } })).toBe(true);
   });
 
   it('compares keys by their bytes', () => {

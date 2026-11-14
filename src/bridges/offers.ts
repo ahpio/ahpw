@@ -17,11 +17,19 @@ export interface Provider {
   manifest?: Record<string, unknown>;
 }
 
+/** What the host says a channel is. */
+export interface ChannelWords {
+  title: string;
+  description?: string;
+}
+
 export interface Offers {
   methods: string[];
   /** What the host says each method does, by its name; a method that says nothing is absent. */
   described: Record<string, string>;
   channels: string[];
+  /** What the host says each channel is, by its scheme; a channel that says nothing is absent. */
+  channelWords: Record<string, ChannelWords>;
   providers: Record<string, Provider>;
   /** Who this connection is, `user:<id>` or `root:<host>`; absent on a host with no users. */
   principal?: string;
@@ -29,7 +37,7 @@ export interface Offers {
   removesArtifacts?: true;
 }
 
-export const NO_OFFERS: Offers = { methods: [], described: {}, channels: [], providers: {} };
+export const NO_OFFERS: Offers = { methods: [], described: {}, channels: [], channelWords: {}, providers: {} };
 
 function bag(value: unknown): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
@@ -65,6 +73,21 @@ function descriptionsOf(value: unknown): Record<string, string> {
   return described;
 }
 
+/** Each channel's title and description, from a list of `{ scheme, title, description }` entries; a map, as an older ahpd sent, has none. */
+function channelWordsOf(value: unknown): Record<string, ChannelWords> {
+  if (!Array.isArray(value)) return {};
+  const words: Record<string, ChannelWords> = {};
+  for (const one of value) {
+    const entry = bag(one);
+    if (typeof entry?.scheme !== 'string' || typeof entry.title !== 'string' || entry.title === '') continue;
+    words[entry.scheme] = {
+      title: entry.title,
+      ...(typeof entry.description === 'string' && entry.description !== '' ? { description: entry.description } : {}),
+    };
+  }
+  return words;
+}
+
 /** The offers in an `initialize` answer's `_meta`. */
 export function offersOf(meta: unknown): Offers {
   const providers: Record<string, Provider> = {};
@@ -77,6 +100,7 @@ export function offersOf(meta: unknown): Offers {
     methods: namesOf(ahpdKey(meta, 'methods'), 'method'),
     described: descriptionsOf(ahpdKey(meta, 'methods')),
     channels: namesOf(ahpdKey(meta, 'channels'), 'scheme'),
+    channelWords: channelWordsOf(ahpdKey(meta, 'channels')),
     providers,
     ...(typeof principal === 'string' && principal !== '' ? { principal } : {}),
     ...(bag(meta)?.['vscode.removeSessionArtifact'] === true ? { removesArtifacts: true as const } : {}),

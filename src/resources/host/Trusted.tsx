@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Button, Text } from '@softov/scena/ui';
 import { readTrust, keepTrust, trustPath, withoutAnswer, type TrustAnswers } from '../../bridges/trust.js';
@@ -11,7 +11,7 @@ import { failed } from '../../shell/notify/index.js';
  * answer back. Forgetting a yes tells the host at once, so it stops trusting
  * the folder; either way the folder is asked about again next time.
  */
-export function TrustedFolders({ host }: { host: string }): ReactElement {
+export function TrustedFolders({ host, heading }: { host: string; /** Drawn in place of the plain title. */ heading?: ReactNode }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
   const answers = useStore<TrustAnswers>(trustPath(host)) ?? readTrust(host);
@@ -28,7 +28,7 @@ export function TrustedFolders({ host }: { host: string }): ReactElement {
 
   return (
     <>
-      <Text variant="h3" text={t('trust/host/title')} />
+      {heading ?? <Text variant="h3" text={t('trust/host/title')} />}
       <p className="web-note">{t('trust/host/hint')}</p>
       {rows.length === 0 ? <p className="web-note">{t('trust/host/none')}</p> : (
         <table className="web-runs web-table web-trust">
