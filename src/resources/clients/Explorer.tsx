@@ -11,8 +11,9 @@ import { copyText } from '../../shell/controls/CopyButton.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList, type Row } from '../../shell/explorer/ExplorerList.js';
 import { operationItems } from '../operations/run.js';
+import { useNow } from '../sessions/clock.js';
 import { ACTIVE_CLIENT } from './state.js';
-import { CLIENTS, CLIENTS_SCHEME, clientsReducer, factsOf, lineOf, titleOf, type ClientsState } from './rows.js';
+import { CLIENTS, CLIENTS_SCHEME, clientsReducer, factsOf, isIdle, lineOf, titleOf, type ClientsState } from './rows.js';
 
 /** The sidebar: the connections of the shown hosts that list them, in the order they arrived; this page's own is marked. */
 export default function ClientExplorer(): ReactElement {
@@ -25,6 +26,8 @@ export default function ClientExplorer(): ReactElement {
   const { states, errors } = useChannelOnEach<ClientsState>(hosts, CLIENTS, clientsReducer);
   const connections = useEach<HostFacts | null>(hosts.map((host) => ahpPaths(host).host));
   const active = useStore<{ host: string; id: string }>(ACTIVE_CLIENT);
+  // Read in 5-second steps, the host's own tick, so the list is not drawn again each second.
+  const now = Math.floor(useNow(hosts.length > 0) / 5000) * 5000;
   const open = (key: string): void => {
     const { host, id } = refOf(key);
     const record = states[hosts.indexOf(host)]?.records.find((one) => one.id === id)?.record;
@@ -37,14 +40,15 @@ export default function ClientExplorer(): ReactElement {
     return (state?.records ?? []).map(({ id, record }): Row => {
       const facts = factsOf(record);
       const own = mine !== undefined && facts.clientId === mine;
+      const idle = !own && isIdle(facts, now);
       const place = { host, channel: CLIENTS, target: id };
       const item = (title: string, run: () => void, extra: Partial<PickerAction> = {}): PickerAction => ({ title, onSelect: (menu) => { menu.closeMenu(); run(); }, ...extra });
       return {
         key: refKey(host, id),
-        dot: own ? 'fresh' : 'ok',
-        dotLabel: t(own ? 'clients/explorer/thisApp' : 'clients/explorer/connected'),
+        dot: own ? 'fresh' : idle ? 'quiet' : 'ok',
+        dotLabel: t(own ? 'clients/explorer/thisApp' : idle ? 'clients/explorer/idle' : 'clients/explorer/connected'),
         title: titleOf(facts),
-        lines: [[multi ? hostName(host) : undefined, own ? t('clients/explorer/thisApp') : undefined, lineOf(facts)].filter((bit) => bit !== undefined && bit !== '').join(' \u{00B7} ')],
+        lines: [[multi ? hostName(host) : undefined, own ? t('clients/explorer/thisApp') : undefined, lineOf(facts, t('clients/facts/hostToken'))].filter((bit) => bit !== undefined && bit !== '').join(' \u{00B7} ')],
         menu: [
           item(t('clients/actions/open'), () => open(refKey(host, id))),
           ...operationItems(scena, place, rowOperations(state, record)),
@@ -54,7 +58,7 @@ export default function ClientExplorer(): ReactElement {
     });
   }),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [hosts, states, connections, hostName, multi, t]);
+  [hosts, states, connections, hostName, multi, now, t]);
 
   const error = multi ? null : errors[0] ?? null;
   const state = multi ? states.find((one) => one !== undefined) : states[0];
