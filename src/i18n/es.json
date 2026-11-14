@@ -2771,7 +2771,10 @@
       "trusted": "De confianza",
       "untrusted": "Sin confianza",
       "forget": "Olvidar",
-      "notForgotten": "El host no pudo guardar el cambio"
+      "notForgotten": "El host no pudo guardar el cambio",
+      "forgetTitle": "¿Olvidar {folder}?",
+      "forgetTrusted": "El host deja de confiar en esta carpeta ahora y vuelve a preguntar la próxima vez.",
+      "forgetUntrusted": "El host vuelve a preguntar por esta carpeta la próxima vez."
     }
   },
   "profile": {

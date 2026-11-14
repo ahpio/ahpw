@@ -2771,7 +2771,10 @@
       "trusted": "Confiável",
       "untrusted": "Não confiável",
       "forget": "Esquecer",
-      "notForgotten": "O host não conseguiu salvar a mudança"
+      "notForgotten": "O host não conseguiu salvar a mudança",
+      "forgetTitle": "Esquecer {folder}?",
+      "forgetTrusted": "O host deixa de confiar nesta pasta agora e pergunta de novo na próxima vez.",
+      "forgetUntrusted": "O host pergunta sobre esta pasta de novo na próxima vez."
     }
   },
   "profile": {

@@ -4,11 +4,11 @@ import { Button, Text } from '@softov/scena/ui';
 import { readTrust, keepTrust, trustPath, withoutAnswer, type TrustAnswers } from '../../bridges/trust.js';
 import { sendTrust } from '../../bridges/trust-ask.js';
 import { folderLabel } from '../../bridges/words.js';
-import { failed } from '../../shell/notify/index.js';
+import { confirm, failed } from '../../shell/notify/index.js';
 
 /**
  * The folders this browser answered about on the host, and a way to take an
- * answer back. Forgetting a yes tells the host at once, so it stops trusting
+ * answer back once the person confirms it. Forgetting a yes tells the host at once, so it stops trusting
  * the folder; either way the folder is asked about again next time.
  */
 export function TrustedFolders({ host, heading }: { host: string; /** Drawn in place of the plain title. */ heading?: ReactNode }): ReactElement {
@@ -17,7 +17,14 @@ export function TrustedFolders({ host, heading }: { host: string; /** Drawn in p
   const answers = useStore<TrustAnswers>(trustPath(host)) ?? readTrust(host);
   const rows = Object.entries(answers);
 
-  const forget = (uri: string, trusted: boolean): void => {
+  const forget = async (uri: string, trusted: boolean): Promise<void> => {
+    const asked = await confirm({
+      title: t('trust/host/forgetTitle', { folder: folderLabel(uri) }),
+      body: t(trusted ? 'trust/host/forgetTrusted' : 'trust/host/forgetUntrusted'),
+      confirmLabel: t('trust/host/forget'),
+      tone: 'danger',
+    });
+    if (!asked) return;
     const next = withoutAnswer(answers, uri);
     if (!trusted) {
       keepTrust(scena.store, host, next);
@@ -40,7 +47,7 @@ export function TrustedFolders({ host, heading }: { host: string; /** Drawn in p
               <tr key={uri}>
                 <td><code>{folderLabel(uri)}</code></td>
                 <td>{t(trusted ? 'trust/host/trusted' : 'trust/host/untrusted')}</td>
-                <td className="web-trust__forget"><Button label={t('trust/host/forget')} size="sm" onClick={() => forget(uri, trusted)} /></td>
+                <td className="web-trust__forget"><Button label={t('trust/host/forget')} size="sm" onClick={() => void forget(uri, trusted)} /></td>
               </tr>
             ))}
           </tbody>

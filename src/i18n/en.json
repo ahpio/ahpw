@@ -2771,7 +2771,10 @@
       "trusted": "Trusted",
       "untrusted": "Not trusted",
       "forget": "Forget",
-      "notForgotten": "The host couldn't save the change"
+      "notForgotten": "The host couldn't save the change",
+      "forgetTitle": "Forget {folder}?",
+      "forgetTrusted": "The host stops trusting this folder now, and asks about it again next time.",
+      "forgetUntrusted": "The host asks about this folder again next time."
     }
   },
   "profile": {
