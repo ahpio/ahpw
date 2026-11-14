@@ -16,8 +16,11 @@
   --oo-activitybar-bg-active: transparent;
 }
 
+/* The title bar's height comes from this box, not from the mark, so the mark can be smaller than the bar. */
 .web-title {
   display: flex;
+  align-items: center;
+  height: 24px;
 }
 
 /* The brand holds the activity bar's column, so what comes after it starts where the sidebar does. */

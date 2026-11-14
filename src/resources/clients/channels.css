@@ -1,0 +1,53 @@
+/* The channels a client follows: a title that opens the channel's view, its URI, and what it is. */
+.web-channels {
+  margin: var(--oo-spacing-sm) 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-color-surface);
+  container: channels / inline-size;
+}
+
+.web-channels__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--oo-spacing-md);
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+}
+
+.web-channels__row + .web-channels__row {
+  border-top: 1px solid var(--oo-color-border);
+}
+
+.web-channels__title {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.web-channels__uri {
+  /* Takes what the title leaves, and wraps a long URI inside that space; under 16rem it moves to its own line. */
+  flex: 1 1 16rem;
+  min-width: 0;
+  text-align: right;
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  word-break: break-all;
+}
+
+.web-channels__description {
+  flex-basis: 100%;
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-muted);
+}
+
+@container channels (width < 40rem) {
+  .web-channels__uri {
+    flex-basis: 100%;
+    text-align: left;
+  }
+}

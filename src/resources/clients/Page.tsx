@@ -3,7 +3,10 @@ import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Badge, DetailList, Spinner, Text, type DetailItem } from '@softov/scena/ui';
 import { useChannel } from '../../bridges/channel.js';
-import { ahpPaths, titlePath, type HostFacts } from '../../bridges/data.js';
+import type { ChatSummary } from '@microsoft/agent-host-protocol';
+import { ahpPaths, channelPath, titlePath, type HostFacts } from '../../bridges/data.js';
+import { useEach } from '../../bridges/hosts.js';
+import type { Offers } from '../../bridges/offers.js';
 import { rowOperations } from '../../bridges/operations.js';
 import { elapsed } from '../../bridges/words.js';
 import { embedMode } from '../../shell/embed/index.js';
@@ -18,6 +21,8 @@ import {
   bytesWords, CLIENTS, clientsReducer, clientWords, factsOf, isIdle, rateOf, titleOf, whoOf,
   type ClientFacts, type ClientsState, type Reading,
 } from './rows.js';
+import { describeChannels } from './channels.js';
+import './channels.css';
 
 const when = dateFormat({ dateStyle: 'medium', timeStyle: 'medium' });
 
@@ -140,6 +145,40 @@ function SessionLink({ host, resource }: { host: string; resource: string }): Re
   );
 }
 
+/** The channels a client follows, in the order of their URIs: what each is, and a link to its view where this app has one. */
+function ChannelList({ host, facts }: { host: string; facts: ClientFacts }): ReactElement {
+  const scena = useScena();
+  const offers = useStore<Offers>(ahpPaths(host).offers);
+  // Any followed URI may be a session, or hold one before its changeset.
+  const candidates = [...new Set([...facts.sessions, ...facts.watching.map((uri) => uri.split('/changeset/')[0] ?? uri)])];
+  const titles = useEach<string>(candidates.map((uri) => titlePath(host, uri)));
+  const states = useEach<{ chats?: readonly ChatSummary[] }>(candidates.map((uri) => channelPath(host, uri)));
+  const entries = describeChannels(facts.watching, {
+    host,
+    offers,
+    sessions: facts.sessions,
+    titleOf: (session) => titles[candidates.indexOf(session)],
+    sessionOf: (chat) => candidates.find((_, at) => states[at]?.chats?.some((one) => one.resource === chat) === true),
+  });
+  return (
+    <ul className="web-channels">
+      {entries.map(({ uri, title, description, open }) => (
+        <li key={uri} className="web-channels__row">
+          {open === undefined
+            ? <span className="web-channels__title">{title}</span>
+            : (
+              <button type="button" className="web-link web-channels__title" onClick={() => void scena.commands.execute(open.command, open.args)}>
+                {title}
+              </button>
+            )}
+          <span className="web-channels__uri">{uri}</span>
+          {description === undefined ? null : <span className="web-channels__description">{description}</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /** One connection: who it is, where it comes from, what it carries now, and the operations the host offers on it. */
 export default function ClientPage({ host, client: id }: { host: string; client?: string }): ReactElement {
   const { t } = useI18n();
@@ -182,7 +221,7 @@ export default function ClientPage({ host, client: id }: { host: string; client?
       )}
 
       <Folded title={t('clients/page/watching')} count={facts.watching.length}>
-        <pre>{facts.watching.join('\n')}</pre>
+        <ChannelList host={host} facts={facts} />
       </Folded>
       <Folded title={t('clients/page/authenticated')} count={facts.authenticated.length}>
         <pre>{facts.authenticated.join('\n')}</pre>

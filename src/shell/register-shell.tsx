@@ -59,7 +59,7 @@ import { AhpioMark } from './AhpioMark.js';
 function AppTitle(): ReactElement {
   return (
     <span className="web-title">
-      <AhpioMark size={24} label="ahpio" />
+      <AhpioMark size={18} label="ahpio" />
     </span>
   );
 }

@@ -11,6 +11,7 @@ import { embedder, embedMode, type EmbedHost } from '../shell/embed/index.js';
 import { offering } from './protocol-versions.js';
 import { readingServerInfo } from './server-info.js';
 import { offersOf } from './offers.js';
+import { aboutOf, rootMetaOf } from './host-about.js';
 import { hostTrustOf, joinedUris, keepTrust, readTrust, trustAction, trustedOnHost, trustedUris } from './trust.js';
 import { hostSocketUrl, plainUrl, socketUrl } from './socket.js';
 import { NOTHING_NEWER, heard, laid, listed, type Newer } from './summaries.js';
@@ -43,6 +44,8 @@ export interface AhpPaths {
   server: BindingPath;
   /** What the host's plugins offer beyond AHP, as its last `initialize` answer said, as `Offers`. */
   offers: BindingPath;
+  /** The host's build, machine and agent settings pages, as its last `initialize` answer's root state said, as `HostAbout`. */
+  about: BindingPath;
   /** The host's terminals this page has stopped following; their tabs stay, showing what they last drew. */
   detached: BindingPath;
   /** In multi, whether the host refuses the token its socket offers; undefined until a failure asked. */
@@ -68,6 +71,7 @@ export function ahpPaths(host: string): AhpPaths {
       host: at('host'),
       server: at('server'),
       offers: at('offers'),
+      about: at('about'),
       detached: at('terminals/detached'),
       refused: at('refused'),
     };
@@ -728,9 +732,10 @@ async function addOne(store: ReactiveStore, multi: MultiHostClient, id: string):
     await multi.addHost({
       id,
       label: embedder !== undefined ? (await embeddedHost(id)).name : window.location.host,
-      transportFactory: async () => readingServerInfo(offering(observing(id, await openSocket(id))), (info, meta) => {
+      transportFactory: async () => readingServerInfo(offering(observing(id, await openSocket(id))), (info, meta, result) => {
         store.set(ahpPaths(id).server, info);
         store.set(ahpPaths(id).offers, offersOf(meta));
+        store.set(ahpPaths(id).about, aboutOf(rootMetaOf(result, ROOT_RESOURCE_URI)));
       }),
     });
   } catch (error) {
