@@ -3175,7 +3175,8 @@
       "empty": "No clients connected.",
       "notServed": "None of your hosts list clients.",
       "thisApp": "this app",
-      "connected": "connected"
+      "connected": "connected",
+      "idle": "idle"
     },
     "notices": {
       "none": "No clients",
@@ -3195,17 +3196,44 @@
       "protocolVersion": "Protocol",
       "locale": "Language",
       "connectedAt": "Connected",
-      "watching": "Channels followed"
+      "watching": "Channels followed",
+      "client": "Client",
+      "hostToken": "Host token",
+      "roles": "Roles",
+      "team": "Team",
+      "principalUntil": "Signed in until",
+      "path": "Path",
+      "node": "Node",
+      "userAgent": "User agent",
+      "origin": "Origin",
+      "claim": "claimed",
+      "capabilities": "Capabilities",
+      "arrival": {
+        "initialize": "new",
+        "reconnect": "resumed"
+      }
     },
     "traffic": {
       "framesIn": "Frames in",
       "framesOut": "Frames out",
       "bytesIn": "Bytes in",
-      "bytesOut": "Bytes out"
+      "bytesOut": "Bytes out",
+      "rateIn": "Rate in",
+      "rateOut": "Rate out",
+      "perSecond": "{bytes}/s",
+      "lastIn": "Last frame in",
+      "lastOut": "Last frame out",
+      "lastPing": "Last ping",
+      "ago": "{time} ago",
+      "queue": "Queue",
+      "queueOf": "{used} of {limit}",
+      "refused": "Refused requests"
     },
     "page": {
       "traffic": "Traffic",
-      "watching": "Channels it follows"
+      "watching": "Channels it follows",
+      "authenticated": "Resources it signed in to",
+      "sessions": "Sessions it is in"
     }
   }
 }

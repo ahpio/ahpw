@@ -1,7 +1,7 @@
 ---
 title: A client page shows its connection
 domain: hosts
-status: active
+status: built
 priority: medium
 created: 2026-11-14
 revalidated: 2026-11-14
@@ -66,6 +66,7 @@ ahpd row (x-ahpd-clients) -> clientsReducer -> factsOf -> Page facts, traffic, l
 | Each new fact is drawn only when its field is present | [code://src/resources/clients/Page.tsx#L20-L35](../../../../src/resources/clients/Page.tsx#L20-L35) | 02 |
 | `userAgent`, `origin` and `forwardedFor` are marked as claims | (defaulted: ahpd's docs call them claims) | 02 |
 | The queue reads as bytes of the limit, with a warning tone past half | (defaulted: the brief's wording) | 02 |
+| A rate reads zero once the counters stand still past one host tick | (defaulted: the host sends no row while they stand still) | 02 |
 | A session in the list opens with `ahp.openSession` | [code://src/resources/usage/Records.tsx#L82](../../../../src/resources/usage/Records.tsx#L82) | 02 |
 
 ## Proposed architecture
@@ -89,8 +90,8 @@ ahpd row (x-ahpd-clients) -> clientsReducer -> factsOf -> Page facts, traffic, l
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A row reads every field](task-01-a-row-reads-every-field.md) | todo | - |
-| [02 - The page and the row draw them](task-02-the-page-and-the-row-draw-them.md) | todo | 01 |
+| [01 - A row reads every field](task-01-a-row-reads-every-field.md) | done | - |
+| [02 - The page and the row draw them](task-02-the-page-and-the-row-draw-them.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -99,14 +100,14 @@ ahpd row (x-ahpd-clients) -> clientsReducer -> factsOf -> Page facts, traffic, l
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-a-row-reads-every-field.md](task-01-a-row-reads-every-field.md).
+- **Done so far:** tasks 01 and 02 done on 2026-11-14, as [implemented.md](implemented.md) says. Softov validated the page.
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** the field is `subscriptions` on the wire and `watching` in ahpw.
 
 ## Final verification checklist
 
-- [ ] `pnpm typecheck` and the ahpw suite pass.
-- [ ] On a daemon from the ahpd branch, the page shows every section, and the rate and the times move.
-- [ ] The badge turns *idle* after 60 seconds with no frame.
-- [ ] The page is checked at 1280 and at 800 pixels wide.
+- [x] `pnpm typecheck` and the ahpw suite pass.
+- [x] On a daemon from the ahpd branch, the page shows every section, and the rate and the times move.
+- [x] The badge turns *idle* after 60 seconds with no frame.
+- [x] The page is checked at 1280 and at 800 pixels wide.

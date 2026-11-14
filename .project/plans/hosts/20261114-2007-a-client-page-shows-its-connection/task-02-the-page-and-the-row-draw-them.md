@@ -1,6 +1,6 @@
 ---
 title: The page and the row draw them
-status: todo
+status: done
 depends: [task-01-a-row-reads-every-field.md]
 layer: "clients"
 refs:
@@ -41,3 +41,5 @@ The client page draws every section *The page* in the plan lists, and the explor
 - By hand: the badge turns *idle* after 60 seconds with no frame.
 
 ## Resume
+
+Built as the steps say. A connection with still counters got no rate at first. The host sends no row while nothing moves, so the rate now reads zero after one tick. The explorer reads the clock in 5-second steps, so the list is not drawn again each second.

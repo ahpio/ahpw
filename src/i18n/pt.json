@@ -3175,7 +3175,8 @@
       "empty": "Nenhum cliente conectado.",
       "notServed": "Nenhum dos seus hosts lista clientes.",
       "thisApp": "este app",
-      "connected": "conectado"
+      "connected": "conectado",
+      "idle": "ocioso"
     },
     "notices": {
       "none": "Sem clientes",
@@ -3195,17 +3196,44 @@
       "protocolVersion": "Protocolo",
       "locale": "Idioma",
       "connectedAt": "Conectado em",
-      "watching": "Canais seguidos"
+      "watching": "Canais seguidos",
+      "client": "Cliente",
+      "hostToken": "Token do host",
+      "roles": "Papéis",
+      "team": "Equipe",
+      "principalUntil": "Conectado até",
+      "path": "Caminho",
+      "node": "Nó",
+      "userAgent": "User agent",
+      "origin": "Origem",
+      "claim": "declarado",
+      "capabilities": "Capacidades",
+      "arrival": {
+        "initialize": "nova",
+        "reconnect": "retomada"
+      }
     },
     "traffic": {
       "framesIn": "Quadros recebidos",
       "framesOut": "Quadros enviados",
       "bytesIn": "Bytes recebidos",
-      "bytesOut": "Bytes enviados"
+      "bytesOut": "Bytes enviados",
+      "rateIn": "Taxa de entrada",
+      "rateOut": "Taxa de saída",
+      "perSecond": "{bytes}/s",
+      "lastIn": "Último quadro recebido",
+      "lastOut": "Último quadro enviado",
+      "lastPing": "Último ping",
+      "ago": "há {time}",
+      "queue": "Fila",
+      "queueOf": "{used} de {limit}",
+      "refused": "Pedidos recusados"
     },
     "page": {
       "traffic": "Tráfego",
-      "watching": "Canais que segue"
+      "watching": "Canais que segue",
+      "authenticated": "Recursos em que se autenticou",
+      "sessions": "Sessões em que está"
     }
   }
 }
