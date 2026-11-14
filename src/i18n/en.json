@@ -46,6 +46,14 @@
       "sessions": "Sessions",
       "unread": "unread",
       "working": "working",
+      "errors": {
+        "one": "error",
+        "other": "errors"
+      },
+      "warnings": {
+        "one": "warning",
+        "other": "warnings"
+      },
       "explorer": "Explorer",
       "automations": "Automations",
       "host": "Host",

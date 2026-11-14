@@ -7,6 +7,7 @@ import { registerThemeController } from '@softov/scena/styles';
 // import { registerCommands } from '../resources/commands/index.js';
 import { registerConnection } from '../bridges/index.js';
 import { registerHosts, sessionCountPaths } from '../bridges/hosts.js';
+import { registerSummary, summaryPaths } from '../bridges/summary.js';
 import { SESSIONS_SECTION, hideOverlaidSidebar, registerSessionFiles, registerSessions } from '../resources/sessions/index.js';
 import { AGENTS_SECTION, registerAgents } from '../resources/agents/index.js';
 import { AUTOMATIONS_SECTION, registerAutomations } from '../resources/automations/index.js';
@@ -65,6 +66,20 @@ function AppTitle(): ReactElement {
 
 /** What an activity item passes to `sidebar.activate`: pressed again, it closes the sidebar. */
 const TOGGLE = { toggle: true };
+
+/**
+ * An item's alert badges from the host's summary: rows with an error in one
+ * corner, rows with a warning in the other, and the tooltip saying each alert
+ * and the rows that say it.
+ */
+const alertBadges = (area: string) => ({
+  badge: { path: summaryPaths(area).errors },
+  badgeTone: 'danger',
+  badgeLabel: { path: summaryPaths(area).errorsLabel },
+  secondBadge: { path: summaryPaths(area).warnings },
+  secondBadgeTone: 'warning',
+  secondBadgeLabel: { path: summaryPaths(area).warningsLabel },
+});
 
 /** The left sidebar's active section, as the layout mirrors it into the store. */
 const SECTION = '$/layout/surfaces/sidebar:left/section' as BindingPath;
@@ -258,7 +273,7 @@ export function registerShell(scena: Scena): Disposable {
     scena.surfaces.mount({
       surface: 'activitybar',
       key: 'agents:nav',
-      resource: { component: 'ActivityBarItem', icon: EMOJIcon.agents, label: bound('shell/nav/agents'), pos: 'bottom', section: AGENTS_SECTION, args: TOGGLE },
+      resource: { component: 'ActivityBarItem', icon: EMOJIcon.agents, label: bound('shell/nav/agents'), pos: 'bottom', section: AGENTS_SECTION, args: TOGGLE, ...alertBadges('agents') },
     }),
     // Shown while a host serves ahpd's computer plugin.
     scena.surfaces.mount({
@@ -307,14 +322,14 @@ export function registerShell(scena: Scena): Disposable {
       surface: 'activitybar',
       key: 'plugins:nav',
       when: `${PLUGINS_SERVED} == true`,
-      resource: { component: 'ActivityBarItem', icon: EMOJIcon.hostPlugins, label: bound('shell/nav/plugins'), pos: 'bottom', section: PLUGINS_SECTION, args: TOGGLE },
+      resource: { component: 'ActivityBarItem', icon: EMOJIcon.hostPlugins, label: bound('shell/nav/plugins'), pos: 'bottom', section: PLUGINS_SECTION, args: TOGGLE, ...alertBadges('plugins') },
     }),
     // Shown while a host lists connectors to this reader: every kind and connector with config:read, else their own.
     scena.surfaces.mount({
       surface: 'activitybar',
       key: 'connectors:nav',
       when: `${CONNECTORS_SERVED} == true`,
-      resource: { component: 'ActivityBarItem', icon: EMOJIcon.connectors, label: bound('shell/nav/connectors'), pos: 'bottom', section: CONNECTORS_SECTION, args: TOGGLE },
+      resource: { component: 'ActivityBarItem', icon: EMOJIcon.connectors, label: bound('shell/nav/connectors'), pos: 'bottom', section: CONNECTORS_SECTION, args: TOGGLE, ...alertBadges('connectors') },
     }),
     scena.surfaces.mount({
       surface: 'activitybar',
@@ -324,6 +339,7 @@ export function registerShell(scena: Scena): Disposable {
     }),
 
     registerConnection(scena),
+    registerSummary(scena),
     registerHosts(scena),
     registerSessions(scena),
     registerAgents(scena),
