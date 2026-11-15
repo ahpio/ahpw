@@ -1,7 +1,7 @@
 ---
 title: The model gateway section
 domain: hosts
-status: planned
+status: active
 priority: high
 created: 2026-11-15
 revalidated: 2026-11-15
@@ -54,6 +54,7 @@ usage://records -> UsageEntry.source -> Records.tsx SOURCES -> the icon
 | No old name is read: the section drops `modelProxy` and `proxy` | Softov, 2026-11-15, chose "No migration, old names break" | 01 |
 | The labels are `Model gateway` in `en`, and `Gateway de modelos` in `pt` and `es` | the ahpd brief | 01 |
 | `SOURCES` is keyed by plain strings, so ahpw builds against the sdk it has | (defaulted: no release before the PR, and an unknown source shows no icon, as today) | 01 |
+| A usage record's source word is `Gateway`, and a source ahpw does not know reads as it is, as `kindWord` does | (defaulted: the plan did not name the `usage/record/sources` key) | 01 |
 | The `http` alias of the listener section stays | (defaulted: it is not part of this rename) | 01 |
 | This session builds the plan | Softov, 2026-11-15, chose "Brief, then plan, then I build" | 01 |
 
@@ -69,7 +70,7 @@ usage://records -> UsageEntry.source -> Records.tsx SOURCES -> the icon
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - ahpw says model gateway](task-01-ahpw-says-model-gateway.md) | todo | - |
+| [01 - ahpw says model gateway](task-01-ahpw-says-model-gateway.md) | implemented | - |
 
 ## Risks and tradeoffs
 
@@ -79,9 +80,10 @@ usage://records -> UsageEntry.source -> Records.tsx SOURCES -> the icon
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-ahpw-says-model-gateway.md](task-01-ahpw-says-model-gateway.md), after the ahpd PR of the rename merges.
+- **Done so far:** task 01, 2026-11-15, in one PR that waits for Softov's review and for ahpd #345.
+- **Next action:** merge after ahpd #345, then [implemented.md](implemented.md) closes the plan.
 - **Open questions:** none.
+- **Departures:** the source icon and word moved from `Records.tsx` to `sourceIcon` and `sourceWord` in `usage/words.ts`, with `words.test.ts`. The `usage/record/sources` label is `gateway` in the three i18n files. In the manifest test, `project` is `Pr` now that no `proxy` shares its start.
 - **Watch out for:** the `network` section's `http.proxy` keys are VS Code's outgoing proxy, not the model gateway.
 
 ## Final verification checklist

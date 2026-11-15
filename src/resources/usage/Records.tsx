@@ -5,16 +5,9 @@ import { Button } from '@softov/scena/ui';
 import { totalWords, type UsageEntry } from '../../bridges/usage.js';
 import { timeOf } from '../automations/words.js';
 import { EMOJIcon } from '../emojis.js';
-import { hoursWord } from './words.js';
+import { hoursWord, sourceIcon, sourceWord } from './words.js';
 
 type Cost = NonNullable<UsageEntry['cost']>;
-
-/** The icon of what wrote a record. */
-const SOURCES: Record<UsageEntry['source'], string> = {
-  proxy: EMOJIcon.proxy,
-  agent: EMOJIcon.agents,
-  computer: EMOJIcon.computers,
-};
 
 /** The icon of what a record measures. */
 const KINDS: Record<UsageEntry['kind'], string> = {
@@ -97,7 +90,7 @@ export function UsageRecords({ host, records }: { host: string; records: readonl
         const name = record.kind === 'computer' ? record.computer : (model?.name || undefined);
         const by = model === undefined || name === undefined ? undefined : (record.agent ?? model.provider);
         const cost = costOf(record);
-        const sourceWord = t(`usage/record/sources/${record.source}`);
+        const sourceText = sourceWord(record.source);
         const kindWord = t(`usage/record/kinds/${record.kind}`);
         const tokens = (icon: string, title: string, n: number | undefined): ReactElement => (
           <span className="web-spend__num" title={title}><b>{icon}</b>{n === undefined ? '\u{2013}' : compactWord(n)}</span>
@@ -112,7 +105,7 @@ export function UsageRecords({ host, records }: { host: string; records: readonl
               </button>
               <span className="web-spend__when">{timeOf(record.at)}</span>
               <span className="web-spend__icons">
-                <span title={`${t('usage/record/source')}: ${sourceWord}`}>{SOURCES[record.source]}</span>
+                <span title={`${t('usage/record/source')}: ${sourceText}`}>{sourceIcon(record.source)}</span>
                 <span title={`${t('usage/record/kind')}: ${kindWord}`}>{KINDS[record.kind]}</span>
               </span>
               <span className="web-spend__what" title={name ?? record.agent}>
@@ -140,7 +133,7 @@ export function UsageRecords({ host, records }: { host: string; records: readonl
             {expanded ? (
               <div className="web-spend__detail">
                 <Group title={t('usage/record/origin')} fields={[
-                  [t('usage/record/source'), <>{SOURCES[record.source]} {sourceWord}</>],
+                  [t('usage/record/source'), <>{sourceIcon(record.source)} {sourceText}</>],
                   [t('usage/record/kind'), <>{KINDS[record.kind]} {kindWord}</>],
                   [t('usage/record/model'), model?.name || undefined],
                   [t('usage/record/provider'), model?.provider],

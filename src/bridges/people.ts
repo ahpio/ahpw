@@ -184,7 +184,7 @@ export function userFields(record: ListedUser | undefined): UserFields {
  */
 export const BUILT_IN_ROLES: Readonly<Record<string, readonly Grant[]>> = {
   admin: ['*:*'],
-  member: ['file:read', 'file:write', 'session:read', 'session:write', 'terminal:read', 'terminal:write', 'proxy:read', 'proxy:write', 'trust:write'],
+  member: ['file:read', 'file:write', 'session:read', 'session:write', 'terminal:read', 'terminal:write', 'gateway:read', 'gateway:write', 'trust:write'],
   guest: ['session:read', 'automation:read'],
 };
 

@@ -163,7 +163,7 @@ export const EMOJIcon = {
   interface: mono('🪟'),
 
   // a usage record: what wrote it, and its tokens
-  proxy: '⇄',
+  gateway: '⇄',
   tokensIn: '↑',
   tokensOut: '↓',
   cacheRead: '⟲',

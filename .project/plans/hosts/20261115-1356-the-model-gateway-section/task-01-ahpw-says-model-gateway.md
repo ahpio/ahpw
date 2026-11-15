@@ -1,6 +1,6 @@
 ---
 title: ahpw says model gateway
-status: todo
+status: implemented
 depends: []
 layer: "ahpw resources, i18n and bridges"
 refs:
