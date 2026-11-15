@@ -1,7 +1,8 @@
 import { useState, type KeyboardEvent, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n } from '@softov/scena/react';
-import { Button, Markdown } from '@softov/scena/ui';
+import { Button } from '@softov/scena/ui';
+import { Markdown } from '../../shell/markdown/Markdown.js';
 import { plural } from '../../i18n/locales.js';
 import type { ChatInputAnswer, ChatInputQuestion, ChatInputRequest, StateAction } from '@microsoft/agent-host-protocol';
 import { EMPTY, allowsOther, answerWords, draftOf, encode, isChoice, optionsOf, type Draft } from './answer.js';

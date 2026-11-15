@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Markdown, Spinner } from '@softov/scena/ui';
+import { Alert, Spinner } from '@softov/scena/ui';
+import { Markdown } from '../../../shell/markdown/Markdown.js';
 import type { ChatState, SessionState, SessionSummary } from '@microsoft/agent-host-protocol';
 import { hostBridge } from '../../../bridges/data.js';
 import { saveFile } from '../../../lib/save-file.js';

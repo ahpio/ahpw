@@ -1,6 +1,7 @@
 import { memo, useContext, useState, type MouseEvent, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Markdown } from '@softov/scena/ui';
+import { Alert, Button } from '@softov/scena/ui';
+import { Markdown } from '../../shell/markdown/Markdown.js';
 import type {
   ResponsePart,
   StateAction,
