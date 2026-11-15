@@ -16,7 +16,7 @@ import { NameMark } from '../../shell/NameMark.js';
 import { SharedDocument, documentChannel, type DocumentPerson, type PersonKind, type SaveMode } from './document.js';
 import { FILE_SAVE_MODE } from './save-mode.js';
 import { FILE_COMMENTS } from './comments-shown.js';
-import { FileHead } from './text.js';
+import { FileHead, useWrap, WrapButton } from './text.js';
 import { commentsChannel, commentsOf, isOutdated, newComment, remove, reply, resolve, textOf } from './comments.js';
 import { NewComment, Thread, type ThreadActions } from './Threads.js';
 import type { FilePageProps } from './FilePage.js';
@@ -36,7 +36,7 @@ const KIND_MARK: Partial<Record<PersonKind, string>> = { root: EMOJIcon.host, us
  * starts and the page changes for this file. A host that does not serve the
  * document calls `onPlain`, and the plain page takes over.
  */
-export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra = [] }: FilePageProps & { uri: string; onPlain: () => void; extra?: Extension[] }): ReactElement {
+export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra = [], alwaysWraps = false }: FilePageProps & { uri: string; onPlain: () => void; extra?: Extension[]; alwaysWraps?: boolean }): ReactElement {
   const { t } = useI18n();
   const scena = useScena();
   const [open, setOpen] = useState(false);
@@ -44,6 +44,8 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra =
   const [mode, setMode] = useState<SaveMode>(() => (FILE_SAVE_MODE.read(scena.store) === 'manual' ? 'manual' : 'live'));
   /** Whether the comments sit in a margin; folded away, one thread opens as a card by its line. */
   const [shown, setShown] = useState(() => FILE_COMMENTS.read(scena.store) === 'shown');
+  /** Whether long lines wrap; a page that always wraps, as the Markdown preview, has no ↵. */
+  const [wrap, setWrap] = useWrap();
   /** What a click in the text away from a comment does: close the card, while the comments are folded away. */
   const onTextClick = useRef<() => void>(() => {});
   const [refused, setRefused] = useState<string | null>(null);
@@ -340,6 +342,7 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra =
           ) : null}
         </>
       )}
+      {alwaysWraps ? null : <WrapButton wrap={wrap} onChange={setWrap} />}
       <button type="button" className="web-icon-button web-file__comments-toggle" aria-pressed={shown}
         title={shown ? t('files/comments/hideAll') : t('files/comments/showAll')} aria-label={shown ? t('files/comments/hideAll') : t('files/comments/showAll')}
         onClick={() => setShown((was) => !was)}>{EMOJIcon.comment}<span className="web-file__comments-count">{openCount}</span></button>
@@ -361,6 +364,8 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra =
           value=""
           language={languageOf(uri)}
           readOnly={locked}
+          wrap={alwaysWraps || wrap}
+          onWrapChange={alwaysWraps ? () => {} : setWrap}
           line={line ?? null}
           end={end ?? null}
           onSave={() => { if (mode === 'manual') shared?.save(); }}

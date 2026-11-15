@@ -81,6 +81,26 @@ class TaskBox extends WidgetType {
   override ignoreEvent(): boolean { return false; }
 }
 
+/** An HTML tag's attributes, by name in lower case; a value with no quotes ends at a space or `>`. */
+export const htmlAttributes = (tag: string): Record<string, string> => {
+  const found: Record<string, string> = {};
+  for (const match of tag.matchAll(/([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g)) {
+    found[match[1]!.toLowerCase()] = match[2] ?? match[3] ?? match[4] ?? '';
+  }
+  return found;
+};
+
+/** The `<img>` tags in some HTML, each as its source, its text and its size. */
+export const htmlImages = (html: string): { src: string; alt: string; width?: string; height?: string }[] =>
+  [...html.matchAll(/<img\b[^>]*>/gi)].flatMap((match) => {
+    const attributes = htmlAttributes(match[0]);
+    if (attributes.src === undefined || attributes.src === '') return [];
+    return [{ src: attributes.src, alt: attributes.alt ?? '', ...(attributes.width === undefined ? {} : { width: attributes.width }), ...(attributes.height === undefined ? {} : { height: attributes.height }) }];
+  });
+
+/** A CSS length from an HTML size: a bare number is pixels. */
+const cssSize = (size: string | undefined): string | undefined => (size === undefined ? undefined : /^\d+$/.test(size) ? `${size}px` : size);
+
 /** A drawing's height once drawn, by its key: the editor measures its line again when it changes. */
 const drawnSized = StateEffect.define<{ key: string; height: number }>();
 
@@ -110,11 +130,19 @@ interface PictureHolder extends HTMLElement {
  * element kept, so the image is not read twice.
  */
 class Picture extends WidgetType {
-  constructor(readonly src: string, readonly alt: string, readonly height: number, readonly options: LivePreviewOptions) { super(); }
-  override eq(other: Picture): boolean { return other.src === this.src && other.alt === this.alt && other.height === this.height; }
+  constructor(readonly src: string, readonly alt: string, readonly height: number, readonly options: LivePreviewOptions,
+    readonly size: { width?: string; height?: string; inline?: boolean } = {}) { super(); }
+  override eq(other: Picture): boolean {
+    return other.src === this.src && other.alt === this.alt && other.height === this.height
+      && other.size.width === this.size.width && other.size.height === this.size.height && other.size.inline === this.size.inline;
+  }
   toDOM(view: EditorView): HTMLElement {
     const holder: PictureHolder = document.createElement('span');
-    holder.className = 'web-lp-image';
+    holder.className = this.size.inline === true ? 'web-lp-image web-lp-image--inline' : 'web-lp-image';
+    const width = cssSize(this.size.width);
+    const height = cssSize(this.size.height);
+    if (width !== undefined) holder.style.setProperty('--web-lp-image-width', width);
+    if (height !== undefined) holder.style.setProperty('--web-lp-image-height', height);
     holder.dataset.src = this.src;
     holder.undraw = this.options.image(holder, this.src, this.alt);
     watchHeight(view, holder, this.src, this.height);
@@ -150,17 +178,56 @@ class BlockDrawing extends WidgetType {
   override ignoreEvent(): boolean { return false; }
 }
 
-/** The blocks drawn whole: each table and fenced block away from the caret's lines. */
+/** An HTML block's images, drawn in a row, aligned as the block's own tag says; the rest of its HTML is not drawn. */
+class HtmlImages extends WidgetType {
+  constructor(readonly html: string, readonly height: number, readonly options: LivePreviewOptions) { super(); }
+  override eq(other: HtmlImages): boolean { return other.html === this.html && other.height === this.height; }
+  toDOM(view: EditorView): HTMLElement {
+    const holder: PictureHolder = document.createElement('div');
+    holder.className = 'web-lp-html';
+    holder.dataset.html = this.html;
+    const align = htmlAttributes(this.html.match(/^<\w+[^>]*>/)?.[0] ?? '').align;
+    if (align === 'center' || align === 'right' || align === 'left') holder.style.textAlign = align;
+    const undraws: (() => void)[] = [];
+    for (const image of htmlImages(this.html)) {
+      const one = document.createElement('span');
+      one.className = 'web-lp-image web-lp-image--inline';
+      const width = cssSize(image.width);
+      const height = cssSize(image.height);
+      if (width !== undefined) one.style.setProperty('--web-lp-image-width', width);
+      if (height !== undefined) one.style.setProperty('--web-lp-image-height', height);
+      undraws.push(this.options.image(one, image.src, image.alt));
+      holder.append(one);
+    }
+    holder.undraw = () => { for (const undraw of undraws) undraw(); };
+    watchHeight(view, holder, this.html, this.height);
+    return holder;
+  }
+  override updateDOM(dom: HTMLElement): boolean { return dom.dataset.html === this.html; }
+  override destroy(dom: HTMLElement): void {
+    const holder = dom as PictureHolder;
+    holder.watch?.disconnect();
+    holder.undraw?.();
+  }
+  override ignoreEvent(): boolean { return false; }
+}
+
+/** The blocks drawn whole: each table and fenced block away from the caret's lines, and an HTML block's images. */
 export const blockDecorations = (state: EditorState, options: LivePreviewOptions, heights: ReadonlyMap<string, number> = new Map()): DecorationSet => {
   const shown = sourceLines(state);
   const ranges: Range<Decoration>[] = [];
   syntaxTree(state).iterate({
     enter: (node) => {
-      if (node.name !== 'FencedCode' && node.name !== 'Table') return true;
+      if (node.name !== 'FencedCode' && node.name !== 'Table' && node.name !== 'HTMLBlock') return true;
       const first = state.doc.lineAt(node.from);
       const last = state.doc.lineAt(node.to);
       for (let line = first.number; line <= last.number; line += 1) if (shown.has(line)) return false;
       const markdown = state.doc.sliceString(first.from, last.to);
+      if (node.name === 'HTMLBlock') {
+        // Only an HTML block with images is drawn; any other stays as its text.
+        if (htmlImages(markdown).length > 0) ranges.push(Decoration.replace({ widget: new HtmlImages(markdown, heights.get(markdown) ?? 0, options), block: true }).range(first.from, last.to));
+        return false;
+      }
       ranges.push(Decoration.replace({ widget: new BlockDrawing(markdown, heights.get(markdown) ?? 0, options), block: true }).range(first.from, last.to));
       return false;
     },
@@ -205,6 +272,17 @@ export const previewDecorations = (state: EditorState, options: LivePreviewOptio
         return false;
       }
       if (name === 'HTMLBlock' || name === 'CodeBlock') return false;
+      // An `<img>` tag among the text, such as a logo in a heading.
+      if (name === 'HTMLTag') {
+        const tag = state.doc.sliceString(node.from, node.to);
+        if (onSource(node.from) || !/^<img\b/i.test(tag)) return false;
+        const image = htmlImages(tag)[0];
+        if (image !== undefined) {
+          ranges.push(Decoration.replace({ widget: new Picture(image.src, image.alt, heights.get(image.src) ?? 0, options, {
+            inline: true, ...(image.width === undefined ? {} : { width: image.width }), ...(image.height === undefined ? {} : { height: image.height }) }) }).range(node.from, node.to));
+        }
+        return false;
+      }
       const heading = HEADINGS[name];
       if (heading !== undefined) {
         if (onSource(node.from)) {
@@ -237,14 +315,17 @@ export const previewDecorations = (state: EditorState, options: LivePreviewOptio
         ranges.push(hidden.range(open.from, open.to));
         ranges.push(Decoration.mark({ class: 'web-lp-link', attributes: { 'data-href': url, title: url } }).range(open.to, close.from));
         ranges.push(hidden.range(close.from, node.to));
-        return false;
+        // The link's text may be an image, as a badge is: it is drawn inside the link.
+        return true;
       }
       if (name === 'Image') {
         const url = childText(state, node, 'URL');
         if (onSource(node.from) || url === undefined) return false;
         const marks = node.node.getChildren('LinkMark');
         const alt = marks.length >= 2 ? state.doc.sliceString(marks[0]!.to, marks[1]!.from) : '';
-        ranges.push(Decoration.replace({ widget: new Picture(url, alt, heights.get(url) ?? 0, options) }).range(node.from, node.to));
+        // An image inside a link, as a badge, stays in the line; an image alone is drawn under its line.
+        const inline = node.node.parent?.name === 'Link';
+        ranges.push(Decoration.replace({ widget: new Picture(url, alt, heights.get(url) ?? 0, options, { inline }) }).range(node.from, node.to));
         return false;
       }
       if (name === 'Blockquote') {

@@ -416,6 +416,8 @@
     "reading": "Cargando el archivo",
     "notReadable": "No se pudo leer este archivo",
     "notText": "Este archivo no es texto.",
+    "wrapOn": "Ajustar líneas largas (Alt+Z)",
+    "wrapOff": "Mantener líneas largas en una línea (Alt+Z)",
     "simpleNote": "Esta vista no edita el archivo aquí.",
     "unsaved": "Tienes cambios sin guardar en este archivo.",
     "changedOnHost": "Este archivo cambió en el host después de que lo abriste. Copia tus cambios y vuelve a abrir el archivo.",
@@ -2472,6 +2474,12 @@
           "description": "Si los comentarios de un archivo están en un margen, o recogidos hasta que abras uno. Puedes cambiarlo en cada archivo con 💬.",
           "hidden": "Recogidos",
           "shown": "En un margen"
+        },
+        "textWrap": {
+          "title": "Líneas largas",
+          "description": "Si un editor de código ajusta las líneas largas al abrir. Puedes cambiarlo en cada archivo con ↵ o Alt+Z.",
+          "off": "Mantener en una línea",
+          "on": "Ajustar"
         }
       },
       "tabs": {

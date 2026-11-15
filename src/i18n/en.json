@@ -416,6 +416,8 @@
     "reading": "Loading the file",
     "notReadable": "Couldn't read this file",
     "notText": "This file is not text.",
+    "wrapOn": "Wrap long lines (Alt+Z)",
+    "wrapOff": "Keep long lines on one line (Alt+Z)",
     "simpleNote": "This view does not edit the file here.",
     "unsaved": "You have unsaved changes in this file.",
     "changedOnHost": "This file changed on the host after you opened it. Copy your changes, then reopen the file.",
@@ -2472,6 +2474,12 @@
           "description": "Whether a file's comments sit in a margin, or fold away until you open one. You can change it on each file with 💬.",
           "hidden": "Folded away",
           "shown": "In a margin"
+        },
+        "textWrap": {
+          "title": "Long lines",
+          "description": "Whether a code editor wraps long lines when it opens. You can change it on each file with ↵ or Alt+Z.",
+          "off": "Keep on one line",
+          "on": "Wrap"
         }
       },
       "tabs": {
