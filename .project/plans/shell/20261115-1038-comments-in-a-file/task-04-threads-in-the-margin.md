@@ -1,6 +1,6 @@
 ---
 title: Threads in the margin
-status: todo
+status: implemented
 depends: [task-01-a-mockup-of-comments.md, task-03-commented-ranges.md]
 layer: "files"
 refs:
@@ -13,7 +13,7 @@ The file page shows each thread beside its range, and the person adds, replies, 
 
 ## Files
 
-- `CREATE: src/resources/files/Comments.tsx` - the margin: threads, the reply box, the add box.
+- `CREATE: src/resources/files/Threads.tsx` - the margin: threads, the reply box, the add box.
 - `CREATE: src/resources/files/comments.css` - the margin's look, beside the component.
 - `UPDATE: src/resources/files/SharedFilePage.tsx` - the margin beside the editor, and the add-comment button on a selection.
 - `UPDATE: src/i18n/en.json` - the margin's words, and the same keys in each other catalog.
@@ -36,3 +36,15 @@ The file page shows each thread beside its range, and the person adds, replies, 
 - `pnpm typecheck`, `pnpm test` and `pnpm build` pass.
 
 ## Resume
+
+Built on 2026-11-15.
+- The component file is `Threads.tsx`: `src/source-names.test.ts` refuses `Comments.tsx` beside `comments.ts`.
+- At narrow widths the open thread is a block widget under its range's last line, as the mockup shows.
+- The outdated badge says "Outdated", and the new comment box says "Comment on the selection", as the mockup does.
+- A two-browser run found a comment moved two lines when the other browser typed above it. The host sent the moved range before the edit; plan C's host now sends the edit first.
+- The two-browser run passed at 1280 and 760 wide, light and dark, and at 600 wide for the thread under its line.
+- Softov's test found the threads far from their lines, and some not shown. Each thread had a reply box, so each one pushed the next one down. Now only the open thread has the reply box, and it sits at its line.
+- The margin clips with `overflow: clip`: with `overflow: hidden`, a thread that took focus scrolled the margin and moved every thread.
+- The editor gets room below its last line for threads pushed past the end of the text.
+- Softov's test on 2026-11-15 showed an agent's comment with `agent` as its author, and the comments made in VS Code beside ahpw's.
+- A resolved thread reopens with ↺, apart from ✓ for resolve.

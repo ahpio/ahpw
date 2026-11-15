@@ -96,6 +96,7 @@ export const EMOJIcon = {
 
   // status and feedback
   check: '✓',
+  reopen: '↺',
   cross: '✕',
   error: mono('✖'),
   warning: mono('⚠'),
@@ -121,6 +122,9 @@ export const EMOJIcon = {
   liveSave: mono('⚡'),
   manualSave: mono('✍'),
   save: mono('💾'),
+  // a file's comments: add one, and send a comment or a reply
+  comment: mono('💬'),
+  commentSend: '➤',
   subagent: '◈',
   canvas: '▣',
   web: '⊕',
