@@ -1,6 +1,6 @@
 ---
 title: One list in the sidebar
-status: todo
+status: implemented
 depends: [task-01-the-bridge-reads-the-lists.md]
 layer: "ahpw plugins screen"
 refs:
@@ -44,3 +44,11 @@ A search shows one flat list: the installed plugins that match, then the listed 
 - On a test ahpd from the ahpd branch, the search `agent` matches the mockup `mock-1280-light-details-filter-agent.png`.
 
 ## Resume
+
+Built on 2026-11-15; awaits review.
+`shownRows` in `ExplorerList.tsx` holds the search rule, with three cases in `ExplorerList.test.ts`. A row has `button` and `bare`, for a row with no dot.
+`listedRows` and `installListed` are in `rows.ts` and `actions.ts`. A row's Install label is chosen per host, since one host may install for the reader and another may not.
+The search placeholder is *Search plugins* when a host answers the lists.
+On a test ahpd from the ahpd branch, the search `agent` showed Agent ACP installed, then Claude, Cofold, pi, Computer, Push and Tasks with Install.
+After Softov's test on 2026-11-15, an install keeps its busy mark in the scena store, `INSTALLING`.
+The row and an open page then both say *Installing…*. An install from the row opens no tab.

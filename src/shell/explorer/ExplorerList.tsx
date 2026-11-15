@@ -7,6 +7,7 @@ import { EMOJIcon } from '../../resources/emojis.js';
 import { HostIcon, useHostIcon } from '../HostIcon.js';
 import { NameMark } from '../NameMark.js';
 import { HostLines } from './HostLines.js';
+import './ExplorerList.css';
 
 /** The colour of a row's dot, by meaning. */
 export type Dot = 'attention' | 'working' | 'failed' | 'fresh' | 'ok' | 'quiet' | 'off';
@@ -36,6 +37,22 @@ export interface Row {
   subgroup?: { key: string; label: string };
   /** An icon button on the row, beside its time. */
   action?: { icon: string; label: string; run: () => void };
+  /** Draws the row's icon with no dot on its corner, for a row that has no state to show, such as a plugin not installed. */
+  bare?: boolean;
+  /** A text button on the row, beside its title, such as Install; `busy` draws it disabled while its work runs. */
+  button?: { label: string; run: () => void; busy?: boolean };
+}
+
+/**
+ * The rows a list draws for what is typed in its filter: every row with no
+ * search; with one, the rows whose words have it, and then the search rows
+ * that do, as one flat list with no group headings.
+ */
+export function shownRows(rows: readonly Row[], searchRows: readonly Row[] | undefined, needle: string): Row[] {
+  if (needle === '') return [...rows];
+  const matches = (row: Row): boolean => [row.title, ...row.lines.filter((line) => typeof line === 'string')].join(' ').toLowerCase().includes(needle);
+  if (searchRows === undefined) return rows.filter(matches);
+  return [...rows, ...searchRows].filter(matches).map(({ group: _group, subgroup: _subgroup, ...rest }) => rest);
 }
 
 interface Menu {
@@ -49,9 +66,15 @@ interface Menu {
  * right-click. Its section's title and buttons are scena's header, declared on
  * the section's component; `label` only names the list for assistive tech.
  */
-export function ExplorerList({ label, rows, selected, onOpen, notice, filterLabel, hostLines }: {
+export function ExplorerList({ label, rows, searchRows, selected, onOpen, notice, filterLabel, hostLines }: {
   label: string;
   rows: Row[];
+  /**
+   * Rows shown only while a search is typed, after the matching `rows`, as
+   * VS Code's Extensions view adds the marketplace to a search. The list is
+   * then one flat list, with no group headings.
+   */
+  searchRows?: Row[] | undefined;
   selected: string | null;
   onOpen: (key: string) => void;
   notice?: ReactNode;
@@ -69,7 +92,7 @@ export function ExplorerList({ label, rows, selected, onOpen, notice, filterLabe
     return next;
   });
   const needle = filter.trim().toLowerCase();
-  const shown = needle === '' ? rows : rows.filter((row) => [row.title, ...row.lines.filter((line) => typeof line === 'string')].join(' ').toLowerCase().includes(needle));
+  const shown = shownRows(rows, searchRows, needle);
 
   const openMenu = (event: MouseEvent, row: Row): void => {
     event.preventDefault();
@@ -150,6 +173,21 @@ export function ExplorerList({ label, rows, selected, onOpen, notice, filterLabe
                       <span className="web-row__head">
                         <span className="web-row__title" data-strong={row.strong === true ? 'true' : 'false'}>{row.title}</span>
                         {row.time === undefined ? null : <span className="web-row__time">{row.time}</span>}
+                        {row.button === undefined ? null : (
+                          <button
+                            type="button"
+                            className="web-row__button"
+                            data-variant="primary"
+                            disabled={row.button.busy === true}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              row.button?.run();
+                            }}
+                            onKeyDown={(event) => event.stopPropagation()}
+                          >
+                            {row.button.label}
+                          </button>
+                        )}
                         {row.action === undefined ? null : (
                           <button
                             type="button"
@@ -197,7 +235,7 @@ function RowMark({ row }: { row: Row }): ReactElement {
         : row.initials !== undefined
           ? <NameMark name={row.initials} size={20} />
           : <span className="web-row__emoji" aria-hidden="true">{row.emoji}</span>}
-      {icon === undefined && row.initials !== undefined && row.dot === 'quiet' ? null : dot}
+      {row.bare === true || (icon === undefined && row.initials !== undefined && row.dot === 'quiet') ? null : dot}
     </span>
   );
 }

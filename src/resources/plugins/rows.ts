@@ -1,6 +1,6 @@
 import type { PickerAction } from '@softov/scena/types';
 import { refKey } from '../../bridges/hosts.js';
-import { PLUGIN_STATES, type PluginRow, type PluginState } from '../../bridges/plugins.js';
+import { PLUGIN_STATES, type ListedPlugin, type PluginRow, type PluginState } from '../../bridges/plugins.js';
 import type { Dot, Row } from '../../shell/explorer/ExplorerList.js';
 import { EMOJIcon } from '../emojis.js';
 import { arrange } from '../sessions/grouping.js';
@@ -101,3 +101,68 @@ export function pluginRows(entries: readonly PluginEntry[], by: PluginGrouping, 
 
 /** The plugin a row key names, by either grouping. */
 export const entryKeyOf = (key: string): string => (key.startsWith('category:') ? key.slice(key.indexOf('|') + 1) : key);
+
+/** One listed plugin of one host, as the list is given it. */
+export interface ListedEntry {
+  host: string;
+  hostName: string;
+  plugin: ListedPlugin;
+}
+
+/** The words and callbacks the listed rows are made with. */
+export interface ListedWords {
+  multi: boolean;
+  /** What a row that is not installed is said to be, for its mark. */
+  notInstalled: string;
+  /** The label of an entry's Install, or nothing when its host does not install for this reader. */
+  install: (entry: ListedEntry) => string | undefined;
+  /** Whether an entry's install runs now. */
+  busy: (key: string) => boolean;
+  run: (entry: ListedEntry) => void;
+  menu: (entry: ListedEntry) => PickerAction[];
+}
+
+/** A listed row's key: its host, its list and its id, so two lists with one id are two rows. */
+export const listedKey = (entry: ListedEntry): string => `listed|${entry.host}|${entry.plugin.marketplace}|${entry.plugin.id}`;
+
+/** A list's name for a person: the host of its URL. */
+export function listName(marketplace: string): string {
+  try {
+    return new URL(marketplace).host;
+  } catch {
+    return marketplace;
+  }
+}
+
+/**
+ * Whether an entry is the plugin an installed row already shows: the host
+ * matched it, from this list or from no list. An installed plugin from another
+ * list leaves this entry a row of its own.
+ */
+export const installedHere = (plugin: ListedPlugin): boolean =>
+  plugin.installed !== undefined && (plugin.installed.marketplace === undefined || plugin.installed.marketplace === plugin.marketplace);
+
+/** The rows of the plugins a host's lists hold and it has not installed, each with Install; shown only while a search is typed. */
+export function listedRows(entries: readonly ListedEntry[], words: ListedWords): Row[] {
+  return entries.filter((entry) => !installedHere(entry.plugin)).map((entry) => {
+    const { plugin } = entry;
+    const key = listedKey(entry);
+    const newest = plugin.versions[0]?.version;
+    const install = words.install(entry);
+    return {
+      key,
+      dot: 'quiet',
+      dotLabel: words.notInstalled,
+      bare: true,
+      title: plugin.name ?? plugin.id,
+      ...(plugin.icons === undefined || plugin.icons.length === 0 ? {} : { icons: plugin.icons }),
+      emoji: EMOJIcon.hostPlugins,
+      lines: [
+        ...(plugin.description === undefined ? [] : [plugin.description]),
+        [words.multi ? entry.hostName : undefined, listName(plugin.marketplace), newest].filter((bit) => bit !== undefined).join(' \u{00B7} '),
+      ],
+      menu: words.menu(entry),
+      ...(install === undefined ? {} : { button: { label: install, run: () => words.run(entry), busy: words.busy(key) } }),
+    };
+  });
+}

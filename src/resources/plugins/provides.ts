@@ -13,7 +13,7 @@ export interface Provided {
 }
 
 /** The register methods a plugin names, in the order the page shows them; any other follows by name. */
-export const PROVIDE_ORDER = ['agents', 'adapters', 'channels', 'methods', 'resourceProviders', 'tools', 'triggerTypes'] as const;
+export const PROVIDE_ORDER = ['agents', 'adapters', 'channels', 'methods', 'resourceProviders', 'tools', 'triggerTypes', 'engines', 'tunnelKinds', 'routes', 'bindings', 'folders', 'grants', 'closers'] as const;
 
 /** The section each channel scheme and resource scheme opens, where ahpw has one. */
 const SECTION: Readonly<Record<string, string>> = {

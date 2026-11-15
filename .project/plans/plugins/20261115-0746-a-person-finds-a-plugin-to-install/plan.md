@@ -47,7 +47,7 @@ Plugins sidebar: no search -> the installed rows, as today
 x-ahpd/plugins/available (each host that offers it, on mount and after a change) -> listed rows, each with Install
 listed row -> ahp.openListedPlugin { host, id, marketplace } -> ListedPluginPage -> x-ahpd/plugins/details
   Install -> x-ahpd/plugins/install { source, marketplace } -> rereadAfterChange -> ahp.openPlugin { host, id }
-installed row -> PluginPage -> its list entry, when one has installed.id = its id -> Details, Features, Changelog and the facts column
+installed row -> PluginPage -> details {installed: true} -> Overview, Features, Changelog, Settings; Marketplace facts only when installed.marketplace names the list
 ```
 
 ### Gaps
@@ -75,6 +75,14 @@ installed row -> PluginPage -> its list entry, when one has installed.id = its i
 | Under 600 pixels the facts column goes under the tabs | (defaulted: as the mockup at 760) | 03 |
 | Every new string is in the `en`, `pt` and `es` catalogs | (defaulted: ahpw's catalogs) | 02, 03, 04 |
 | New styles go in a CSS file beside their component | file:///github/ahpw/.project/briefs/styles-live-beside-their-component.md | 02, 03 |
+| An installed plugin's tabs are Overview, Features and Settings | Softov, 2026-11-15: "Overview \| Features \| Settings" | 04 |
+| An installed plugin's page shows only what its installed package says | Softov, 2026-11-15: "Only the installed package" | 04 |
+| *As configured* goes, and Options is renamed Settings | Softov, 2026-11-15: "We could start by first removing the As configured and changing options to settings." | 04 |
+| The id, the version and the module go to the head, and the State fact goes | Softov, 2026-11-15, in his marked screenshot | 04 |
+| The facts column follows VS Code: Installation, Marketplace only from a list, Categories, Resources | Softov, 2026-11-15: "see how it show when installed and not installed." | 04 |
+| Overview shows the README of the installed package, with no list | Softov, 2026-11-15: "the plugin detail is the readme already present onto the system also, if any and no marketplace." | 04 |
+| A listed page's first tab is Overview, as the installed page's | (defaulted: one name for one tab) | 03 |
+| A listed tab that becomes installed is that plugin's only tab | (defaulted: his test found a second tab with the same page) | 04 |
 
 ## Proposed architecture
 
@@ -88,10 +96,10 @@ installed row -> PluginPage -> its list entry, when one has installed.id = its i
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The bridge reads the lists](task-01-the-bridge-reads-the-lists.md) | todo | - |
-| [02 - One list in the sidebar](task-02-one-list-in-the-sidebar.md) | todo | 01 |
-| [03 - A listed plugin's page](task-03-a-listed-plugins-page.md) | todo | 01 |
-| [04 - An installed plugin's page gets its list tabs](task-04-an-installed-plugins-page-gets-its-list-tabs.md) | todo | 03 |
+| [01 - The bridge reads the lists](task-01-the-bridge-reads-the-lists.md) | implemented | - |
+| [02 - One list in the sidebar](task-02-one-list-in-the-sidebar.md) | implemented | 01 |
+| [03 - A listed plugin's page](task-03-a-listed-plugins-page.md) | implemented | 01 |
+| [04 - An installed plugin's page reads its own package](task-04-an-installed-plugins-page-reads-its-package.md) | implemented | 03 |
 
 ## Risks and tradeoffs
 
@@ -101,8 +109,8 @@ installed row -> PluginPage -> its list entry, when one has installed.id = its i
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-the-bridge-reads-the-lists.md](task-01-the-bridge-reads-the-lists.md).
+- **Done so far:** tasks 01 to 04 are built on branch `plugins/20261115-0746-a-person-finds-a-plugin-to-install` in `/github/ahpw.worktrees/plugin-browse` on 2026-11-15, not committed. The screens from the build are in `.scratch/mockups/plugin-list/check/`.
+- **Next action:** Softov tests the branch against a host from the ahpd branch. The tree is committed and a PR is opened on his word.
 - **Open questions:** none.
 - **Watch out for:** the list's id is not the row's id for a first-party plugin, such as `agent-acp` and `ahpd-agent-acp`. Match by `installed.id`.
 
@@ -111,5 +119,5 @@ installed row -> PluginPage -> its list entry, when one has installed.id = its i
 - [ ] `pnpm typecheck` passes.
 - [ ] The vitest suite passes, one suite at a time.
 - [ ] On a test ahpd from the branch, a search shows the listed plugins, and Install installs one and opens its page.
-- [ ] An installed listed plugin's page has Details, Features and Changelog beside Overview and Options.
+- [ ] An installed plugin's page has Overview, Features and Settings from its own package, and Marketplace facts only when it came from a list.
 - [ ] Each screen matches the mockups at 1280 and 760 px, light and dark.
