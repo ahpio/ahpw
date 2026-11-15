@@ -93,12 +93,16 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
   };
 
   const people = shared?.everyone() ?? [];
-  /** What a click on a person's circle opens: their own profile, a user's page, or the host's for root. */
+  /**
+   * What a click on a person's circle opens: the host panel for root, the
+   * person's own profile for a signed-in user who is you, another user's page,
+   * and nothing for a guest, who has no profile.
+   */
   const opener = (one: DocumentPerson): (() => void) | undefined => {
-    if (one.me) return () => { void scena.commands.execute('ahp.openProfile', { host }); };
-    if (one.kind === 'user') return () => { void scena.commands.execute('ahp.openUser', { host, id: one.name }); };
     if (one.kind === 'root') return () => { void scena.commands.execute('ahp.openHostInfo', { host }); };
-    return undefined;
+    if (one.kind !== 'user') return undefined;
+    if (one.me) return () => { void scena.commands.execute('ahp.openProfile', { host }); };
+    return () => { void scena.commands.execute('ahp.openUser', { host, id: one.name }); };
   };
   const titleOf = (one: DocumentPerson): string => t('files/shared/person', {
     name: one.me ? t('files/shared/you', { name: one.name }) : one.name,

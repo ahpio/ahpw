@@ -77,7 +77,7 @@ an envelope from the host -> own origin: confirmed; another's: moved past the ch
 | A 🔒 button stops editing; it waits while Manual save has edits not sent | Softov, 2026-11-15: "I cannot found how to get out of edit mode" | 04 |
 | Resting the pointer on another person's caret or selection shows their name | Softov, 2026-11-15: "I mouse over and cannot see who is" | 03 |
 | Each circle marks what the person is (🖥 root, 👤 user, 🤖 agent; a guest has no mark) and ✎ while they edit; its title says who, what and whether they edit | Softov, 2026-11-15: "Mark kind and editing" | 04 |
-| A click on a circle opens the person's own profile, a user's page, or the host panel for root | Softov, 2026-11-15: "click on circle on top to open user panel. on root user open the host panel" | 04 |
+| A click on a circle opens the host panel for root, your own included; your profile when you are a signed-in user; another user's page; and nothing for a guest | Softov, 2026-11-15: "click on circle on top to open user panel. on root user open the host panel", and "If I, as a root, clicked on my root circle, it opens a Profile failure" | 04 |
 | The channel is the host's `x-ahpd-shared:`; a resource whose `kind` is not `text` falls back to the plain page | Softov, 2026-11-15 | 02 |
 | Manual save holds the person's edits on their screen and sends them as one change on Mod-S or Save | Softov, 2026-11-15 | 02 |
 | A setting key `ui.fileSaveMode`, values `live` and `manual` | `(defaulted: the `ui.<name>` form of the other UI settings)` | 04 |
