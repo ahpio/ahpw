@@ -1,6 +1,6 @@
 ---
 title: The comments channel
-status: todo
+status: implemented
 depends: []
 layer: "files"
 refs:
@@ -19,7 +19,7 @@ A file page holds the file's comments, and adds, replies, resolves and deletes t
 ## Steps
 
 1. Follow `x-ahpd-annotations:<file URI>` with the protocol's `annotationsReducer`.
-2. Build `annotations/set` for a new comment: the range, the first entry, and the `vscode.agentFeedback` meta with `kind: user` and `state: created`.
+2. Build `annotations/set` for a new comment: the range, the first entry, and the `vscode.agentFeedback` meta with `kind: user` and `state: submitted`.
 3. Set `origin.session` to the channel's URI, since a file page is in no session.
 4. Build `annotations/entrySet` for a reply, with `author: user` in the entry's meta.
 5. Build `annotations/updated` with `resolved` for resolve and reopen, and `annotations/removed` for delete.
@@ -33,3 +33,7 @@ A file page holds the file's comments, and adds, replies, resolves and deletes t
 - `pnpm test src/resources/files/comments.test.ts` passes.
 
 ## Resume
+
+Built on 2026-11-15.
+- A person's comment is `state: submitted`, not `created`: the agent's comment tools hide a `created` one, which VS Code keeps for a comment not sent yet.
+- A page reads the channel with `useChannel(host, commentsChannel(file), annotationsReducer)`; `comments.ts` builds the actions only.

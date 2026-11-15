@@ -1,7 +1,7 @@
 ---
 title: Comments in a file
 domain: shell
-status: planned
+status: active
 priority: medium
 created: 2026-11-15
 revalidated: 2026-11-15
@@ -56,7 +56,7 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 | The file page shows the file's own channel, `x-ahpd-annotations:<file URI>`, only; a session's review comments stay in its views | Softov, 2026-11-15, chose "The file's channel only" | 02 |
 | A screenshot mockup comes first, and Softov approves it before the page code | Softov, 2026-11-15, chose "Mockup first" | 01 |
 | Buttons are icons with a title | Softov, 2026-11-15, for the shared file page | 01, 04 |
-| What a client adds carries VS Code's `vscode.agentFeedback` meta, `kind: user`, `state: created`, and each entry its `author`, so the agent's tools see it | the host plan's *Answers* | 02 |
+| What a client adds carries VS Code's `vscode.agentFeedback` meta, `kind: user`, `state: submitted`, and each entry its `author: user`, so the agent's tools list it: they hide a comment still `created` | [`code://packages/sdk/src/tools/comments.ts`](https://github.com/ahpio/ahpd/blob/main/packages/sdk/src/tools/comments.ts) `listableComments` | 02 |
 | An entry shows the person and the time from `_meta.ahpd`, which the host sets | the host plan's *Answers* | 04 |
 | A resolved thread folds to one line; an outdated one says so | `(defaulted: the brief's drawing)` | 04 |
 | A host that does not serve the channel shows no comments, and the file page works as before | `(defaulted: an older host)` | 02 |
@@ -73,9 +73,9 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A mockup of comments in a file](task-01-a-mockup-of-comments.md) | todo | - |
-| [02 - The comments channel](task-02-the-comments-channel.md) | todo | - |
-| [03 - Commented ranges in the editor](task-03-commented-ranges.md) | todo | 02 |
+| [01 - A mockup of comments in a file](task-01-a-mockup-of-comments.md) | doing | - |
+| [02 - The comments channel](task-02-the-comments-channel.md) | implemented | - |
+| [03 - Commented ranges in the editor](task-03-commented-ranges.md) | implemented | 02 |
 | [04 - Threads in the margin](task-04-threads-in-the-margin.md) | todo | 01, 03 |
 
 ## Risks and tradeoffs
@@ -85,8 +85,8 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-a-mockup-of-comments.md](task-01-a-mockup-of-comments.md).
+- **Done so far:** the mockup was sent on 2026-11-15; tasks 02 and 03 built on branch `shell/20261115-1038-comments-in-a-file`, stacked on the shared file branch.
+- **Next action:** Softov approves the mockup; then [task-04-threads-in-the-margin.md](task-04-threads-in-the-margin.md).
 - **Open questions:** none.
 - **Watch out for:** the shared file page is on its branch, not on main; build on it.
 

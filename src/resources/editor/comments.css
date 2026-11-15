@@ -1,0 +1,32 @@
+/* A commented range, its gutter mark, and where an outdated comment's words were. */
+.web-comment {
+  background: color-mix(in srgb, var(--oo-color-warning, #d97706) 20%, transparent);
+  border-bottom: 2px solid var(--oo-color-warning, #d97706);
+}
+
+.web-comment--focused {
+  background: color-mix(in srgb, var(--oo-color-warning, #d97706) 36%, transparent);
+}
+
+.web-comment-gutters .cm-gutterElement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  cursor: pointer;
+}
+
+.web-comment-gutter {
+  color: var(--oo-color-primary);
+  font-family: "Noto Emoji", var(--oo-font-family);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.web-comment-outdated {
+  display: inline-block;
+  width: 0;
+  height: 1.1em;
+  vertical-align: text-bottom;
+  border-left: 2px dashed var(--oo-color-muted);
+}

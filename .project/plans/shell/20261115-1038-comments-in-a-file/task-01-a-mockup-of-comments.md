@@ -1,6 +1,6 @@
 ---
 title: A mockup of comments in a file
-status: todo
+status: doing
 depends: []
 layer: "files"
 refs:
@@ -32,3 +32,5 @@ Softov approves a mockup of comments in a file before the page code.
 - Softov approves the mockup.
 
 ## Resume
+
+Mockup made on 2026-11-15: `/github/ahpw/.scratch/mockups/file-comments.html`, screenshots `file-comments-{light,dark}-{1280,760}.png` beside it, sent to Softov. Waiting for his approval.

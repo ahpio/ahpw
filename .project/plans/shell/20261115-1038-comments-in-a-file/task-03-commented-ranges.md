@@ -1,6 +1,6 @@
 ---
 title: Commented ranges in the editor
-status: todo
+status: implemented
 depends: [task-02-the-comments-channel.md]
 layer: "editor"
 refs:
@@ -33,3 +33,7 @@ The editor marks each commented range, and puts a mark in the gutter on its firs
 - `pnpm test src/resources/editor/comments.test.ts` passes.
 
 ## Resume
+
+Built on 2026-11-15.
+- An outdated comment draws a dashed bar where its words were, not a mark.
+- ahpw's tests run with no DOM, so the marks and the gutter are counted on an `EditorState`.
