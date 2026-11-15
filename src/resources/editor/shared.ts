@@ -24,7 +24,7 @@ const colours = (name: string): { solid: string; light: string } => {
   return { solid, light: solid.replace(/\)$/, ' / 0.25)') };
 };
 
-/** One caret of another person: a bar in their colour, and their name above it for 2 s. */
+/** One caret of another person: a bar in their colour, their name above it for 2 s, and again on hover. */
 class CaretWidget extends WidgetType {
   constructor(readonly name: string, readonly colour: string, readonly position: number) { super(); }
 
@@ -35,6 +35,7 @@ class CaretWidget extends WidgetType {
   toDOM(): HTMLElement {
     const caret = document.createElement('span');
     caret.className = 'web-caret';
+    caret.title = this.name;
     caret.style.borderLeftColor = this.colour;
     const tag = document.createElement('span');
     tag.className = 'web-caret__tag';
@@ -60,7 +61,7 @@ export const peopleDecorations = (people: readonly DocumentPerson[], length: num
       const anchor = Math.min(Math.max(range.anchor, 0), length);
       const from = Math.min(head, anchor);
       const to = Math.max(head, anchor);
-      if (from < to) marks.push(Decoration.mark({ class: 'web-caret__selection', attributes: { style: `background-color: ${light}` } }).range(from, to));
+      if (from < to) marks.push(Decoration.mark({ class: 'web-caret__selection', attributes: { style: `background-color: ${light}`, title: person.name } }).range(from, to));
       marks.push(Decoration.widget({ widget: new CaretWidget(person.name, solid, head), side: 1 }).range(head));
     }
   }

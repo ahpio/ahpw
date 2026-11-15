@@ -10,7 +10,7 @@ changes: []
 creates: []
 refs:
   - git://e0cedea - the commit of ahpw this plan was checked at
-  - "file:///github/ahpd/.project/plans/host/20261115-0829-a-file-is-a-shared-document/plan.md - the host side: the `x-ahpd-document:` channel, its state, its actions and its rules"
+  - "file:///github/ahpd/.project/plans/host/20261115-0829-a-file-is-a-shared-document/plan.md - the host side: the `x-ahpd-shared:` channel, its state, its actions and its rules"
   - "[code://src/resources/files/FilePage.tsx](../../../../src/resources/files/FilePage.tsx) - the file page: Mod-S and Save, the etag check, the unsaved guard"
   - "[code://src/resources/files/text.tsx#L27-L38](../../../../src/resources/files/text.tsx#L27-L38) - `FileHead`, where the people and the save state go"
   - "[code://src/resources/files/save.ts#L5](../../../../src/resources/files/save.ts#L5) - `MAX_CHARS`, the limit the host uses too"
@@ -47,7 +47,7 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 ### Runtime path
 
 ```
-FilePage opens locked -> subscribe x-ahpd-document:<file URI> -> text, people, carets drawn
+FilePage opens locked -> subscribe x-ahpd-shared:<file URI> -> text, people, carets drawn
 Edit -> CodeEditor shared mode -> a keystroke -> changed (live) or held (manual, until Mod-S)
 an envelope from the host -> own origin: confirmed; another's: moved past the change in flight, applied
 ```
@@ -73,6 +73,12 @@ an envelope from the host -> own origin: confirmed; another's: moved past the ch
 | A screenshot mockup comes first, and Softov approves it before the build | Softov, 2026-11-15 | 01 |
 | The header's buttons are icons with a title, not words: ✎ Edit, ⚡ Live save, ✍ Manual save, 💾 Save, 🔒 read only, ◌ and ✓ for saving and saved | Softov, 2026-11-15: "replace buttons text for icons buttons with tittle hints" | 01, 04 |
 | The mockup is approved with that change | Softov, 2026-11-15: "besides that you can build it" | 04 |
+| The icons sit centred in their buttons, and the copy button on the header's middle | Softov, 2026-11-15: "icons need some centering, also in title copy" | 04 |
+| A 🔒 button stops editing; it waits while Manual save has edits not sent | Softov, 2026-11-15: "I cannot found how to get out of edit mode" | 04 |
+| Resting the pointer on another person's caret or selection shows their name | Softov, 2026-11-15: "I mouse over and cannot see who is" | 03 |
+| Each circle marks what the person is (🖥 root, 👤 user, 🤖 agent; a guest has no mark) and ✎ while they edit; its title says who, what and whether they edit | Softov, 2026-11-15: "Mark kind and editing" | 04 |
+| A click on a circle opens the person's own profile, a user's page, or the host panel for root | Softov, 2026-11-15: "click on circle on top to open user panel. on root user open the host panel" | 04 |
+| The channel is the host's `x-ahpd-shared:`; a resource whose `kind` is not `text` falls back to the plain page | Softov, 2026-11-15 | 02 |
 | Manual save holds the person's edits on their screen and sends them as one change on Mod-S or Save | Softov, 2026-11-15 | 02 |
 | A setting key `ui.fileSaveMode`, values `live` and `manual` | `(defaulted: the `ui.<name>` form of the other UI settings)` | 04 |
 | Carets go out at most once every 50 ms | `(defaulted: fast enough to follow, few enough to keep the socket quiet)` | 02 |
@@ -107,7 +113,7 @@ an envelope from the host -> own origin: confirmed; another's: moved past the ch
 
 ## Resume state
 
-- **Done so far:** tasks 01 to 04 built on 2026-11-15, on branch `shell/20261115-0832-people-edit-a-file-together`; checked in two browsers against a daemon from the host plan's branch.
+- **Done so far:** tasks 01 to 04 built on 2026-11-15, on branch `shell/20261115-0832-people-edit-a-file-together`; Softov tested them, and his notes of the same day are built and checked in two browsers.
 - **Next action:** Softov tests both branches; then review, `implemented.md`, and a PR for each.
 - **Open questions:** none.
 - **Watch out for:** `follow` reducers get no `origin`. A remote change is applied to CodeMirror only after it is moved past the person's own changes.

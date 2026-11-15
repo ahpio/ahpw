@@ -1,7 +1,7 @@
 /**
- * A shared document: one file, open in several clients, edited by all.
+ * A shared resource of kind `text`: one file, open in several clients, edited by all.
  *
- * The host serves `x-ahpd-document:<file URI>` and puts every change in order.
+ * The host serves `x-ahpd-shared:<resource URI>` and puts every change in order.
  * This client keeps the person's own changes in step with the host's: one
  * change out at a time, what is typed meanwhile held for the next, and each
  * change from someone else moved past the person's own before it is applied.
@@ -16,8 +16,8 @@
 import { ChangeSet, type ChangeDesc } from '@codemirror/state';
 import type { ChannelEnvelope, OpenChannel } from '../../bridges/data.js';
 
-/** The channel of a file's shared document. */
-export const documentChannel = (file: string): string => `x-ahpd-document:${file}`;
+/** The channel of a file's shared resource. */
+export const documentChannel = (file: string): string => `x-ahpd-shared:${file}`;
 
 /** How the person's edits reach the others: at once, or when they save. */
 export type SaveMode = 'live' | 'manual';
@@ -28,11 +28,16 @@ export interface Range {
   head: number;
 }
 
+/** What a person is, as the host says. */
+export type PersonKind = 'root' | 'user' | 'guest' | 'agent';
+
 /** One person in the document. */
 export interface DocumentPerson {
   client: string;
   name: string;
-  agent: boolean;
+  kind: PersonKind;
+  /** Whether they are editing, not only reading. */
+  editing: boolean;
   /** The carets, in the editor's text; empty for the person themself. */
   ranges: Range[];
   me: boolean;
@@ -62,12 +67,14 @@ export interface DocumentView {
 interface Held {
   client: string;
   name: string;
-  agent: boolean;
+  kind: PersonKind;
+  editing: boolean;
   /** Carets on the host's text at `version`. */
   ranges: Range[];
 }
 
 interface Snapshot {
+  kind?: string;
   text: string;
   version: number;
   saved: number;
@@ -97,6 +104,8 @@ export const differenceOf = (before: string, after: string): Edit[] => {
   return [{ from: start, to: before.length - end, insert: after.slice(start, after.length - end) }];
 };
 
+const kindOf = (value: unknown): PersonKind => (value === 'root' || value === 'user' || value === 'agent' ? value : 'guest');
+
 const randomId = (): string => Math.random().toString(36).slice(2, 12);
 
 /** How often the person's carets go out, at most. */
@@ -118,6 +127,7 @@ export class SharedDocument {
   private waiting: ChannelEnvelope[] | undefined = [];
   private fromSeq = 0;
   private closed = false;
+  private editing = false;
 
   constructor(
     private readonly channel: OpenChannel,
@@ -141,19 +151,23 @@ export class SharedDocument {
     const action = envelope.action;
     const type = String(action.type ?? '');
     if (envelope.rejectionReason !== undefined) {
-      if (type === 'x-ahpd-document/changed' && this.inflight !== undefined && action.id === this.inflight.id) this.onRefused(envelope.rejectionReason);
+      if (type === 'x-ahpd-shared/changed' && this.inflight !== undefined && action.id === this.inflight.id) this.onRefused(envelope.rejectionReason);
       return;
     }
-    if (type === 'x-ahpd-document/changed') this.onChanged(envelope);
-    else if (type === 'x-ahpd-document/selected') this.onSelected(envelope);
-    else if (type === 'x-ahpd-document/joined') {
+    if (type === 'x-ahpd-shared/changed') this.onChanged(envelope);
+    else if (type === 'x-ahpd-shared/selected') this.onSelected(envelope);
+    else if (type === 'x-ahpd-shared/joined') {
       const client = String(action.client);
-      this.people.set(client, { client, name: String(action.name ?? client), agent: action.agent === true, ranges: [] });
+      this.people.set(client, { client, name: String(action.name ?? client), kind: kindOf(action.kind), editing: action.editing === true, ranges: [] });
       this.view.changed();
-    } else if (type === 'x-ahpd-document/left') {
+    } else if (type === 'x-ahpd-shared/editing') {
+      const person = envelope.origin === undefined ? undefined : this.people.get(envelope.origin.clientId);
+      if (person !== undefined) person.editing = action.editing === true;
+      this.view.changed();
+    } else if (type === 'x-ahpd-shared/left') {
       this.people.delete(String(action.client));
       this.view.changed();
-    } else if (type === 'x-ahpd-document/saved') {
+    } else if (type === 'x-ahpd-shared/saved') {
       const saved = Number(action.version);
       if (Number.isInteger(saved)) this.saved = saved;
       this.view.changed();
@@ -211,7 +225,8 @@ export class SharedDocument {
     return [...this.people.values()].map((one) => ({
       client: one.client,
       name: one.name,
-      agent: one.agent,
+      kind: one.kind,
+      editing: one.editing,
       me: one.client === me,
       ranges: one.client === me ? [] : mapRanges(one.ranges, own),
     }));
@@ -237,10 +252,12 @@ export class SharedDocument {
     if (this.closed) return;
     const snapshot = answer?.state as Snapshot | undefined;
     if (answer === undefined || snapshot === undefined) throw new Error('The host sent no document');
+    // Only text is edited here; another kind is another editor's.
+    if (snapshot.kind !== undefined && snapshot.kind !== 'text') throw new Error(`A shared ${snapshot.kind} is not text`);
     this.fromSeq = answer.fromSeq;
     this.version = snapshot.version;
     this.saved = snapshot.saved;
-    this.people = new Map(snapshot.people.map((one) => [one.client, { ...one, ranges: one.ranges ?? [] }]));
+    this.people = new Map(snapshot.people.map((one) => [one.client, { ...one, kind: kindOf(one.kind), editing: one.editing === true, ranges: one.ranges ?? [] }]));
     this.inflight = undefined;
     const had = how === 'keep' ? this.view.current() : undefined;
     if (had === undefined || had === snapshot.text) {
@@ -255,7 +272,16 @@ export class SharedDocument {
     this.waiting = undefined;
     for (const one of held) if ((one.serverSeq ?? Number.MAX_SAFE_INTEGER) > this.fromSeq) this.read(one);
     if (this.mode === 'live') this.send();
+    // A subscribe makes the person new to the host: whether they edit is said again.
+    if (this.editing) this.channel.dispatch({ type: 'x-ahpd-shared/editing', editing: true });
     this.view.changed();
+  }
+
+  /** Say to everyone whether the person is editing, not only reading. */
+  setEditing(editing: boolean): void {
+    if (this.editing === editing) return;
+    this.editing = editing;
+    if (this.waiting === undefined && !this.closed) this.channel.dispatch({ type: 'x-ahpd-shared/editing', editing });
   }
 
   /** The person's own changes the host does not have yet, as one. */
@@ -270,7 +296,7 @@ export class SharedDocument {
     this.inflight = { id, changes: this.pending };
     this.pending = undefined;
     this.channel.dispatch({
-      type: 'x-ahpd-document/changed',
+      type: 'x-ahpd-shared/changed',
       version: this.version,
       changes: editsOf(this.inflight.changes),
       // The editor's text is the host's with this change on it, so the carets go as they are.
@@ -283,7 +309,7 @@ export class SharedDocument {
     if (this.closed || this.waiting !== undefined) return;
     // `selected` is on `version`: every change of the person's own goes back out of the carets.
     const ranges = mapRanges(this.lastRanges, this.own()?.invertedDesc);
-    this.channel.dispatch({ type: 'x-ahpd-document/selected', version: this.version, ranges });
+    this.channel.dispatch({ type: 'x-ahpd-shared/selected', version: this.version, ranges });
   }
 
   private onChanged(envelope: ChannelEnvelope): void {

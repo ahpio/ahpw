@@ -455,7 +455,18 @@
       "locked": "Somente leitura",
       "saveNow": "Salvar (Mod-S)",
       "you": "{name} (você)",
-      "refused": "O host recusou sua edição"
+      "refused": "O host recusou sua edição",
+      "stopEditing": "Parar de editar",
+      "saveFirst": "Salve suas edições primeiro",
+      "person": "{name} · {kind} · {doing}",
+      "editingNow": "editando",
+      "viewing": "vendo",
+      "kinds": {
+        "root": "root",
+        "user": "usuário",
+        "guest": "convidado",
+        "agent": "agente"
+      }
     }
   },
   "changes": {

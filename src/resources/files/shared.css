@@ -16,10 +16,46 @@
 }
 
 .web-file__person {
+  position: relative;
   display: inline-flex;
   margin-left: -6px;
+  padding: 0;
   border: 2px solid var(--oo-color-surface);
   border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.web-file__person:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+/* What the person is, at the circle's foot, and a pencil at its top while they edit. */
+.web-file__person-kind,
+.web-file__person-editing {
+  position: absolute;
+  right: -5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--oo-color-surface);
+  color: var(--oo-color-text);
+  font-size: 8px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.web-file__person-kind {
+  bottom: -4px;
+}
+
+.web-file__person-editing {
+  top: -4px;
+  color: var(--oo-color-primary);
 }
 
 .web-file__person:first-child {
@@ -38,6 +74,10 @@
 }
 
 .web-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   width: 26px;
   height: 24px;
   padding: 0;
@@ -67,4 +107,22 @@
 .web-file__mode .web-icon-button {
   border: 0;
   border-radius: 0;
+}
+
+/* The header's items sit on its middle, the copy button with them, though the path may wrap. */
+.web-file__head > * {
+  align-self: center;
+}
+
+.web-file__head .web-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.web-file__state {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }

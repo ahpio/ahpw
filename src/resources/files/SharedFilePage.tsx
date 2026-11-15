@@ -8,11 +8,14 @@ import { languageOf } from '../editor/languages.js';
 import { EditorDocumentView, sharedEditor } from '../editor/shared.js';
 import { EMOJIcon } from '../emojis.js';
 import { NameMark } from '../../shell/NameMark.js';
-import { SharedDocument, documentChannel, type SaveMode } from './document.js';
+import { SharedDocument, documentChannel, type DocumentPerson, type PersonKind, type SaveMode } from './document.js';
 import { FILE_SAVE_MODE } from './save-mode.js';
 import { FileHead } from './text.js';
 import type { FilePageProps } from './FilePage.js';
 import './shared.css';
+
+/** The mark on a person's circle that says what they are; a guest has none. */
+const KIND_MARK: Partial<Record<PersonKind, string>> = { root: EMOJIcon.host, user: EMOJIcon.users, agent: EMOJIcon.agents };
 
 /**
  * A file open in several clients at once, through the host's shared document.
@@ -72,6 +75,8 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
   }, [host, uri]);
 
   useEffect(() => { doc.current?.setMode(mode); }, [mode]);
+  // Everyone sees who is editing, not only reading.
+  useEffect(() => { doc.current?.setEditing(!locked); }, [locked, open]);
 
   const shared = doc.current;
   const unsent = shared?.unsent === true && mode === 'manual';
@@ -88,15 +93,34 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
   };
 
   const people = shared?.everyone() ?? [];
+  /** What a click on a person's circle opens: their own profile, a user's page, or the host's for root. */
+  const opener = (one: DocumentPerson): (() => void) | undefined => {
+    if (one.me) return () => { void scena.commands.execute('ahp.openProfile', { host }); };
+    if (one.kind === 'user') return () => { void scena.commands.execute('ahp.openUser', { host, id: one.name }); };
+    if (one.kind === 'root') return () => { void scena.commands.execute('ahp.openHostInfo', { host }); };
+    return undefined;
+  };
+  const titleOf = (one: DocumentPerson): string => t('files/shared/person', {
+    name: one.me ? t('files/shared/you', { name: one.name }) : one.name,
+    kind: t(`files/shared/kinds/${one.kind}`),
+    doing: one.editing ? t('files/shared/editingNow') : t('files/shared/viewing'),
+  });
   const head = (
     <FileHead uri={uri} dirty={unsent}>
       <span className="web-file__spacer" />
       <span className="web-file__people">
-        {people.map((one) => (
-          <span key={one.client} className="web-file__person" title={one.me ? t('files/shared/you', { name: one.name }) : one.name}>
-            <NameMark name={one.name} size={24} />
-          </span>
-        ))}
+        {people.map((one) => {
+          const go = opener(one);
+          const title = titleOf(one);
+          const mark = KIND_MARK[one.kind];
+          return (
+            <button key={one.client} type="button" className="web-file__person" title={title} aria-label={title} disabled={go === undefined} onClick={go}>
+              <NameMark name={one.name} size={24} />
+              {mark === undefined ? null : <span className="web-file__person-kind" aria-hidden="true">{mark}</span>}
+              {one.editing ? <span className="web-file__person-editing" aria-hidden="true">{EMOJIcon.edit}</span> : null}
+            </button>
+          );
+        })}
       </span>
       {locked ? (
         <>
@@ -105,6 +129,7 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
         </>
       ) : (
         <>
+          <button type="button" className="web-icon-button" disabled={unsent} title={unsent ? t('files/shared/saveFirst') : t('files/shared/stopEditing')} aria-label={t('files/shared/stopEditing')} onClick={() => setLocked(true)}>{EMOJIcon.lock}</button>
           {mode === 'live' ? (
             <span className="web-file__state" data-busy={shared?.saving === true ? 'true' : 'false'} title={shared?.saving === true ? t('files/shared/saving') : t('files/shared/saved')}>
               {shared?.saving === true ? '◌' : EMOJIcon.check}

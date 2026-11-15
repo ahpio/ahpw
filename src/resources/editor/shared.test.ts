@@ -10,7 +10,7 @@ import type { DocumentPerson } from '../files/document.js';
  */
 
 const person = (name: string, ranges: { anchor: number; head: number }[], me = false): DocumentPerson =>
-  ({ client: name, name, agent: false, me, ranges });
+  ({ client: name, name, kind: 'user', editing: false, me, ranges });
 
 const count = (set: ReturnType<typeof peopleDecorations>): { widgets: number; marks: number } => {
   let widgets = 0;

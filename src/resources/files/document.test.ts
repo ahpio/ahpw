@@ -25,7 +25,7 @@ class FakeHost {
   channel(client: string): OpenChannel {
     let clientSeq = 0;
     return {
-      subscribe: async () => ({ state: { text: this.text, version: this.version, saved: 0, people: [...this.readers.keys()].map((one) => ({ client: one, name: one, agent: false, ranges: [] })) }, fromSeq: this.seq }),
+      subscribe: async () => ({ state: { text: this.text, version: this.version, saved: 0, kind: 'text', people: [...this.readers.keys()].map((one) => ({ client: one, name: one, kind: 'user', editing: false, ranges: [] })) }, fromSeq: this.seq }),
       dispatch: (action) => { clientSeq += 1; this.queue.push({ client, action, seq: clientSeq }); return clientSeq; },
       close: () => { this.readers.delete(client); },
     };
@@ -36,7 +36,7 @@ class FakeHost {
     const next = this.queue.shift();
     if (next === undefined) return;
     const { client, action, seq } = next;
-    if (action.type !== 'x-ahpd-document/changed') return;
+    if (action.type !== 'x-ahpd-shared/changed') return;
     const made = Number(action.version);
     const length = this.lengthAt(made);
     let changes = ChangeSet.of(action.changes as never, length);
@@ -47,7 +47,7 @@ class FakeHost {
     const edits: { from: number; to: number; insert: string }[] = [];
     applied.iterChanges((fromA, toA, _b, _c, inserted) => edits.push({ from: fromA, to: toA, insert: inserted.toString() }));
     this.seq += 1;
-    const envelope: ChannelEnvelope = { channel: 'doc', serverSeq: this.seq, origin: { clientId: client, clientSeq: seq }, action: { type: 'x-ahpd-document/changed', version: this.version, changes: edits, ranges: [], id: action.id } };
+    const envelope: ChannelEnvelope = { channel: 'doc', serverSeq: this.seq, origin: { clientId: client, clientSeq: seq }, action: { type: 'x-ahpd-shared/changed', version: this.version, changes: edits, ranges: [], id: action.id } };
     this.version += 1;
     for (const read of this.readers.values()) read(envelope);
   }
@@ -165,6 +165,25 @@ describe('SharedDocument', () => {
     expect(host.text).toBe('aXYf');
     expect(ana.text()).toBe('aXYf');
     expect(rafael.text()).toBe('aXYf');
+  });
+});
+
+describe('editing', () => {
+  it('says when the person starts and stops editing, and again after a fresh subscribe', async () => {
+    const host = new FakeHost('a');
+    const ana = editor(host, 'ana');
+    await ana.doc.start();
+    ana.doc.setEditing(true);
+    ana.doc.setEditing(true);
+    ana.doc.setEditing(false);
+    ana.doc.setEditing(true);
+    await ana.doc.resubscribe('keep');
+    expect(host.queue.map((one) => one.action)).toEqual([
+      { type: 'x-ahpd-shared/editing', editing: true },
+      { type: 'x-ahpd-shared/editing', editing: false },
+      { type: 'x-ahpd-shared/editing', editing: true },
+      { type: 'x-ahpd-shared/editing', editing: true },
+    ]);
   });
 });
 

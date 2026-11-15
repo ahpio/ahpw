@@ -10,7 +10,7 @@ refs:
 
 ## Objective
 
-One object per open file speaks the `x-ahpd-document:` channel.
+One object per open file speaks the `x-ahpd-shared:` channel.
 It keeps the person's own changes in order with the host's, and says what to apply and where each caret is.
 
 ## Files
@@ -22,7 +22,7 @@ It keeps the person's own changes in order with the host's, and says what to app
 ## Steps
 
 1. Add `onEnvelopes(channel, read)` to the host bridge, fed from `watchChannels` before any reducer.
-2. In `document.ts`, subscribe to `x-ahpd-document:<file URI>` and keep the confirmed text, the version and the people.
+2. In `document.ts`, subscribe to `x-ahpd-shared:<file URI>` and keep the confirmed text, the version and the people.
 3. Turn a CodeMirror `ChangeSet` into the host's `{ from, to, insert }` list, and back with `ChangeSet.of`.
 4. In Live save, send one `changed` with the person's carets, and hold what follows until its echo arrives.
 5. In Manual save, hold every change until `save()`; then send them as one `changed`.
