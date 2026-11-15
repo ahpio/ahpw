@@ -19,11 +19,9 @@ import { COMPUTERS_SERVED } from '../resources/computers/state.js';
 import { BOTS_SECTION, registerBots } from '../resources/bots/index.js';
 import { registerCanvases } from '../resources/canvases/index.js';
 import { BOTS_SERVED } from '../resources/bots/state.js';
-import { registerUsers, USERS_SECTION } from '../resources/users/index.js';
+import { registerUsers } from '../resources/users/index.js';
 import { registerProfilePage } from '../resources/profile/index.js';
-import { USERS_SERVED } from '../resources/users/state.js';
-import { registerTeams, TEAMS_SECTION } from '../resources/teams/index.js';
-import { TEAMS_SERVED } from '../resources/teams/state.js';
+import { registerTeams } from '../resources/teams/index.js';
 import { registerUsage, USAGE_SECTION } from '../resources/usage/index.js';
 import { USAGE_SERVED } from '../resources/usage/state.js';
 import { POLICIES_SECTION, registerPolicies } from '../resources/policies/index.js';
@@ -288,20 +286,6 @@ export function registerShell(scena: Scena): Disposable {
       key: 'bots:nav',
       when: `${BOTS_SERVED} == true`,
       resource: { component: 'ActivityBarItem', icon: EMOJIcon.bots, label: bound('shell/nav/bots'), pos: 'bottom', section: BOTS_SECTION, args: TOGGLE },
-    }),
-    // Shown while a host lists its users.
-    scena.surfaces.mount({
-      surface: 'activitybar',
-      key: 'users:nav',
-      when: `${USERS_SERVED} == true`,
-      resource: { component: 'ActivityBarItem', icon: EMOJIcon.users, label: bound('shell/nav/users'), pos: 'bottom', section: USERS_SECTION, args: TOGGLE },
-    }),
-    // Shown while a host lists its teams.
-    scena.surfaces.mount({
-      surface: 'activitybar',
-      key: 'teams:nav',
-      when: `${TEAMS_SERVED} == true`,
-      resource: { component: 'ActivityBarItem', icon: EMOJIcon.teams, label: bound('shell/nav/teams'), pos: 'bottom', section: TEAMS_SECTION, args: TOGGLE },
     }),
     // Shown while a host keeps usage.
     scena.surfaces.mount({
