@@ -1,0 +1,8 @@
+/* The note under the simple Markdown page: this view does not edit the file. */
+.web-file__simple-note {
+  margin: 0;
+  padding: 6px 16px;
+  border-top: 1px solid var(--oo-color-border);
+  color: var(--oo-color-muted);
+  font-size: 12px;
+}

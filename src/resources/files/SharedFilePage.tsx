@@ -1,3 +1,4 @@
+import type { Extension } from '@codemirror/state';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { createPortal } from 'react-dom';
 import { annotationsReducer, type AnnotationsState, type TextRange } from '@microsoft/agent-host-protocol';
@@ -34,7 +35,7 @@ const KIND_MARK: Partial<Record<PersonKind, string>> = { root: EMOJIcon.host, us
  * starts and the page changes for this file. A host that does not serve the
  * document calls `onPlain`, and the plain page takes over.
  */
-export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FilePageProps & { uri: string; onPlain: () => void }): ReactElement {
+export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra = [] }: FilePageProps & { uri: string; onPlain: () => void; extra?: Extension[] }): ReactElement {
   const { t } = useI18n();
   const scena = useScena();
   const [open, setOpen] = useState(false);
@@ -81,6 +82,7 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
       removeTitle: t('files/comments/delete'),
     }),
     EditorView.updateListener.of((update) => { onUpdate.current(update); }),
+    ...extra,
   ]);
 
   useEffect(() => {

@@ -56,7 +56,8 @@ const LOADERS: Readonly<Record<LanguageKey, () => Promise<Extension>>> = {
   scss: async () => (await import('@codemirror/lang-css')).css(),
   less: async () => (await import('@codemirror/lang-css')).css(),
   json: async () => (await import('@codemirror/lang-json')).json(),
-  markdown: async () => (await import('@codemirror/lang-markdown')).markdown(),
+  // GitHub's Markdown: task lists, strikethrough and tables, which the live preview reads.
+  markdown: async () => { const md = await import('@codemirror/lang-markdown'); return md.markdown({ base: md.markdownLanguage }); },
   yaml: async () => (await import('@codemirror/lang-yaml')).yaml(),
   toml: async () => stream((await import('@codemirror/legacy-modes/mode/toml')).toml),
   python: async () => (await import('@codemirror/lang-python')).python(),

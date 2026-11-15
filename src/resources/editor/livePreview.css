@@ -1,0 +1,91 @@
+/* The live preview: Markdown drawn as a page, in the page's font. */
+.web-lp .cm-content {
+  font-family: var(--oo-font-family);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+/* The page's own colours: the source view's syntax colours stay out, and each part below sets its own. */
+.web-lp .cm-line {
+  color: var(--oo-color-text);
+}
+
+.web-lp .cm-line span {
+  color: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  text-decoration: inherit;
+}
+
+.web-lp .cm-content .web-lp-h1 { font-size: 22px; font-weight: 700; line-height: 32px; }
+.web-lp .cm-content .web-lp-h2 { font-size: 18px; font-weight: 650; line-height: 28px; }
+.web-lp .cm-content .web-lp-h3 { font-size: 16px; font-weight: 650; }
+.web-lp .cm-content .web-lp-h4,
+.web-lp .cm-content .web-lp-h5,
+.web-lp .cm-content .web-lp-h6 { font-weight: 650; }
+
+.web-lp .cm-content .web-lp-strong { font-weight: 700; }
+.web-lp .cm-content .web-lp-em { font-style: italic; }
+.web-lp .cm-content .web-lp-strike,
+.web-lp .cm-content .web-lp-done { text-decoration: line-through; }
+.web-lp .cm-content .web-lp-done { color: var(--oo-color-muted); }
+
+.web-lp .cm-content .web-lp-code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--oo-color-muted) 16%, transparent);
+  font-family: var(--oo-font-family-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+}
+
+.web-lp .cm-content .web-lp-link {
+  color: var(--oo-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.web-lp .cm-content .web-lp-quote {
+  border-left: 3px solid var(--oo-color-border);
+  padding-left: 10px;
+  color: var(--oo-color-muted);
+}
+
+.web-lp .cm-content .web-lp-bullet {
+  display: inline-block;
+  width: 14px;
+  color: var(--oo-color-muted);
+}
+
+.web-lp .cm-content .web-lp-task {
+  margin: 0 6px 0 0;
+  vertical-align: -2px;
+  cursor: pointer;
+}
+
+.web-lp .cm-content .web-lp-image {
+  display: block;
+  margin: 4px 0 6px;
+}
+
+.web-lp .cm-content .web-lp-image img {
+  max-width: min(100%, 520px);
+  border-radius: 6px;
+}
+
+/* A line with the caret shows its Markdown, as source. */
+.web-lp .cm-content .web-lp-source {
+  font-family: var(--oo-font-family-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+}
+
+.web-lp .cm-content .web-lp-marker { color: var(--oo-color-muted); }
+
+/* A table or a fenced block, drawn whole, inside the text's own padding. */
+.web-lp .cm-content .web-lp-block {
+  padding: 4px 2px 4px 6px;
+}
+
+.web-lp .cm-content .web-lp-block table {
+  margin: 0;
+}

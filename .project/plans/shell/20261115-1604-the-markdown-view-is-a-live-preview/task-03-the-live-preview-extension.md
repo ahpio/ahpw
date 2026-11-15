@@ -26,7 +26,7 @@ A CodeMirror extension draws Markdown styled, and hides its markers away from th
 4. Draw bullets and task boxes as widgets; a click on a box writes `[x]` or `[ ]` into the text.
 5. Show a link as its text, and open it on Mod-click; show an image as a widget under its line.
 6. Draw a quote with a bar.
-7. Leave tables, fenced code and mermaid as their source.
+7. Leave tables, fenced code and mermaid to task 06.
 
 ## Validation
 

@@ -416,6 +416,7 @@
     "reading": "Carregando o arquivo",
     "notReadable": "Não foi possível ler este arquivo",
     "notText": "Este arquivo não é texto.",
+    "simpleNote": "Esta visão não edita o arquivo aqui.",
     "unsaved": "Você tem alterações não salvas neste arquivo.",
     "changedOnHost": "Este arquivo mudou no host depois que você o abriu. Copie suas alterações e abra o arquivo de novo.",
     "readOnly": "Somente leitura",

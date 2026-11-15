@@ -8,7 +8,7 @@ import { useFileUrl } from './media.js';
  * reads one, because the page's own URL is not where the file is. Drawn
  * through `<img>`, so an SVG's scripts never run.
  */
-function HostImage({ host, src, alt, base }: { host: string; src: string; alt: string; base: string | null }): ReactElement {
+export function HostImage({ host, src, alt, base }: { host: string; src: string; alt: string; base: string | null }): ReactElement {
   const target = /^(https?|data):/i.test(src) ? null : fileLink(src, base);
   const file = useFileUrl(host, target?.uri);
   if (target === null) return <img src={src} alt={alt} />;

@@ -416,6 +416,7 @@
     "reading": "Loading the file",
     "notReadable": "Couldn't read this file",
     "notText": "This file is not text.",
+    "simpleNote": "This view does not edit the file here.",
     "unsaved": "You have unsaved changes in this file.",
     "changedOnHost": "This file changed on the host after you opened it. Copy your changes, then reopen the file.",
     "readOnly": "Read-only",

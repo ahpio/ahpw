@@ -47,7 +47,7 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 | What | Source | Task |
 | --- | --- | --- |
 | The first version draws headings, emphasis, code spans, strikethrough, lists, task boxes, links, images and quotes | Softov, 2026-11-15, chose "Headings and emphasis, Lists and task boxes, Links and images, Blocks" | 03 |
-| Tables, fenced code and mermaid wait in a brief | Softov, 2026-11-15: "save brief for pending ones. table, code, mermaid" | 03 |
+| Tables, fenced code and mermaid are drawn away from the caret, and are text with the caret in them; editing a table cell by cell waits in a brief | Softov, 2026-11-15, chose "Now, in plan E", after "save brief for pending ones" | 06 |
 | Markers are hidden away from the caret's line, and shown on it | Softov, 2026-11-15, chose "Hidden, shown on caret line" | 03 |
 | "Show as Markdown" opens the live preview; the switch is the one that exists | Softov, 2026-11-15: "it already exists", then "Markdown view becomes it" | 04 |
 | The read-only renderer stays as `SimpleMarkdown`, shown when editing is not available | Softov, 2026-11-15: "Save the file as reference simplemarkdown ... like editor not avail because file is readonly" | 02 |
@@ -74,11 +74,12 @@ Where the host serves no shared file, or the file is read-only, it opens `Simple
 | [03 - The live preview extension](task-03-the-live-preview-extension.md) | todo | 01 |
 | [04 - The Markdown view edits live](task-04-the-markdown-view-edits-live.md) | todo | 02, 03 |
 | [05 - Comments fold away](task-05-comments-fold-away.md) | todo | 01 |
+| [06 - Blocks drawn in the preview](task-06-blocks-drawn-in-the-preview.md) | todo | 03 |
 
 ## Risks and tradeoffs
 
 - A hidden marker moves the text when the caret enters its line - Obsidian accepts this, and the answer chose it.
-- A block the first version does not draw shows as its source - the brief `live-preview-blocks` holds tables, fenced code and mermaid.
+- A drawn block changes height after its line is measured - the line is measured again when it does.
 
 ## Resume state
 
