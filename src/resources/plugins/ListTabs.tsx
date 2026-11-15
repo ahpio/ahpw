@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, DetailList, Markdown, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Markdown } from '../../shell/markdown/Markdown.js';
 import type { ListedPlugin, PluginDetails } from '../../bridges/plugins.js';
 import type { KeptTab } from '../../shell/view/KeptTabs.js';
 import { RemovableChip } from '../../shell/view/RemovableChip.js';

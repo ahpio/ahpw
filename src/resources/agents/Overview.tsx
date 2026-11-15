@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { useI18n, useStore } from '@softov/scena/react';
-import { DetailList, Markdown, Text, type DetailItem } from '@softov/scena/ui';
+import { DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Markdown } from '../../shell/markdown/Markdown.js';
 import type { AgentInfo, SessionSummary } from '@microsoft/agent-host-protocol';
 import type { EngineRow, AgentRow } from '../../bridges/agents.js';
 import { ahpPaths } from '../../bridges/data.js';
