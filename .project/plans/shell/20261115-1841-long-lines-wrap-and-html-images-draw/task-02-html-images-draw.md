@@ -21,7 +21,7 @@ A README's logo, badges and centred images show in the Markdown preview.
 
 1. Read an `<img>` tag's `src`, `alt`, `width` and `height`.
 2. Draw an `<img>` among the text as an inline picture, through `HostImage`.
-3. Draw an HTML block that holds images as a row of them, aligned as its first tag says; leave any other HTML as text.
+3. Draw the images of an HTML block in a row, aligned as its first tag says.
 4. Draw an image inside a link, and keep the link's Mod-click.
 
 ## Validation
