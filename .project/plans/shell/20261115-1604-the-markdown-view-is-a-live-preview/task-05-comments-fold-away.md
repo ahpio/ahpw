@@ -27,7 +27,7 @@ The file view starts at full width, and a person opens the comments they want.
 2. Hide the margin when the setting says so, and give the editor the full width.
 3. With the margin hidden, open a clicked thread as a card beside its line.
 4. Close the card on `›`, on Escape, or on a click in the text away from it.
-5. With the margin shown, keep today's column.
+5. With the margin shown, lay it over the editor at the top right, with `position: absolute`.
 6. Keep the narrow layout: a thread opens under its line.
 
 ## Validation
@@ -42,4 +42,5 @@ The file view starts at full width, and a person opens the comments they want.
 
 Built on 2026-11-15.
 - A mousedown in the text away from a comment's words closes the card.
+- The margin is absolute over the editor, as Softov asked; the body clips with `overflow: clip`, so focus in a thread cannot scroll it.
 - Checked in a browser at 1280 light and 760 dark: a new comment, its card, Escape, `›`, and 💬.

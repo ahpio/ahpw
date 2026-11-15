@@ -55,6 +55,7 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 | A click on a task box writes `[x]` or `[ ]` into the text; Mod-click opens a link | `(defaulted: as Obsidian does)` | 03 |
 | The preview is locked until ✎, as Text is | `(defaulted: the shared editor's lock)` | 04 |
 | 💬 with a count, after ✎, shows or hides the comments margin; hidden, a click opens one thread as a card beside its line, closed with `›`, Escape or a click in the text; a UI setting picks the default | Softov, 2026-11-15, chose "💬 toggle + floating card" | 05 |
+| The shown margin is `position: absolute` at the body's top right, over the editor, which keeps its full width; the body clips, the margin does not | Softov, 2026-11-15: "web-file__margin position absolute. right 0, top 0 no overflow: clip" | 05 |
 | The comments that fold away are part of this plan | Softov, 2026-11-15, chose "Add it to plan E" | 05 |
 
 ## Proposed architecture

@@ -3,6 +3,8 @@
   position: relative;
   display: flex;
   min-height: 0;
+  /* Clipped, not hidden: a hidden box scrolls when a thread in it takes focus, and moves every thread off its line. */
+  overflow: clip;
 }
 
 .web-file__body--comments > .web-editor {
@@ -11,11 +13,12 @@
 }
 
 .web-file__margin {
-  position: relative;
-  flex: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
   width: 300px;
-  /* Clipped, not hidden: a hidden box still scrolls when a thread in it takes focus, and moves every thread off its line. */
-  overflow: clip;
   border-left: 1px solid var(--oo-color-border);
   background: var(--oo-color-surface);
 }
@@ -231,12 +234,21 @@
   box-shadow: none;
 }
 
-.web-file__comments-toggle {
+.web-file__head .web-file__comments-toggle {
   width: auto;
-  padding: 0 6px;
-  gap: 2px;
+  min-width: 26px;
+  padding: 0 5px;
+  gap: 3px;
+}
+
+.web-file__comments-toggle[aria-pressed="true"] {
+  border-color: var(--oo-color-primary);
+  background: color-mix(in srgb, var(--oo-color-primary) 18%, transparent);
 }
 
 .web-file__comments-count {
+  font-family: var(--oo-font-family);
   font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
