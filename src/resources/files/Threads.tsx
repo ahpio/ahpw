@@ -1,6 +1,6 @@
 import { useState, type KeyboardEvent, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Markdown } from '@softov/scena/ui';
+import { Markdown } from '../../shell/markdown/Markdown.js';
 import type { Annotation, AnnotationEntry } from '@microsoft/agent-host-protocol';
 import { NameMark } from '../../shell/NameMark.js';
 import { ContainedConfirm } from '../../shell/notify/ContainedModal.js';
