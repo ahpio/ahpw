@@ -60,6 +60,12 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 | An entry shows the person and the time from `_meta.ahpd`, which the host sets | the host plan's *Answers* | 04 |
 | A resolved thread folds to one line; an outdated one says so | `(defaulted: the brief's drawing)` | 04 |
 | A host that does not serve the channel shows no comments, and the file page works as before | `(defaulted: an older host)` | 02 |
+| A closed thread shows its entries without the reply box. The open thread sits at its line, and the others move out of its way | Softov, 2026-11-15: "Beside the line", after the threads drifted from their lines | 04 |
+| ✓ and ✕ sit on a thread's first name row, open or closed; a closed thread shows them on hover | Softov, 2026-11-15: "the ✓ and ✕ does not match ... need to be the same" | 04 |
+| Delete uses a cross, and asks inside the card first, with a modal held in the component (`ContainedConfirm`) | Softov, 2026-11-15: "use a CROSS to delete", "to remove it needs confirmation ... like on Card it is" | 04 |
+| A click on commented words opens their thread, and the open thread's words are brighter with a solid line; the others have a dashed line | Softov, 2026-11-15: "click on text hightlight card and vice versa", "more brigther than the comment. or dashed border bottom" | 04 |
+| Hovered commented words show a pill for each comment there, with its first 30 characters and a cross; a click opens it, the cross asks to delete it | Softov, 2026-11-15: "mouse hover text show a pill on top, 30 first card and a X" | 04 |
+| At narrow widths, the block under a line holds every thread that starts on it | Softov, 2026-11-15: "I made 2 comments on the same line. it show only one." | 04 |
 
 ## Proposed architecture
 
@@ -73,10 +79,10 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A mockup of comments in a file](task-01-a-mockup-of-comments.md) | doing | - |
+| [01 - A mockup of comments in a file](task-01-a-mockup-of-comments.md) | done | - |
 | [02 - The comments channel](task-02-the-comments-channel.md) | implemented | - |
 | [03 - Commented ranges in the editor](task-03-commented-ranges.md) | implemented | 02 |
-| [04 - Threads in the margin](task-04-threads-in-the-margin.md) | todo | 01, 03 |
+| [04 - Threads in the margin](task-04-threads-in-the-margin.md) | implemented | 01, 03 |
 
 ## Risks and tradeoffs
 
@@ -85,15 +91,15 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 
 ## Resume state
 
-- **Done so far:** the mockup was sent on 2026-11-15; tasks 02 and 03 built on branch `shell/20261115-1038-comments-in-a-file`, stacked on the shared file branch.
-- **Next action:** Softov approves the mockup; then [task-04-threads-in-the-margin.md](task-04-threads-in-the-margin.md).
+- **Done so far:** Softov approved the mockup on 2026-11-15; tasks 02, 03 and 04 built on branch `shell/20261115-1038-comments-in-a-file`, stacked on the shared file branch.
+- **Next action:** Softov tests stage 2; then an agent's reply is checked in a browser.
 - **Open questions:** none.
 - **Watch out for:** the shared file page is on its branch, not on main; build on it.
 
 ## Final verification checklist
 
-- [ ] Softov approved the mockup, and each screen matches it.
-- [ ] Two browsers: a comment, a reply and a resolve in one show in the other.
-- [ ] A comment stays on its words while the other browser types above it.
+- [x] Softov approved the mockup, and each screen matches it.
+- [x] Two browsers: a comment, a reply and a resolve in one show in the other.
+- [x] A comment stays on its words while the other browser types above it.
 - [ ] An agent's reply shows with the agent as its author.
-- [ ] `pnpm typecheck`, `pnpm test` and `pnpm build` pass.
+- [x] `pnpm typecheck`, `pnpm test` and `pnpm build` pass.

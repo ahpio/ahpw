@@ -467,6 +467,25 @@
         "guest": "guest",
         "agent": "agent"
       }
+    },
+    "comments": {
+      "add": "Comment on the selection",
+      "new": "Comment on the selection",
+      "send": "Comment (Mod-Enter)",
+      "cancel": "Cancel",
+      "reply": "Reply",
+      "sendReply": "Send reply",
+      "resolve": "Resolve",
+      "reopen": "Open again",
+      "delete": "Delete comment",
+      "deleteAsk": "Delete this thread?",
+      "deleteYes": "Delete",
+      "show": "Show the thread",
+      "outdated": "Outdated",
+      "replies": {
+        "one": "{count} reply",
+        "other": "{count} replies"
+      }
     }
   },
   "changes": {

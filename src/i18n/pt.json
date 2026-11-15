@@ -467,6 +467,25 @@
         "guest": "convidado",
         "agent": "agente"
       }
+    },
+    "comments": {
+      "add": "Comentar a seleção",
+      "new": "Comentar a seleção",
+      "send": "Comentar (Mod-Enter)",
+      "cancel": "Cancelar",
+      "reply": "Responder",
+      "sendReply": "Enviar resposta",
+      "resolve": "Resolver",
+      "reopen": "Abrir de novo",
+      "delete": "Excluir comentário",
+      "deleteAsk": "Excluir esta conversa?",
+      "deleteYes": "Excluir",
+      "show": "Mostrar a conversa",
+      "outdated": "Desatualizado",
+      "replies": {
+        "one": "{count} resposta",
+        "other": "{count} respostas"
+      }
     }
   },
   "changes": {
