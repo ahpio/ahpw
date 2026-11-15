@@ -2290,7 +2290,7 @@
         "trust": "Confianza del espacio de trabajo",
         "limits": "Límites y diagnóstico",
         "listener": "Escucha",
-        "modelProxy": "Proxy de modelos",
+        "modelGateway": "Gateway de modelos",
         "sessions": "Sesiones",
         "tools": "Herramientas",
         "mcp": "Servidores MCP",
@@ -2728,7 +2728,7 @@
       "opens": "abre el turno",
       "pools": "Pools",
       "sources": {
-        "proxy": "Proxy",
+        "gateway": "Gateway",
         "agent": "Agente",
         "computer": "Computadora"
       },

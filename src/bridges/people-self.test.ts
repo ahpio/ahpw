@@ -26,8 +26,8 @@ describe('selfId', () => {
 
 describe('readOwnUser', () => {
   it('reads the person at their own address', async () => {
-    readText.mockResolvedValue({ text: JSON.stringify({ id: 'ana', roles: ['ops'], grants: ['proxy:write'] }) });
-    await expect(readOwnUser('h', as('user:ana'))).resolves.toEqual({ id: 'ana', roles: ['ops'], grants: ['proxy:write'] });
+    readText.mockResolvedValue({ text: JSON.stringify({ id: 'ana', roles: ['ops'], grants: ['gateway:write'] }) });
+    await expect(readOwnUser('h', as('user:ana'))).resolves.toEqual({ id: 'ana', roles: ['ops'], grants: ['gateway:write'] });
     expect(readText).toHaveBeenCalledWith('user://ana');
   });
 

@@ -6,7 +6,7 @@ const request = vi.hoisted(() => vi.fn());
 
 vi.mock('./data.js', () => ({ hostBridge: () => ({ request }) }));
 
-const LAPTOP = { id: 't1', user: 'ana', label: 'laptop', grants: ['proxy:write'], created: 1_760_000_000_000 };
+const LAPTOP = { id: 't1', user: 'ana', label: 'laptop', grants: ['gateway:write'], created: 1_760_000_000_000 };
 
 beforeEach(() => {
   request.mockReset();
@@ -41,8 +41,8 @@ describe('listTokens', () => {
 describe('mintToken', () => {
   it('sends only what was asked for', async () => {
     request.mockResolvedValue({ ...LAPTOP, secret: 's3cret' });
-    await expect(mintToken('h', { label: 'laptop', grants: ['proxy:write'] })).resolves.toMatchObject({ secret: 's3cret' });
-    expect(request).toHaveBeenCalledWith(TOKENS.mint, { label: 'laptop', grants: ['proxy:write'] });
+    await expect(mintToken('h', { label: 'laptop', grants: ['gateway:write'] })).resolves.toMatchObject({ secret: 's3cret' });
+    expect(request).toHaveBeenCalledWith(TOKENS.mint, { label: 'laptop', grants: ['gateway:write'] });
   });
 
   it('sends the user and the expiry when given', async () => {
