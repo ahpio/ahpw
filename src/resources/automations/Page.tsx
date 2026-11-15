@@ -1,8 +1,9 @@
-import { useState, type ReactElement, type ReactNode } from 'react';
+import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Badge, Button, DetailList, Markdown, Spinner, Text, type DetailItem } from '@softov/scena/ui';
-import { automationReducer, type AutomationCapabilities, type AutomationEntry, type AutomationState as Catalogue } from '@microsoft/agent-host-protocol';
+import { KeptTabs } from '../../shell/view/KeptTabs.js';
+import { automationReducer, type AgentInfo, type AutomationCapabilities, type AutomationEntry, type AutomationState as Catalogue } from '@microsoft/agent-host-protocol';
 import { ahpPaths, AUTOMATIONS, hostBridge } from '../../bridges/data.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
@@ -14,6 +15,15 @@ import { cronWords, runFacts, runsByTime, stateOf, timeOf, titleOf, type Automat
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { plural } from '../../i18n/locales.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
+import { PageTitle } from '../../shell/HostIcon.js';
+import { EMOJIcon } from '../emojis.js';
+import { AutomationForm } from './Edit.js';
+import { Section } from '../../shell/view/Section.js';
+import { useAgentIconSrc } from '../agents/icons.js';
+import type { Option } from '../sessions/composer-commands.js';
+import { settingLabels } from '../sessions/pill-labels.js';
+import { useSessionSettings } from './session-settings.js';
+import { AUTOMATION_SECTION, automationTabKey, keepAutomationTabKey, type AutomationAsk } from './state.js';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -36,23 +46,49 @@ const lines = (values: readonly ReactNode[]): ReactElement => (
   <span className="web-lines">{values.map((value, index) => <span key={index}>{value}</span>)}</span>
 );
 
-/** The facts of a definition, as a list. */
-function factsOf(host: string, entry: AutomationEntry): DetailItem[] {
-  const { definition } = entry;
-  const session = definition.session;
+/** What the Agent section reads besides the definition: the agent's name and models, and the settings as the host names them. */
+interface AgentWords {
+  name: string;
+  image?: string | undefined;
+  /** The model ids the agent offers; empty while unknown. */
+  models: readonly string[];
+  options: readonly Option[];
+}
+
+/** The Agent section: who runs, with which model, where, and with which settings. */
+function agentFacts(host: string, entry: AutomationEntry, words: AgentWords): DetailItem[] {
+  const session = entry.definition.session;
   const folders = session.workingDirectories ?? [];
+  const model = session.model?.id;
+  const items: DetailItem[] = [
+    ...(embedMode() === 'multi' ? [{ label: translate('common/host'), value: <HostTag host={host} /> }] : []),
+    { label: translate('automations/facts/agent'), value: <span className="web-automation__agent">{words.image === undefined ? null : <img src={words.image} alt="" />}{words.name}</span> },
+    {
+      label: translate('automations/facts/model'),
+      value: model === undefined ? translate('automations/defaults/agent') : (
+        <span className="web-automation__agent">{model}{words.models.length === 0 || words.models.includes(model) ? null : <Badge tone="warning" text={translate('automations/facts/notOffered')} />}</span>
+      ),
+    },
+  ];
+  if (folders.length > 0) items.push({ label: translate('automations/facts/folder'), value: lines(folders.map(folderLabel)) });
+  if (session.agent !== undefined) items.push({ label: translate('automations/facts/customAgent'), value: session.agent.uri });
+  const config = session.config ?? {};
+  if (Object.keys(config).length > 0) {
+    // The host's names for the settings once it answers; the keys as stored until then.
+    const named = words.options.filter((option) => option.key in config);
+    const shown = named.length > 0 ? named.map((option) => settingLabels(option).label) : Object.entries(config).map(([key, value]) => `${key}: ${String(value)}`);
+    items.push({ label: translate('automations/facts/settings'), value: lines(shown) });
+  }
+  return items;
+}
+
+/** The Schedule section: when it runs, what happens to missed runs, when it turns off, and the next run. */
+function scheduleFacts(entry: AutomationEntry): DetailItem[] {
+  const { definition } = entry;
   const schedules = definition.triggers.filter((trigger) => 'schedule' in trigger);
   const events = definition.triggers.filter((trigger) => !('schedule' in trigger));
   const stops = (definition.disableConditions ?? []).map((one) => ('max' in one ? plural('automations/facts/afterRuns', one.max) : translate('automations/facts/afterDate', { date: timeOf(one.date) })));
-  const items: DetailItem[] = [
-    ...(embedMode() === 'multi' ? [{ label: translate('common/host'), value: <HostTag host={host} /> }] : []),
-    { label: translate('automations/facts/agent'), value: session.provider ?? translate('automations/defaults/host') },
-    { label: translate('automations/facts/model'), value: session.model?.id ?? translate('automations/defaults/agent') },
-  ];
-  if (folders.length > 0) items.push({ label: translate('automations/facts/folder'), value: lines(folders.map(folderLabel)) });
-  if (session.config !== undefined && Object.keys(session.config).length > 0) {
-    items.push({ label: translate('automations/facts/settings'), value: lines(Object.entries(session.config).map(([key, value]) => `${key}: ${String(value)}`)) });
-  }
+  const items: DetailItem[] = [];
   for (const trigger of schedules) {
     if (!('schedule' in trigger)) continue;
     items.push({ label: translate('automations/facts/schedule'), value: lines([cronWords(trigger.schedule.expression), <span key="raw" className="web-method">{`${trigger.schedule.expression} \u{00B7} ${trigger.schedule.timeZone}`}</span>]) });
@@ -63,52 +99,55 @@ function factsOf(host: string, entry: AutomationEntry): DetailItem[] {
     if ('schedule' in trigger) continue;
     items.push({ label: translate('automations/facts/event'), value: `${trigger.title}${trigger.events.length === 0 ? '' : `: ${trigger.events.map((one) => one.title).join(', ')}`}` });
   }
-  if (stops.length > 0) items.push({ label: translate('automations/facts/turnsOff'), value: lines(stops) });
-  if (entry.nextRunAt !== undefined && definition.enabled) items.push({ label: translate('automations/facts/nextRun'), value: timeOf(entry.nextRunAt) });
-  items.push({ label: translate('automations/facts/runs'), value: String(entry.runCount ?? entry.runs.length) });
-  if ((entry.customizations?.length ?? 0) > 0) items.push({ label: translate('automations/facts/customizations'), value: String(entry.customizations?.length) });
-  items.push({ label: translate('automations/facts/created'), value: timeOf(entry.createdAt) }, { label: translate('automations/facts/changed'), value: timeOf(entry.modifiedAt) });
+  items.push({ label: translate('automations/facts/turnsOff'), value: stops.length === 0 ? <span className="web-note">{translate('automations/facts/never')}</span> : lines(stops) });
+  if (schedules.length > 0) {
+    items.push({
+      label: translate('automations/facts/nextRun'),
+      value: !definition.enabled ? <span className="web-note">{translate('automations/state/off')}</span> : entry.nextRunAt === undefined ? '' : timeOf(entry.nextRunAt),
+    });
+  }
   return items;
 }
 
-/** One automation: what it sends, where, when, and how its runs went. */
-export default function AutomationPage({ host, resource }: { host: string; resource?: string }): ReactElement {
+/** The Details section: when it was made and changed, and its customizations. */
+function detailFacts(entry: AutomationEntry): DetailItem[] {
+  return [
+    { label: translate('automations/facts/created'), value: timeOf(entry.createdAt) },
+    { label: translate('automations/facts/changed'), value: timeOf(entry.modifiedAt) },
+    ...((entry.customizations?.length ?? 0) > 0 ? [{ label: translate('automations/facts/customizations'), value: String(entry.customizations?.length) }] : []),
+  ];
+}
+
+/** The Overview tab: the agent, the schedule, the instructions, the runs and the details, each a section. */
+function Overview({ host, entry, onFailure }: { host: string; entry: AutomationEntry; onFailure: (caught: unknown) => void }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
-  const { state, error } = useChannel<Catalogue>(host, AUTOMATIONS, automationReducer);
   const caps = useStore<AutomationCapabilities | null>(ahpPaths(host).automationCaps);
-  const [failure, setFailure] = useState<string | null>(null);
-  if (error !== null) return <PageAlert tone="danger" title={t('automations/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('automations/notices/reading')} />;
-  const entry = state.entries.find((one) => one.resource === resource);
-  if (entry === undefined) return <PageAlert tone="warning" message={t('automations/notices/gone')} />;
-
-  const can = (operation: string): boolean => entry.operations.map(String).includes(operation);
-  const now = stateOf(entry);
+  const agents = useStore<AgentInfo[]>(ahpPaths(host).agents) ?? [];
+  const iconSrcOf = useAgentIconSrc(useMemo(() => [host], [host]));
+  const session = entry.definition.session;
+  const provider = session.provider ?? '';
+  const settings = useSessionSettings(host, provider, folderLabel(session.workingDirectories?.[0] ?? ''), session.config ?? {});
+  const agent = agents.find((one) => one.provider === provider);
+  const words: AgentWords = {
+    name: agent?.displayName ?? (provider === '' ? t('automations/defaults/host') : provider),
+    image: provider === '' ? undefined : iconSrcOf(host, provider),
+    models: (settings.models ?? agent?.models ?? []).map((one) => one.id),
+    options: settings.options,
+  };
   const runs = runsByTime(entry);
-  const say = (caught: unknown): void => setFailure(caught instanceof Error ? caught.message : String(caught));
-
   return (
-    <div className="web-page">
-      <div className="web-page__head">
-        <div className="web-chat__title">
-          <Text variant="h2" text={titleOf(entry)} />
-          <Badge tone={STATE[now]} text={t(`automations/state/${now}`)} />
-        </div>
-        <div className="web-page__actions">
-          {can('run') ? <Button label={t('automations/actions/runNow')} variant="primary" onClick={() => void runNow(host, entry).catch(say)} /> : null}
-          {can('update') ? <Button label={t(entry.definition.enabled ? 'automations/actions/turnOff' : 'automations/actions/turnOn')} onClick={() => setEnabled(host, entry, !entry.definition.enabled)} /> : null}
-          {can('update') ? <Button label={t('automations/actions/edit')} onClick={() => void scena.commands.execute('ahp.editAutomation', { host, resource: entry.resource })} /> : null}
-        </div>
-      </div>
-      {failure === null ? null : <Alert tone="danger" message={failure} />}
+    <div className="web-automation__overview">
+      <Section icon={EMOJIcon.agents} title={t('automations/page/sections/agent')} />
+      <DetailList items={agentFacts(host, entry, words)} columns={2} />
 
-      <DetailList items={factsOf(host, entry)} columns={2} />
+      <Section icon={EMOJIcon.automations} title={t('automations/page/sections/schedule')} />
+      <DetailList items={scheduleFacts(entry)} columns={2} />
 
-      <Text variant="h3" text={t('automations/page/message')} />
+      <Section icon={EMOJIcon.markdown} title={t('automations/page/instructions')} />
       <div className="web-automation__message"><Markdown text={entry.definition.message.text} /></div>
 
-      <Text variant="h3" text={t('automations/page/runs')} />
+      <Section icon={EMOJIcon.run} title={t('automations/page/runs')} count={entry.runCount ?? entry.runs.length} />
       {runs.length === 0 ? <p className="web-note">{t('automations/page/noRuns')}</p> : (
         <table className="web-runs">
           <thead>
@@ -149,11 +188,59 @@ export default function AutomationPage({ host, resource }: { host: string; resou
       {entry.runsNextCursor === undefined ? null : (
         <Button
           label={t('automations/page/loadOlder')}
-          onClick={() => void hostBridge(host).request('fetchAutomationRuns', { channel: AUTOMATIONS, automation: entry.resource, cursor: entry.runsNextCursor } as never).catch(say)}
+          onClick={() => void hostBridge(host).request('fetchAutomationRuns', { channel: AUTOMATIONS, automation: entry.resource, cursor: entry.runsNextCursor } as never).catch(onFailure)}
         />
       )}
 
-      {can('remove') ? <DangerZone label={t('automations/actions/delete')} onClick={() => void remove(host, entry)} /> : null}
+      <Section icon={EMOJIcon.info} title={t('automations/page/sections/details')} />
+      <DetailList items={detailFacts(entry)} columns={2} />
+    </div>
+  );
+}
+
+/** One automation: its head with its state, Run now and Turn on or off, over Overview and Settings, with Delete at the end of Settings. */
+export default function AutomationPage({ host, resource }: { host: string; resource?: string }): ReactElement {
+  const { t } = useI18n();
+  const { state, error } = useChannel<Catalogue>(host, AUTOMATIONS, automationReducer);
+  const ask = useStore<AutomationAsk>(AUTOMATION_SECTION);
+  const [failure, setFailure] = useState<string | null>(null);
+  if (error !== null) return <PageAlert tone="danger" title={t('automations/notices/none')} message={error} />;
+  if (state === undefined) return <Spinner label={t('automations/notices/reading')} />;
+  const entry = state.entries.find((one) => one.resource === resource);
+  if (entry === undefined) return <PageAlert tone="warning" message={t('automations/notices/gone')} />;
+
+  const can = (operation: string): boolean => entry.operations.map(String).includes(operation);
+  const now = stateOf(entry);
+  const say = (caught: unknown): void => setFailure(caught instanceof Error ? caught.message : String(caught));
+  const overview = <Overview host={host} entry={entry} onFailure={say} />;
+  const settings = can('update') || can('remove');
+
+  return (
+    <div className="web-page web-automation">
+      <div className="web-page__head">
+        <PageTitle emoji={EMOJIcon.automations} title={titleOf(entry)} uri={entry.resource} state={<Badge tone={STATE[now]} text={t(`automations/state/${now}`)} />} />
+        <div className="web-page__actions">
+          {can('run') ? <Button label={t('automations/actions/runNow')} variant="primary" onClick={() => void runNow(host, entry).catch(say)} /> : null}
+          {can('update') ? <Button label={t(entry.definition.enabled ? 'automations/actions/turnOff' : 'automations/actions/turnOn')} onClick={() => setEnabled(host, entry, !entry.definition.enabled)} /> : null}
+        </div>
+      </div>
+      {failure === null ? null : <Alert tone="danger" message={failure} />}
+      {!settings ? overview : (
+        <KeptTabs
+          key={ask?.host === host && ask.resource === entry.resource ? ask.at : 0}
+          tabs={[
+            { key: 'overview', title: t('automations/page/overview'), child: overview },
+            { key: 'settings', title: t('automations/page/settings'), child: (
+              <>
+                {can('update') ? <AutomationForm host={host} entry={entry} /> : null}
+                {can('remove') ? <DangerZone label={t('automations/actions/delete')} onClick={() => void remove(host, entry)} /> : null}
+              </>
+            ) },
+          ]}
+          defaultValue={automationTabKey()}
+          onChange={keepAutomationTabKey}
+        />
+      )}
     </div>
   );
 }

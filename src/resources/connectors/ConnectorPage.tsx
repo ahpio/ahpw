@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, Spinner, Tabs, Text, type BadgeTone } from '@softov/scena/ui';
+import { Alert, Badge, Button, Spinner, Text, type BadgeTone } from '@softov/scena/ui';
+import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ADAPTERS, adaptersReducer, CONNECTORS, connectorsReducer, type AdapterRow, type ConnectorRow, type ConnectorState } from '../../bridges/connectors.js';
 import { ahpPaths } from '../../bridges/data.js';
@@ -78,7 +79,7 @@ export default function ConnectorPage({ host, connector: id }: { host: string; c
       {row.state === 'ready' || row.state === 'failed' ? null : (
         <Alert tone={row.state === 'disabled' ? 'info' : row.state === 'unavailable' ? 'danger' : 'warning'} message={row.adapter === undefined ? t('connectors/page/noAdapter') : t(`connectors/stateNotes/${row.state}`, { adapter: row.adapter })} />
       )}
-      <Tabs
+      <KeptTabs
         tabs={[
           { key: 'overview', title: t('connectors/page/overview'), child: <Overview host={host} row={row} adapter={adapter} /> },
           ...(servesModels ? [{ key: 'models', title: t('connectors/page/models'), child: <Models host={host} id={id} /> }] : []),

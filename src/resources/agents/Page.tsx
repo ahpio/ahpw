@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, Tabs, type BadgeTone } from '@softov/scena/ui';
+import { Alert, Badge, Button, type BadgeTone } from '@softov/scena/ui';
+import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import type { AgentInfo } from '@microsoft/agent-host-protocol';
 import { ENGINES, AGENTS, enginesReducer, agentsReducer, servesEngines, servesAgents, type EngineRow, type AgentRow } from '../../bridges/agents.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -140,7 +141,7 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
         <Alert tone={record.state === 'disabled' ? 'info' : record.state === 'unavailable' ? 'danger' : 'warning'} message={t(`agents/page/standby/${record.state}`, { engine: record.engine })} />
       )}
       {tabs.length === 1 ? overview : (
-        <Tabs
+        <KeptTabs
           key={ask?.host === host && ask.provider === provider ? ask.at : 0}
           tabs={tabs}
           defaultValue={opens}

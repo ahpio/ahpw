@@ -97,7 +97,11 @@ export interface Draft {
   message: string;
   provider: string;
   model: string;
+  /** The custom agent each run's message names, by URI; empty is the agent's own. */
+  agent: string;
   folder: string;
+  /** The session settings each run starts with, as `resolveSessionConfig` names them. */
+  config: Record<string, unknown>;
   expression: string;
   timeZone: string;
   misfire: 'skip' | 'runOnce';
@@ -121,6 +125,8 @@ export function draftOf(entry: AutomationEntry | undefined, defaults: { provider
     message: definition?.message.text ?? '',
     provider: definition?.session.provider ?? defaults.provider ?? '',
     model: definition?.session.model?.id ?? '',
+    agent: definition?.session.agent?.uri ?? '',
+    config: definition?.session.config ?? {},
     folder: definition?.session.workingDirectories?.[0] === undefined ? defaults.folder ?? '' : folderLabel(definition.session.workingDirectories[0]),
     expression: schedule?.schedule.expression ?? '',
     timeZone: schedule?.schedule.timeZone ?? localZone(),
@@ -150,7 +156,7 @@ export function definitionOf(draft: Draft, kept?: AutomationDefinition): Automat
   ];
   // What the form owns is rebuilt from the draft, so clearing a field clears it; everything else is kept.
   const { disableConditions: _conditions, ...base } = kept ?? ({} as Partial<AutomationDefinition>);
-  const { provider: _provider, model: _model, workingDirectories: _folders, ...session } = kept?.session ?? {};
+  const { provider: _provider, model: _model, agent: _agent, workingDirectories: _folders, config: _config, ...session } = kept?.session ?? {};
   return {
     ...base,
     title: draft.title.trim(),
@@ -159,6 +165,8 @@ export function definitionOf(draft: Draft, kept?: AutomationDefinition): Automat
       ...session,
       ...(draft.provider === '' ? {} : { provider: draft.provider }),
       ...(draft.model === '' ? {} : { model: { id: draft.model } }),
+      ...(draft.agent === '' ? {} : { agent: { uri: draft.agent } }),
+      ...(Object.keys(draft.config).length === 0 ? {} : { config: draft.config }),
       ...(draft.folder.trim() === '' ? {} : { workingDirectories: [folderUri(draft.folder)] }),
     },
     enabled: draft.enabled,

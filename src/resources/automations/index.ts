@@ -2,7 +2,7 @@ import type { BindingPath, Disposable, Scena } from '@softov/scena/types';
 import { PALETTE_SLOT } from '../../shell/CommandPalette.js';
 import { combineDisposables, translate, type ModusClass } from '@softov/scena';
 import { hideOverlaidSidebar } from '../sessions/index.js';
-import { ACTIVE_AUTOMATION, AUTOMATIONS_FILTER, AUTOMATIONS_GROUP, AUTOMATIONS_SORT } from './state.js';
+import { ACTIVE_AUTOMATION, AUTOMATION_SECTION, AUTOMATIONS_FILTER, AUTOMATIONS_GROUP, AUTOMATIONS_SORT, automationTab, keepAutomationTabKey, NEW_AUTOMATION_TAB, type AutomationAsk } from './state.js';
 import { AUTO_FILTERS, AUTO_GROUPS, AUTO_SORTS, CHOICE_KEYS } from './arrange.js';
 import { registerChoice } from '../../shell/explorer/choice.js';
 import { titleOf } from './words.js';
@@ -68,7 +68,7 @@ export function registerAutomations(scena: Scena): Disposable {
       renderer: { kind: 'react', load: () => import('./Page.js') },
     }),
     scena.components.register({
-      component: 'AutomationEditPage',
+      component: 'NewAutomationPage',
       category: 'page',
       props: { icon: EMOJIcon.automations },
       renderer: { kind: 'react', load: () => import('./Edit.js') },
@@ -84,7 +84,7 @@ export function registerAutomations(scena: Scena): Disposable {
         const given = (args as { host?: string } | undefined)?.host;
         const host = given ?? (embedMode() === 'multi' ? startHost(everyHost(ctx.store), readLastHost()) : windowHost());
         if (host === undefined) return;
-        ctx.surfaces.open({ surface: 'main', key: 'automation:new', resource: { component: 'AutomationEditPage', host }, props: { title: bound('automations/commands/new') } });
+        ctx.surfaces.open({ surface: 'main', key: NEW_AUTOMATION_TAB, resource: { component: 'NewAutomationPage', host }, props: { title: bound('automations/commands/new') } });
         hideOverlaidSidebar(ctx.scena, ctx.store.get<ModusClass>(MODUS_CLASS) ?? 'large');
       },
     }),
@@ -99,18 +99,14 @@ export function registerAutomations(scena: Scena): Disposable {
     scena.commands.register({
       id: 'ahp.editAutomation',
       title: () => translate('automations/commands/edit'),
+      // An automation's settings are a tab of its page: the page opens on it, open already or not.
       run: (ctx, args) => {
         const target = args as AutomationArgs | undefined;
         if (target?.resource === undefined) return;
         const { resource, host = windowHost() } = target;
-        const entry = ctx.store.get<AutomationState>(channelPath(host, AUTOMATIONS))?.entries.find((one) => one.resource === resource);
-        ctx.surfaces.open({
-          surface: 'main',
-          key: `automation:edit:${host}:${resource}`,
-          resource: { component: 'AutomationEditPage', host, resource },
-          props: { title: entry === undefined ? bound('automations/commands/edit') : translate('automations/editTitle', { title: titleOf(entry) }) },
-        });
-        hideOverlaidSidebar(ctx.scena, ctx.store.get<ModusClass>(MODUS_CLASS) ?? 'large');
+        keepAutomationTabKey('settings');
+        ctx.store.set(AUTOMATION_SECTION, { host, resource, at: Date.now() } satisfies AutomationAsk);
+        return ctx.commands.execute('ahp.openAutomation', { host, resource });
       },
     }),
     scena.commands.register({
@@ -124,7 +120,7 @@ export function registerAutomations(scena: Scena): Disposable {
         const entry = ctx.store.get<AutomationState>(channelPath(host, AUTOMATIONS))?.entries.find((one) => one.resource === resource);
         ctx.surfaces.open({
           surface: 'main',
-          key: `automation:${host}:${resource}`,
+          key: automationTab(host, resource),
           resource: { component: 'AutomationPage', host, resource },
           props: { title: entry === undefined ? bound('automations/automation') : titleOf(entry) },
         });

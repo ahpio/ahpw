@@ -1,7 +1,8 @@
 import { useState, type ReactElement } from 'react';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, CheckBox, Spinner, Tabs, Text, type BadgeTone } from '@softov/scena/ui';
+import { Alert, Badge, Button, CheckBox, Spinner, Text, type BadgeTone } from '@softov/scena/ui';
+import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
@@ -93,7 +94,7 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
           {mayRestart(offers) ? <> <Button size="sm" label={t('host/restart/button')} onClick={() => void scena.commands.execute(RESTART_HOST, { host })} /></> : null}
         </Alert>
       ) : null}
-      <Tabs
+      <KeptTabs
         tabs={[
           { key: 'overview', title: t('plugins/page/overview'), child: <Overview host={host} id={id} row={row} /> },
           { key: 'options', title: t('plugins/page/options'), child: (

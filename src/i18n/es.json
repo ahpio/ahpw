@@ -608,7 +608,6 @@
       "open": "Abrir automatización"
     },
     "automation": "Automatización",
-    "editTitle": "Editar {title}",
     "untitled": "Sin título",
     "byHand": "Ejecución manual",
     "cron": {
@@ -723,10 +722,15 @@
       "runs": "Ejecuciones",
       "customizations": "Personalizaciones",
       "created": "Creada",
-      "changed": "Modificada"
+      "changed": "Modificada",
+      "notOffered": "No ofrecido",
+      "customAgent": "Agente personalizado",
+      "never": "Nunca"
     },
     "page": {
-      "message": "Mensaje",
+      "overview": "Resumen",
+      "settings": "Configuración",
+      "instructions": "Instrucciones",
       "runs": "Ejecuciones",
       "noRuns": "Aún no hay ejecuciones.",
       "columns": {
@@ -738,7 +742,12 @@
       },
       "openSession": "Abrir sesión",
       "stop": "Detener",
-      "loadOlder": "Cargar ejecuciones anteriores"
+      "loadOlder": "Cargar ejecuciones anteriores",
+      "sections": {
+        "agent": "Agente",
+        "schedule": "Programación",
+        "details": "Detalles"
+      }
     },
     "edit": {
       "noCreate": "Este host no permite crear automatizaciones.",
@@ -753,12 +762,7 @@
         "replaceNo": "Dejar lo mío"
       },
       "title": "Título",
-      "message": "Mensaje",
       "messageHint": "El mensaje que recibe el agente cada vez que se ejecuta.",
-      "agent": "Agente",
-      "model": "Modelo",
-      "folder": "Carpeta",
-      "folderHint": "Una carpeta en la computadora del host.",
       "schedule": "Programación",
       "presets": {
         "byHand": "Solo manual",
@@ -788,7 +792,14 @@
       "on": "Activada",
       "create": "Crear",
       "save": "Guardar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "reset": "Restablecer",
+      "saved": "Guardado.",
+      "notOffered": "El agente no ofrece este modelo.",
+      "notOfferedPill": "{model} · no ofrecido",
+      "notOfferedNote": "{agent} no ofrece {model}. Elige un modelo, o las ejecuciones fallan.",
+      "instructionsPlaceholder": "¿Qué debe hacer cada vez que se ejecute?",
+      "modelHint": "El modelo de cada ejecución"
     },
     "group": {
       "none": "Sin grupos",
