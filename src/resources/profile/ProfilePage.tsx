@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Tabs, Text } from '@softov/scena/ui';
+import { Text } from '@softov/scena/ui';
+import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { personUri, selfId } from '../../bridges/people.js';
@@ -21,7 +22,7 @@ export default function ProfilePage({ host }: { host: string }): ReactElement {
   return (
     <div className="web-page web-profile">
       <PageTitle emoji={EMOJIcon.users} title={id} uri={personUri(offers, 'users', id)} />
-      <Tabs
+      <KeptTabs
         tabs={[
           { key: 'info', title: t('profile/tabs/info'), child: <Info host={host} /> },
           { key: 'keys', title: t('profile/tabs/keys'), child: <Keys host={host} /> },

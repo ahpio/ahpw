@@ -1,7 +1,8 @@
 import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, DetailList, Markdown, Spinner, Tabs, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, Badge, Button, DetailList, Markdown, Spinner, Text, type DetailItem } from '@softov/scena/ui';
+import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { automationReducer, type AgentInfo, type AutomationCapabilities, type AutomationEntry, type AutomationState as Catalogue } from '@microsoft/agent-host-protocol';
 import { ahpPaths, AUTOMATIONS, hostBridge } from '../../bridges/data.js';
 import { embedMode } from '../../shell/embed/index.js';
@@ -225,7 +226,7 @@ export default function AutomationPage({ host, resource }: { host: string; resou
       </div>
       {failure === null ? null : <Alert tone="danger" message={failure} />}
       {!settings ? overview : (
-        <Tabs
+        <KeptTabs
           key={ask?.host === host && ask.resource === entry.resource ? ask.at : 0}
           tabs={[
             { key: 'overview', title: t('automations/page/overview'), child: overview },

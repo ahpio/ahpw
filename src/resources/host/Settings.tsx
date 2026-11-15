@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Button, SchemaForm, Spinner, Tabs, fieldsView, jsonView, sectionsView, type JsonSchemaObject } from '@softov/scena/ui';
+import { Button, SchemaForm, Spinner, fieldsView, jsonView, sectionsView, type JsonSchemaObject } from '@softov/scena/ui';
+import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { rootReducer, type RootState, type StateAction } from '@microsoft/agent-host-protocol';
 import { hostBridge, ROOT } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -154,7 +155,7 @@ export default function SettingsPage({ host, place = 'main' }: { host: string; p
   const { t } = useI18n();
   return (
     <div className="web-page web-settings" data-place={place}>
-      <Tabs
+      <KeptTabs
         tabs={[
           { key: 'host', title: t('host/settings/tabs/host'), child: <HostSettings host={host} /> },
           { key: 'ui', title: t('host/settings/tabs/ui'), child: <InterfaceSettings /> },
