@@ -1,0 +1,108 @@
+import { describe, expect, it } from 'vitest';
+import { ensureSyntaxTree } from '@codemirror/language';
+import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
+import { EditorSelection, EditorState } from '@codemirror/state';
+import type { Decoration } from '@codemirror/view';
+import { blockDecorations, previewDecorations, sourceLines } from './livePreview.js';
+
+/*
+ * The live preview's decorations, on an `EditorState`: what each part is
+ * drawn as, and what stays as text on the caret's line.
+ */
+
+const options = { openLink: () => {}, image: () => () => {}, block: () => () => {} };
+
+const stateOf = (doc: string, caret: number | null, readOnly = false): EditorState => {
+  const state = EditorState.create({
+    doc,
+    ...(caret === null ? {} : { selection: EditorSelection.single(caret) }),
+    extensions: [markdown({ base: markdownLanguage }), EditorState.readOnly.of(readOnly)],
+  });
+  ensureSyntaxTree(state, state.doc.length, 5000);
+  return state;
+};
+
+interface Drawn { from: number; to: number; text: string; kind: string }
+
+/** Each decoration as the text it covers and what it does there. */
+const drawn = (state: EditorState): Drawn[] => {
+  const out: Drawn[] = [];
+  previewDecorations(state, options).between(0, state.doc.length, (from, to, value: Decoration) => {
+    const spec = value.spec as { class?: string; widget?: { constructor: { name: string } }; attributes?: Record<string, string> };
+    const kind = spec.widget !== undefined ? `widget:${spec.widget.constructor.name}`
+      : spec.class !== undefined ? spec.class
+        : from === to ? 'line' : 'hidden';
+    out.push({ from, to, text: state.doc.sliceString(from, to), kind });
+  });
+  return out;
+};
+
+describe('the preview', () => {
+  it('sizes a heading and hides its marker away from the caret', () => {
+    const state = stateOf('# Title\n\ntext', null, true);
+    const parts = drawn(state);
+    expect(parts).toContainEqual({ from: 0, to: 2, text: '# ', kind: 'hidden' });
+    expect(previewDecorations(state, options).size).toBeGreaterThan(1);
+  });
+
+  it('styles bold and hides its markers, and keeps them on the caret\'s line', () => {
+    const away = drawn(stateOf('a **b** c\nnext', 12));
+    expect(away).toContainEqual({ from: 2, to: 7, text: '**b**', kind: 'web-lp-strong' });
+    expect(away.filter((one) => one.kind === 'hidden').map((one) => one.text)).toEqual(['**', '**']);
+    const on = drawn(stateOf('a **b** c\nnext', 1));
+    expect(on.filter((one) => one.kind === 'hidden')).toEqual([]);
+    expect(on.filter((one) => one.kind === 'web-lp-marker').map((one) => one.text)).toEqual(['**', '**']);
+  });
+
+  it('draws a task box in place of its marker, and strikes a done task', () => {
+    const parts = drawn(stateOf('- [x] done\n- [ ] open\n', null, true));
+    expect(parts.filter((one) => one.kind === 'widget:TaskBox').map((one) => one.text)).toEqual(['- [x] ', '- [ ] ']);
+    expect(parts).toContainEqual({ from: 6, to: 10, text: 'done', kind: 'web-lp-done' });
+  });
+
+  it('draws a bullet as a dot', () => {
+    const parts = drawn(stateOf('- one\n- two\n', null, true));
+    expect(parts.filter((one) => one.kind === 'widget:Bullet').map((one) => one.text)).toEqual(['-', '-']);
+  });
+
+  it('shows a link as its text, with its URL hidden', () => {
+    const parts = drawn(stateOf('See [the brief](brief.md) now', null, true));
+    expect(parts).toContainEqual({ from: 5, to: 14, text: 'the brief', kind: 'web-lp-link' });
+    expect(parts.filter((one) => one.kind === 'hidden').map((one) => one.text)).toEqual(['[', '](brief.md)']);
+  });
+
+  it('leaves a fenced block to the block drawings, with nothing styled inside it', () => {
+    const parts = drawn(stateOf('```js\nconst a = **1**;\n```\n', null, true));
+    expect(parts).toEqual([]);
+  });
+});
+
+describe('the lines that show their Markdown', () => {
+  it('are the caret\'s lines while the text is editable, and none while it is locked', () => {
+    expect([...sourceLines(stateOf('a\nb\nc', 2))]).toEqual([2]);
+    expect([...sourceLines(stateOf('a\nb\nc', 2, true))]).toEqual([]);
+  });
+});
+
+describe('the blocks drawn whole', () => {
+  /** Each block drawing as the text it replaces. */
+  const blocks = (state: EditorState): string[] => {
+    const out: string[] = [];
+    blockDecorations(state, options).between(0, state.doc.length, (from, to) => { out.push(state.doc.sliceString(from, to)); });
+    return out;
+  };
+  const doc = 'Intro\n\n| a | b |\n| - | - |\n| 1 | 2 |\n\n```mermaid\nflowchart LR\n  A --> B\n```\n\nEnd';
+
+  it('draws a table and a fenced block away from the caret', () => {
+    expect(blocks(stateOf(doc, 0))).toEqual(['| a | b |\n| - | - |\n| 1 | 2 |', '```mermaid\nflowchart LR\n  A --> B\n```']);
+  });
+
+  it('leaves a block as text while a caret is in it', () => {
+    const inTable = doc.indexOf('| 1 |');
+    expect(blocks(stateOf(doc, inTable))).toEqual(['```mermaid\nflowchart LR\n  A --> B\n```']);
+  });
+
+  it('draws every block while the text is locked', () => {
+    expect(blocks(stateOf(doc, doc.indexOf('A -->'), true))).toHaveLength(2);
+  });
+});

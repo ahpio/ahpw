@@ -10,6 +10,14 @@ async function openTarget(scena: Scena, host: string, target: FileTarget, missin
   else if (kind !== null || missing === 'open') void scena.commands.execute('ahp.openFile', { host, uri: target.uri, line: target.line, end: target.end });
 }
 
+/** Open what a link names: a file or folder on the host, relative paths from `base`, or a web link in a new browser tab. */
+export function openHref(scena: Scena, host: string, base: string | null, href: string): void {
+  if (href.startsWith('#')) return;
+  const target = fileLink(href, base);
+  if (target !== null) void openTarget(scena, host, target, 'open');
+  else if (/^(https?|mailto):/i.test(href)) window.open(href, '_blank', 'noopener');
+}
+
 /**
  * Clicks inside rendered markdown: a link or a code span that names a file or
  * folder on the host `host` opens it, relative paths from `base`, and a web link opens in a new
@@ -23,9 +31,7 @@ export function linkClicks(scena: Scena, host: string, base: string | null): (ev
       const href = anchor.getAttribute('href') ?? '';
       if (href.startsWith('#')) return;
       event.preventDefault();
-      const target = fileLink(href, base);
-      if (target !== null) void openTarget(scena, host, target, 'open');
-      else if (/^(https?|mailto):/i.test(href)) window.open(href, '_blank', 'noopener');
+      openHref(scena, host, base, href);
       return;
     }
     const code = element.closest('code');

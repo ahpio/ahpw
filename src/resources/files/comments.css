@@ -3,6 +3,8 @@
   position: relative;
   display: flex;
   min-height: 0;
+  /* Clipped, not hidden: a hidden box scrolls when a thread in it takes focus, and moves every thread off its line. */
+  overflow: clip;
 }
 
 .web-file__body--comments > .web-editor {
@@ -11,13 +13,14 @@
 }
 
 .web-file__margin {
-  position: relative;
-  flex: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
   width: 300px;
-  /* Clipped, not hidden: a hidden box still scrolls when a thread in it takes focus, and moves every thread off its line. */
-  overflow: clip;
-  border-left: 1px solid var(--oo-color-border);
-  background: var(--oo-color-surface);
+  /* Transparent: the text shows between the threads, and takes clicks there. */
+  pointer-events: none;
 }
 
 /* The threads move with the editor's scroll; each sits at its line's height. */
@@ -28,6 +31,7 @@
 
 .web-file__margin-slot {
   position: absolute;
+  pointer-events: auto;
   left: 8px;
   right: 8px;
 }
@@ -200,4 +204,52 @@
 .web-file__add-comment {
   position: absolute;
   z-index: 5;
+}
+
+/* With the comments folded away: one thread as a card beside its line. */
+.web-file__float {
+  position: absolute;
+  right: 16px;
+  z-index: 6;
+  width: 300px;
+  max-width: calc(100% - 32px);
+  border: 1px solid var(--oo-color-primary);
+  border-radius: 8px;
+  background: var(--oo-color-surface);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 18%);
+}
+
+.web-file__float-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 2px 10px;
+  border-bottom: 1px solid var(--oo-color-border);
+  color: var(--oo-color-muted);
+  font-size: 11px;
+}
+
+/* The card is the frame: the thread inside it draws none of its own. */
+.web-file__float .web-thread {
+  border: 0;
+  box-shadow: none;
+}
+
+.web-file__head .web-file__comments-toggle {
+  width: auto;
+  min-width: 26px;
+  padding: 0 5px;
+  gap: 3px;
+}
+
+.web-file__comments-toggle[aria-pressed="true"] {
+  border-color: var(--oo-color-primary);
+  background: color-mix(in srgb, var(--oo-color-primary) 18%, transparent);
+}
+
+.web-file__comments-count {
+  font-family: var(--oo-font-family);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }

@@ -1,3 +1,4 @@
+import type { Extension } from '@codemirror/state';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { createPortal } from 'react-dom';
 import { annotationsReducer, type AnnotationsState, type TextRange } from '@microsoft/agent-host-protocol';
@@ -14,6 +15,7 @@ import { EMOJIcon } from '../emojis.js';
 import { NameMark } from '../../shell/NameMark.js';
 import { SharedDocument, documentChannel, type DocumentPerson, type PersonKind, type SaveMode } from './document.js';
 import { FILE_SAVE_MODE } from './save-mode.js';
+import { FILE_COMMENTS } from './comments-shown.js';
 import { FileHead } from './text.js';
 import { commentsChannel, commentsOf, isOutdated, newComment, remove, reply, resolve, textOf } from './comments.js';
 import { NewComment, Thread, type ThreadActions } from './Threads.js';
@@ -34,12 +36,16 @@ const KIND_MARK: Partial<Record<PersonKind, string>> = { root: EMOJIcon.host, us
  * starts and the page changes for this file. A host that does not serve the
  * document calls `onPlain`, and the plain page takes over.
  */
-export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FilePageProps & { uri: string; onPlain: () => void }): ReactElement {
+export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra = [] }: FilePageProps & { uri: string; onPlain: () => void; extra?: Extension[] }): ReactElement {
   const { t } = useI18n();
   const scena = useScena();
   const [open, setOpen] = useState(false);
   const [locked, setLocked] = useState(true);
   const [mode, setMode] = useState<SaveMode>(() => (FILE_SAVE_MODE.read(scena.store) === 'manual' ? 'manual' : 'live'));
+  /** Whether the comments sit in a margin; folded away, one thread opens as a card by its line. */
+  const [shown, setShown] = useState(() => FILE_COMMENTS.read(scena.store) === 'shown');
+  /** What a click in the text away from a comment does: close the card, while the comments are folded away. */
+  const onTextClick = useRef<() => void>(() => {});
   const [refused, setRefused] = useState<string | null>(null);
   const [, redraw] = useState(0);
   const view = useRef<EditorView | null>(null);
@@ -81,6 +87,13 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
       removeTitle: t('files/comments/delete'),
     }),
     EditorView.updateListener.of((update) => { onUpdate.current(update); }),
+    EditorView.domEventHandlers({
+      mousedown(event) {
+        if (!(event.target instanceof Element && event.target.closest('.web-comment') !== null)) onTextClick.current();
+        return false;
+      },
+    }),
+    ...extra,
   ]);
 
   useEffect(() => {
@@ -249,6 +262,16 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
     setDraft(null);
   };
   const draftBox = draft === null ? null : <NewComment onAdd={add} onCancel={() => setDraft(null)} />;
+  const closeFloat = (): void => { setDraft(null); setFocused(null); };
+  onTextClick.current = () => { if (!shown && (draft !== null || focused !== null)) closeFloat(); };
+  // Escape closes the card, wherever the focus is.
+  useEffect(() => {
+    if (shown || (draft === null && focused === null)) return undefined;
+    const onKey = (event: KeyboardEvent): void => { if (event.key === 'Escape') closeFloat(); };
+    window.addEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shown, draft, focused]);
   /** The margin's threads and the new comment's box, in the order of the text, each once its line is measured. */
   const slotted = [
     ...comments.filter((one) => one.range !== undefined).map((one) => ({ id: one.id, range: one.range!, node: <Thread annotation={one} focused={one.id === focused} confirming={one.id === asking} actions={actions} /> })),
@@ -256,6 +279,10 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
   ]
     .filter((one) => tops[one.id] !== undefined)
     .sort((a, b) => a.range.start.line - b.range.start.line || a.range.start.character - b.range.start.character);
+  /** With the comments folded away: the open thread, or the new comment's box, as a card by its line. */
+  const floating = ((one) => (one === undefined ? null : { id: one.id, line: one.range.start.line, node: one.node }))(slotted.find((one) => one.id === (draft === null ? focused : DRAFT)));
+  /** The comments not resolved, which 💬 counts. */
+  const openCount = comments.filter((one) => !one.resolved).length;
 
   const people = shared?.everyone() ?? [];
   /**
@@ -313,6 +340,9 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
           ) : null}
         </>
       )}
+      <button type="button" className="web-icon-button web-file__comments-toggle" aria-pressed={shown}
+        title={shown ? t('files/comments/hideAll') : t('files/comments/showAll')} aria-label={shown ? t('files/comments/hideAll') : t('files/comments/showAll')}
+        onClick={() => setShown((was) => !was)}>{EMOJIcon.comment}<span className="web-file__comments-count">{openCount}</span></button>
     </FileHead>
   );
 
@@ -337,7 +367,16 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain }: FileP
           extensions={extensions}
           onView={attach}
         />
-        {narrow ? null : (
+        {narrow || shown || floating === null ? null : (
+          <div className="web-file__float" style={{ top: Math.max(0, tops[floating.id] ?? 0) }} onKeyDown={(event) => { if (event.key === 'Escape') closeFloat(); }}>
+            <div className="web-file__float-bar">
+              <span>{t('files/comments/line', { line: floating.line + 1 })}</span>
+              <button type="button" className="web-icon-button" title={t('files/comments/close')} aria-label={t('files/comments/close')} onClick={closeFloat}>{EMOJIcon.collapse}</button>
+            </div>
+            {floating.node}
+          </div>
+        )}
+        {narrow || !shown ? null : (
           <div className="web-file__margin">
             <div className="web-file__margin-inner" ref={margin}>
               {slotted.map(({ id, node }) => (

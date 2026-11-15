@@ -416,6 +416,7 @@
     "reading": "Cargando el archivo",
     "notReadable": "No se pudo leer este archivo",
     "notText": "Este archivo no es texto.",
+    "simpleNote": "Esta vista no edita el archivo aquí.",
     "unsaved": "Tienes cambios sin guardar en este archivo.",
     "changedOnHost": "Este archivo cambió en el host después de que lo abriste. Copia tus cambios y vuelve a abrir el archivo.",
     "readOnly": "Solo lectura",
@@ -478,6 +479,10 @@
       "resolve": "Resolver",
       "reopen": "Abrir de nuevo",
       "delete": "Eliminar comentario",
+      "line": "Línea {line}",
+      "close": "Cerrar",
+      "showAll": "Mostrar comentarios",
+      "hideAll": "Ocultar comentarios",
       "deleteAsk": "¿Eliminar esta conversación?",
       "deleteYes": "Eliminar",
       "show": "Mostrar la conversación",
@@ -2461,6 +2466,12 @@
           "description": "Cómo se guarda un archivo después de hacer clic en Editar. Puedes cambiarlo en cada archivo.",
           "live": "Guardar en vivo",
           "manual": "Guardar a mano"
+        },
+        "fileComments": {
+          "title": "Al abrir un archivo",
+          "description": "Si los comentarios de un archivo están en un margen, o recogidos hasta que abras uno. Puedes cambiarlo en cada archivo con 💬.",
+          "hidden": "Recogidos",
+          "shown": "En un margen"
         }
       },
       "tabs": {
