@@ -608,7 +608,6 @@
       "open": "Open automation"
     },
     "automation": "Automation",
-    "editTitle": "Edit {title}",
     "untitled": "Untitled",
     "byHand": "Run manually",
     "cron": {
@@ -723,10 +722,15 @@
       "runs": "Runs",
       "customizations": "Customizations",
       "created": "Created",
-      "changed": "Changed"
+      "changed": "Changed",
+      "notOffered": "Not offered",
+      "customAgent": "Custom agent",
+      "never": "Never"
     },
     "page": {
-      "message": "Message",
+      "overview": "Overview",
+      "settings": "Settings",
+      "instructions": "Instructions",
       "runs": "Runs",
       "noRuns": "No runs yet.",
       "columns": {
@@ -738,7 +742,12 @@
       },
       "openSession": "Open session",
       "stop": "Stop",
-      "loadOlder": "Load older runs"
+      "loadOlder": "Load older runs",
+      "sections": {
+        "agent": "Agent",
+        "schedule": "Schedule",
+        "details": "Details"
+      }
     },
     "edit": {
       "noCreate": "This host doesn't allow creating automations.",
@@ -753,12 +762,7 @@
         "replaceNo": "Keep mine"
       },
       "title": "Title",
-      "message": "Message",
       "messageHint": "The message the agent gets each time it runs.",
-      "agent": "Agent",
-      "model": "Model",
-      "folder": "Folder",
-      "folderHint": "A folder on the host's computer.",
       "schedule": "Schedule",
       "presets": {
         "byHand": "Manual only",
@@ -788,7 +792,14 @@
       "on": "On",
       "create": "Create",
       "save": "Save",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "reset": "Reset",
+      "saved": "Saved.",
+      "notOffered": "The agent doesn't offer this model.",
+      "notOfferedPill": "{model} · not offered",
+      "notOfferedNote": "{agent} doesn't offer {model}. Pick a model, or runs fail.",
+      "instructionsPlaceholder": "What should it do each time it runs?",
+      "modelHint": "The model each run uses"
     },
     "group": {
       "none": "No groups",

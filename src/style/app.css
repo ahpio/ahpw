@@ -1530,6 +1530,20 @@
   text-align: right;
 }
 
+/* An automation page's Overview tab: its facts, message and runs, spaced as a page's own blocks. */
+.web-automation__overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  padding-top: var(--oo-spacing-md);
+}
+
+/* A section after another keeps a line of space over its heading. */
+.web-automation__overview > .web-section:not(:first-child),
+.web-automation-form > .web-section {
+  margin-top: var(--oo-spacing-sm);
+}
+
 .web-automation__message {
   padding: var(--oo-spacing-sm) var(--oo-spacing-md);
   border-left: 2px solid var(--oo-color-border);
@@ -1544,8 +1558,60 @@
 }
 
 /* A field straight in a form page is one row of a column: it keeps its height. `flex: 1` is for fields side by side. */
-.web-page.web-form > .web-form__field {
+.web-page.web-form > .web-form__field,
+.web-automation-form > .web-form__field {
   flex: none;
+}
+
+/* The session each run starts, drawn as the new session box: no gutter of its own, as the form gives one. */
+.web-automation__box {
+  padding: 0;
+}
+
+.web-automation__box > .web-note {
+  margin: var(--oo-spacing-xs) 0 0;
+}
+
+/* The instructions keep four lines, so the box reads as a message to write. */
+.web-automation__text {
+  min-height: calc(4 * 1.4em + 12px);
+}
+
+/* A pill that opens a menu: its menu is placed under it, and a long description is cut, so the menu stays the width of a pill's list. */
+.web-menu-pill {
+  display: inline-flex;
+  --oo-action-list-max-width: min(28rem, calc(100vw - 2rem));
+}
+
+/* An agent's icon before its name, and a badge after a model. */
+.web-automation__agent {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+}
+
+.web-automation__agent img {
+  width: 16px;
+  height: 16px;
+}
+
+/* What makes the runs fail, said under the box. */
+.web-automation__warning {
+  margin: var(--oo-spacing-xs) 0 0;
+  color: var(--oo-color-warning);
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-automation__warn {
+  color: var(--oo-color-warning);
+}
+
+/* An automation's fields, on the new automation's page or in its page's Settings tab. */
+.web-automation-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  padding-top: var(--oo-spacing-md);
 }
 
 .web-form__row {

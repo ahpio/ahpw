@@ -77,6 +77,19 @@ describe('draftOf and definitionOf', () => {
     expect(definition.disableConditions).toBeUndefined();
   });
 
+  it('edits the settings and the custom agent each run starts with, and clears them when emptied', () => {
+    const kept = entry({}, { session: { provider: 'claude', agent: { uri: 'agent://reviewer' }, config: { permissionMode: 'default', isolation: 'folder' } } });
+    const draft = draftOf(kept);
+    expect(draft.agent).toBe('agent://reviewer');
+    expect(draft.config).toEqual({ permissionMode: 'default', isolation: 'folder' });
+    expect(definitionOf({ ...draft, config: { ...draft.config, isolation: 'worktree' } }, kept.definition).session).toEqual({
+      provider: 'claude',
+      agent: { uri: 'agent://reviewer' },
+      config: { permissionMode: 'default', isolation: 'worktree' },
+    });
+    expect(definitionOf({ ...draft, agent: '', config: {} }, kept.definition).session).toEqual({ provider: 'claude' });
+  });
+
   it('names what is missing', () => {
     const empty = draftOf(undefined);
     expect(draftProblem(empty)).toBe('Add a title.');

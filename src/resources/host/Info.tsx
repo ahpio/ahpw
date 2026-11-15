@@ -24,6 +24,7 @@ import { HOST_LIST, hostNameOf } from '../../bridges/hosts.js';
 import type { ServerInfo } from '../../bridges/server-info.js';
 import { memoryWords, NO_ABOUT, type HostAbout } from '../../bridges/host-about.js';
 import './info.css';
+import { Section } from '../../shell/view/Section.js';
 import { runFacts, runsByTime } from '../automations/words.js';
 
 /** What `GET /api/status` says about the daemon process. */
@@ -93,17 +94,6 @@ function AutomationsFact({ host, caps }: { host: string; caps: AutomationCapabil
       {' \u{00B7} '}
       {last === undefined ? t('host/info/automationsNeverRan') : t('host/info/automationsLastRan', { when: when(last) })}
     </button>
-  );
-}
-
-/** A section's heading: its icon, its title, and how many rows it holds when it lists any. */
-function Section({ icon, title, count }: { icon: string; title: string; count?: number }): ReactElement {
-  return (
-    <div className="web-host-section">
-      <span className="web-host-section__icon" aria-hidden="true">{icon}</span>
-      <Text variant="h3" text={title} />
-      {count === undefined ? null : <span className="web-host-section__count">{`(${String(count)})`}</span>}
-    </div>
   );
 }
 

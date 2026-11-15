@@ -608,7 +608,6 @@
       "open": "Abrir automação"
     },
     "automation": "Automação",
-    "editTitle": "Editar {title}",
     "untitled": "Sem título",
     "byHand": "Executada manualmente",
     "cron": {
@@ -723,10 +722,15 @@
       "runs": "Execuções",
       "customizations": "Personalizações",
       "created": "Criada",
-      "changed": "Alterada"
+      "changed": "Alterada",
+      "notOffered": "Não oferecido",
+      "customAgent": "Agente personalizado",
+      "never": "Nunca"
     },
     "page": {
-      "message": "Mensagem",
+      "overview": "Visão geral",
+      "settings": "Configurações",
+      "instructions": "Instruções",
       "runs": "Execuções",
       "noRuns": "Ainda não há execuções.",
       "columns": {
@@ -738,7 +742,12 @@
       },
       "openSession": "Abrir sessão",
       "stop": "Parar",
-      "loadOlder": "Carregar execuções anteriores"
+      "loadOlder": "Carregar execuções anteriores",
+      "sections": {
+        "agent": "Agente",
+        "schedule": "Agendamento",
+        "details": "Detalhes"
+      }
     },
     "edit": {
       "noCreate": "Este host não permite criar automações.",
@@ -753,12 +762,7 @@
         "replaceNo": "Manter o meu"
       },
       "title": "Título",
-      "message": "Mensagem",
       "messageHint": "A mensagem que o agente recebe a cada execução.",
-      "agent": "Agente",
-      "model": "Modelo",
-      "folder": "Pasta",
-      "folderHint": "Uma pasta no computador do host.",
       "schedule": "Agendamento",
       "presets": {
         "byHand": "Só manual",
@@ -788,7 +792,14 @@
       "on": "Ativada",
       "create": "Criar",
       "save": "Salvar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "reset": "Restaurar",
+      "saved": "Salvo.",
+      "notOffered": "O agente não oferece este modelo.",
+      "notOfferedPill": "{model} · não oferecido",
+      "notOfferedNote": "{agent} não oferece {model}. Escolha um modelo, ou as execuções falham.",
+      "instructionsPlaceholder": "O que ele deve fazer a cada execução?",
+      "modelHint": "O modelo de cada execução"
     },
     "group": {
       "none": "Sem grupos",

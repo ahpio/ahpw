@@ -1,12 +1,12 @@
-import { useMemo, useRef, useState, type ReactElement } from 'react';
+import { useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { getLocale } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Button, ContextMenu, Spinner, Text } from '@softov/scena/ui';
-import type { PickerAction } from '@softov/scena/types';
 import {
   automationReducer,
   type AgentInfo,
   type AutomationCapabilities,
+  type AutomationEntry,
   type AutomationState as Catalogue,
   type StateAction,
 } from '@microsoft/agent-host-protocol';
@@ -20,10 +20,13 @@ import { cronWords, definitionOf, draftOf, draftProblem, type Draft } from './wo
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { Field } from '../../shell/view/Field.js';
 import { plural } from '../../i18n/locales.js';
-import { useAgentIconSrc } from '../agents/icons.js';
 import { EMOJIcon } from '../emojis.js';
 import { confirm } from '../../shell/notify/confirm.js';
 import { templatesIn, type AutomationTemplate } from './templates.js';
+import { NEW_AUTOMATION_TAB } from './state.js';
+import { SettingsBox } from './SettingsBox.js';
+import { useSessionSettings } from './session-settings.js';
+import { Section } from '../../shell/view/Section.js';
 
 /** Schedules most people want, so a cron expression is something to read rather than write. */
 const PRESETS: { key: string; expression: string }[] = [
@@ -35,53 +38,6 @@ const PRESETS: { key: string; expression: string }[] = [
   { key: 'weekdaysAt9', expression: '0 9 * * 1-5' },
   { key: 'mondayAt5', expression: '0 5 * * 1' },
 ];
-
-/** The agent an automation runs with, picked from a list that draws each agent's icon; empty is the host's default. */
-function AgentField({ host, agents, value, onChange }: { host: string; agents: readonly AgentInfo[]; value: string; onChange: (provider: string) => void }): ReactElement {
-  const { t } = useI18n();
-  const iconSrcOf = useAgentIconSrc(useMemo(() => [host], [host]));
-  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
-  const agent = agents.find((one) => one.provider === value);
-  const image = value === '' ? undefined : iconSrcOf(host, value);
-  const pick = (provider: string) => (list: { closeMenu: () => void }): void => {
-    list.closeMenu();
-    onChange(provider);
-  };
-  return (
-    <>
-      <button
-        type="button"
-        className="web-field web-agent-field"
-        aria-haspopup="menu"
-        aria-expanded={menu !== null}
-        onClick={(event) => {
-          const box = event.currentTarget.getBoundingClientRect();
-          setMenu({ x: box.left, y: box.bottom });
-        }}
-      >
-        {image === undefined ? null : <img className="web-agent-field__image" src={image} alt="" />}
-        <span className="web-agent-field__label">{value === '' ? t('automations/defaults/host') : agent?.displayName ?? value}</span>
-        <span aria-hidden="true">{EMOJIcon.caretDown}</span>
-      </button>
-      {menu === null ? null : (
-        <ContextMenu
-          spec={{
-            items: [
-              { title: t('automations/defaults/host'), active: value === '', onSelect: pick('') },
-              ...agents.map((one): PickerAction => {
-                const iconSrc = iconSrcOf(host, one.provider);
-                return { title: one.displayName, ...(iconSrc === undefined ? {} : { iconSrc }), active: one.provider === value, onSelect: pick(one.provider) };
-              }),
-            ],
-          }}
-          x={menu.x}
-          y={menu.y}
-          onClose={() => setMenu(null)}
-        />
-      )}
-    </>
-  );
-}
 
 /** A button that lists the examples and hands back the one picked, asking first when it would replace what was typed. */
 function ExamplesButton({ dirty, onPick }: { dirty: boolean; onPick: (template: AutomationTemplate) => void }): ReactElement {
@@ -128,29 +84,22 @@ function ExamplesButton({ dirty, onPick }: { dirty: boolean; onPick: (template: 
   );
 }
 
-/** Creates an automation, or edits the one named by `resource`. */
-export default function AutomationEditPage({ host: opened, resource }: { host: string; resource?: string }): ReactElement {
-  // A new automation with every host may move to another host; one that exists stays on its own.
-  const [picked, setPicked] = useState(opened);
-  const host = resource === undefined && embedMode() === 'multi' ? picked : opened;
-  const hostList = useStore<HostName[]>(HOST_LIST);
+/** The fields of an automation and their buttons: Create and Cancel for a new one, Save and Reset for one that exists. */
+export function AutomationForm({ host, entry, header }: { host: string; entry?: AutomationEntry | undefined; header?: ReactNode }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
-  const { state, error } = useChannel<Catalogue>(host, AUTOMATIONS, automationReducer);
   const agents = useStore<AgentInfo[]>(ahpPaths(host).agents) ?? [];
   const caps = useStore<AutomationCapabilities | null>(ahpPaths(host).automationCaps);
   const home = useStore<string | null>(ahpPaths(host).defaultDirectory);
-  const entry = resource === undefined ? undefined : state?.entries.find((one) => one.resource === resource);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [saved, setSaved] = useState(false);
 
-  if (error !== null) return <PageAlert tone="danger" title={t('automations/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('automations/notices/reading')} />;
-  if (resource !== undefined && entry === undefined) return <PageAlert tone="warning" message={t('automations/notices/gone')} />;
-  if (resource === undefined && caps?.create === undefined) return <PageAlert tone="warning" message={t('automations/edit/noCreate')} />;
-
-  const shown = draft ?? draftOf(entry, { ...(agents[0] === undefined ? {} : { provider: agents[0].provider }), ...(home === null || home === undefined ? {} : { folder: folderLabel(home) }) });
-  const set = (patch: Partial<Draft>): void => setDraft({ ...shown, ...patch });
-  const agent = agents.find((one) => one.provider === shown.provider);
+  const held = draftOf(entry, { ...(agents[0] === undefined ? {} : { provider: agents[0].provider }), ...(home === null || home === undefined ? {} : { folder: folderLabel(home) }) });
+  // Turn on and Turn off sit in the page's head, so a made automation's form keeps the state the host holds.
+  const shown = entry === undefined ? draft ?? held : { ...(draft ?? held), enabled: held.enabled };
+  const dirty = JSON.stringify(shown) !== JSON.stringify(held);
+  const set = (patch: Partial<Draft>): void => { setDraft({ ...shown, ...patch }); setSaved(false); };
+  const settings = useSessionSettings(host, shown.provider, shown.folder, shown.config);
   const problem = draftProblem(shown);
   const minimum = caps?.schedules?.minIntervalMinutes;
   const preset = PRESETS.find((one) => one.expression === shown.expression.trim());
@@ -161,27 +110,18 @@ export default function AutomationEditPage({ host: opened, resource }: { host: s
     if (entry === undefined) {
       const created = `ahp-automation:/${newId()}`;
       hostBridge(host).dispatch(AUTOMATIONS, { type: 'automation/createRequested', resource: created, definition } as StateAction);
-      scena.surfaces.close('automation:new');
+      scena.surfaces.close(NEW_AUTOMATION_TAB);
       writeLastHost(host);
       void scena.commands.execute('ahp.openAutomation', { host, resource: created });
     } else {
       hostBridge(host).dispatch(AUTOMATIONS, { type: 'automation/updateRequested', resource: entry.resource, changes: definition } as StateAction);
-      scena.surfaces.close(`automation:edit:${host}:${entry.resource}`);
-      void scena.commands.execute('ahp.openAutomation', { host, resource: entry.resource });
+      setSaved(true);
     }
   };
 
   return (
-    <div className="web-page web-form">
-      <Text variant="h2" text={entry === undefined ? t('automations/commands/new') : entry.definition.title === '' ? t('automations/commands/edit') : t('automations/editTitle', { title: entry.definition.title })} />
-
-      {resource === undefined && embedMode() === 'multi' ? (
-        <Field label={t('automations/edit/host')}>
-          <select className="web-field" value={host} onChange={(event) => { setPicked(event.target.value); writeLastHost(event.target.value); setDraft(null); }}>
-            {(hostList ?? []).map((one) => <option key={one.id} value={one.id}>{one.name}</option>)}
-          </select>
-        </Field>
-      ) : null}
+    <div className="web-automation-form">
+      {header}
 
       {entry === undefined ? (
         <ExamplesButton
@@ -194,26 +134,10 @@ export default function AutomationEditPage({ host: opened, resource }: { host: s
         <input className="web-field" value={shown.title} onChange={(event) => set({ title: event.target.value })} />
       </Field>
 
-      <Field label={t('automations/edit/message')} hint={t('automations/edit/messageHint')}>
-        <textarea className="web-field web-form__message" rows={5} value={shown.message} onChange={(event) => set({ message: event.target.value })} />
-      </Field>
+      <Section icon={EMOJIcon.markdown} title={t('automations/page/instructions')} />
+      <SettingsBox host={host} agents={agents} draft={shown} settings={settings} set={set} />
 
-      <div className="web-form__row">
-        <Field label={t('automations/edit/agent')}>
-          <AgentField host={host} agents={agents} value={shown.provider} onChange={(provider) => set({ provider, model: '' })} />
-        </Field>
-        <Field label={t('automations/edit/model')}>
-          <select className="web-field" value={shown.model} onChange={(event) => set({ model: event.target.value })}>
-            <option value="">{t('automations/defaults/agent')}</option>
-            {(agent?.models ?? []).map((one) => <option key={one.id} value={one.id}>{one.name}</option>)}
-          </select>
-        </Field>
-      </div>
-
-      <Field label={t('automations/edit/folder')} hint={t('automations/edit/folderHint')}>
-        <input className="web-field" value={shown.folder} onChange={(event) => set({ folder: event.target.value })} />
-      </Field>
-
+      <Section icon={EMOJIcon.automations} title={t('automations/page/sections/schedule')} />
       <div className="web-form__row">
         <Field label={t('automations/edit/schedule')}>
           <select className="web-field" value={preset?.expression ?? 'custom'} onChange={(event) => { if (event.target.value !== 'custom') set({ expression: event.target.value }); }}>
@@ -252,16 +176,61 @@ export default function AutomationEditPage({ host: opened, resource }: { host: s
         </Field>
       </div>
 
-      <label className="web-input__row">
-        <input type="checkbox" checked={shown.enabled} onChange={(event) => set({ enabled: event.target.checked })} />
-        <span>{t('automations/edit/on')}</span>
-      </label>
+      {entry === undefined ? (
+        <label className="web-input__row">
+          <input type="checkbox" checked={shown.enabled} onChange={(event) => set({ enabled: event.target.checked })} />
+          <span>{t('automations/edit/on')}</span>
+        </label>
+      ) : null}
 
       {problem === undefined ? null : <p className="web-note">{problem}</p>}
-      <div className="web-page__actions">
-        <Button label={t(entry === undefined ? 'automations/edit/create' : 'automations/edit/save')} variant="primary" disabled={problem !== undefined} onClick={save} />
-        <Button label={t('automations/edit/cancel')} onClick={() => scena.surfaces.close(entry === undefined ? 'automation:new' : `automation:edit:${host}:${entry.resource}`)} />
-      </div>
+      {entry === undefined ? (
+        <div className="web-page__actions">
+          <Button label={t('automations/edit/create')} variant="primary" disabled={problem !== undefined} onClick={save} />
+          <Button label={t('automations/edit/cancel')} onClick={() => scena.surfaces.close(NEW_AUTOMATION_TAB)} />
+        </div>
+      ) : (
+        <div className="web-page__actions">
+          <Button label={t('automations/edit/save')} variant="primary" disabled={problem !== undefined || !dirty} onClick={save} />
+          <Button label={t('automations/edit/reset')} disabled={!dirty} onClick={() => { setDraft(null); setSaved(false); }} />
+          {saved && !dirty ? <span className="web-note">{t('automations/edit/saved')}</span> : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** The form for a new automation; with every host, it starts on the last host used and may move to another. */
+export default function NewAutomationPage({ host: opened }: { host: string }): ReactElement {
+  const [picked, setPicked] = useState(opened);
+  const host = embedMode() === 'multi' ? picked : opened;
+  const hostList = useStore<HostName[]>(HOST_LIST);
+  const { t } = useI18n();
+  const { state, error } = useChannel<Catalogue>(host, AUTOMATIONS, automationReducer);
+  const caps = useStore<AutomationCapabilities | null>(ahpPaths(host).automationCaps);
+
+  if (error !== null) return <PageAlert tone="danger" title={t('automations/notices/none')} message={error} />;
+  if (state === undefined) return <Spinner label={t('automations/notices/reading')} />;
+  if (caps?.create === undefined) return <PageAlert tone="warning" message={t('automations/edit/noCreate')} />;
+
+  return (
+    <div className="web-page">
+      <AutomationForm
+        key={host}
+        host={host}
+        header={(
+          <>
+            <Text variant="h2" text={t('automations/commands/new')} />
+            {embedMode() === 'multi' ? (
+              <Field label={t('automations/edit/host')}>
+                <select className="web-field" value={host} onChange={(event) => { setPicked(event.target.value); writeLastHost(event.target.value); }}>
+                  {(hostList ?? []).map((one) => <option key={one.id} value={one.id}>{one.name}</option>)}
+                </select>
+              </Field>
+            ) : null}
+          </>
+        )}
+      />
     </div>
   );
 }
