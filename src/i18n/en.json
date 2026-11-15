@@ -2897,7 +2897,8 @@
       "filter": "Filter plugins",
       "group": "Group",
       "empty": "This host has no plugins.",
-      "notServed": "None of your hosts let you see their plugins. This needs the plugin:list grant."
+      "notServed": "None of your hosts let you see their plugins. This needs the plugin:list grant.",
+      "search": "Search plugins"
     },
     "group": {
       "state": "By state",
@@ -2906,7 +2907,8 @@
     "commands": {
       "show": "Show plugins",
       "open": "Open plugin",
-      "new": "New plugin"
+      "new": "New plugin",
+      "openListed": "Open listed plugin"
     },
     "states": {
       "error": "Error",
@@ -2971,18 +2973,17 @@
     "page": {
       "gone": "This plugin is no longer installed.",
       "overview": "Overview",
-      "options": "Options",
       "provides": "Provides",
       "providesNothing": "Its manifest doesn't list anything it provides.",
       "undeclared": "It loaded, but its manifest doesn't list what it provides.",
       "notLoaded": "It hasn't loaded, so what it provides is unknown.",
-      "spec": "As configured",
       "loadFailed": "It didn't load",
-      "failing": "It has errors"
+      "failing": "It has errors",
+      "settings": "Settings",
+      "installation": "Installation",
+      "noReadme": "Its package has no README."
     },
     "facts": {
-      "id": "ID",
-      "state": "State",
       "version": "Version",
       "running": "Running",
       "module": "Module",
@@ -2996,7 +2997,14 @@
       "methods": "Commands",
       "resourceProviders": "Resource schemes",
       "tools": "Tools",
-      "triggerTypes": "Trigger types"
+      "triggerTypes": "Trigger types",
+      "engines": "Engines",
+      "tunnelKinds": "Tunnel kinds",
+      "routes": "Routes",
+      "bindings": "Bindings",
+      "folders": "Folders",
+      "grants": "Grants",
+      "closers": "Closers"
     },
     "options": {
       "save": "Save",
@@ -3010,6 +3018,32 @@
     "running": {
       "yes": "Yes",
       "no": "No, it loads the next time the host starts"
+    },
+    "listed": {
+      "notInstalled": "Not installed",
+      "install": "Install",
+      "installing": "Installing…",
+      "installFailed": "Couldn't install {title}",
+      "installVersion": "Install {version}",
+      "versions": "Install a specific version",
+      "reading": "Reading the plugin…",
+      "unread": "Couldn't read this plugin",
+      "gone": "No list of this host holds this plugin now.",
+      "features": "Features",
+      "changelog": "Changelog",
+      "noReadme": "This version has no README.",
+      "identifier": "Identifier",
+      "published": "Published",
+      "list": "List",
+      "author": "Author",
+      "license": "License",
+      "categories": "Categories",
+      "resources": "Resources",
+      "repository": "Repository",
+      "homepage": "Homepage",
+      "issues": "Issues",
+      "marketplace": "Marketplace",
+      "noSettings": "It has no settings."
     }
   },
   "connectors": {

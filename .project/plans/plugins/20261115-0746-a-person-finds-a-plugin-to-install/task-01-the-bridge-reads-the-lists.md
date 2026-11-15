@@ -1,6 +1,6 @@
 ---
 title: The bridge reads the lists
-status: todo
+status: implemented
 depends: []
 layer: "ahpw bridges"
 refs:
@@ -33,3 +33,7 @@ The plugins bridge asks `x-ahpd/plugins/available` and `x-ahpd/plugins/details`,
 - `pnpm typecheck` passes.
 
 ## Resume
+
+Built on 2026-11-15; awaits review.
+`availablePlugins` and `pluginDetails` are in `src/bridges/plugins.ts`, and `installPlugin` takes an optional `marketplace`.
+`src/bridges/plugins.test.ts` passes 13 cases.

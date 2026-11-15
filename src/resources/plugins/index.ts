@@ -13,7 +13,7 @@ import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
 import { PLUGIN_GROUPINGS } from './rows.js';
 import { applyAll } from './actions.js';
-import { ACTIVE_PLUGIN, GROUP_KEY, newPluginTab, pluginTab, PLUGINS_ADD, PLUGINS_APPLY, PLUGINS_GROUP, PLUGINS_SERVED } from './state.js';
+import { ACTIVE_LISTED, ACTIVE_PLUGIN, GROUP_KEY, LISTED_AS, listedTab, newPluginTab, pluginTab, PLUGINS_ADD, PLUGINS_APPLY, PLUGINS_GROUP, PLUGINS_SERVED } from './state.js';
 
 /** The display size class the modus backend publishes. */
 const MODUS_CLASS = '$/modus/class' as BindingPath;
@@ -30,6 +30,14 @@ export interface PluginArgs {
   id?: string;
 }
 
+/** Arguments of the command that opens a listed plugin: its host, its id in the list, the list, and the name its tab shows. */
+export interface ListedArgs {
+  host?: string;
+  id?: string;
+  marketplace?: string;
+  title?: string;
+}
+
 /** The host's plugins: a list grouped by state or by category, and a page that shows, enables and configures each. */
 export function registerPlugins(scena: Scena): Disposable {
   const offersOf = (host: string): Offers => scena.store.get<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
@@ -42,12 +50,34 @@ export function registerPlugins(scena: Scena): Disposable {
     const host = target.host ?? startHost(servingHosts(), readLastHost());
     if (host === undefined || target.id === undefined) return;
     scena.store.set(ACTIVE_PLUGIN, { host, id: target.id });
+    scena.store.set(ACTIVE_LISTED, undefined);
+    // A listed tab that turned into this plugin's page is its tab.
+    const listedAs = scena.store.get<Record<string, string>>(LISTED_AS)?.[pluginTab(host, target.id)];
+    if (listedAs !== undefined && scena.surfaces.listAt('main').some((one) => one.key === listedAs)) {
+      scena.surfaces.focus(listedAs);
+      hideOverlaidSidebar(scena, scena.store.get<ModusClass>(MODUS_CLASS) ?? 'large');
+      return;
+    }
     // `plugin`, not `id`: the page's plugin id, which scena's own `id` would shadow.
     scena.surfaces.open({
       surface: 'main',
       key: pluginTab(host, target.id),
       resource: { component: 'PluginPage', host, plugin: target.id },
       props: { title: target.id },
+    });
+    hideOverlaidSidebar(scena, scena.store.get<ModusClass>(MODUS_CLASS) ?? 'large');
+  };
+
+  /** Open the page of a plugin a host's list holds, one tab for each host, list and id. */
+  const openListed = (_ctx: unknown, args: unknown): void => {
+    const target = (args ?? {}) as ListedArgs;
+    if (target.host === undefined || target.id === undefined || target.marketplace === undefined) return;
+    scena.store.set(ACTIVE_LISTED, { host: target.host, id: target.id, marketplace: target.marketplace });
+    scena.surfaces.open({
+      surface: 'main',
+      key: listedTab(target.host, target.marketplace, target.id),
+      resource: { component: 'ListedPluginPage', host: target.host, plugin: target.id, marketplace: target.marketplace },
+      props: { title: target.title ?? target.id },
     });
     hideOverlaidSidebar(scena, scena.store.get<ModusClass>(MODUS_CLASS) ?? 'large');
   };
@@ -80,6 +110,7 @@ export function registerPlugins(scena: Scena): Disposable {
     }),
     scena.components.register({ component: 'NewPluginPage', category: 'page', props: { icon: EMOJIcon.hostPlugins }, renderer: { kind: 'react', load: () => import('./NewPluginPage.js') } }),
     scena.components.register({ component: 'PluginPage', category: 'page', props: { icon: EMOJIcon.hostPlugins }, renderer: { kind: 'react', load: () => import('./PluginPage.js') } }),
+    scena.components.register({ component: 'ListedPluginPage', category: 'page', props: { icon: EMOJIcon.hostPlugins }, renderer: { kind: 'react', load: () => import('./ListedPluginPage.js') } }),
     scena.commands.register({
       id: 'plugins.reload',
       title: () => translate('common/reload'),
@@ -114,6 +145,7 @@ export function registerPlugins(scena: Scena): Disposable {
       },
     }),
     scena.commands.register({ id: 'ahp.openPlugin', title: () => translate('plugins/commands/open'), run: open }),
+    scena.commands.register({ id: 'ahp.openListedPlugin', title: () => translate('plugins/commands/openListed'), run: openListed }),
     scena.surfaces.mount({
       surface: 'sidebar:left',
       key: 'plugins:explorer',

@@ -1,87 +1,60 @@
 import type { ReactElement } from 'react';
-import { useI18n, useScena } from '@softov/scena/react';
-import { Alert, DetailList, Markdown, Text, type DetailItem } from '@softov/scena/ui';
+import { useI18n } from '@softov/scena/react';
+import { Alert, Text, type DetailItem } from '@softov/scena/ui';
 import type { PluginRow } from '../../bridges/plugins.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { AlertList } from '../../shell/view/AlertList.js';
-import { RemovableChip } from '../../shell/view/RemovableChip.js';
-import { categoryWord } from './Explorer.js';
+import { ReadText } from './ListTabs.js';
 import { PluginViewPanel } from './PluginViewPanel.js';
-import { PROVIDE_ORDER, providedGroups } from './provides.js';
+import { providedGroups } from './provides.js';
+import { ProvidesList } from './ProvidesList.js';
 
 /** A state that is a problem, and how loud it is. */
 const PROBLEM_TONE: Partial<Record<PluginRow['state'], 'danger' | 'warning'>> = { error: 'danger', missing: 'danger', incompatible: 'warning', unconfigured: 'warning' };
 
+/** Where an installed plugin is and whether it runs, as the *Installation* section of its facts column names it. */
+export function installationFacts(host: string, row: PluginRow, t: (key: string) => string): DetailItem[] {
+  return [
+    ...(embedMode() === 'multi' ? [{ label: t('common/host'), value: <HostTag host={host} /> }] : []),
+    ...(row.loaded === undefined ? [] : [{ label: t('plugins/facts/running'), value: t(row.loaded ? 'plugins/running/yes' : 'plugins/running/no') }]),
+    ...(row.path === undefined ? [] : [{ label: t('plugins/facts/path'), value: <code className="web-listed__path">{row.path}</code> }]),
+    // A `file:` URL is the path again; only a plugin loaded from elsewhere names one.
+    ...(row.url === undefined || row.url.startsWith('file:') ? [] : [{ label: t('plugins/facts/url'), value: <code className="web-listed__path">{row.url}</code> }]),
+  ];
+}
+
 /**
- * What a plugin is: its description and problem, the view it draws on its page, the facts of where it comes
- * from and its links, its categories, its alerts by level, what its contracts say it provides - each
- * opening where ahpw shows it - and its configured spec.
+ * An installed plugin's *Overview*: its problem, the view it draws on its
+ * page, its alerts by level, and the README of the package it loads, when
+ * the package has one.
  */
-export function Overview({ host, id, row }: { host: string; id: string; row: PluginRow }): ReactElement {
-  const scena = useScena();
+export function Overview({ host, id, row, readme }: { host: string; id: string; row: PluginRow; readme: string | undefined }): ReactElement {
   const { t } = useI18n();
-  const manifest = row.manifest;
-  const groups = providedGroups(manifest?.contracts, host);
   const tone = PROBLEM_TONE[row.state];
   // ahpd repeats a configured problem as the load's error; the problem above says it.
   const alerts = (row.alerts ?? []).filter((alert) => alert.text !== row.problem);
-  const facts: DetailItem[] = [
-    ...(embedMode() === 'multi' ? [{ label: t('common/host'), value: <HostTag host={host} />, span: true }] : []),
-    { label: t('plugins/facts/id'), value: id },
-    { label: t('plugins/facts/state'), value: t(`plugins/states/${row.state}`) },
-    ...(row.version === undefined ? [] : [{ label: t('plugins/facts/version'), value: row.version }]),
-    ...(row.loaded === undefined ? [] : [{ label: t('plugins/facts/running'), value: t(row.loaded ? 'plugins/running/yes' : 'plugins/running/no') }]),
-    ...(row.module === undefined ? [] : [{ label: t('plugins/facts/module'), value: row.module }]),
-    ...(row.path === undefined ? [] : [{ label: t('plugins/facts/path'), value: row.path, span: true }]),
-    ...(row.url === undefined ? [] : [{ label: t('plugins/facts/url'), value: row.url, span: true }]),
-    ...(manifest?.links ?? []).map((link) => ({
-      label: link.title,
-      value: <a href={link.url} target="_blank" rel="noreferrer">{link.url}</a>,
-      span: true,
-    })),
-  ];
-
   return (
-    <div className="web-plugin__overview">
-      {manifest?.description === undefined ? null : <Markdown text={manifest.description} />}
+    <>
       {row.problem === undefined ? null : <Alert tone={tone ?? 'warning'} message={row.problem} />}
       {row.views?.main === undefined ? null : <PluginViewPanel host={host} plugin={id} at={`plugin:${id}`} view={row.views.main} />}
-      <DetailList items={facts} columns={2} />
-
-      {(manifest?.categories ?? []).length === 0 ? null : (
-        <div className="web-plugin__tags">
-          {(manifest?.categories ?? []).map((category) => <RemovableChip key={category} label={categoryWord(t, category)} removeLabel={category} />)}
-        </div>
-      )}
-
       <AlertList alerts={alerts} />
+      {readme === undefined ? <p className="web-note">{t('plugins/page/noReadme')}</p> : <ReadText text={readme} />}
+    </>
+  );
+}
 
+/** An installed plugin's *Features*: what its loaded manifest says it provides, each entry opening where ahpw shows it. */
+export function Features({ host, row }: { host: string; row: PluginRow }): ReactElement {
+  const { t } = useI18n();
+  const manifest = row.manifest;
+  const groups = providedGroups(manifest?.contracts, host);
+  return (
+    <>
       <Text variant="h3" text={t('plugins/page/provides')} />
       {row.undeclared === true ? <p className="web-note">{t('plugins/page/undeclared')}</p>
-        : groups.length === 0 ? <p className="web-note">{t(manifest === undefined ? 'plugins/page/notLoaded' : 'plugins/page/providesNothing')}</p> : (
-          <dl className="web-plugin__provides">
-            {groups.map((group) => (
-              <div key={group.kind} className="web-plugin__provides-row">
-                <dt>{(PROVIDE_ORDER as readonly string[]).includes(group.kind) ? t(`plugins/provides/${group.kind}`) : group.kind}</dt>
-                <dd>
-                  {group.entries.map((entry) => (entry.link === undefined
-                    ? <code key={entry.name} className="web-plugin__entry">{entry.name}</code>
-                    : (
-                      <button key={entry.name} type="button" className="web-link web-plugin__entry" onClick={() => void scena.commands.execute(entry.link!.command, entry.link!.args)}>
-                        {entry.name}
-                      </button>
-                    )))}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        )}
-
-      <details className="web-record">
-        <summary>{t('plugins/page/spec')}</summary>
-        <pre>{JSON.stringify(row.spec, null, 2)}</pre>
-      </details>
-    </div>
+        : groups.length === 0 ? <p className="web-note">{t(manifest === undefined ? 'plugins/page/notLoaded' : 'plugins/page/providesNothing')}</p>
+          : <ProvidesList host={host} contracts={manifest?.contracts} />}
+    </>
   );
 }
