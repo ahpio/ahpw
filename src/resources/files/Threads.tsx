@@ -92,7 +92,7 @@ export function Thread({ annotation, focused, confirming, actions }: { annotatio
   }
   const tools = (
     <span className="web-thread__tools">
-      <button type="button" className="web-icon-button" title={annotation.resolved ? t('files/comments/reopen') : t('files/comments/resolve')} aria-label={annotation.resolved ? t('files/comments/reopen') : t('files/comments/resolve')} onClick={(event) => { event.stopPropagation(); actions.resolve(annotation.id, !annotation.resolved); }}>{EMOJIcon.check}</button>
+      <button type="button" className="web-icon-button" title={annotation.resolved ? t('files/comments/reopen') : t('files/comments/resolve')} aria-label={annotation.resolved ? t('files/comments/reopen') : t('files/comments/resolve')} onClick={(event) => { event.stopPropagation(); actions.resolve(annotation.id, !annotation.resolved); }}>{annotation.resolved ? EMOJIcon.reopen : EMOJIcon.check}</button>
       <button type="button" className="web-icon-button" title={t('files/comments/delete')} aria-label={t('files/comments/delete')} onClick={(event) => { event.stopPropagation(); actions.askRemove(annotation.id); }}>{EMOJIcon.close}</button>
     </span>
   );

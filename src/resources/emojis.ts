@@ -96,6 +96,7 @@ export const EMOJIcon = {
 
   // status and feedback
   check: '✓',
+  reopen: '↺',
   cross: '✕',
   error: mono('✖'),
   warning: mono('⚠'),
