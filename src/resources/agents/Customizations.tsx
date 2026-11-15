@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Button, Markdown, Spinner, StatusDot, TextField } from '@softov/scena/ui';
+import { Button, Spinner, StatusDot, TextField } from '@softov/scena/ui';
+import { Markdown } from '../../shell/markdown/Markdown.js';
 import { EMOJIcon } from '../emojis.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { linkClicks } from '../files/clicks.js';

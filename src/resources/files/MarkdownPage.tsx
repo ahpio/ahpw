@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Alert, Markdown, Spinner } from '@softov/scena/ui';
+import { Alert, Spinner } from '@softov/scena/ui';
+import { Markdown } from '../../shell/markdown/Markdown.js';
 import { linkClicks } from './clicks.js';
 import { imagesFrom } from './HostImage.js';
 import { FileHead, useFileText } from './text.js';
