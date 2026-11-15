@@ -19,8 +19,8 @@
   bottom: 0;
   z-index: 5;
   width: 300px;
-  border-left: 1px solid var(--oo-color-border);
-  background: var(--oo-color-surface);
+  /* Transparent: the text shows between the threads, and takes clicks there. */
+  pointer-events: none;
 }
 
 /* The threads move with the editor's scroll; each sits at its line's height. */
@@ -31,6 +31,7 @@
 
 .web-file__margin-slot {
   position: absolute;
+  pointer-events: auto;
   left: 8px;
   right: 8px;
 }
