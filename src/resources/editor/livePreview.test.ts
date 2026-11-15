@@ -3,7 +3,7 @@ import { ensureSyntaxTree } from '@codemirror/language';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { EditorSelection, EditorState } from '@codemirror/state';
 import type { Decoration } from '@codemirror/view';
-import { blockDecorations, previewDecorations, sourceLines } from './livePreview.js';
+import { blockDecorations, htmlImages, previewDecorations, sourceLines } from './livePreview.js';
 
 /*
  * The live preview's decorations, on an `EditorState`: what each part is
@@ -104,5 +104,30 @@ describe('the blocks drawn whole', () => {
 
   it('draws every block while the text is locked', () => {
     expect(blocks(stateOf(doc, doc.indexOf('A -->'), true))).toHaveLength(2);
+  });
+});
+
+describe('images written as HTML', () => {
+  it('reads an img tag\'s source, text and size', () => {
+    expect(htmlImages('<p align="center"><img src="logo.svg" alt="" height="32"><img src=\'b.png\' width=20></p>'))
+      .toEqual([{ src: 'logo.svg', alt: '', height: '32' }, { src: 'b.png', alt: '', width: '20' }]);
+  });
+
+  it('draws an img tag in a heading as an inline image, and its marker hidden', () => {
+    const parts = drawn(stateOf('# <img src="logo.svg" alt="" height="32"> ahpd\n\ntext', null, true));
+    expect(parts).toContainEqual({ from: 2, to: 41, text: '<img src="logo.svg" alt="" height="32">', kind: 'widget:Picture' });
+  });
+
+  it('draws the image inside a link, as a badge', () => {
+    const parts = drawn(stateOf('[![CI](ci.svg)](https://example.com/ci)\n', null, true));
+    expect(parts).toContainEqual({ from: 1, to: 14, text: '![CI](ci.svg)', kind: 'widget:Picture' });
+    expect(parts.filter((one) => one.kind === 'web-lp-link')).toHaveLength(1);
+  });
+
+  it('draws an HTML block with images as a block, and leaves other HTML as text', () => {
+    const doc = 'a\n\n<p align="center"><img src="a.png" width="200"></p>\n\n<div>no image</div>\n';
+    const out: string[] = [];
+    blockDecorations(stateOf(doc, 0), options).between(0, doc.length, (from, to) => { out.push(doc.slice(from, to)); });
+    expect(out).toEqual(['<p align="center"><img src="a.png" width="200"></p>']);
   });
 });

@@ -5,7 +5,7 @@ import { hostBridge } from '../../bridges/data.js';
 import CodeEditor from '../editor/CodeEditor.js';
 import { languageOf } from '../editor/languages.js';
 import { changedOnHost, refusesWrite, shownText } from './save.js';
-import { FileHead, useFileText } from './text.js';
+import { FileHead, useFileText, useWrap, WrapButton } from './text.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { SharedFilePage } from './SharedFilePage.js';
 
@@ -49,6 +49,7 @@ function PlainFilePage({ host, uri, line, end, onDirty }: FilePageProps): ReactE
   /** The version of the file the editor started from; a save is refused once the host holds another. */
   const version = useRef<string | undefined>(undefined);
 
+  const [wrap, setWrap] = useWrap();
   useCloseGuard(() => (dirty ? t('files/unsaved') : null));
   // A holder with no tab of its own, as a modal, learns of unsaved text here.
   useEffect(() => { onDirty?.(dirty); }, [dirty, onDirty]);
@@ -101,6 +102,7 @@ function PlainFilePage({ host, uri, line, end, onDirty }: FilePageProps): ReactE
   return (
     <div className="web-file">
       <FileHead uri={uri} dirty={dirty}>
+        <WrapButton wrap={wrap} onChange={setWrap} />
         {readOnly ? null : <Button label={t('files/save')} size="sm" variant="primary" disabled={!dirty} onClick={() => save(draft.current)} />}
       </FileHead>
       {failure === null ? null : <Alert tone="danger" title={failure.refused ? t('files/readOnly') : t('files/notSaved')} message={failure.message} />}
@@ -114,6 +116,8 @@ function PlainFilePage({ host, uri, line, end, onDirty }: FilePageProps): ReactE
           end={end ?? null}
           onChange={change}
           onSave={save}
+          wrap={wrap}
+          onWrapChange={setWrap}
         />
       </div>
     </div>

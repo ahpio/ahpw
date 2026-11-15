@@ -69,8 +69,26 @@
 }
 
 .web-lp .cm-content .web-lp-image img {
+  width: var(--web-lp-image-width, auto);
+  height: var(--web-lp-image-height, auto);
   max-width: min(100%, 520px);
   border-radius: 6px;
+}
+
+/* An image among the text, as a logo in a heading or a badge in a link. */
+.web-lp .cm-content .web-lp-image--inline {
+  display: inline-block;
+  margin: 0 2px;
+  vertical-align: middle;
+}
+
+.web-lp .cm-content .web-lp-image--inline img {
+  border-radius: 0;
+}
+
+/* An HTML block's images, in a row. */
+.web-lp .cm-content .web-lp-html {
+  padding: 4px 2px 4px 6px;
 }
 
 /* A line with the caret shows its Markdown, as source. */

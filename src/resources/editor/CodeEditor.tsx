@@ -1,4 +1,5 @@
-import { useEffect, useRef, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useScena, useStore } from '@softov/scena/react';
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { bracketMatching, foldGutter, foldKeymap, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language';
@@ -10,6 +11,7 @@ import {
 } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { loadLanguage, type LanguageKey } from './languages.js';
+import { TEXT_WRAP } from './wrap.js';
 
 /** What the editor shows and what it tells its owner. */
 export interface CodeEditorProps {
@@ -30,6 +32,10 @@ export interface CodeEditorProps {
   extensions?: Extension;
   /** Called with the editor once it is made, and with null when it goes, for a shared document that drives it. */
   onView?: (view: EditorView | null) => void;
+  /** Whether long lines wrap, held by the owner; when absent, the editor follows the text wrap setting. */
+  wrap?: boolean;
+  /** Called when the person toggles wrap with Alt+Z, for an owner that holds `wrap`. */
+  onWrapChange?: (wrap: boolean) => void;
 }
 
 /** Marks a change that came from `value`, which is not an edit. */
@@ -119,7 +125,15 @@ const highlight = HighlightStyle.define([
 ]);
 
 /** Whether the text can be changed, as the state and the view each need it. */
-const editable = (readOnly: boolean): Extension => [EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)];
+/**
+ * Whether the text can change. A read-only editor still takes focus, as VS
+ * Code's does, so its keys work: copy, search, and Alt+Z.
+ */
+const editable = (readOnly: boolean): Extension => [
+  EditorState.readOnly.of(readOnly),
+  EditorView.editable.of(!readOnly),
+  readOnly ? EditorView.contentAttributes.of({ tabindex: '0' }) : [],
+];
 
 /** Select lines `line` to `end` and bring them to the middle of the view. */
 function reveal(view: EditorView, line: number, end: number | null | undefined): void {
@@ -133,13 +147,23 @@ function reveal(view: EditorView, line: number, end: number | null | undefined):
 }
 
 /** A code editor: line numbers, folding, bracket matching, search and the language's colours. */
-export default function CodeEditor({ value, language = null, readOnly = false, line, end, onChange, onSave, extensions = [], onView }: CodeEditorProps): ReactElement {
+export default function CodeEditor({ value, language = null, readOnly = false, line, end, onChange, onSave, extensions = [], onView, wrap, onWrapChange }: CodeEditorProps): ReactElement {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const languageSlot = useRef(new Compartment());
   const readOnlySlot = useRef(new Compartment());
-  const handlers = useRef({ onChange, onSave, onView });
-  handlers.current = { onChange, onSave, onView };
+  const wrapSlot = useRef(new Compartment());
+  // The setting, followed live, for an editor whose owner does not hold wrap.
+  const setting = useStore<string>(TEXT_WRAP.path);
+  const scena = useScena();
+  const [own, setOwn] = useState(() => TEXT_WRAP.read(scena.store) === 'on');
+  useEffect(() => { if (setting !== undefined) setOwn(setting === 'on'); }, [setting]);
+  const wraps = wrap ?? own;
+  const handlers = useRef({ onChange, onSave, onView, toggleWrap: () => {} });
+  handlers.current = {
+    onChange, onSave, onView,
+    toggleWrap: () => { if (onWrapChange !== undefined) onWrapChange(!wraps); else setOwn(!wraps); },
+  };
 
   useEffect(() => {
     const parent = host.current;
@@ -168,6 +192,8 @@ export default function CodeEditor({ value, language = null, readOnly = false, l
           search({ top: true }),
           keymap.of([
             { key: 'Mod-s', preventDefault: true, run: (target) => { handlers.current.onSave?.(target.state.doc.toString()); return true; } },
+            // VS Code's Toggle Word Wrap.
+            { key: 'Alt-z', preventDefault: true, run: () => { handlers.current.toggleWrap(); return true; } },
             ...closeBracketsKeymap,
             ...defaultKeymap,
             ...searchKeymap,
@@ -180,6 +206,7 @@ export default function CodeEditor({ value, language = null, readOnly = false, l
           extensions,
           languageSlot.current.of([]),
           readOnlySlot.current.of(editable(readOnly)),
+          wrapSlot.current.of(wraps ? EditorView.lineWrapping : []),
           EditorView.updateListener.of((update) => {
             if (!update.docChanged || update.transactions.some((one) => one.annotation(external) === true)) return;
             handlers.current.onChange?.(update.state.doc.toString());
@@ -215,6 +242,10 @@ export default function CodeEditor({ value, language = null, readOnly = false, l
   useEffect(() => {
     view.current?.dispatch({ effects: readOnlySlot.current.reconfigure(editable(readOnly)) });
   }, [readOnly]);
+
+  useEffect(() => {
+    view.current?.dispatch({ effects: wrapSlot.current.reconfigure(wraps ? EditorView.lineWrapping : []) });
+  }, [wraps]);
 
   useEffect(() => {
     const current = view.current;

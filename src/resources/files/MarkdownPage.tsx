@@ -42,7 +42,7 @@ export default function MarkdownPage({ host, uri }: { host: string; uri?: string
   if (simple || !uri.startsWith('file:')) return <SimpleMarkdown host={host} uri={uri} />;
   return (
     <>
-      <SharedFilePage key={uri} host={host} uri={uri} extra={extra} onPlain={() => setSimple(true)} />
+      <SharedFilePage key={uri} host={host} uri={uri} extra={extra} alwaysWraps onPlain={() => setSimple(true)} />
       {[...drawings].map(([dom, node]) => createPortal(node, dom))}
     </>
   );
