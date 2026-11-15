@@ -1,6 +1,6 @@
 ---
 title: The document client
-status: todo
+status: implemented
 depends: []
 layer: "files"
 refs:
@@ -10,7 +10,7 @@ refs:
 
 ## Objective
 
-One object per open file speaks the `x-ahpd-document:` channel.
+One object per open file speaks the `x-ahpd-shared:` channel.
 It keeps the person's own changes in order with the host's, and says what to apply and where each caret is.
 
 ## Files
@@ -22,7 +22,7 @@ It keeps the person's own changes in order with the host's, and says what to app
 ## Steps
 
 1. Add `onEnvelopes(channel, read)` to the host bridge, fed from `watchChannels` before any reducer.
-2. In `document.ts`, subscribe to `x-ahpd-document:<file URI>` and keep the confirmed text, the version and the people.
+2. In `document.ts`, subscribe to `x-ahpd-shared:<file URI>` and keep the confirmed text, the version and the people.
 3. Turn a CodeMirror `ChangeSet` into the host's `{ from, to, insert }` list, and back with `ChangeSet.of`.
 4. In Live save, send one `changed` with the person's carets, and hold what follows until its echo arrives.
 5. In Manual save, hold every change until `save()`; then send them as one `changed`.
@@ -46,3 +46,10 @@ It keeps the person's own changes in order with the host's, and says what to app
 - `pnpm test src/resources/files/document.test.ts` passes.
 
 ## Resume
+
+Built on 2026-11-15.
+- The bridge method is `openChannel(uri, read, connected)`: a snapshot with its `fromSeq`, each envelope in order, and a call on each reconnect.
+- Each change carries a random `id`, which the host sends back. Two tabs in one browser share a client id, so the client confirms its own change by `id`, not by `clientSeq`.
+- `selected` goes out at any time: the carets are moved back past the person's own changes not yet taken, onto `version`.
+- Envelopes that arrive while a subscribe is out are held, and read after the snapshot if their `serverSeq` is past its `fromSeq`.
+- A refusal that is not `stale:` puts the host's text back in the editor, so the same change is not sent forever.

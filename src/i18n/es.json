@@ -445,7 +445,29 @@
       "zoomIn": "Acercar"
     },
     "gone": "Este archivo ya no existe.",
-    "readRefused": "No tienes permiso para leer este archivo."
+    "readRefused": "No tienes permiso para leer este archivo.",
+    "shared": {
+      "edit": "Editar",
+      "liveSave": "Guardar en vivo: tus ediciones llegan a todos al instante",
+      "manualSave": "Guardar a mano: tus ediciones salen cuando guardas",
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "locked": "Solo lectura",
+      "saveNow": "Guardar (Mod-S)",
+      "you": "{name} (tú)",
+      "refused": "El host rechazó tu edición",
+      "stopEditing": "Dejar de editar",
+      "saveFirst": "Guarda tus ediciones primero",
+      "person": "{name} · {kind} · {doing}",
+      "editingNow": "editando",
+      "viewing": "viendo",
+      "kinds": {
+        "root": "root",
+        "user": "usuario",
+        "guest": "invitado",
+        "agent": "agente"
+      }
+    }
   },
   "changes": {
     "title": "Cambios",
@@ -2414,6 +2436,12 @@
         "palettePosition": {
           "title": "Paleta de comandos: posición",
           "description": "Bloqueada impide arrastrarla. Su menú y este formulario aún la mueven."
+        },
+        "fileSaveMode": {
+          "title": "Al editar un archivo",
+          "description": "Cómo se guarda un archivo después de hacer clic en Editar. Puedes cambiarlo en cada archivo.",
+          "live": "Guardar en vivo",
+          "manual": "Guardar a mano"
         }
       },
       "tabs": {

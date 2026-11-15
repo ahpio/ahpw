@@ -281,6 +281,16 @@ async function snapshot(id: string, uri: string): Promise<void> {
   }
 }
 
+/** One channel a page reads itself; see `HostBridge.openChannel`. */
+export interface OpenChannel {
+  /** Subscribe, or subscribe again, and answer the channel's state and the sequence number it was taken at. */
+  subscribe(): Promise<{ state: unknown; fromSeq: number } | undefined>;
+  /** Send an action on the channel, and answer its client sequence. */
+  dispatch(action: Record<string, unknown>): number;
+  /** Stop reading, and unsubscribe. */
+  close(): void;
+}
+
 /** A file's text, or null when it is not text. */
 export interface FileText {
   text: string | null;
@@ -330,6 +340,14 @@ export interface HostBridge {
   deleteResource(uri: string, recursive: boolean): Promise<void>;
   /** Send one action on a channel. */
   dispatch(channel: string, action: StateAction): void;
+  /**
+   * Read one channel directly: its snapshot, and each envelope in order with
+   * its origin, as a shared document needs. `connected` is called each time
+   * the host connects again, so the reader can subscribe again.
+   */
+  openChannel(uri: string, read: (envelope: ChannelEnvelope) => void, connected: () => void): OpenChannel;
+  /** The client id this page connected to the host with, once it has connected. */
+  clientId(): string | undefined;
   /**
    * Send one action and wait for the host to say it back: null once it took
    * it, or the host's reason when it refused. A dispatch is a notification, so
@@ -448,6 +466,48 @@ function makeBridge(id: string): HostBridge {
     dispatch(channel, action) {
       client?.dispatch(id, channel, action);
     },
+    clientId() {
+      return client?.host(id)?.clientId;
+    },
+    openChannel(uri, read, connected) {
+      const key = `${id}\u0000${uri}`;
+      const readers = envelopeReaders.get(key) ?? new Set();
+      readers.add(read);
+      envelopeReaders.set(key, readers);
+      const onConnect = connectReaders.get(id) ?? new Set();
+      onConnect.add(connected);
+      connectReaders.set(id, onConnect);
+      let closed = false;
+      return {
+        async subscribe() {
+          const multi = client;
+          if (multi === undefined) throw new Error(translate('bridges/notConnected'));
+          // A subscribe the host cancels because an unsubscribe and a new
+          // subscribe of the same channel overtook it, as a page made twice
+          // does, is asked again.
+          for (let tries = 0; ; tries += 1) {
+            try {
+              const result = await multi.subscribe(id, uri);
+              return result.snapshot === undefined ? undefined : { state: result.snapshot.state, fromSeq: result.snapshot.fromSeq };
+            } catch (error) {
+              if (closed || tries >= 3 || !String((error as Error).message ?? error).includes('Subscription cancelled')) throw error;
+            }
+          }
+        },
+        dispatch(action) {
+          if (client === undefined) return 0;
+          return client.dispatch(id, uri, action as unknown as StateAction).clientSeq;
+        },
+        close() {
+          if (closed) return;
+          closed = true;
+          readers.delete(read);
+          if (readers.size === 0) envelopeReaders.delete(key);
+          onConnect.delete(connected);
+          void client?.unsubscribe(id, uri).catch(() => undefined);
+        },
+      };
+    },
     dispatchAndWait(channel, action) {
       if (client === undefined || client.host(id)?.state.status !== 'connected') return Promise.reject(new Error(translate('bridges/notConnected')));
       const { clientSeq } = client.dispatch(id, channel, action);
@@ -524,6 +584,9 @@ async function watchHost(store: ReactiveStore, multi: MultiHostClient): Promise<
       if (state.status === 'failed' || state.status === 'reconnecting' || state.status === 'disconnected') void noteRefusal(store, id);
     }
     if (event.type === 'connected') {
+      for (const read of connectReaders.get(id) ?? []) {
+        try { read(); } catch { /* a reader's fault is its own */ }
+      }
       const data = dataOf(id);
       data.generation = event.generation;
       // A connection lists the sessions afresh into the SDK's cache.
@@ -634,6 +697,20 @@ async function pushMissingTrust(store: ReactiveStore, multi: MultiHostClient, id
   }
 }
 
+/** One action as a host sent it on a channel: who sent it, and why it was refused when it was. */
+export interface ChannelEnvelope {
+  channel: string;
+  action: Record<string, unknown>;
+  serverSeq?: number;
+  origin?: { clientId: string; clientSeq: number };
+  rejectionReason?: string;
+}
+
+/** What reads one channel's envelopes in order, by host and channel. */
+const envelopeReaders = new Map<string, Set<(envelope: ChannelEnvelope) => void>>();
+/** What wants to know each time a host connects again, by host. */
+const connectReaders = new Map<string, Set<() => void>>();
+
 async function watchChannels(store: ReactiveStore, multi: MultiHostClient): Promise<void> {
   for await (const tagged of multi.events()) {
     const id = tagged.hostId;
@@ -647,6 +724,10 @@ async function watchChannels(store: ReactiveStore, multi: MultiHostClient): Prom
     }
     if (event.type !== 'action') continue;
     const { channel, action } = event.params;
+    // A page that reads the channel itself gets every envelope in order, before any reducer.
+    for (const read of envelopeReaders.get(`${id}\u0000${channel}`) ?? []) {
+      try { read(event.params as unknown as ChannelEnvelope); } catch { /* a reader's fault is its own */ }
+    }
     const seq = (event.params as { origin?: { clientSeq?: unknown } }).origin?.clientSeq;
     if (typeof seq === 'number') {
       const waiting = echoes.get(echoKey(id, channel, seq));

@@ -1,0 +1,50 @@
+/* Another person's caret: a bar in their colour, their name above it for 2 s, and again on hover. */
+.web-caret {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 1.2em;
+  margin-left: -1px;
+  vertical-align: text-bottom;
+  border-left: 2px solid;
+}
+
+/* A wider place to rest the pointer on than the 2 px bar. */
+.web-caret::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -5px;
+  width: 10px;
+}
+
+.web-caret:hover .web-caret__tag {
+  animation: none;
+  opacity: 1;
+}
+
+.web-caret__tag {
+  position: absolute;
+  left: -2px;
+  bottom: 100%;
+  padding: 0 4px;
+  border-radius: 3px 3px 3px 0;
+  color: #fff;
+  font-family: var(--oo-font-family);
+  font-size: 10px;
+  line-height: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: web-caret-tag 2s forwards;
+}
+
+/* The name shows when the caret moves, and fades once it has been still for 2 s. */
+@keyframes web-caret-tag {
+  0%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.web-caret__selection {
+  border-radius: 2px;
+}

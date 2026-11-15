@@ -445,7 +445,29 @@
       "zoomIn": "Zoom in"
     },
     "gone": "This file no longer exists.",
-    "readRefused": "You don't have permission to read this file."
+    "readRefused": "You don't have permission to read this file.",
+    "shared": {
+      "edit": "Edit",
+      "liveSave": "Live save: your edits go to everyone at once",
+      "manualSave": "Manual save: your edits go out when you save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "locked": "Read only",
+      "saveNow": "Save (Mod-S)",
+      "you": "{name} (you)",
+      "refused": "The host refused your edit",
+      "stopEditing": "Stop editing",
+      "saveFirst": "Save your edits first",
+      "person": "{name} · {kind} · {doing}",
+      "editingNow": "editing",
+      "viewing": "viewing",
+      "kinds": {
+        "root": "root",
+        "user": "user",
+        "guest": "guest",
+        "agent": "agent"
+      }
+    }
   },
   "changes": {
     "title": "Changes",
@@ -2414,6 +2436,12 @@
         "palettePosition": {
           "title": "Command palette: position",
           "description": "Locked stops a drag. Its menu and this form still move it."
+        },
+        "fileSaveMode": {
+          "title": "When I edit a file",
+          "description": "How a file saves after you click Edit. You can change it on each file.",
+          "live": "Live save",
+          "manual": "Manual save"
         }
       },
       "tabs": {
