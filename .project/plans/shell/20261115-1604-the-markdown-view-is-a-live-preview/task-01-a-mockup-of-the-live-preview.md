@@ -30,4 +30,4 @@ Softov sees the live preview before it is built.
 ## Resume
 
 Mockup made on 2026-11-15, with screenshots `live-preview-{light,dark}-{1280,760}.png` beside it.
-Softov approved it on 2026-11-15.
+Softov approved it on 2026-11-15, and the two comment states of task 05 the same day.

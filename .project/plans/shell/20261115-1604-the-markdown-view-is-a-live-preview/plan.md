@@ -54,6 +54,8 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 | A mockup comes before the build | the stages brief, "Before plan E: a mockup of the preview" | 01 |
 | A click on a task box writes `[x]` or `[ ]` into the text; Mod-click opens a link | `(defaulted: as Obsidian does)` | 03 |
 | The preview is locked until ✎, as Text is | `(defaulted: the shared editor's lock)` | 04 |
+| 💬 with a count, after ✎, shows or hides the comments margin; hidden, a click opens one thread as a card beside its line, closed with `›`, Escape or a click in the text; a UI setting picks the default | Softov, 2026-11-15, chose "💬 toggle + floating card" | 05 |
+| The comments that fold away are part of this plan | Softov, 2026-11-15, chose "Add it to plan E" | 05 |
 
 ## Proposed architecture
 
@@ -71,6 +73,7 @@ Where the host serves no shared file, or the file is read-only, it opens `Simple
 | [02 - The simple Markdown page](task-02-the-simple-markdown-page.md) | todo | - |
 | [03 - The live preview extension](task-03-the-live-preview-extension.md) | todo | 01 |
 | [04 - The Markdown view edits live](task-04-the-markdown-view-edits-live.md) | todo | 02, 03 |
+| [05 - Comments fold away](task-05-comments-fold-away.md) | todo | 01 |
 
 ## Risks and tradeoffs
 
@@ -80,7 +83,7 @@ Where the host serves no shared file, or the file is read-only, it opens `Simple
 ## Resume state
 
 - **Done so far:** Softov approved the mockup on 2026-11-15, at `.scratch/mockups/live-preview.html` in `/github/ahpw`.
-- **Next action:** Softov sends one more request for this view, which may join this plan; then tasks 02 to 04.
+- **Next action:** tasks 02 to 05; Softov approved the comment states on 2026-11-15.
 - **Open questions:** none.
 - **Watch out for:** the comments margin works on the shared editor; the live preview must keep it working.
 
