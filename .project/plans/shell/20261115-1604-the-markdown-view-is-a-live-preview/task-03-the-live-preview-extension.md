@@ -1,6 +1,6 @@
 ---
 title: The live preview extension
-status: todo
+status: implemented
 depends: [task-01-a-mockup-of-the-live-preview.md]
 layer: "editor"
 refs:
@@ -35,3 +35,8 @@ A CodeMirror extension draws Markdown styled, and hides its markers away from th
 - The same file: a task box click changes `[ ]` to `[x]`.
 
 ## Resume
+
+Built on 2026-11-15.
+- Markdown loads as GitHub's dialect, so task lists and strikethrough parse, in the text view too.
+- The preview sets its own colours: the source view's syntax colours stay out.
+- An image's height is part of its widget: the editor measures its line again when the image arrives.

@@ -70,11 +70,11 @@ Where the host serves no shared file, or the file is read-only, it opens `Simple
 | Task | Status | Depends on |
 | --- | --- | --- |
 | [01 - A mockup of the live preview](task-01-a-mockup-of-the-live-preview.md) | done | - |
-| [02 - The simple Markdown page](task-02-the-simple-markdown-page.md) | todo | - |
-| [03 - The live preview extension](task-03-the-live-preview-extension.md) | todo | 01 |
-| [04 - The Markdown view edits live](task-04-the-markdown-view-edits-live.md) | todo | 02, 03 |
-| [05 - Comments fold away](task-05-comments-fold-away.md) | todo | 01 |
-| [06 - Blocks drawn in the preview](task-06-blocks-drawn-in-the-preview.md) | todo | 03 |
+| [02 - The simple Markdown page](task-02-the-simple-markdown-page.md) | implemented | - |
+| [03 - The live preview extension](task-03-the-live-preview-extension.md) | implemented | 01 |
+| [04 - The Markdown view edits live](task-04-the-markdown-view-edits-live.md) | implemented | 02, 03 |
+| [05 - Comments fold away](task-05-comments-fold-away.md) | implemented | 01 |
+| [06 - Blocks drawn in the preview](task-06-blocks-drawn-in-the-preview.md) | implemented | 03 |
 
 ## Risks and tradeoffs
 
@@ -84,7 +84,8 @@ Where the host serves no shared file, or the file is read-only, it opens `Simple
 ## Resume state
 
 - **Done so far:** Softov approved the mockup on 2026-11-15, at `.scratch/mockups/live-preview.html` in `/github/ahpw`.
-- **Next action:** tasks 02 to 05; Softov approved the comment states on 2026-11-15.
+- **Done so far:** tasks 02 to 06 built on 2026-11-15.
+- **Next action:** the PR text for Softov; then Softov tests.
 - **Open questions:** none.
 - **Watch out for:** the comments margin works on the shared editor; the live preview must keep it working.
 
@@ -92,6 +93,6 @@ Where the host serves no shared file, or the file is read-only, it opens `Simple
 
 - [x] Softov approved the mockup, and each screen matches it.
 - [ ] Two browsers edit one Markdown file in the preview, and each sees the other's edits and caret.
-- [ ] A task box click writes `[x]` into the file.
+- [x] A task box click writes `[x]` into the file.
 - [ ] A read-only file shows `SimpleMarkdown`.
-- [ ] `pnpm typecheck`, `pnpm test` and `pnpm build` pass.
+- [x] `pnpm typecheck`, `pnpm test` and `pnpm build` pass.

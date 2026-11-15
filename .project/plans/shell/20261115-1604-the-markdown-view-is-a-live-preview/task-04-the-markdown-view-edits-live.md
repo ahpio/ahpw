@@ -1,6 +1,6 @@
 ---
 title: The Markdown view edits live
-status: todo
+status: implemented
 depends: [task-02-the-simple-markdown-page.md, task-03-the-live-preview-extension.md]
 layer: "files"
 refs:
@@ -32,3 +32,7 @@ refs:
 - `pnpm typecheck`, `pnpm test` and `pnpm build` pass.
 
 ## Resume
+
+Built on 2026-11-15.
+- The page renders the images and the drawn blocks into the editor's elements through portals, so they have its context.
+- Checked in a browser at 1280 and 760 wide, light and dark: the page, the caret's line, a task box written to disk.

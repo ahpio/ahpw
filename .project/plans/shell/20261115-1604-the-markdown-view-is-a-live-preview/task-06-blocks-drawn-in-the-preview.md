@@ -1,6 +1,6 @@
 ---
 title: Blocks drawn in the preview
-status: todo
+status: implemented
 depends: [task-03-the-live-preview-extension.md]
 layer: "editor"
 refs:
@@ -31,3 +31,7 @@ The preview draws tables, fenced code and mermaid diagrams, and shows their Mark
 - A locked file shows its mermaid diagram, its table and its code drawn.
 
 ## Resume
+
+Built on 2026-11-15.
+- Each block is drawn with the Markdown wrapper, so mermaid draws as on the simple page.
+- Every line of a block with a caret in it shows as source.

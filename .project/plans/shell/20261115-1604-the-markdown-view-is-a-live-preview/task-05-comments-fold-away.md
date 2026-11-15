@@ -1,6 +1,6 @@
 ---
 title: Comments fold away
-status: todo
+status: implemented
 depends: [task-01-a-mockup-of-the-live-preview.md]
 layer: "files"
 refs:
@@ -39,3 +39,7 @@ The file view starts at full width, and a person opens the comments they want.
 - Each screen matches the approved mockup.
 
 ## Resume
+
+Built on 2026-11-15.
+- A mousedown in the text away from a comment's words closes the card.
+- Checked in a browser at 1280 light and 760 dark: a new comment, its card, Escape, `›`, and 💬.

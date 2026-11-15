@@ -479,6 +479,10 @@
       "resolve": "Resolver",
       "reopen": "Abrir de novo",
       "delete": "Excluir comentário",
+      "line": "Linha {line}",
+      "close": "Fechar",
+      "showAll": "Mostrar comentários",
+      "hideAll": "Ocultar comentários",
       "deleteAsk": "Excluir esta conversa?",
       "deleteYes": "Excluir",
       "show": "Mostrar a conversa",
@@ -2462,6 +2466,12 @@
           "description": "Como um arquivo é salvo depois de clicar em Editar. Você pode mudar em cada arquivo.",
           "live": "Salvar ao vivo",
           "manual": "Salvar manualmente"
+        },
+        "fileComments": {
+          "title": "Ao abrir um arquivo",
+          "description": "Se os comentários de um arquivo ficam numa margem, ou recolhidos até você abrir um. Você pode mudar em cada arquivo com 💬.",
+          "hidden": "Recolhidos",
+          "shown": "Numa margem"
         }
       },
       "tabs": {

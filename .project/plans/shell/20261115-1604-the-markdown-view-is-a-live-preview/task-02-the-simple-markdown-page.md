@@ -1,6 +1,6 @@
 ---
 title: The simple Markdown page
-status: todo
+status: implemented
 depends: []
 layer: "files"
 refs:
@@ -27,3 +27,8 @@ The rendered, read-only Markdown page stays, as `SimpleMarkdown`, for a file tha
 - `pnpm typecheck` and `pnpm test` pass.
 
 ## Resume
+
+Built on 2026-11-15.
+- `SimpleMarkdown` opens on a host with no shared files, and for a file that the host does not share.
+- ahpw cannot tell ahead that a person may not write a file.
+- Such a file opens in the preview, locked, and the host refuses an edit after ✎, as in the text view.

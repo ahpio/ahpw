@@ -479,6 +479,10 @@
       "resolve": "Resolve",
       "reopen": "Open again",
       "delete": "Delete comment",
+      "line": "Line {line}",
+      "close": "Close",
+      "showAll": "Show comments",
+      "hideAll": "Hide comments",
       "deleteAsk": "Delete this thread?",
       "deleteYes": "Delete",
       "show": "Show the thread",
@@ -2462,6 +2466,12 @@
           "description": "How a file saves after you click Edit. You can change it on each file.",
           "live": "Live save",
           "manual": "Manual save"
+        },
+        "fileComments": {
+          "title": "When I open a file",
+          "description": "Whether a file's comments sit in a margin, or fold away until you open one. You can change it on each file with 💬.",
+          "hidden": "Folded away",
+          "shown": "In a margin"
         }
       },
       "tabs": {
