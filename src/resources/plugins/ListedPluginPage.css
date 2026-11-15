@@ -1,0 +1,20 @@
+/* A listed plugin's page: the gear beside Install that names a version. */
+.web-listed__versions {
+  padding: 2px 8px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.web-listed__versions:hover,
+.web-listed__versions:focus-visible {
+  background: var(--oo-color-hover);
+}
+
+.web-listed__versions:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

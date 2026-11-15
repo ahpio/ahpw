@@ -2869,7 +2869,8 @@
       "filter": "Filtrar plugins",
       "group": "Agrupar",
       "empty": "Este host não tem plugins.",
-      "notServed": "Nenhum dos seus hosts deixa você ver os plugins. Isso requer a permissão plugin:list."
+      "notServed": "Nenhum dos seus hosts deixa você ver os plugins. Isso requer a permissão plugin:list.",
+      "search": "Pesquisar plugins"
     },
     "group": {
       "state": "Por estado",
@@ -2878,7 +2879,8 @@
     "commands": {
       "show": "Mostrar plugins",
       "open": "Abrir plugin",
-      "new": "Novo plugin"
+      "new": "Novo plugin",
+      "openListed": "Abrir plugin da lista"
     },
     "states": {
       "error": "Erro",
@@ -2943,18 +2945,17 @@
     "page": {
       "gone": "Este plugin não está mais instalado.",
       "overview": "Visão geral",
-      "options": "Opções",
       "provides": "Oferece",
       "providesNothing": "Seu manifesto não lista nada que ele ofereça.",
       "undeclared": "Foi carregado, mas seu manifesto não lista o que ele oferece.",
       "notLoaded": "Não foi carregado, então não se sabe o que ele oferece.",
-      "spec": "Como está configurado",
       "loadFailed": "Não carregou",
-      "failing": "Tem erros"
+      "failing": "Tem erros",
+      "settings": "Configurações",
+      "installation": "Instalação",
+      "noReadme": "O pacote dele não tem README."
     },
     "facts": {
-      "id": "ID",
-      "state": "Estado",
       "version": "Versão",
       "running": "Em execução",
       "module": "Módulo",
@@ -2968,7 +2969,14 @@
       "methods": "Comandos",
       "resourceProviders": "Esquemas de recursos",
       "tools": "Ferramentas",
-      "triggerTypes": "Tipos de gatilho"
+      "triggerTypes": "Tipos de gatilho",
+      "engines": "Motores",
+      "tunnelKinds": "Tipos de túnel",
+      "routes": "Rotas",
+      "bindings": "Vínculos",
+      "folders": "Pastas",
+      "grants": "Permissões",
+      "closers": "Encerradores"
     },
     "options": {
       "save": "Salvar",
@@ -2982,6 +2990,32 @@
     "running": {
       "yes": "Sim",
       "no": "Não, carrega na próxima vez que o host iniciar"
+    },
+    "listed": {
+      "notInstalled": "Não instalado",
+      "install": "Instalar",
+      "installing": "Instalando…",
+      "installFailed": "Não foi possível instalar {title}",
+      "installVersion": "Instalar {version}",
+      "versions": "Instalar uma versão específica",
+      "reading": "Lendo o plugin…",
+      "unread": "Não foi possível ler este plugin",
+      "gone": "Nenhuma lista deste host tem este plugin agora.",
+      "features": "Recursos",
+      "changelog": "Alterações",
+      "noReadme": "Esta versão não tem README.",
+      "identifier": "Identificador",
+      "published": "Publicado",
+      "list": "Lista",
+      "author": "Autor",
+      "license": "Licença",
+      "categories": "Categorias",
+      "resources": "Recursos",
+      "repository": "Repositório",
+      "homepage": "Página",
+      "issues": "Problemas",
+      "marketplace": "Marketplace",
+      "noSettings": "Não tem configurações."
     }
   },
   "connectors": {

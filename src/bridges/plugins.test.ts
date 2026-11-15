@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RootState } from '@microsoft/agent-host-protocol';
 import { NO_OFFERS } from './offers.js';
-import { disablePlugin, enablePlugin, installPlugin, PLUGINS, pluginsReducer, removePlugin, restartNeeded, servesPlugins, specEnabled, writePlugin, type PluginRow } from './plugins.js';
+import { availablePlugins, disablePlugin, enablePlugin, installedFiles, installPlugin, PLUGINS, pluginDetails, pluginsReducer, removePlugin, restartNeeded, servesPlugins, specEnabled, writePlugin, type PluginRow } from './plugins.js';
 
 const request = vi.hoisted(() => vi.fn());
 
@@ -88,5 +88,42 @@ describe('specEnabled', () => {
     expect(specEnabled('@ahpd/bot')).toBe(true);
     expect(specEnabled({ name: '@ahpd/bot' })).toBe(true);
     expect(specEnabled({ name: '@ahpd/bot', enabled: false })).toBe(false);
+  });
+});
+
+describe('the plugin lists', () => {
+  it('install sends a marketplace only when one is given', async () => {
+    request.mockResolvedValue({ id: 'bot' });
+    await installPlugin('h', '@ahpd/bot');
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.install, { source: '@ahpd/bot' });
+    await installPlugin('h', '@ahpd/bot', 'https://plugins.example.com/v1/plugins.json');
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.install, { source: '@ahpd/bot', marketplace: 'https://plugins.example.com/v1/plugins.json' });
+  });
+
+  it('available reads the lists and the plugins, and empty arrays for what the host leaves out', async () => {
+    const plugin = { id: 'bot', source: '@ahpd/bot', marketplace: 'https://plugins.example.com/v1/plugins.json', versions: [{ version: '0.14.0' }] };
+    request.mockResolvedValue({ marketplaces: [{ url: plugin.marketplace, state: 'on' }], plugins: [plugin] });
+    await expect(availablePlugins('h')).resolves.toEqual({ marketplaces: [{ url: plugin.marketplace, state: 'on' }], plugins: [plugin] });
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.available, {});
+    request.mockResolvedValue({});
+    await expect(availablePlugins('h')).resolves.toEqual({ marketplaces: [], plugins: [] });
+  });
+
+  it('details sends only the params given, and refuses an answer with no plugin', async () => {
+    request.mockResolvedValue({ id: 'bot', marketplace: 'm', version: '0.14.0', versions: ['0.14.0'], readme: '# Bot' });
+    await expect(pluginDetails('h', 'bot')).resolves.toMatchObject({ id: 'bot', readme: '# Bot' });
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.details, { id: 'bot' });
+    await pluginDetails('h', 'bot', 'm', '0.13.0');
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.details, { id: 'bot', marketplace: 'm', version: '0.13.0' });
+    request.mockResolvedValue({});
+    await expect(pluginDetails('h', 'bot')).rejects.toThrow('x-ahpd/plugins/details answered no plugin');
+  });
+});
+
+describe('an installed plugin\'s files', () => {
+  it('asks details for the installed row, and reads its files', async () => {
+    request.mockResolvedValue({ id: 'bot', readme: '# Bot' });
+    await expect(installedFiles('h', 'bot')).resolves.toEqual({ id: 'bot', readme: '# Bot' });
+    expect(request).toHaveBeenLastCalledWith(PLUGINS.details, { id: 'bot', installed: true });
   });
 });

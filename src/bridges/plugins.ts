@@ -33,6 +33,8 @@ export const PLUGINS = {
   install: 'x-ahpd/plugins/install',
   write: 'x-ahpd/plugins/write',
   remove: 'x-ahpd/plugins/remove',
+  available: 'x-ahpd/plugins/available',
+  details: 'x-ahpd/plugins/details',
 } as const;
 
 /**
@@ -174,8 +176,126 @@ async function change(host: string, method: string, params: Record<string, unkno
  * Installs a plugin from `source`: a package name, a path, a tarball URL,
  * `github:<owner>/<repo>` or a `git+ssh:` spec. The host runs npm, names it in
  * its configuration and loads it before it answers, which can take minutes.
+ * `marketplace` is the plugin list to take the version from, one the host
+ * reads; without it the host takes the first list that has the source.
  */
-export const installPlugin = (host: string, source: string): Promise<PluginChanged> => change(host, PLUGINS.install, { source });
+export const installPlugin = (host: string, source: string, marketplace?: string): Promise<PluginChanged> =>
+  change(host, PLUGINS.install, marketplace === undefined ? { source } : { source, marketplace });
+
+/** One version of a listed plugin, as a plugin list holds it. */
+export interface ListedVersion {
+  version: string;
+  /** The `@ahpd/sdk` range it declares; absent loads on every host. */
+  sdk?: string;
+  published?: string;
+  /** Why the list's publisher says not to use it; the host never installs it. */
+  deprecated?: string;
+}
+
+/** The installed plugin a listed entry is: its row's id, its version, and the list it came from. */
+export interface ListedInstall {
+  id: string;
+  version?: string;
+  marketplace?: string;
+  deprecated?: string;
+}
+
+/** One plugin a host's plugin list holds, with the list it came from. */
+export interface ListedPlugin {
+  /** The id the list names it by, which need not be the id of its installed row. */
+  id: string;
+  name?: string;
+  description?: string;
+  /** What an install sends: an npm name or `github:<owner>/<repo>`. */
+  source: string;
+  /** The URL of the list it is in. */
+  marketplace: string;
+  categories?: string[];
+  author?: string;
+  license?: string;
+  repository?: string;
+  /** Drawn beside its name; the host sends each as a `data:` URI. */
+  icons?: Icon[];
+  /** Every listed version, newest first. */
+  versions: ListedVersion[];
+  /** Present when the host has it installed. */
+  installed?: ListedInstall;
+}
+
+/** One list a host reads: `on` once fetched, `missing` until then. */
+export interface ListState {
+  url: string;
+  state: 'on' | 'missing';
+  checkedAt?: string;
+}
+
+/** What `x-ahpd/plugins/available` answers. */
+export interface AvailablePlugins {
+  marketplaces: ListState[];
+  plugins: ListedPlugin[];
+}
+
+/** One part of a details page the host could not fetch, and why. */
+export interface DetailsProblem {
+  part: string;
+  problem: string;
+}
+
+/** What `x-ahpd/plugins/details` answers for one listed version. */
+export interface PluginDetails {
+  id: string;
+  marketplace: string;
+  version: string;
+  versions: string[];
+  readme?: string;
+  changelog?: string;
+  license?: string;
+  contracts?: PluginContracts;
+  links?: PluginLink[];
+  optionsSchema?: Record<string, unknown>;
+  homepage?: unknown;
+  bugs?: unknown;
+  repository?: unknown;
+  icons?: Icon[];
+  problems?: DetailsProblem[];
+}
+
+/** Every plugin the host's lists hold, each with its list, its icons and the installed row it is. */
+export async function availablePlugins(host: string): Promise<AvailablePlugins> {
+  const answer = await hostBridge(host).request(PLUGINS.available as never, {} as never) as Partial<AvailablePlugins> | null;
+  return {
+    marketplaces: Array.isArray(answer?.marketplaces) ? answer.marketplaces : [],
+    plugins: Array.isArray(answer?.plugins) ? answer.plugins : [],
+  };
+}
+
+/** The files an installed plugin's own package holds for a person to read. */
+export interface InstalledFiles {
+  id: string;
+  readme?: string;
+  changelog?: string;
+  license?: string;
+}
+
+/**
+ * An installed plugin's README, changelog and license, read by the host from
+ * the package it loads, whether it came from a list, a folder or a file.
+ */
+export async function installedFiles(host: string, id: string): Promise<InstalledFiles> {
+  const answer = await hostBridge(host).request(PLUGINS.details as never, { id, installed: true } as never) as Partial<InstalledFiles> | null;
+  if (typeof answer !== 'object' || answer === null || typeof answer.id !== 'string') throw new Error(`${PLUGINS.details} answered no plugin`);
+  return answer as InstalledFiles;
+}
+
+/** What a listed plugin's page shows: one version's README, changelog, license and manifest. */
+export async function pluginDetails(host: string, id: string, marketplace?: string, version?: string): Promise<PluginDetails> {
+  const params = { id, ...(marketplace === undefined ? {} : { marketplace }), ...(version === undefined ? {} : { version }) };
+  const answer = await hostBridge(host).request(PLUGINS.details as never, params as never) as Partial<PluginDetails> | null;
+  if (typeof answer !== 'object' || answer === null || typeof answer.id !== 'string' || typeof answer.version !== 'string') {
+    throw new Error(`${PLUGINS.details} answered no plugin`);
+  }
+  return { ...answer, versions: Array.isArray(answer.versions) ? answer.versions : [] } as PluginDetails;
+}
 
 /**
  * Writes a plugin as one TypeScript file and its package.json. The host runs
