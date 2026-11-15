@@ -1,6 +1,6 @@
 ---
 title: Carets and remote edits in the editor
-status: todo
+status: implemented
 depends: [task-02-the-document-client.md]
 layer: "editor"
 refs:
@@ -36,3 +36,8 @@ The person's caret and undo history stay as they were.
 - `pnpm test src/resources/editor/shared.test.ts` passes.
 
 ## Resume
+
+Built on 2026-11-15.
+- `CodeEditor` takes `onView`, and the shared mode is the `sharedEditor` extension plus `EditorDocumentView`, passed by the page; `value` and `onChange` stay for every other use.
+- The name tag fades with a CSS animation 2 s after the caret moves; a moved caret is a new widget, which starts the animation again.
+- ahpw's tests run with no DOM, so `shared.test.ts` checks the decorations and the undo history on `EditorState`, not on an `EditorView`.

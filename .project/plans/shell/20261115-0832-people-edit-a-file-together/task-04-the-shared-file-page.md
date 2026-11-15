@@ -1,6 +1,6 @@
 ---
 title: The shared file page
-status: todo
+status: implemented
 depends: [task-01-a-mockup-of-the-shared-file-page.md, task-03-carets-and-remote-edits.md]
 layer: "files"
 refs:
@@ -45,3 +45,10 @@ Edit unlocks it in the person's save mode, which they change per file.
 - `pnpm typecheck`, `pnpm test` and `pnpm build` pass.
 
 ## Resume
+
+Built on 2026-11-15.
+- `FilePage` keeps today's page as `PlainFilePage`; a `file:` URI opens `SharedFilePage`, which falls back to the plain page when the host serves no shared document.
+- The editor is made once and stays the same when Edit unlocks it; `readOnly` changes, not the editor.
+- React runs a page's effect twice in development, so a document whose page went first is ignored, and `openChannel.subscribe` asks again when the host says `Subscription cancelled`.
+- A Markdown file opens in the Markdown viewer first; Show as text opens the shared editor. Stage 3's live preview is what joins the two.
+- Checked in two browser contexts against a daemon from the host plan's branch: each sees the other's caret and edits, and the file on disk holds both.

@@ -28,6 +28,8 @@ export interface CodeEditorProps {
   onSave?: (text: string) => void;
   /** More CodeMirror extensions, as a linter; read once, when the editor is made. */
   extensions?: Extension;
+  /** Called with the editor once it is made, and with null when it goes, for a shared document that drives it. */
+  onView?: (view: EditorView | null) => void;
 }
 
 /** Marks a change that came from `value`, which is not an edit. */
@@ -131,13 +133,13 @@ function reveal(view: EditorView, line: number, end: number | null | undefined):
 }
 
 /** A code editor: line numbers, folding, bracket matching, search and the language's colours. */
-export default function CodeEditor({ value, language = null, readOnly = false, line, end, onChange, onSave, extensions = [] }: CodeEditorProps): ReactElement {
+export default function CodeEditor({ value, language = null, readOnly = false, line, end, onChange, onSave, extensions = [], onView }: CodeEditorProps): ReactElement {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const languageSlot = useRef(new Compartment());
   const readOnlySlot = useRef(new Compartment());
-  const handlers = useRef({ onChange, onSave });
-  handlers.current = { onChange, onSave };
+  const handlers = useRef({ onChange, onSave, onView });
+  handlers.current = { onChange, onSave, onView };
 
   useEffect(() => {
     const parent = host.current;
@@ -186,9 +188,11 @@ export default function CodeEditor({ value, language = null, readOnly = false, l
       }),
     });
     view.current = created;
+    handlers.current.onView?.(created);
     return () => {
       created.destroy();
       view.current = null;
+      handlers.current.onView?.(null);
     };
     // The view is made once; the effects below keep it current.
     // eslint-disable-next-line react-hooks/exhaustive-deps

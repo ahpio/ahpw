@@ -116,6 +116,11 @@ export const EMOJIcon = {
   read: '≡',
   search: '⌕',
   edit: '✎',
+  // a shared file: read only, the two save modes, and save now
+  lock: mono('🔒'),
+  liveSave: mono('⚡'),
+  manualSave: mono('✍'),
+  save: mono('💾'),
   subagent: '◈',
   canvas: '▣',
   web: '⊕',

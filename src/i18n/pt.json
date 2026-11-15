@@ -445,7 +445,18 @@
       "zoomIn": "Aumentar zoom"
     },
     "gone": "Este arquivo não existe mais.",
-    "readRefused": "Você não tem permissão para ler este arquivo."
+    "readRefused": "Você não tem permissão para ler este arquivo.",
+    "shared": {
+      "edit": "Editar",
+      "liveSave": "Salvar ao vivo: suas edições vão para todos na hora",
+      "manualSave": "Salvar manualmente: suas edições vão quando você salvar",
+      "saving": "Salvando…",
+      "saved": "Salvo",
+      "locked": "Somente leitura",
+      "saveNow": "Salvar (Mod-S)",
+      "you": "{name} (você)",
+      "refused": "O host recusou sua edição"
+    }
   },
   "changes": {
     "title": "Alterações",
@@ -2414,6 +2425,12 @@
         "palettePosition": {
           "title": "Paleta de comandos: posição",
           "description": "Travada impede arrastar. O menu e este formulário ainda a movem."
+        },
+        "fileSaveMode": {
+          "title": "Ao editar um arquivo",
+          "description": "Como um arquivo é salvo depois de clicar em Editar. Você pode mudar em cada arquivo.",
+          "live": "Salvar ao vivo",
+          "manual": "Salvar manualmente"
         }
       },
       "tabs": {

@@ -1,7 +1,7 @@
 ---
 title: People edit a file together
 domain: shell
-status: planned
+status: active
 priority: medium
 created: 2026-11-15
 revalidated: 2026-11-15
@@ -71,6 +71,8 @@ an envelope from the host -> own origin: confirmed; another's: moved past the ch
 | A locked page still shows the others' edits and carets live | Softov, 2026-11-15 | 02, 04 |
 | A person's colour is `textToColor` of their name | Softov, 2026-11-15: "for user we already have something that pick color" | 03, 04 |
 | A screenshot mockup comes first, and Softov approves it before the build | Softov, 2026-11-15 | 01 |
+| The header's buttons are icons with a title, not words: ✎ Edit, ⚡ Live save, ✍ Manual save, 💾 Save, 🔒 read only, ◌ and ✓ for saving and saved | Softov, 2026-11-15: "replace buttons text for icons buttons with tittle hints" | 01, 04 |
+| The mockup is approved with that change | Softov, 2026-11-15: "besides that you can build it" | 04 |
 | Manual save holds the person's edits on their screen and sends them as one change on Mod-S or Save | Softov, 2026-11-15 | 02 |
 | A setting key `ui.fileSaveMode`, values `live` and `manual` | `(defaulted: the `ui.<name>` form of the other UI settings)` | 04 |
 | Carets go out at most once every 50 ms | `(defaulted: fast enough to follow, few enough to keep the socket quiet)` | 02 |
@@ -91,10 +93,10 @@ an envelope from the host -> own origin: confirmed; another's: moved past the ch
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A mockup of the shared file page](task-01-a-mockup-of-the-shared-file-page.md) | todo | - |
-| [02 - The document client](task-02-the-document-client.md) | todo | - |
-| [03 - Carets and remote edits in the editor](task-03-carets-and-remote-edits.md) | todo | 02 |
-| [04 - The shared file page](task-04-the-shared-file-page.md) | todo | 01, 03 |
+| [01 - A mockup of the shared file page](task-01-a-mockup-of-the-shared-file-page.md) | implemented | - |
+| [02 - The document client](task-02-the-document-client.md) | implemented | - |
+| [03 - Carets and remote edits in the editor](task-03-carets-and-remote-edits.md) | implemented | 02 |
+| [04 - The shared file page](task-04-the-shared-file-page.md) | implemented | 01, 03 |
 
 ## Risks and tradeoffs
 
@@ -105,8 +107,8 @@ an envelope from the host -> own origin: confirmed; another's: moved past the ch
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-a-mockup-of-the-shared-file-page.md](task-01-a-mockup-of-the-shared-file-page.md).
+- **Done so far:** tasks 01 to 04 built on 2026-11-15, on branch `shell/20261115-0832-people-edit-a-file-together`; checked in two browsers against a daemon from the host plan's branch.
+- **Next action:** Softov tests both branches; then review, `implemented.md`, and a PR for each.
 - **Open questions:** none.
 - **Watch out for:** `follow` reducers get no `origin`. A remote change is applied to CodeMirror only after it is moved past the person's own changes.
 

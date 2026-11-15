@@ -1,6 +1,6 @@
 ---
 title: A mockup of the shared file page
-status: todo
+status: implemented
 depends: []
 layer: "files"
 refs:
@@ -32,3 +32,6 @@ Softov approves a mockup of the shared file page before the build.
 - Softov approves the mockup.
 
 ## Resume
+
+Mockup made on 2026-11-15: `/github/ahpw/.scratch/mockups/shared-file.html`, screenshots `shared-file-{light,dark}-{1280,760}.png` beside it, sent to Softov. Waiting for his approval.
+Approved on 2026-11-15 with icon buttons in place of words; the mockup was redrawn with them.
