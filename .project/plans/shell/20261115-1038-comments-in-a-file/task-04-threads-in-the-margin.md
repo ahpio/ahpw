@@ -46,4 +46,5 @@ Built on 2026-11-15.
 - Softov's test found the threads far from their lines, and some not shown. Each thread had a reply box, so each one pushed the next one down. Now only the open thread has the reply box, and it sits at its line.
 - The margin clips with `overflow: clip`: with `overflow: hidden`, a thread that took focus scrolled the margin and moved every thread.
 - The editor gets room below its last line for threads pushed past the end of the text.
-- An agent's reply is not checked in a browser yet.
+- Softov's test on 2026-11-15 showed an agent's comment with `agent` as its author, and the comments made in VS Code beside ahpw's.
+- A resolved thread reopens with ↺, apart from ✓ for resolve.

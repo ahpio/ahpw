@@ -92,7 +92,7 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 ## Resume state
 
 - **Done so far:** Softov approved the mockup on 2026-11-15; tasks 02, 03 and 04 built on branch `shell/20261115-1038-comments-in-a-file`, stacked on the shared file branch.
-- **Next action:** Softov tests stage 2; then an agent's reply is checked in a browser.
+- **Next action:** the PR, then Softov merges on green CI.
 - **Open questions:** none.
 - **Watch out for:** the shared file page is on its branch, not on main; build on it.
 
@@ -101,5 +101,5 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 - [x] Softov approved the mockup, and each screen matches it.
 - [x] Two browsers: a comment, a reply and a resolve in one show in the other.
 - [x] A comment stays on its words while the other browser types above it.
-- [ ] An agent's reply shows with the agent as its author.
+- [x] An agent's reply shows with the agent as its author.
 - [x] `pnpm typecheck`, `pnpm test` and `pnpm build` pass.
