@@ -8,7 +8,8 @@ import { plural } from '../../i18n/locales.js';
 import { chatAttachment, clipboardImage, fromFiles } from './attachments.js';
 import { EMOJIcon } from '../emojis.js';
 import type { CustomAgent } from './custom-agents.js';
-import { pullRequestFacts, pullRequestName, STATE_COLOR, type PullRequest } from './pull-requests.js';
+import { kindOf, pullRequestFacts, pullRequestName, type PullRequest } from './pull-requests.js';
+import { pullRequestIconSrc } from './pull-request-icons.js';
 import { PullRequestCard } from './PullRequests.js';
 import { ARTIFACT_ICON, ARTIFACT_TYPES, artifactName, copyOf, openOf, relativeOf, type Artifact } from './artifact-list.js';
 import { downloadFile } from '../folders/actions.js';
@@ -258,13 +259,18 @@ export const CUSTOM_AGENT_COMMAND = 'ahp.composer.agent';
 /** The command behind the pull request pill and `/session.pr`: open, copy or remove a pull request. */
 export const PULL_REQUESTS_COMMAND = 'ahp.composer.pullRequests';
 
-/** One row per pull request, its glyph in the colour of the state the host sent. */
+/** A row's icon: its state's, in the state's colour, or the plain glyph when the host sent no state. */
+function pullRequestRowIcon(pullRequest: PullRequest): { icon: string } | { iconSrc: string } {
+  const kind = kindOf(pullRequest);
+  return kind === undefined ? { icon: EMOJIcon.pullRequest } : { iconSrc: pullRequestIconSrc(kind) };
+}
+
+/** One row per pull request: GitHub's title where the host sent it, and its state's icon. */
 export function pullRequestRows(pullRequests: readonly PullRequest[], open: (host: HostCtx, pullRequest: PullRequest) => void): PickerAction[] {
   return pullRequests.map((pullRequest) => ({
     title: pullRequestName(pullRequest),
     description: pullRequestFacts(pullRequest),
-    icon: EMOJIcon.pullRequest,
-    ...(pullRequest.state === undefined ? {} : { color: STATE_COLOR[pullRequest.state] }),
+    ...pullRequestRowIcon(pullRequest),
     onSelect: (host: HostCtx) => open(host, pullRequest),
   }));
 }

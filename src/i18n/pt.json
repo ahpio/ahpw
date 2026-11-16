@@ -1690,7 +1690,8 @@
       "state": {
         "open": "Aberto",
         "closed": "Fechado",
-        "merged": "Mesclado"
+        "merged": "Mesclado",
+        "draft": "Rascunho"
       },
       "openOnGitHub": "Abrir no GitHub",
       "copyUrl": "Copiar URL",
@@ -1706,7 +1707,10 @@
       "removeHint": "Tirar dos artefatos da sessão",
       "repository": "Repositório",
       "status": "Status",
-      "branches": "Branches"
+      "branches": "Branches",
+      "openedOn": "em {date}",
+      "openedBy": "@{login} abriu este pull request",
+      "noDescription": "Sem descrição."
     },
     "composer": {
       "steering": "Redirecionando",

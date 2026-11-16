@@ -1,2 +1,21 @@
 /* The merged banner's lines, one under another inside scena's Alert. */
 .web-merged .oo-alert__message { display: grid; justify-items: start; gap: var(--oo-spacing-xs); }
+
+/* The pull request card, as VS Code's pull request hover draws it. */
+.web-pr-card { display: grid; gap: var(--oo-spacing-sm, 8px); max-width: 420px; padding: var(--oo-spacing-xs, 4px) 0; }
+.web-pr-card__head { color: var(--oo-color-muted); font-size: var(--oo-font-size-sm, 12px); }
+.web-pr-card__head .oo-link { text-decoration: none; }
+.web-pr-card__title { font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+.web-pr-card__title .oo-link { font-weight: 600; text-decoration: none; }
+.web-pr-card__state { justify-self: start; --oo-badge-font-family: var(--oo-font-family); --oo-badge-font-size: var(--oo-font-size-sm, 12px); --oo-badge-font-weight: 400; --oo-badge-gap: 5px; --oo-badge-padding-x: 9px; --oo-badge-background: transparent; border-radius: 999px; }
+.web-pr-card__state .web-pr-icon { color: rgb(var(--oo-badge-rgb)); }
+.web-pr-card__body { color: var(--oo-color-muted); line-height: 1.45; overflow-wrap: anywhere; }
+.web-pr-card__body[data-empty] { font-style: italic; }
+.web-pr-card__branches { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--oo-color-muted); }
+.web-pr-card__branch { font-family: var(--oo-font-family-mono, ui-monospace, monospace); font-size: var(--oo-font-size-sm, 12px); color: var(--oo-color-primary); border: 1px solid var(--oo-color-border); border-radius: 999px; padding: 1px 9px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.web-pr-card__author { color: var(--oo-color-muted); font-size: var(--oo-font-size-sm, 12px); }
+
+/* The pill's card on hover, raised over the composer. */
+.web-pr-pill { display: inline-flex; }
+.web-pr-hover { width: 420px; max-width: calc(100vw - 16px); box-sizing: border-box; padding: 10px 14px; border: 1px solid var(--oo-color-border); border-radius: 8px; background: var(--oo-color-raised, var(--oo-color-surface)); box-shadow: 0 4px 14px rgb(0 0 0 / .18); }
+.web-pr-card__state > span { color: var(--oo-color-text); }

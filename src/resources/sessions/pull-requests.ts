@@ -4,6 +4,9 @@ import { hostKey } from '../../lib/storage-keys.js';
 /** `_meta` key of the artifacts and references an agent recorded for a session, VS Code's name. */
 export const ARTIFACTS_META = 'agentHost/sessionArtifacts';
 
+/** `_meta` key of what GitHub says of each pull request a session shows, keyed by its URL; ahpd's own. */
+export const PULL_REQUESTS_META = 'ahpd.pullRequests';
+
 /** What became of a pull request, as the host last saw it on GitHub. */
 export type PullRequestState = 'open' | 'closed' | 'merged';
 
@@ -14,16 +17,29 @@ export interface PullRequest {
   number: string;
   /** `owner/repo`, from its URL. */
   repository: string;
-  /** The label the agent recorded it under; a pull request found only for the branch has none. */
+  /** Its title on GitHub when the host sent it, else the label the agent recorded it under; one found only for the branch has neither. */
   title?: string;
   /** The last state the host observed, when it observed one for this URL. */
   state?: PullRequestState;
-  /** The branch it merges into, when it is the pull request of the session's branch. */
+  /** The branch it merges into: GitHub's when the host sent it, else the session folder's base for the branch's pull request. */
   base?: string;
-  /** The branch it merges from, when it is the pull request of the session's branch. */
+  /** The branch it merges from: GitHub's when the host sent it, else the session folder's branch for the branch's pull request. */
   head?: string;
   /** The artifact's id, which `vscode/removeSessionArtifact` takes; absent when no artifact records it. */
   artifactId?: string;
+  /** Its description, as its author wrote it in Markdown; the host sends at most 1000 characters. */
+  body?: string;
+  /** Whether the host cut the description. */
+  bodyTruncated?: boolean;
+  /** Whether it is a draft. */
+  isDraft?: boolean;
+  /** Who opened it. */
+  author?: { login: string };
+  /** When it was opened, last changed, merged and closed, ISO 8601. */
+  createdAt?: string;
+  updatedAt?: string;
+  mergedAt?: string;
+  closedAt?: string;
 }
 
 function bag(value: unknown): Record<string, unknown> {
@@ -111,11 +127,42 @@ function recordedPullRequests(meta: Record<string, unknown>): PullRequest[] {
 }
 
 /**
+ * What `_meta['ahpd.pullRequests']` says of the pull request at `url`, each
+ * field kept only when it has the right type.
+ */
+export function detailsOf(meta: Record<string, unknown>, url: string): Partial<PullRequest> {
+  const all = bag(meta[PULL_REQUESTS_META]);
+  const key = urlKey(url);
+  const found = Object.entries(all).find(([one]) => urlKey(one) === key)?.[1];
+  if (found === undefined) return {};
+  const held = bag(found);
+  const author = bag(held.author);
+  const login = text(author.login);
+  const state = stateOf(held.state);
+  const fields: Partial<PullRequest> = {
+    ...(state === undefined ? {} : { state }),
+    ...(held.bodyTruncated === true ? { bodyTruncated: true } : {}),
+    ...(typeof held.isDraft === 'boolean' ? { isDraft: held.isDraft } : {}),
+    ...(login === undefined ? {} : { author: { login } }),
+  };
+  // Each text field under the name `PullRequest` gives it, from the name the host sends.
+  const texts = [['title', 'title'], ['base', 'baseRef'], ['head', 'headRef'], ['body', 'body'],
+    ['createdAt', 'createdAt'], ['updatedAt', 'updatedAt'], ['mergedAt', 'mergedAt'], ['closedAt', 'closedAt']] as const;
+  for (const [to, from] of texts) {
+    const value = text(held[from]);
+    if (value !== undefined) fields[to] = value;
+  }
+  return fields;
+}
+
+/**
  * The GitHub pull requests of a session: the ones `_meta.github` names first,
  * then the ones its agent recorded, newest first, each once.
  *
  * A pull request in both takes the state and branches of `_meta`, and the
- * artifact's title and id.
+ * artifact's title and id. What `_meta['ahpd.pullRequests']` says of one wins
+ * over both for its state, title and branches: GitHub's words over the
+ * agent's label. One the host sent nothing for stays as the two make it.
  */
 export function pullRequestsOf(meta: Record<string, unknown> | undefined): PullRequest[] {
   const held = bag(meta);
@@ -126,7 +173,7 @@ export function pullRequestsOf(meta: Record<string, unknown> | undefined): PullR
     const known = byKey.get(key);
     byKey.set(key, known === undefined ? recorded : { ...known, ...recorded, url: known.url });
   }
-  return [...byKey.values()];
+  return [...byKey.values()].map((one) => ({ ...one, ...detailsOf(held, one.url) }));
 }
 
 /** A pull request as a line names it: `#248 Title`, with its repository for a title the host did not send. */
@@ -143,13 +190,58 @@ export function pullRequestFacts(pullRequest: PullRequest): string {
   ].filter((one) => one !== undefined).join(' \u00B7 ');
 }
 
+/**
+ * A pull request's state as its card shows it, VS Code's order: merged, then
+ * closed, then an open draft, then open; none when the host sent no state.
+ * https://github.com/microsoft/vscode/blob/6e68549edb69380c9316e49df5d3795d5064a2b0/src/vs/workbench/contrib/github/browser/githubResourceHover.ts#L223-L234
+ */
+export function kindOf(pullRequest: PullRequest): 'open' | 'draft' | 'merged' | 'closed' | undefined {
+  if (pullRequest.state === 'open' && pullRequest.isDraft === true) return 'draft';
+  return pullRequest.state;
+}
+
+/** Whether the host sent what GitHub says of a pull request, and not only its URL and state. */
+export function hasDetails(pullRequest: PullRequest): boolean {
+  return pullRequest.author !== undefined || pullRequest.createdAt !== undefined || pullRequest.isDraft !== undefined || pullRequest.body !== undefined;
+}
+
+/** The longest description a card shows, VS Code's. */
+export const DESCRIPTION_LIMIT = 200;
+
+/**
+ * A description as a card shows it: plain text with no Markdown marks, its
+ * white space joined, cut at `DESCRIPTION_LIMIT` with `…`, or nothing when no
+ * text is left. VS Code renders it as plain text the same way.
+ * https://github.com/microsoft/vscode/blob/6e68549edb69380c9316e49df5d3795d5064a2b0/src/vs/workbench/contrib/github/browser/githubResourceHover.ts#L240-L243
+ */
+export function plainDescription(body: string | undefined): string | undefined {
+  if (body === undefined) return undefined;
+  const plain = body
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/```[^\n]*\n?/g, ' ')
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+[.)])\s+/gm, '')
+    .replace(/(\*\*|__|\*|_|~~|`)(?=\S)([^\n]*?\S)\1/g, '$2')
+    .replace(/`/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (plain === '') return undefined;
+  const chars = Array.from(plain);
+  return chars.length <= DESCRIPTION_LIMIT ? plain : `${chars.slice(0, DESCRIPTION_LIMIT).join('').trimEnd()}\u2026`;
+}
+
+/** The repository's page on the host its pull request is on. */
+export function repositoryUrl(pullRequest: PullRequest): string {
+  const found = /^(https?:\/\/[^/]+)\//.exec(pullRequest.url.trim());
+  return `${found?.[1] ?? 'https://github.com'}/${pullRequest.repository}`;
+}
+
 /** Whether a session has pull requests and every one of them is merged. */
 export function allMerged(pullRequests: readonly PullRequest[]): boolean {
   return pullRequests.length > 0 && pullRequests.every((one) => one.state === 'merged');
 }
-
-/** The colour of the pull request glyph in each state. */
-export const STATE_COLOR: Record<PullRequestState, string> = { open: 'green', closed: 'red', merged: 'purple' };
 
 /**
  * The state the pill draws for a set of pull requests, from the states the
