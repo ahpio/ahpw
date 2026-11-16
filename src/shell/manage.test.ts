@@ -4,6 +4,8 @@ import { ahpPaths, windowHost } from '../bridges/data.js';
 import { NO_OFFERS } from '../bridges/offers.js';
 import { CLIENTS_SERVED } from '../resources/clients/state.js';
 import { TUNNELS_SERVED } from '../resources/tunnels/state.js';
+import { USERS_SERVED } from '../resources/users/state.js';
+import { TEAMS_SERVED } from '../resources/teams/state.js';
 import { MANAGE_SLOT, profileEntryTitle, registerManage } from './manage.js';
 
 /** The Manage menu's ids, in its order, as it lists for the principal given. */
@@ -29,16 +31,26 @@ describe('the Manage menu', () => {
     expect(menuAs('user:ana', true).at(-1)).toBe(`ahp.manage.profile.${windowHost()}`);
   });
 
-  it('lists Tunnels and Clients after Host only while a host serves them', () => {
+  it('lists the host pages, then the app choices, then the account, each group parted by a line', () => {
     const scena = createScena();
+    scena.store.set(ahpPaths(windowHost()).offers, { ...NO_OFFERS, principal: 'user:ana' });
     registerManage(scena, false);
-    const ids = (): string[] => scena.commands.list({ slot: MANAGE_SLOT, enabled: true }).map((one) => one.id);
-    expect(ids()).not.toContain('ahp.manage.tunnels');
-    expect(ids()).not.toContain('ahp.manage.clients');
-    scena.store.set(TUNNELS_SERVED, true);
-    scena.store.set(CLIENTS_SERVED, true);
-    const at = ids().indexOf('ahp.manage.host');
-    expect(ids().slice(at, at + 3)).toEqual(['ahp.manage.host', 'ahp.manage.tunnels', 'ahp.manage.clients']);
+    const rows = (): { id: string; category: string | undefined }[] => scena.commands.list({ slot: MANAGE_SLOT, enabled: true }).map((one) => ({ id: one.id, category: one.category }));
+    expect(rows().map((one) => one.id)).not.toContain('ahp.manage.tunnels');
+    for (const served of [TUNNELS_SERVED, CLIENTS_SERVED, USERS_SERVED, TEAMS_SERVED]) scena.store.set(served, true);
+    expect(rows()).toEqual([
+      { id: 'ahp.manage.host', category: 'host' },
+      { id: 'ahp.manage.tunnels', category: 'host' },
+      { id: 'ahp.manage.clients', category: 'host' },
+      { id: 'ahp.manage.users', category: 'host' },
+      { id: 'ahp.manage.teams', category: 'host' },
+      { id: 'ahp.manage.language', category: 'app' },
+      { id: 'ahp.manage.layout', category: 'app' },
+      { id: 'ahp.manage.theme', category: 'app' },
+      { id: 'ahp.manage.settings', category: 'app' },
+      { id: `ahp.manage.profile.${windowHost()}`, category: 'account' },
+      { id: 'ahp.manage.signOut', category: 'account' },
+    ]);
   });
 });
 
