@@ -1,7 +1,7 @@
 ---
 title: Bots and push devices are sent as commands
 domain: shell
-status: active
+status: built
 priority: high
 created: 2026-11-16
 revalidated: 2026-11-16
@@ -43,8 +43,8 @@ Sign out -> disablePush -> sigillum.signout
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - bots-send-commands](task-01-bots-send-commands.md) | implemented | - |
-| [02 - push-devices-send-commands](task-02-push-devices-send-commands.md) | implemented | - |
+| [01 - bots-send-commands](task-01-bots-send-commands.md) | done | - |
+| [02 - push-devices-send-commands](task-02-push-devices-send-commands.md) | done | - |
 
 ## Risks and tradeoffs
 
@@ -53,8 +53,8 @@ Sign out -> disablePush -> sigillum.signout
 
 ## Resume state
 
-- **Done so far:** tasks 01 and 02 built on branch `shell/20261116-2200-bots-and-push-send-commands` on 2026-11-16, awaiting review. `pnpm typecheck` passes, and `pnpm test` passes 1007 tests.
-- **Next action:** Softov's review against a host with ahpd's plan, then the pull request.
+- **Done so far:** tasks 01 and 02 built, and merged in ahpio/ahpw#99 on 2026-11-16 as `ef1e5161d`.
+- **Next action:** none.
 
 ## Final verification checklist
 

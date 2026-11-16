@@ -1,6 +1,6 @@
 ---
 title: Bots send commands
-status: implemented
+status: done
 depends: []
 layer: "bots"
 refs:

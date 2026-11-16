@@ -1,6 +1,6 @@
 ---
 title: Push devices send commands
-status: implemented
+status: done
 depends: []
 layer: "notify"
 refs:
