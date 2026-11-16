@@ -6,6 +6,7 @@ import { Markdown } from '../../shell/markdown/Markdown.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { openHref } from './clicks.js';
 import { HostImage, imagesFrom } from './HostImage.js';
+import { FileUrls } from './media.js';
 import { SharedFilePage } from './SharedFilePage.js';
 import { folderOf, SimpleMarkdown } from './SimpleMarkdown.js';
 
@@ -24,6 +25,9 @@ export default function MarkdownPage({ host, uri }: { host: string; uri?: string
   useEffect(() => { setSimple(false); }, [host, uri]);
   /** What the editor asked to have drawn, by the element it made for it. */
   const [drawings, setDrawings] = useState<ReadonlyMap<HTMLElement, ReactNode>>(new Map());
+  // The images read for the preview, kept while the page is open.
+  const [urls] = useState(() => new FileUrls());
+  useEffect(() => () => { urls.release(); }, [urls]);
   // Made once per file: the editor reads its extensions when it is made.
   const [extra] = useState(() => {
     if (uri === undefined) return [];
@@ -33,9 +37,9 @@ export default function MarkdownPage({ host, uri }: { host: string; uri?: string
     };
     return [livePreview({
       openLink: (href) => { openHref(scena, host, folderOf(uri), href); },
-      image: (dom, src, alt) => draw(dom, <HostImage host={host} src={src} alt={alt} base={folderOf(uri)} />),
+      image: (dom, src, alt) => draw(dom, <HostImage host={host} src={src} alt={alt} base={folderOf(uri)} urls={urls} />),
       // A table or a fenced block, a diagram among them, drawn as the simple page draws it.
-      block: (dom, markdown) => draw(dom, <div className="web-md"><Markdown text={markdown} image={imagesFrom(host, folderOf(uri))} /></div>),
+      block: (dom, markdown) => draw(dom, <div className="web-md"><Markdown text={markdown} image={imagesFrom(host, folderOf(uri), urls)} /></div>),
     })];
   });
   if (uri === undefined) return <PageAlert tone="warning" message={t('files/noFile')} />;

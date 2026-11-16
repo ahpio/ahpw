@@ -71,6 +71,18 @@ describe('the preview', () => {
     expect(parts.filter((one) => one.kind === 'hidden').map((one) => one.text)).toEqual(['[', '](brief.md)']);
   });
 
+  it('draws a `---` line as a rule, and keeps its text on the caret\'s line', () => {
+    const parts = drawn(stateOf('a\n\n---\n\nb', null, true));
+    expect(parts).toContainEqual({ from: 3, to: 3, text: '', kind: 'web-lp-rule' });
+    expect(parts).toContainEqual({ from: 3, to: 6, text: '---', kind: 'hidden' });
+    expect(drawn(stateOf('a\n\n---\n\nb', 4)).filter((one) => one.text === '---')).toEqual([]);
+  });
+
+  it('draws an image alone in its line, as a badge is', () => {
+    const parts = drawn(stateOf('![logo](logo.png)\n', null, true));
+    expect(parts).toEqual([{ from: 0, to: 17, text: '![logo](logo.png)', kind: 'widget:Picture' }]);
+  });
+
   it('leaves a fenced block to the block drawings, with nothing styled inside it', () => {
     const parts = drawn(stateOf('```js\nconst a = **1**;\n```\n', null, true));
     expect(parts).toEqual([]);
@@ -104,6 +116,31 @@ describe('the blocks drawn whole', () => {
 
   it('draws every block while the text is locked', () => {
     expect(blocks(stateOf(doc, doc.indexOf('A -->'), true))).toHaveLength(2);
+  });
+});
+
+describe('a paragraph\'s lines', () => {
+  /** The text each joined line break covers. */
+  const breaks = (state: EditorState): string[] => {
+    const out: string[] = [];
+    blockDecorations(state, options).between(0, state.doc.length, (from, to, value: Decoration) => {
+      if ((value.spec as { widget?: { constructor: { name: string } } }).widget?.constructor.name === 'SoftBreak') out.push(state.doc.sliceString(from, to));
+    });
+    return out;
+  };
+
+  it('join into one line, as badges do in a page', () => {
+    expect(breaks(stateOf('![a](a.svg)\n![b](b.svg)\n![c](c.svg)\n\nnext', null, true))).toEqual(['\n', '\n']);
+  });
+
+  it('take the next line\'s indent and quote marks with the break', () => {
+    expect(breaks(stateOf('- one\n  two\n', null, true))).toEqual(['\n  ']);
+    expect(breaks(stateOf('> one\n> two\n', null, true))).toEqual(['\n> ']);
+  });
+
+  it('keep a hard break, and keep their lines while a caret is in the paragraph', () => {
+    expect(breaks(stateOf('one  \ntwo\\\nthree', null, true))).toEqual([]);
+    expect(breaks(stateOf('one\ntwo\n\nthree\nfour', 1))).toEqual(['\n']);
   });
 });
 
