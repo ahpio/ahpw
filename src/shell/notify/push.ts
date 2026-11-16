@@ -56,6 +56,12 @@ function installId(): string {
 
 const deviceUri = (): string => `push://devices/${installId()}`;
 
+/** The command that registers a device. */
+export const PUSH_PUT = 'x-ahpd/push/put';
+
+/** The command that takes a device off. */
+export const PUSH_REMOVE = 'x-ahpd/push/remove';
+
 /** Whether the host keeps devices: its offers have a `push` provider that allows `write`. */
 export function servesPush(offers: Offers | undefined): boolean {
   const provider = offers?.providers['push'];
@@ -94,18 +100,23 @@ async function subscription(host: string): Promise<PushSubscription> {
   return registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key as BufferSource });
 }
 
-/** Subscribes on the host and writes its device there. */
-export async function pushOnHost(host: string): Promise<void> {
+/** Subscribes on the host and writes its device there: `x-ahpd/push/put` where the host lists it, a resource write otherwise. */
+export async function pushOnHost(host: string, offers?: Offers): Promise<void> {
   const { endpoint, keys } = (await subscription(host)).toJSON();
   if (endpoint === undefined || keys?.['p256dh'] === undefined || keys['auth'] === undefined) throw new Error('The browser gave no subscription');
   const device = { platform: 'web', endpoint, keys: { p256dh: keys['p256dh'], auth: keys['auth'] }, lang: getLocale(), audience: audience() };
+  if (offers?.methods.includes(PUSH_PUT) === true) {
+    await hostBridge(host).request(PUSH_PUT as never, { id: installId(), record: device } as never);
+    return;
+  }
   await hostBridge(host).writeText(deviceUri(), JSON.stringify(device));
 }
 
 /** Removes the device from the host and ends the browser's subscription. */
-async function pushOffHost(host: string): Promise<void> {
+async function pushOffHost(host: string, offers?: Offers): Promise<void> {
   try {
-    await hostBridge(host).deleteResource(deviceUri(), false);
+    if (offers?.methods.includes(PUSH_REMOVE) === true) await hostBridge(host).request(PUSH_REMOVE as never, { id: installId() } as never);
+    else await hostBridge(host).deleteResource(deviceUri(), false);
   } finally {
     const registration = await navigator.serviceWorker.getRegistration(places(host).scope);
     await (await registration?.pushManager.getSubscription())?.unsubscribe();
@@ -113,22 +124,22 @@ async function pushOffHost(host: string): Promise<void> {
 }
 
 /** Turns push on for the window's host; it stays off when the host refuses. */
-export async function enablePush(): Promise<void> {
-  await pushOnHost(windowHost());
+export async function enablePush(offers?: Offers): Promise<void> {
+  await pushOnHost(windowHost(), offers);
   keep(PUSH_KEY, 'on');
 }
 
 /** Turns push off: the device leaves the host, whatever the host answers. */
-export async function disablePush(): Promise<void> {
+export async function disablePush(offers?: Offers): Promise<void> {
   keep(PUSH_KEY, null);
-  await pushOffHost(windowHost());
+  await pushOffHost(windowHost(), offers);
 }
 
 /** Switches the audience, and tells the host when push is on. */
-export async function switchAudience(): Promise<Audience> {
+export async function switchAudience(offers?: Offers): Promise<Audience> {
   const next: Audience = audience() === 'person' ? 'device' : 'person';
   keep(AUDIENCE_KEY, next);
-  if (pushOn()) await pushOnHost(windowHost());
+  if (pushOn()) await pushOnHost(windowHost(), offers);
   return next;
 }
 
@@ -144,7 +155,8 @@ export function keepPushing(scena: Scena): Disposable {
   let wasUp = false;
   return scena.store.subscribe(path, () => {
     const up = scena.store.get<Connection>(path)?.status === 'connected';
-    if (up && !wasUp && pushOn() && granted() && servesPush(scena.store.get<Offers>(ahpPaths(host).offers))) void pushOnHost(host).catch(() => undefined);
+    const offers = scena.store.get<Offers>(ahpPaths(host).offers);
+    if (up && !wasUp && pushOn() && granted() && servesPush(offers)) void pushOnHost(host, offers).catch(() => undefined);
     wasUp = up;
   });
 }

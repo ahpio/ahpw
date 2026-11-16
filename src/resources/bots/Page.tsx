@@ -7,7 +7,7 @@ import { HostTag } from '../../shell/explorer/HostLines.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { timeOf } from '../automations/words.js';
 import { Bood } from './Bood.js';
-import { BOTS, botsReducer, type BotsState } from './catalogue.js';
+import { BOTS, botsIn, botsReducer, type BotsState } from './catalogue.js';
 import { refKey } from '../../bridges/hosts.js';
 import { BOT_CHAT_OPENING, BOT_EDIT_ASKED } from './state.js';
 import { BotForm } from './Edit.js';
@@ -30,7 +30,7 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
   }, [asked]);
   if (error !== null) return <PageAlert tone="danger" title={t('bots/notices/none')} message={error} />;
   if (state === undefined) return <Spinner label={t('bots/notices/reading')} />;
-  const bot = state.bots.find((one) => one.id === slug);
+  const bot = botsIn(state).find((one) => one.id === slug);
   if (bot === undefined) return <PageAlert tone="warning" message={t('bots/notices/gone')} />;
   if (editing) return <BotForm host={host} slug={bot.id} onDone={() => setEditing(false)} />;
 

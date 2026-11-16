@@ -2,9 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const readText = vi.fn();
 const request = vi.fn();
-vi.mock('../../bridges/data.js', () => ({ hostBridge: () => ({ readText, request }) }));
+const writeResource = vi.fn();
+const writeText = vi.fn();
+const deleteResource = vi.fn();
+vi.mock('../../bridges/data.js', () => ({ hostBridge: () => ({ readText, request, writeResource, writeText, deleteResource }) }));
 
-const { botsReducer, openBotChat, readBotChat, servesBotChats } = await import('./catalogue.js');
+const { botsIn, botsReducer, deleteBot, editBot, makeBot, openBotChat, readBotChat, sendsTalks, servesBotChats } = await import('./catalogue.js');
 import type { BotRecord, BotsState } from './catalogue.js';
 import { draftOf, freshLook, parseLabels, recordBody } from './draft.js';
 
@@ -18,10 +21,53 @@ describe('botsReducer', () => {
     let state: BotsState = { bots: [bot('b')] };
     state = botsReducer(state, { type: 'x-ahpd-bots/added', bot: bot('a') });
     state = botsReducer(state, { type: 'x-ahpd-bots/changed', bot: bot('b', { name: 'Bee' }) });
-    expect(state.bots.map((one) => one.name)).toEqual(['a', 'Bee']);
+    expect(botsIn(state).map((one) => one.name)).toEqual(['a', 'Bee']);
     state = botsReducer(state, { type: 'x-ahpd-bots/removed', id: 'a' });
-    expect(state.bots.map((one) => one.id)).toEqual(['b']);
+    expect(botsIn(state).map((one) => one.id)).toEqual(['b']);
     expect(botsReducer(state, { type: 'other' } as never)).toBe(state);
+    expect(sendsTalks(state)).toBe(false);
+  });
+
+  it('reads the records shape a host sends, and keeps that it carries each reader\'s talk', () => {
+    const { id: _id, ...rest } = bot('b');
+    let state: BotsState = { records: [{ id: 'b', record: { ...rest, session: 'ahp-session:/mine' } }] };
+    expect(botsIn(state)).toEqual([{ ...bot('b'), session: 'ahp-session:/mine' }]);
+    expect(sendsTalks(state)).toBe(true);
+    state = botsReducer(state, { type: 'x-ahpd-bots/added', id: 'a', record: rest });
+    state = botsReducer(state, { type: 'x-ahpd-bots/changed', id: 'b', record: { ...rest, name: 'Bee' } });
+    expect(botsIn(state).map((one) => `${one.id} ${one.name}`)).toEqual(['a b', 'b Bee']);
+    expect(sendsTalks(state)).toBe(true);
+    expect(botsIn(undefined)).toEqual([]);
+  });
+});
+
+describe('writes', () => {
+  const served = { methods: ['x-ahpd/bots/put', 'x-ahpd/bots/remove'], described: {}, channels: [], channelWords: {}, providers: {} };
+  const bare = { ...served, methods: [] };
+  beforeEach(() => {
+    for (const one of [request, writeResource, writeText, deleteResource]) one.mockReset().mockResolvedValue({});
+  });
+
+  it('makes, edits and deletes a bot by command where the host lists them', async () => {
+    expect(await makeBot('h', served, ['ana'], { name: 'Ana' })).toBe('ana');
+    await editBot('h', served, bot('ana'), { name: 'Ana 2' });
+    await deleteBot('h', served, 'ana');
+    expect(request.mock.calls).toEqual([
+      ['x-ahpd/bots/put', { id: 'ana', record: { name: 'Ana' }, createOnly: true }],
+      ['x-ahpd/bots/put', { id: 'ana', record: { name: 'Ana 2' }, ifMatch: '2026-10-16T10:00:00Z' }],
+      ['x-ahpd/bots/remove', { id: 'ana' }],
+    ]);
+    expect(writeResource).not.toHaveBeenCalled();
+  });
+
+  it('writes a bot as a resource on a host without the commands', async () => {
+    await makeBot('h', bare, ['ana'], { name: 'Ana' });
+    await editBot('h', bare, bot('ana'), { name: 'Ana 2' });
+    await deleteBot('h', bare, 'ana');
+    expect(writeResource).toHaveBeenCalledWith('bot://ana', JSON.stringify({ name: 'Ana' }), 'utf-8', true);
+    expect(writeText).toHaveBeenCalledWith('bot://ana', JSON.stringify({ name: 'Ana 2' }), '2026-10-16T10:00:00Z');
+    expect(deleteResource).toHaveBeenCalledWith('bot://ana', false);
+    expect(request).not.toHaveBeenCalled();
   });
 });
 
@@ -61,6 +107,11 @@ describe('bot chats', () => {
     beforeEach(() => {
       readText.mockReset();
       request.mockReset().mockResolvedValue({});
+    });
+
+    it('opens the talk the catalogue carries, with no read', async () => {
+      expect(await openBotChat('h', offers, bot('telly', { session: 'ahp-session:/mine' }), true, true)).toBe('ahp-session:/mine');
+      expect(readText).not.toHaveBeenCalled();
     });
 
     it('opens the talk a read of the bot answers', async () => {

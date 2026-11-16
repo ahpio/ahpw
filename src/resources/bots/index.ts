@@ -11,7 +11,7 @@ import { choose, confirm, failed, warn } from '../../shell/notify/index.js';
 import { readLastHost, startHost } from '../sessions/last-host.js';
 import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
-import { BOTS, BOTS_SCHEME, deleteBot, openBotChat, servesBotChats, type BotsState } from './catalogue.js';
+import { BOTS, BOTS_SCHEME, botsIn, deleteBot, openBotChat, sendsTalks, servesBotChats, type BotsState } from './catalogue.js';
 import { ACTIVE_BOT, BOT_CHAT_OPENING, BOT_EDIT_ASKED, BOTS_SERVED } from './state.js';
 import { BOT_CHAT_OPENS, type ChatPlace } from './sidebar.js';
 
@@ -54,7 +54,7 @@ const serving = (offers: Offers | undefined): boolean => offers?.channels.includ
 
 /** The bots list, a bot's page, and the form that makes or edits one. */
 export function registerBots(scena: Scena): Disposable {
-  const botOf = (args: BotArgs) => scena.store.get<BotsState>(channelPath(args.host, BOTS))?.bots.find((one) => one.id === args.slug);
+  const botOf = (args: BotArgs) => botsIn(scena.store.get<BotsState>(channelPath(args.host, BOTS))).find((one) => one.id === args.slug);
   type Opened = Parameters<Scena['surfaces']['open']>[0];
   const open = (key: string, resource: Opened['resource'], title: NonNullable<NonNullable<Opened['props']>['title']>): void => {
     scena.surfaces.open({ surface: 'main', key, resource, props: { title } });
@@ -145,7 +145,8 @@ export function registerBots(scena: Scena): Disposable {
           if (bot === undefined) return;
           const offers = ctx.store.get<Offers>(ahpPaths(target.host).offers) ?? NO_OFFERS;
           const chats = servesBotChats(ctx.store.get<AgentInfo[]>(ahpPaths(target.host).agents));
-          const chat = await openBotChat(target.host, offers, bot, chats);
+          const talks = sendsTalks(ctx.store.get<BotsState>(channelPath(target.host, BOTS)));
+          const chat = await openBotChat(target.host, offers, bot, chats, talks);
           if (chat === null) warn(translate('bots/chat/noHost'));
           else await ctx.commands.execute('ahp.openSession', { host: target.host, resource: chat, place });
         } catch (error) {

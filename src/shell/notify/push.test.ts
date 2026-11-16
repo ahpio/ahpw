@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { host } = vi.hoisted(() => ({
-  host: { readText: vi.fn(), writeText: vi.fn(), deleteResource: vi.fn() },
+  host: { readText: vi.fn(), writeText: vi.fn(), deleteResource: vi.fn(), request: vi.fn() },
 }));
 
 vi.mock('../../bridges/data.js', () => ({ hostBridge: () => host, windowHost: () => 'daemon', ahpPaths: (id: string) => ({ connection: `$/ahp/${id}/connection`, offers: `$/ahp/${id}/offers` }) }));
@@ -92,6 +92,18 @@ describe('push with the tab closed', () => {
     expect(host.deleteResource).toHaveBeenCalledWith(host.writeText.mock.calls[0]![0], false);
     expect(made.unsubscribe).toHaveBeenCalledOnce();
     expect(pushOn()).toBe(false);
+  });
+
+  it('registers and removes the device by command where the host lists them', async () => {
+    const offers = { methods: ['x-ahpd/push/put', 'x-ahpd/push/remove'], described: {}, channels: [], channelWords: {}, providers: {} };
+    await enablePush(offers);
+    const [method, params] = host.request.mock.calls[0]! as [string, { id: string; record: Record<string, unknown> }];
+    expect(method).toBe('x-ahpd/push/put');
+    expect(params.record).toMatchObject({ platform: 'web', endpoint: expect.any(String) });
+    await disablePush(offers);
+    expect(host.request.mock.calls[1]).toEqual(['x-ahpd/push/remove', { id: params.id }]);
+    expect(host.writeText).not.toHaveBeenCalled();
+    expect(host.deleteResource).not.toHaveBeenCalled();
   });
 
   it('switches the audience, and tells the host only while push is on', async () => {

@@ -2,13 +2,13 @@ import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Button, Popup, Spinner } from '@softov/scena/ui';
 import { chatReducer, sessionReducer, type AgentInfo, type ChatState, type SessionState, type StateAction } from '@microsoft/agent-host-protocol';
-import { ahpPaths, hostBridge } from '../../../bridges/data.js';
+import { ahpPaths, channelPath, hostBridge } from '../../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../../bridges/offers.js';
 import { useChannel } from '../../../bridges/channel.js';
 import { newId } from '../../../bridges/words.js';
 import { messageOf } from '../../sessions/Composer.js';
 import { EMOJIcon } from '../../emojis.js';
-import { readBotChat, servesBotChats, startBotChat, type BotRecord } from '../catalogue.js';
+import { BOTS, readBotChat, sendsTalks, servesBotChats, startBotChat, type BotRecord, type BotsState } from '../catalogue.js';
 
 /**
  * A floating bot, opened: its name, which opens the bot, what it is for, a
@@ -21,17 +21,18 @@ export function BotPopover({ host, bot, x, y, onClose }: { host: string; bot: Bo
   const { t } = useI18n();
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
   const chats = servesBotChats(useStore<AgentInfo[]>(ahpPaths(host).agents));
+  const talks = sendsTalks(useStore<BotsState>(channelPath(host, BOTS)));
   // The person's own talk with the bot: undefined while reading, null while they have none.
   const [chatSession, setChatSession] = useState<string | null | undefined>(undefined);
   const [failure, setFailure] = useState<string | null>(null);
   useEffect(() => {
     let live = true;
-    void readBotChat(host, offers, bot, chats).then(
+    void readBotChat(host, offers, bot, chats, talks).then(
       (uri) => { if (live) setChatSession(uri); },
       (error: unknown) => { if (live) setFailure(error instanceof Error ? error.message : String(error)); },
     );
     return () => { live = false; };
-  }, [host, offers, bot, chats]);
+  }, [host, offers, bot, chats, talks]);
   const session = useChannel<SessionState>(host, chatSession ?? undefined, sessionReducer);
   const chatUri = session.state?.defaultChat;
   const chat = useChannel<ChatState>(host, chatUri, chatReducer);

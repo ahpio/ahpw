@@ -9,7 +9,7 @@ import { ahpPaths } from '../../bridges/data.js';
 import { refKey, refOf, useEach, useShownHosts } from '../../bridges/hosts.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { Bood } from '../../resources/bots/Bood.js';
-import { BOTS, BOTS_SCHEME, botsReducer, type BotRecord, type BotsState } from '../../resources/bots/catalogue.js';
+import { BOTS, BOTS_SCHEME, botsIn, botsReducer, type BotRecord, type BotsState } from '../../resources/bots/catalogue.js';
 import { BotPopover } from '../../resources/bots/layer/BotPopover.js';
 import { botsInShownChats, shownMountKeys } from '../../resources/bots/layer/shown.js';
 import { done } from '../notify/say.js';
@@ -203,7 +203,7 @@ export default function DockLayer(): ReactElement | null {
   const bots = useMemo(() => {
     const all = new Map<string, BotRecord>();
     hosts.forEach((host, at) => {
-      for (const bot of states[at]?.bots ?? []) all.set(refKey(host, bot.id), bot);
+      for (const bot of botsIn(states[at])) all.set(refKey(host, bot.id), bot);
     });
     return all;
   }, [hosts, states]);
