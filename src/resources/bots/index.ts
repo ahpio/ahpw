@@ -12,7 +12,7 @@ import { readLastHost, startHost } from '../sessions/last-host.js';
 import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
 import { BOTS, BOTS_SCHEME, deleteBot, openBotChat, servesBotChats, type BotsState } from './catalogue.js';
-import { ACTIVE_BOT, BOT_CHAT_OPENING, BOTS_SERVED } from './state.js';
+import { ACTIVE_BOT, BOT_CHAT_OPENING, BOT_EDIT_ASKED, BOTS_SERVED } from './state.js';
 import { BOT_CHAT_OPENS, type ChatPlace } from './sidebar.js';
 
 /** The display size class the modus backend publishes. */
@@ -120,11 +120,12 @@ export function registerBots(scena: Scena): Disposable {
     scena.commands.register({
       id: 'ahp.editBot',
       title: () => translate('bots/commands/edit'),
-      run: (_ctx, args) => {
+      // The bot's own page shows the form in its place, so an edit opens that page and asks it for the form.
+      run: (ctx, args) => {
         const target = args as BotArgs | undefined;
         if (target?.slug === undefined) return;
-        const name = botOf(target)?.name ?? target.slug;
-        open(`bot:edit:${target.host}:${target.slug}`, { component: 'BotEditPage', host: target.host, slug: target.slug }, translate('bots/editTitle', { name }));
+        ctx.store.set(BOT_EDIT_ASKED, refKey(target.host, target.slug));
+        return ctx.commands.execute('ahp.openBot', target);
       },
     }),
     scena.commands.register({

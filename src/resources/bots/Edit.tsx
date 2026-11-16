@@ -25,9 +25,11 @@ function hostOwnerOf(offers: Offers): string | undefined {
   return typeof root?.const === 'string' ? root.const : undefined;
 }
 
+/** What a form that ended says: the bot it saved, or nothing when it was cancelled. */
+export type BotFormDone = (saved?: { slug: string; name: string }) => void;
+
 /** Makes a bot, or edits the one named by `slug`: its look first, then what it is and whose. */
-export default function BotEditPage({ host: opened, slug }: { host: string; slug?: string }): ReactElement {
-  const scena = useScena();
+export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: string; onDone: BotFormDone }): ReactElement {
   const { t } = useI18n();
   const fresh = slug === undefined;
   const hosts = useServingHosts(useShownHosts(), BOTS_SCHEME);
@@ -40,7 +42,6 @@ export default function BotEditPage({ host: opened, slug }: { host: string; slug
   const first = useRef<BotDraft | null>(null);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
-  const tabKey = fresh ? 'bot:new' : `bot:edit:${host}:${slug}`;
 
   if (error !== null) return <PageAlert tone="danger" title={t('bots/notices/none')} message={error} />;
   if (state === undefined) return <Spinner label={t('bots/notices/reading')} />;
@@ -67,10 +68,7 @@ export default function BotEditPage({ host: opened, slug }: { host: string; slug
       })()
       : editBot(host, offers, bot, body).then(() => bot.id);
     void written.then(
-      (made) => {
-        scena.surfaces.close(tabKey);
-        void scena.commands.execute('ahp.openBot', { host, slug: made, name: shown.name.trim() });
-      },
+      (made) => onDone({ slug: made, name: shown.name.trim() }),
       (caught: unknown) => {
         setFailure(caught instanceof Error ? caught.message : String(caught));
         setBusy(false);
@@ -155,8 +153,22 @@ export default function BotEditPage({ host: opened, slug }: { host: string; slug
       {failure === null ? null : <Alert tone="danger" message={failure} />}
       <div className="web-page__actions">
         <Button label={t(fresh ? 'bots/edit/create' : 'bots/edit/save')} variant="primary" disabled={!ready} onClick={save} />
-        <Button label={t('bots/edit/cancel')} onClick={() => scena.surfaces.close(tabKey)} />
+        <Button label={t('bots/edit/cancel')} onClick={() => onDone()} />
       </div>
     </div>
+  );
+}
+
+/** The page that makes a new bot, in a tab of its own that closes on Create or Cancel; a made bot opens. */
+export default function BotEditPage({ host }: { host: string }): ReactElement {
+  const scena = useScena();
+  return (
+    <BotForm
+      host={host}
+      onDone={(saved) => {
+        scena.surfaces.close('bot:new');
+        if (saved !== undefined) void scena.commands.execute('ahp.openBot', { host, slug: saved.slug, name: saved.name });
+      }}
+    />
   );
 }
