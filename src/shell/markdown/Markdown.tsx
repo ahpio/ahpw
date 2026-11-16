@@ -1,25 +1,27 @@
-import { useMemo, type ReactElement } from 'react';
-import { Markdown as ScenaMarkdown, type MarkdownProps } from '@softov/scena/ui';
+import { useCallback, type ReactElement, type ReactNode } from 'react';
+import { Markdown as ScenaMarkdown, type MarkdownBlock, type MarkdownProps } from '@softov/scena/ui';
 import { MermaidDiagram } from './Mermaid.js';
-import { splitMermaid } from './split.js';
+import { isOpenFence } from './fences.js';
 
 /**
- * scena's Markdown, with ```mermaid fences drawn as diagrams. A text with no
- * such fence renders exactly as scena's. One with diagrams renders each run
- * around them as its own scena Markdown, so a footnote is listed at the end
- * of its run.
+ * scena's Markdown, with ```mermaid fences drawn as diagrams through its
+ * block hook, wherever they sit: in a list item and in a quote too. A block
+ * hook the caller passes is asked first; any block neither draws is scena's.
  */
-export function Markdown({ text = '', className, style, image }: MarkdownProps): ReactElement {
-  const segments = useMemo(() => splitMermaid(text), [text]);
-  const passed = { ...(image === undefined ? {} : { image }) };
-  if (!segments.some((one) => one.kind === 'mermaid')) {
-    return <ScenaMarkdown text={text} {...(className === undefined ? {} : { className })} {...(style === undefined ? {} : { style })} {...passed} />;
-  }
+export function Markdown({ text = '', className, style, image, block }: MarkdownProps): ReactElement {
+  const draw = useCallback((one: MarkdownBlock): ReactNode | undefined => {
+    const given = block?.(one);
+    if (given !== undefined) return given;
+    if (one.kind !== 'code' || one.lang !== 'mermaid') return undefined;
+    return <MermaidDiagram source={one.body} closed={!isOpenFence(text, one.body)} />;
+  }, [block, text]);
   return (
-    <div className={['web-markdown', className].filter(Boolean).join(' ')} {...(style === undefined ? {} : { style })}>
-      {segments.map((one, at) => one.kind === 'text'
-        ? <ScenaMarkdown key={at} text={one.text} {...passed} />
-        : <MermaidDiagram key={at} source={one.source} closed={one.closed} />)}
-    </div>
+    <ScenaMarkdown
+      text={text}
+      block={draw}
+      {...(className === undefined ? {} : { className })}
+      {...(style === undefined ? {} : { style })}
+      {...(image === undefined ? {} : { image })}
+    />
   );
 }
