@@ -8,19 +8,20 @@ import { useChannel } from '../../../bridges/channel.js';
 import { newId } from '../../../bridges/words.js';
 import { messageOf } from '../../sessions/Composer.js';
 import { EMOJIcon } from '../../emojis.js';
-import { readBotChat, servesBotChats, type BotRecord } from '../catalogue.js';
+import { readBotChat, servesBotChats, startBotChat, type BotRecord } from '../catalogue.js';
 
 /**
  * A floating bot, opened: its name, which opens the bot, what it is for, a
  * line to say something in its chat, and an icon to its chat. Sending opens
- * the chat; a message waits in the queue while the bot is still answering.
+ * the chat, and makes it for a person who has none yet; a message waits in
+ * the queue while the bot is still answering.
  */
 export function BotPopover({ host, bot, x, y, onClose }: { host: string; bot: BotRecord; x: number; y: number; onClose: () => void }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
   const chats = servesBotChats(useStore<AgentInfo[]>(ahpPaths(host).agents));
-  // The person's own chat with the bot, which the first read starts: undefined while reading, null when they may not chat.
+  // The person's own talk with the bot: undefined while reading, null while they have none.
   const [chatSession, setChatSession] = useState<string | null | undefined>(undefined);
   const [failure, setFailure] = useState<string | null>(null);
   useEffect(() => {
@@ -35,18 +36,32 @@ export function BotPopover({ host, bot, x, y, onClose }: { host: string; bot: Bo
   const chatUri = session.state?.defaultChat;
   const chat = useChannel<ChatState>(host, chatUri, chatReducer);
   const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  // On a host that runs bot chats, a person with no talk yet starts one; elsewhere only the bot's own session is a chat.
+  const canChat = chatSession !== undefined && (chatSession !== null || chats);
   const run = (command: string): void => {
     onClose();
     void scena.commands.execute(command, { host, slug: bot.id });
   };
-  const send = (): void => {
+  const send = async (): Promise<void> => {
     const said = text.trim();
-    if (said === '' || chatUri === undefined) return;
+    if (said === '' || busy) return;
     const message = messageOf(said, undefined, []);
-    hostBridge(host).dispatch(chatUri, (chat.state?.activeTurn === undefined
-      ? { type: 'chat/turnStarted', turnId: newId(), startedAt: new Date().toISOString(), message }
-      : { type: 'chat/pendingMessageSet', kind: 'queued', id: newId(), message }) as StateAction);
-    run('ahp.chatWithBot');
+    setBusy(true);
+    try {
+      const target = chatSession === null
+        ? (await hostBridge(host).readOnce<SessionState>(await startBotChat(host, bot)))?.defaultChat
+        : chatUri;
+      if (target === undefined) return;
+      hostBridge(host).dispatch(target, (chatSession === null || chat.state?.activeTurn === undefined
+        ? { type: 'chat/turnStarted', turnId: newId(), startedAt: new Date().toISOString(), message }
+        : { type: 'chat/pendingMessageSet', kind: 'queued', id: newId(), message }) as StateAction);
+      run('ahp.chatWithBot');
+    } catch (error) {
+      setFailure(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -54,7 +69,7 @@ export function BotPopover({ host, bot, x, y, onClose }: { host: string; bot: Bo
       <div className="web-bot-popover__head">
         <button type="button" className="web-bot-popover__name" title={t('bots/commands/open')} onClick={() => run('ahp.openBot')}>{bot.name}</button>
         {bot.labels.length === 0 ? null : <span className="web-bot-popover__labels">{bot.labels.join(', ')}</span>}
-        {chatSession === null || chatSession === undefined ? null : (
+        {!canChat ? null : (
           <button type="button" className="web-bot-popover__chat" title={t('bots/actions/chat')} aria-label={t('bots/actions/chat')} onClick={() => run('ahp.chatWithBot')}>
             {EMOJIcon.sessions}
           </button>
@@ -63,8 +78,8 @@ export function BotPopover({ host, bot, x, y, onClose }: { host: string; bot: Bo
       {bot.description === undefined ? null : <p className="web-bot-popover__description">{bot.description}</p>}
       {failure !== null ? <p className="web-bot-popover__failure">{failure}</p>
         : chatSession === undefined ? <Spinner label={t('bots/chat/opening')} />
-          : chatSession === null ? <p className="web-note">{t(chats ? 'bots/chat/cannot' : 'bots/chat/noHost')}</p> : (
-        <form className="web-bot-popover__say" onSubmit={(event) => { event.preventDefault(); send(); }}>
+          : !canChat ? <p className="web-note">{t('bots/chat/noHost')}</p> : (
+        <form className="web-bot-popover__say" onSubmit={(event) => { event.preventDefault(); void send(); }}>
           <input
             className="web-field"
             value={text}
@@ -73,7 +88,7 @@ export function BotPopover({ host, bot, x, y, onClose }: { host: string; bot: Bo
             aria-label={t('bots/layer/say', { name: bot.name })}
             onChange={(event) => setText(event.target.value)}
           />
-          <Button label={t('bots/layer/send')} variant="primary" disabled={text.trim() === '' || chatUri === undefined} onClick={send} />
+          <Button label={t('bots/layer/send')} variant="primary" disabled={text.trim() === '' || busy || (chatSession !== null && chatUri === undefined)} onClick={() => void send()} />
         </form>
       )}
     </Popup>

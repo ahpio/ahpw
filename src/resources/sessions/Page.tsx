@@ -441,8 +441,9 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
     const other = sessionOfChannel(uri);
     if (other !== null) void scena.commands.execute('ahp.openSession', { host, resource: other });
   };
-  // A session with a bot's mark is a chat with that bot, whatever its provider: only what is said shows.
-  const mark = botMarkOf(summary._meta) ?? botMarkOf(session.state?._meta);
+  // A session with a bot's mark is a talk with that bot, whatever its provider: its Front shows only what is said, and its Back every step.
+  const front = chosen === undefined || chosen === session.state?.defaultChat;
+  const mark = front ? botMarkOf(summary._meta) ?? botMarkOf(session.state?._meta) : botMarkOf(chat.state?._meta);
   const openUsage = hasUsage(usage) ? () => setUsageOpen(true) : undefined;
   // The header's buttons and the Raw view, the same on a session and on a chat with a bot, whose bubbles draw no calls to hide.
   const tools = (

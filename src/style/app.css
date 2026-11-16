@@ -3703,7 +3703,7 @@
   gap: var(--oo-spacing-sm);
   padding: var(--oo-spacing-md) var(--web-chat-gutter) 32px;
   margin-bottom: calc(-1 * var(--oo-spacing-sm));
-  background: linear-gradient(to bottom, var(--oo-color-surface) 0%, var(--oo-color-surface) 70%, transparent 90%);
+  background: linear-gradient(to bottom, var(--oo-color-canvas) 0%, var(--oo-color-canvas) 70%, transparent 90%);
 }
 
 .web-botchat__title {
