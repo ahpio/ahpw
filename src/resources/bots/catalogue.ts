@@ -7,6 +7,7 @@
 import { AhpErrorCodes } from '@microsoft/agent-host-protocol';
 import { hostBridge } from '../../bridges/data.js';
 import type { Offers } from '../../bridges/offers.js';
+import { newId } from '../../bridges/words.js';
 
 export const BOTS_SCHEME = 'x-ahpd-bots';
 export const BOTS = `${BOTS_SCHEME}://`;
@@ -30,7 +31,7 @@ export interface BotRecord {
   preset?: string;
   workspace: string;
   computer?: string;
-  /** The bot's own session, on a host that does not run bot chats yet. */
+  /** The bot's own session on a host that does not run bot chats yet; on one that does, a read's answer: the reader's own talk. */
   session?: string;
   /** `user:<id>`, `team:<team>`, `project:<team>:<project>` or `root:<host>`. */
   owner: string;
@@ -102,16 +103,29 @@ export const servesBotChats = (agents: readonly { provider: string }[] | undefin
   agents?.some((one) => one.provider === BOT_CHAT_AGENT) ?? false;
 
 /**
- * The session a person chats with a bot in. On a host that runs bot chats, a
- * read of the bot answers `chat`, the reader's own chat, which the first read
- * starts. On one that does not yet, it is the bot's own session. Null when
- * this person may not chat with the bot.
+ * The session a person talks to a bot in, where they have one. On a host that
+ * runs bot chats, a read of the bot answers `session`, the reader's own talk.
+ * On one that does not yet, it is the bot's own session. Null when there is none.
  */
 export async function readBotChat(host: string, offers: Offers, bot: BotRecord, chats: boolean): Promise<string | null> {
   if (!chats) return bot.session ?? null;
   const { text } = await hostBridge(host).readText(botUri(botsRoot(offers), bot.id));
-  const record = JSON.parse(text ?? '{}') as { chat?: unknown };
-  return typeof record.chat === 'string' && record.chat !== '' ? record.chat : null;
+  const record = JSON.parse(text ?? '{}') as { session?: unknown };
+  return typeof record.session === 'string' && record.session !== '' ? record.session : null;
+}
+
+/** Makes this person's talk with a bot, a `bot-chat` session naming it in its config. Answers the session. */
+export async function startBotChat(host: string, bot: BotRecord): Promise<string> {
+  const resource = `ahp-session:/${newId()}`;
+  await hostBridge(host).request('createSession', { channel: resource, provider: BOT_CHAT_AGENT, config: { bot: bot.id } } as never);
+  return resource;
+}
+
+/** The person's talk with a bot: the one they have, or a new one on a host that runs bot chats. Null when there is none to open. */
+export async function openBotChat(host: string, offers: Offers, bot: BotRecord, chats: boolean): Promise<string | null> {
+  const held = await readBotChat(host, offers, bot, chats);
+  if (held !== null || !chats) return held;
+  return startBotChat(host, bot);
 }
 
 export async function deleteBot(host: string, offers: Offers, slug: string): Promise<void> {

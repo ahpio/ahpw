@@ -41,8 +41,8 @@ describe('botsInShownChats', () => {
 
   it('names the bot of each shown session that carries a mark, on its own host', () => {
     const sessions = [
-      [summary('ahp://s/1', { bot: 'ember', name: 'Ember' }), summary('ahp://s/2')],
-      [summary('ahp://s/1', { bot: 'tester' })],
+      [summary('ahp://s/1', { 'ahpd.bot': { id: 'ember', name: 'Ember' } }), summary('ahp://s/2')],
+      [summary('ahp://s/1', { 'ahpd.bot': { id: 'tester' } })],
     ];
     const shown = ['session:h1:ahp://s/1', 'session:h1:ahp://s/2', 'bot:h2:tester', 'session:h2:ahp://s/3'];
     expect([...botsInShownChats(shown, ['h1', 'h2'], sessions)]).toEqual([refKey('h1', 'ember')]);

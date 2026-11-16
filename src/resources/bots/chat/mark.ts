@@ -8,7 +8,7 @@
 
 import type { ActiveTurn, ResponsePart, Turn } from '@microsoft/agent-host-protocol';
 
-/** Who a chat is with, as the session's `_meta` names the bot. */
+/** Who a chat is with, as the `_meta` of its session and its chat names the bot. */
 export interface BotMark {
   /** The bot's slug. */
   bot: string;
@@ -26,10 +26,13 @@ function bag(value: unknown): Record<string, unknown> | null {
 }
 const text = (value: unknown): string | undefined => (typeof value === 'string' && value !== '' ? value : undefined);
 
-/** The bot's mark in a session's `_meta`, or undefined for a session that is not a chat with a bot. */
+/** The key of `_meta` a host puts a bot's mark under, as `@ahpd/bot` writes it. */
+const MARK = 'ahpd.bot';
+
+/** The bot's mark in a session's or a chat's `_meta`, or undefined for one that is not a chat with a bot. */
 export function botMarkOf(meta: unknown): BotMark | undefined {
-  const held = bag(meta);
-  const bot = text(held?.bot);
+  const held = bag(bag(meta)?.[MARK]);
+  const bot = text(held?.id);
   if (held === null || bot === undefined) return undefined;
   const color = text(held.color);
   return {

@@ -1,5 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { botsReducer, readBotChat, servesBotChats, type BotRecord, type BotsState } from './catalogue.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const readText = vi.fn();
+const request = vi.fn();
+vi.mock('../../bridges/data.js', () => ({ hostBridge: () => ({ readText, request }) }));
+
+const { botsReducer, openBotChat, readBotChat, servesBotChats } = await import('./catalogue.js');
+import type { BotRecord, BotsState } from './catalogue.js';
 import { draftOf, freshLook, parseLabels, recordBody } from './draft.js';
 
 const bot = (id: string, extra: Partial<BotRecord> = {}): BotRecord => ({
@@ -48,5 +54,27 @@ describe('bot chats', () => {
     const offers = { methods: [], described: {}, channels: [], channelWords: {}, providers: {} };
     expect(await readBotChat('h', offers, bot('nimbo', { session: 'cofold:/abc' }), false)).toBe('cofold:/abc');
     expect(await readBotChat('h', offers, bot('nimbo'), false)).toBeNull();
+  });
+
+  describe('on a host that runs them', () => {
+    const offers = { methods: [], described: {}, channels: [], channelWords: {}, providers: {} };
+    beforeEach(() => {
+      readText.mockReset();
+      request.mockReset().mockResolvedValue({});
+    });
+
+    it('opens the talk a read of the bot answers', async () => {
+      readText.mockResolvedValue({ text: JSON.stringify({ id: 'telly', session: 'ahp-session:/talk' }) });
+      expect(await openBotChat('h', offers, bot('telly'), true)).toBe('ahp-session:/talk');
+      expect(readText).toHaveBeenCalledWith('bot://telly');
+      expect(request).not.toHaveBeenCalled();
+    });
+
+    it('makes a bot-chat session naming the bot for a person with no talk yet', async () => {
+      readText.mockResolvedValue({ text: JSON.stringify({ id: 'telly' }) });
+      const made = await openBotChat('h', offers, bot('telly'), true);
+      expect(made).toMatch(/^ahp-session:\//);
+      expect(request).toHaveBeenCalledWith('createSession', { channel: made, provider: 'bot-chat', config: { bot: 'telly' } });
+    });
   });
 });

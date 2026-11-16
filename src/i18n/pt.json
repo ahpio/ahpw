@@ -1044,7 +1044,6 @@
       "more": "mais {count} bots"
     },
     "chat": {
-      "cannot": "Você não pode conversar com este bot.",
       "noHost": "Este host ainda não oferece chat com bots.",
       "opening": "Abrindo o chat…",
       "failed": "Não foi possível abrir o chat",

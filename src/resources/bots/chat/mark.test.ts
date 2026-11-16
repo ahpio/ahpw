@@ -6,9 +6,10 @@ const turn = (text: string, parts: unknown[]): Turn => ({ id: 't1', message: { t
 
 describe('botMarkOf', () => {
   it('reads the mark a chat session carries, and nothing from a session without one', () => {
-    expect(botMarkOf({ bot: 'backer', name: 'Backer', color: 'teal', labels: ['ops', 3], body: 'cloud', kind: 'direct' }))
+    expect(botMarkOf({ 'ahpd.bot': { id: 'backer', name: 'Backer', color: 'teal', labels: ['ops', 3], body: 'cloud', kind: 'direct' } }))
       .toEqual({ bot: 'backer', name: 'Backer', color: 'teal', labels: ['ops'], body: 'cloud', kind: 'direct' });
-    expect(botMarkOf({ bot: 'x' })).toEqual({ bot: 'x', name: 'x', labels: [], body: 'robot', kind: 'direct' });
+    expect(botMarkOf({ 'ahpd.bot': { id: 'x' } })).toEqual({ bot: 'x', name: 'x', labels: [], body: 'robot', kind: 'direct' });
+    expect(botMarkOf({ bot: 'x', name: 'X' })).toBeUndefined();
     expect(botMarkOf({ git: { branch: 'main' } })).toBeUndefined();
     expect(botMarkOf(undefined)).toBeUndefined();
   });

@@ -11,8 +11,8 @@ import { choose, confirm, failed, warn } from '../../shell/notify/index.js';
 import { readLastHost, startHost } from '../sessions/last-host.js';
 import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
-import { BOTS, BOTS_SCHEME, deleteBot, readBotChat, servesBotChats, type BotsState } from './catalogue.js';
-import { ACTIVE_BOT, BOT_CHAT_OPENING, BOTS_SERVED } from './state.js';
+import { BOTS, BOTS_SCHEME, deleteBot, openBotChat, servesBotChats, type BotsState } from './catalogue.js';
+import { ACTIVE_BOT, BOT_CHAT_OPENING, BOT_EDIT_ASKED, BOTS_SERVED } from './state.js';
 import { BOT_CHAT_OPENS, type ChatPlace } from './sidebar.js';
 
 /** The display size class the modus backend publishes. */
@@ -120,17 +120,18 @@ export function registerBots(scena: Scena): Disposable {
     scena.commands.register({
       id: 'ahp.editBot',
       title: () => translate('bots/commands/edit'),
-      run: (_ctx, args) => {
+      // The bot's own page shows the form in its place, so an edit opens that page and asks it for the form.
+      run: (ctx, args) => {
         const target = args as BotArgs | undefined;
         if (target?.slug === undefined) return;
-        const name = botOf(target)?.name ?? target.slug;
-        open(`bot:edit:${target.host}:${target.slug}`, { component: 'BotEditPage', host: target.host, slug: target.slug }, translate('bots/editTitle', { name }));
+        ctx.store.set(BOT_EDIT_ASKED, refKey(target.host, target.slug));
+        return ctx.commands.execute('ahp.openBot', target);
       },
     }),
     scena.commands.register({
       id: 'ahp.chatWithBot',
       title: () => translate('bots/actions/chat'),
-      // The first read of a bot by a person starts their chat, so it can take a moment; the store says which bot is opening.
+      // A person's first chat with a bot makes their talk, so it can take a moment; the store says which bot is opening.
       run: async (ctx, args) => {
         const target = args as BotArgs | undefined;
         if (target?.slug === undefined) return;
@@ -144,8 +145,8 @@ export function registerBots(scena: Scena): Disposable {
           if (bot === undefined) return;
           const offers = ctx.store.get<Offers>(ahpPaths(target.host).offers) ?? NO_OFFERS;
           const chats = servesBotChats(ctx.store.get<AgentInfo[]>(ahpPaths(target.host).agents));
-          const chat = await readBotChat(target.host, offers, bot, chats);
-          if (chat === null) warn(translate(chats ? 'bots/chat/cannot' : 'bots/chat/noHost'));
+          const chat = await openBotChat(target.host, offers, bot, chats);
+          if (chat === null) warn(translate('bots/chat/noHost'));
           else await ctx.commands.execute('ahp.openSession', { host: target.host, resource: chat, place });
         } catch (error) {
           failed(translate('bots/chat/failed'), error);
