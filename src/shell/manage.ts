@@ -1,6 +1,6 @@
 import { combineDisposables, translate } from '@softov/scena';
 import type { Disposable, Scena } from '@softov/scena/types';
-import { ahpPaths } from '../bridges/data.js';
+import { ahpPaths, windowHost } from '../bridges/data.js';
 import { everyHost, HOST_LIST, hostNameOf } from '../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../bridges/offers.js';
 import { selfId } from '../bridges/people.js';
@@ -13,6 +13,7 @@ import { TEAMS_SERVED } from '../resources/teams/state.js';
 import { openPalette } from './CommandPalette.js';
 import { localeList, themeList } from './commands.js';
 import { layoutMenu } from './layout-menu.js';
+import { disablePush, pushOn } from './notify/push.js';
 
 /** The commands the activity bar's Manage gear lists, in its menu's order. */
 export const MANAGE_SLOT = 'ahp:manage';
@@ -184,7 +185,13 @@ function accountGroup(scena: Scena, embedded: boolean): Disposable {
       slots: [MANAGE_SLOT],
       run: (ctx) => {
         ctx.host?.closeMenu();
-        void ctx.scena.commands.execute('sigillum.signout');
+        /*
+         * The device leaves the window's host first, while this person can
+         * still take it off: the host refuses the next person a device that
+         * another person registered.
+         */
+        const off = pushOn() ? disablePush(offersOf(windowHost())).catch(() => undefined) : Promise.resolve();
+        void off.then(() => ctx.scena.commands.execute('sigillum.signout'));
       },
     })]),
   );

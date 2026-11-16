@@ -8,7 +8,7 @@ import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList, type Row } from '../../shell/explorer/ExplorerList.js';
 import { Bood } from './Bood.js';
-import { BOTS, BOTS_SCHEME, botsReducer, type BotsState } from './catalogue.js';
+import { BOTS, BOTS_SCHEME, botsIn, botsReducer, type BotsState } from './catalogue.js';
 import { ACTIVE_BOT } from './state.js';
 
 /** The sidebar: the bots of the shown hosts that serve them, each drawn, with its labels and host. */
@@ -26,7 +26,7 @@ export default function BotExplorer(): ReactElement {
   };
 
   const rows = useMemo<Row[]>(() => hosts
-    .flatMap((host, at) => (states[at]?.bots ?? []).map((bot) => ({ host, bot })))
+    .flatMap((host, at) => botsIn(states[at]).map((bot) => ({ host, bot })))
     .sort((a, b) => a.bot.name.localeCompare(b.bot.name))
     .map(({ host, bot }) => {
       const key = refKey(host, bot.id);

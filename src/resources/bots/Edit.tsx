@@ -11,7 +11,7 @@ import { Field } from '../../shell/view/Field.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { writeLastHost } from '../sessions/last-host.js';
 import { Bood } from './Bood.js';
-import { BOT_PROVIDER, BOTS, BOTS_SCHEME, botsReducer, editBot, makeBot, type BotsState } from './catalogue.js';
+import { BOT_PROVIDER, BOTS, BOTS_SCHEME, botsIn, botsReducer, editBot, makeBot, type BotsState } from './catalogue.js';
 import { draftOf, recordBody, renamedFor, type BotDraft } from './draft.js';
 import { BOT_BODIES, COLOR_HEX, knowsBody, slugOf } from './look.js';
 
@@ -45,10 +45,10 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
 
   if (error !== null) return <PageAlert tone="danger" title={t('bots/notices/none')} message={error} />;
   if (state === undefined) return <Spinner label={t('bots/notices/reading')} />;
-  const bot = fresh ? undefined : state.bots.find((one) => one.id === slug);
+  const bot = fresh ? undefined : botsIn(state).find((one) => one.id === slug);
   if (!fresh && bot === undefined) return <PageAlert tone="warning" message={t('bots/notices/gone')} />;
 
-  first.current ??= draftOf(bot, state.bots);
+  first.current ??= draftOf(bot, botsIn(state));
   const shown = draft ?? first.current;
   const start = first.current;
   const set = (change: Partial<BotDraft>): void => setDraft((held) => ({ ...(held ?? start), ...change }));
@@ -61,7 +61,7 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
     const body = recordBody(shown, fresh);
     const written = bot === undefined
       ? (() => {
-        const taken = state.bots.map((one) => one.id);
+        const taken = botsIn(state).map((one) => one.id);
         const slugs: string[] = [];
         for (let n = 0; n < SLUG_TRIES; n += 1) slugs.push(slugOf(shown.name, [...taken, ...slugs]));
         return makeBot(host, offers, slugs, body);

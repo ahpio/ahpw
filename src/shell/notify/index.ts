@@ -95,7 +95,7 @@ export function registerNotifications(scena: Scena): Disposable {
           }
         }
         try {
-          await enablePush();
+          await enablePush(scena.store.get<Offers>(ahpPaths(windowHost()).offers));
           done(translate('shell/notify/push/on'));
         } catch (error) {
           failed(translate('shell/notify/push/notOn'), error);
@@ -111,7 +111,7 @@ export function registerNotifications(scena: Scena): Disposable {
       when: () => pushSupported() && pushOn(),
       run: async () => {
         try {
-          await disablePush();
+          await disablePush(scena.store.get<Offers>(ahpPaths(windowHost()).offers));
           done(translate('shell/notify/push/off'));
         } catch (error) {
           failed(translate('shell/notify/push/notOff'), error);
@@ -128,7 +128,7 @@ export function registerNotifications(scena: Scena): Disposable {
       when: () => pushSupported() && pushOn(),
       run: async () => {
         try {
-          done(translate(await switchAudience() === 'person' ? 'shell/notify/push/person' : 'shell/notify/push/device'));
+          done(translate(await switchAudience(scena.store.get<Offers>(ahpPaths(windowHost()).offers)) === 'person' ? 'shell/notify/push/person' : 'shell/notify/push/device'));
         } catch (error) {
           failed(translate('shell/notify/push/notSwitched'), error);
         }
