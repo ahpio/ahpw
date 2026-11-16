@@ -11,9 +11,9 @@ const command = (id: string): ManifestCommand => ({
 
 describe('shortNames', () => {
   it('takes the shortest start no other name shares', () => {
-    const names = ['daemon', 'user', 'team', 'project', 'plugin', 'proxy', 'usage', 'vault'];
+    const names = ['daemon', 'user', 'team', 'project', 'plugin', 'gateway', 'usage', 'vault'];
     expect(Object.fromEntries(shortNames(names))).toEqual({
-      daemon: 'D', user: 'Use', team: 'T', project: 'Proj', plugin: 'Pl', proxy: 'Prox', usage: 'Usa', vault: 'V',
+      daemon: 'D', user: 'Use', team: 'T', project: 'Pr', plugin: 'Pl', gateway: 'G', usage: 'Usa', vault: 'V',
     });
   });
 

@@ -5,8 +5,9 @@ import { hostBridge } from '../../bridges/data.js';
 import CodeEditor from '../editor/CodeEditor.js';
 import { languageOf } from '../editor/languages.js';
 import { changedOnHost, refusesWrite, shownText } from './save.js';
-import { FileHead, useFileText } from './text.js';
+import { FileHead, useFileText, useWrap, WrapButton } from './text.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
+import { SharedFilePage } from './SharedFilePage.js';
 
 /** Why the last save did not land, and whether the host refuses this file's writes. */
 interface SaveFailure {
@@ -14,8 +15,28 @@ interface SaveFailure {
   refused: boolean;
 }
 
+/** What a file page is given. */
+export interface FilePageProps {
+  host: string;
+  uri?: string;
+  line?: number | null;
+  end?: number | null;
+  onDirty?: (dirty: boolean) => void;
+}
+
+/**
+ * A file the daemon can read: shared with everyone who has it open when the
+ * host serves shared documents, else in an editor that saves with Mod-s.
+ */
+export default function FilePage(props: FilePageProps): ReactElement {
+  const [plain, setPlain] = useState(false);
+  useEffect(() => { setPlain(false); }, [props.host, props.uri]);
+  if (plain || props.uri === undefined || !props.uri.startsWith('file:')) return <PlainFilePage {...props} />;
+  return <SharedFilePage {...props} uri={props.uri} onPlain={() => setPlain(true)} />;
+}
+
 /** A file the daemon can read, in an editor that saves with Mod-s or its Save button, scrolled to the lines a link named. */
-export default function FilePage({ host, uri, line, end, onDirty }: { host: string; uri?: string; line?: number | null; end?: number | null; onDirty?: (dirty: boolean) => void }): ReactElement {
+function PlainFilePage({ host, uri, line, end, onDirty }: FilePageProps): ReactElement {
   const { t } = useI18n();
   const state = useFileText(host, uri);
   const [dirty, setDirty] = useState(false);
@@ -28,6 +49,7 @@ export default function FilePage({ host, uri, line, end, onDirty }: { host: stri
   /** The version of the file the editor started from; a save is refused once the host holds another. */
   const version = useRef<string | undefined>(undefined);
 
+  const [wrap, setWrap] = useWrap();
   useCloseGuard(() => (dirty ? t('files/unsaved') : null));
   // A holder with no tab of its own, as a modal, learns of unsaved text here.
   useEffect(() => { onDirty?.(dirty); }, [dirty, onDirty]);
@@ -80,6 +102,7 @@ export default function FilePage({ host, uri, line, end, onDirty }: { host: stri
   return (
     <div className="web-file">
       <FileHead uri={uri} dirty={dirty}>
+        <WrapButton wrap={wrap} onChange={setWrap} />
         {readOnly ? null : <Button label={t('files/save')} size="sm" variant="primary" disabled={!dirty} onClick={() => save(draft.current)} />}
       </FileHead>
       {failure === null ? null : <Alert tone="danger" title={failure.refused ? t('files/readOnly') : t('files/notSaved')} message={failure.message} />}
@@ -93,6 +116,8 @@ export default function FilePage({ host, uri, line, end, onDirty }: { host: stri
           end={end ?? null}
           onChange={change}
           onSave={save}
+          wrap={wrap}
+          onWrapChange={setWrap}
         />
       </div>
     </div>

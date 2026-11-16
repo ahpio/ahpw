@@ -1,0 +1,112 @@
+/* The live preview: Markdown drawn as a page, in the page's font, clear of the gutter and the edge. */
+.web-lp .cm-content {
+  margin-inline: var(--oo-spacing-lg);
+  font-family: var(--oo-font-family);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+/* The page's own colours: the source view's syntax colours stay out, and each part below sets its own. */
+.web-lp .cm-line {
+  color: var(--oo-color-text);
+}
+
+.web-lp .cm-line span {
+  color: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  text-decoration: inherit;
+}
+
+.web-lp .cm-content .web-lp-h1 { font-size: 22px; font-weight: 700; line-height: 32px; }
+.web-lp .cm-content .web-lp-h2 { font-size: 18px; font-weight: 650; line-height: 28px; }
+
+/* The two top headings close with a rule, as a page draws them. */
+.web-lp .cm-content .web-lp-h1,
+.web-lp .cm-content .web-lp-h2 {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--oo-color-border);
+}
+
+/* A `---` line, drawn as a rule across the page. */
+.web-lp .cm-content .web-lp-rule {
+  background: linear-gradient(var(--oo-color-border), var(--oo-color-border)) center / 100% 2px no-repeat;
+}
+.web-lp .cm-content .web-lp-h3 { font-size: 16px; font-weight: 650; }
+.web-lp .cm-content .web-lp-h4,
+.web-lp .cm-content .web-lp-h5,
+.web-lp .cm-content .web-lp-h6 { font-weight: 650; }
+
+.web-lp .cm-content .web-lp-strong { font-weight: 700; }
+.web-lp .cm-content .web-lp-em { font-style: italic; }
+.web-lp .cm-content .web-lp-strike,
+.web-lp .cm-content .web-lp-done { text-decoration: line-through; }
+.web-lp .cm-content .web-lp-done { color: var(--oo-color-muted); }
+
+.web-lp .cm-content .web-lp-code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--oo-color-muted) 16%, transparent);
+  font-family: var(--oo-font-family-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+}
+
+.web-lp .cm-content .web-lp-link {
+  color: var(--oo-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.web-lp .cm-content .web-lp-quote {
+  border-left: 3px solid var(--oo-color-border);
+  padding-left: 10px;
+  color: var(--oo-color-muted);
+}
+
+.web-lp .cm-content .web-lp-bullet {
+  display: inline-block;
+  width: 14px;
+  color: var(--oo-color-muted);
+}
+
+.web-lp .cm-content .web-lp-task {
+  margin: 0 6px 0 0;
+  vertical-align: -2px;
+  cursor: pointer;
+}
+
+.web-lp .cm-content .web-lp-image img {
+  width: var(--web-lp-image-width, auto);
+  height: var(--web-lp-image-height, auto);
+  max-width: 100%;
+}
+
+/* An image among the text, as a page draws it: a badge in a line, or one image alone filling it. */
+.web-lp .cm-content .web-lp-image--inline {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+/* An HTML block's images, in a row. */
+.web-lp .cm-content .web-lp-html {
+  padding: 4px 2px 4px 6px;
+}
+
+/* A line with the caret shows its Markdown, as source. */
+.web-lp .cm-content .web-lp-source {
+  font-family: var(--oo-font-family-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+}
+
+.web-lp .cm-content .web-lp-marker { color: var(--oo-color-muted); }
+
+/* A table or a fenced block, drawn whole, inside the text's own padding. */
+.web-lp .cm-content .web-lp-block {
+  padding: 4px 2px 4px 6px;
+}
+
+.web-lp .cm-content .web-lp-block table {
+  margin: 0;
+}

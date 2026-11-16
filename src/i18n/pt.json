@@ -414,6 +414,9 @@
     "reading": "Carregando o arquivo",
     "notReadable": "Não foi possível ler este arquivo",
     "notText": "Este arquivo não é texto.",
+    "wrapOn": "Quebrar linhas longas (Alt+Z)",
+    "wrapOff": "Manter linhas longas numa linha (Alt+Z)",
+    "simpleNote": "Esta visão não edita o arquivo aqui.",
     "unsaved": "Você tem alterações não salvas neste arquivo.",
     "changedOnHost": "Este arquivo mudou no host depois que você o abriu. Copie suas alterações e abra o arquivo de novo.",
     "readOnly": "Somente leitura",
@@ -443,7 +446,52 @@
       "zoomIn": "Aumentar zoom"
     },
     "gone": "Este arquivo não existe mais.",
-    "readRefused": "Você não tem permissão para ler este arquivo."
+    "readRefused": "Você não tem permissão para ler este arquivo.",
+    "shared": {
+      "edit": "Editar",
+      "liveSave": "Salvar ao vivo: suas edições vão para todos na hora",
+      "manualSave": "Salvar manualmente: suas edições vão quando você salvar",
+      "saving": "Salvando…",
+      "saved": "Salvo",
+      "locked": "Somente leitura",
+      "saveNow": "Salvar (Mod-S)",
+      "you": "{name} (você)",
+      "refused": "O host recusou sua edição",
+      "stopEditing": "Parar de editar",
+      "saveFirst": "Salve suas edições primeiro",
+      "person": "{name} · {kind} · {doing}",
+      "editingNow": "editando",
+      "viewing": "vendo",
+      "kinds": {
+        "root": "root",
+        "user": "usuário",
+        "guest": "convidado",
+        "agent": "agente"
+      }
+    },
+    "comments": {
+      "add": "Comentar a seleção",
+      "new": "Comentar a seleção",
+      "send": "Comentar (Mod-Enter)",
+      "cancel": "Cancelar",
+      "reply": "Responder",
+      "sendReply": "Enviar resposta",
+      "resolve": "Resolver",
+      "reopen": "Abrir de novo",
+      "delete": "Excluir comentário",
+      "line": "Linha {line}",
+      "close": "Fechar",
+      "showAll": "Mostrar comentários",
+      "hideAll": "Ocultar comentários",
+      "deleteAsk": "Excluir esta conversa?",
+      "deleteYes": "Excluir",
+      "show": "Mostrar a conversa",
+      "outdated": "Desatualizado",
+      "replies": {
+        "one": "{count} resposta",
+        "other": "{count} respostas"
+      }
+    }
   },
   "changes": {
     "title": "Alterações",
@@ -2240,7 +2288,7 @@
         "trust": "Confiança do espaço de trabalho",
         "limits": "Limites e diagnóstico",
         "listener": "Escuta",
-        "modelProxy": "Proxy de modelos",
+        "modelGateway": "Gateway de modelos",
         "sessions": "Sessões",
         "tools": "Ferramentas",
         "mcp": "Servidores MCP",
@@ -2412,6 +2460,24 @@
         "palettePosition": {
           "title": "Paleta de comandos: posição",
           "description": "Travada impede arrastar. O menu e este formulário ainda a movem."
+        },
+        "fileSaveMode": {
+          "title": "Ao editar um arquivo",
+          "description": "Como um arquivo é salvo depois de clicar em Editar. Você pode mudar em cada arquivo.",
+          "live": "Salvar ao vivo",
+          "manual": "Salvar manualmente"
+        },
+        "fileComments": {
+          "title": "Ao abrir um arquivo",
+          "description": "Se os comentários de um arquivo ficam numa margem, ou recolhidos até você abrir um. Você pode mudar em cada arquivo com 💬.",
+          "hidden": "Recolhidos",
+          "shown": "Numa margem"
+        },
+        "textWrap": {
+          "title": "Linhas longas",
+          "description": "Se um editor de código quebra as linhas longas ao abrir. Você pode mudar em cada arquivo com ↵ ou Alt+Z.",
+          "off": "Manter numa linha",
+          "on": "Quebrar"
         }
       },
       "tabs": {
@@ -2660,7 +2726,7 @@
       "opens": "abre o turno",
       "pools": "Pools",
       "sources": {
-        "proxy": "Proxy",
+        "gateway": "Gateway",
         "agent": "Agente",
         "computer": "Computador"
       },
@@ -2867,7 +2933,8 @@
       "filter": "Filtrar plugins",
       "group": "Agrupar",
       "empty": "Este host não tem plugins.",
-      "notServed": "Nenhum dos seus hosts deixa você ver os plugins. Isso requer a permissão plugin:list."
+      "notServed": "Nenhum dos seus hosts deixa você ver os plugins. Isso requer a permissão plugin:list.",
+      "search": "Pesquisar plugins"
     },
     "group": {
       "state": "Por estado",
@@ -2876,7 +2943,8 @@
     "commands": {
       "show": "Mostrar plugins",
       "open": "Abrir plugin",
-      "new": "Novo plugin"
+      "new": "Novo plugin",
+      "openListed": "Abrir plugin da lista"
     },
     "states": {
       "error": "Erro",
@@ -2941,18 +3009,17 @@
     "page": {
       "gone": "Este plugin não está mais instalado.",
       "overview": "Visão geral",
-      "options": "Opções",
       "provides": "Oferece",
       "providesNothing": "Seu manifesto não lista nada que ele ofereça.",
       "undeclared": "Foi carregado, mas seu manifesto não lista o que ele oferece.",
       "notLoaded": "Não foi carregado, então não se sabe o que ele oferece.",
-      "spec": "Como está configurado",
       "loadFailed": "Não carregou",
-      "failing": "Tem erros"
+      "failing": "Tem erros",
+      "settings": "Configurações",
+      "installation": "Instalação",
+      "noReadme": "O pacote dele não tem README."
     },
     "facts": {
-      "id": "ID",
-      "state": "Estado",
       "version": "Versão",
       "running": "Em execução",
       "module": "Módulo",
@@ -2966,7 +3033,14 @@
       "methods": "Comandos",
       "resourceProviders": "Esquemas de recursos",
       "tools": "Ferramentas",
-      "triggerTypes": "Tipos de gatilho"
+      "triggerTypes": "Tipos de gatilho",
+      "engines": "Motores",
+      "tunnelKinds": "Tipos de túnel",
+      "routes": "Rotas",
+      "bindings": "Vínculos",
+      "folders": "Pastas",
+      "grants": "Permissões",
+      "closers": "Encerradores"
     },
     "options": {
       "save": "Salvar",
@@ -2980,6 +3054,32 @@
     "running": {
       "yes": "Sim",
       "no": "Não, carrega na próxima vez que o host iniciar"
+    },
+    "listed": {
+      "notInstalled": "Não instalado",
+      "install": "Instalar",
+      "installing": "Instalando…",
+      "installFailed": "Não foi possível instalar {title}",
+      "installVersion": "Instalar {version}",
+      "versions": "Instalar uma versão específica",
+      "reading": "Lendo o plugin…",
+      "unread": "Não foi possível ler este plugin",
+      "gone": "Nenhuma lista deste host tem este plugin agora.",
+      "features": "Recursos",
+      "changelog": "Alterações",
+      "noReadme": "Esta versão não tem README.",
+      "identifier": "Identificador",
+      "published": "Publicado",
+      "list": "Lista",
+      "author": "Autor",
+      "license": "Licença",
+      "categories": "Categorias",
+      "resources": "Recursos",
+      "repository": "Repositório",
+      "homepage": "Página",
+      "issues": "Problemas",
+      "marketplace": "Marketplace",
+      "noSettings": "Não tem configurações."
     }
   },
   "connectors": {

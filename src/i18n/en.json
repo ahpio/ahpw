@@ -414,6 +414,9 @@
     "reading": "Loading the file",
     "notReadable": "Couldn't read this file",
     "notText": "This file is not text.",
+    "wrapOn": "Wrap long lines (Alt+Z)",
+    "wrapOff": "Keep long lines on one line (Alt+Z)",
+    "simpleNote": "This view does not edit the file here.",
     "unsaved": "You have unsaved changes in this file.",
     "changedOnHost": "This file changed on the host after you opened it. Copy your changes, then reopen the file.",
     "readOnly": "Read-only",
@@ -443,7 +446,52 @@
       "zoomIn": "Zoom in"
     },
     "gone": "This file no longer exists.",
-    "readRefused": "You don't have permission to read this file."
+    "readRefused": "You don't have permission to read this file.",
+    "shared": {
+      "edit": "Edit",
+      "liveSave": "Live save: your edits go to everyone at once",
+      "manualSave": "Manual save: your edits go out when you save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "locked": "Read only",
+      "saveNow": "Save (Mod-S)",
+      "you": "{name} (you)",
+      "refused": "The host refused your edit",
+      "stopEditing": "Stop editing",
+      "saveFirst": "Save your edits first",
+      "person": "{name} · {kind} · {doing}",
+      "editingNow": "editing",
+      "viewing": "viewing",
+      "kinds": {
+        "root": "root",
+        "user": "user",
+        "guest": "guest",
+        "agent": "agent"
+      }
+    },
+    "comments": {
+      "add": "Comment on the selection",
+      "new": "Comment on the selection",
+      "send": "Comment (Mod-Enter)",
+      "cancel": "Cancel",
+      "reply": "Reply",
+      "sendReply": "Send reply",
+      "resolve": "Resolve",
+      "reopen": "Open again",
+      "delete": "Delete comment",
+      "line": "Line {line}",
+      "close": "Close",
+      "showAll": "Show comments",
+      "hideAll": "Hide comments",
+      "deleteAsk": "Delete this thread?",
+      "deleteYes": "Delete",
+      "show": "Show the thread",
+      "outdated": "Outdated",
+      "replies": {
+        "one": "{count} reply",
+        "other": "{count} replies"
+      }
+    }
   },
   "changes": {
     "title": "Changes",
@@ -2240,7 +2288,7 @@
         "trust": "Workspace trust",
         "limits": "Limits and diagnostics",
         "listener": "Listener",
-        "modelProxy": "Model proxy",
+        "modelGateway": "Model gateway",
         "sessions": "Sessions",
         "tools": "Tools",
         "mcp": "MCP servers",
@@ -2412,6 +2460,24 @@
         "palettePosition": {
           "title": "Command palette: position",
           "description": "Locked stops a drag. Its menu and this form still move it."
+        },
+        "fileSaveMode": {
+          "title": "When I edit a file",
+          "description": "How a file saves after you click Edit. You can change it on each file.",
+          "live": "Live save",
+          "manual": "Manual save"
+        },
+        "fileComments": {
+          "title": "When I open a file",
+          "description": "Whether a file's comments sit in a margin, or fold away until you open one. You can change it on each file with 💬.",
+          "hidden": "Folded away",
+          "shown": "In a margin"
+        },
+        "textWrap": {
+          "title": "Long lines",
+          "description": "Whether a code editor wraps long lines when it opens. You can change it on each file with ↵ or Alt+Z.",
+          "off": "Keep on one line",
+          "on": "Wrap"
         }
       },
       "tabs": {
@@ -2660,7 +2726,7 @@
       "opens": "opens the turn",
       "pools": "Pools",
       "sources": {
-        "proxy": "Proxy",
+        "gateway": "Gateway",
         "agent": "Agent",
         "computer": "Computer"
       },
@@ -2867,7 +2933,8 @@
       "filter": "Filter plugins",
       "group": "Group",
       "empty": "This host has no plugins.",
-      "notServed": "None of your hosts let you see their plugins. This needs the plugin:list grant."
+      "notServed": "None of your hosts let you see their plugins. This needs the plugin:list grant.",
+      "search": "Search plugins"
     },
     "group": {
       "state": "By state",
@@ -2876,7 +2943,8 @@
     "commands": {
       "show": "Show plugins",
       "open": "Open plugin",
-      "new": "New plugin"
+      "new": "New plugin",
+      "openListed": "Open listed plugin"
     },
     "states": {
       "error": "Error",
@@ -2941,18 +3009,17 @@
     "page": {
       "gone": "This plugin is no longer installed.",
       "overview": "Overview",
-      "options": "Options",
       "provides": "Provides",
       "providesNothing": "Its manifest doesn't list anything it provides.",
       "undeclared": "It loaded, but its manifest doesn't list what it provides.",
       "notLoaded": "It hasn't loaded, so what it provides is unknown.",
-      "spec": "As configured",
       "loadFailed": "It didn't load",
-      "failing": "It has errors"
+      "failing": "It has errors",
+      "settings": "Settings",
+      "installation": "Installation",
+      "noReadme": "Its package has no README."
     },
     "facts": {
-      "id": "ID",
-      "state": "State",
       "version": "Version",
       "running": "Running",
       "module": "Module",
@@ -2966,7 +3033,14 @@
       "methods": "Commands",
       "resourceProviders": "Resource schemes",
       "tools": "Tools",
-      "triggerTypes": "Trigger types"
+      "triggerTypes": "Trigger types",
+      "engines": "Engines",
+      "tunnelKinds": "Tunnel kinds",
+      "routes": "Routes",
+      "bindings": "Bindings",
+      "folders": "Folders",
+      "grants": "Grants",
+      "closers": "Closers"
     },
     "options": {
       "save": "Save",
@@ -2980,6 +3054,32 @@
     "running": {
       "yes": "Yes",
       "no": "No, it loads the next time the host starts"
+    },
+    "listed": {
+      "notInstalled": "Not installed",
+      "install": "Install",
+      "installing": "Installing…",
+      "installFailed": "Couldn't install {title}",
+      "installVersion": "Install {version}",
+      "versions": "Install a specific version",
+      "reading": "Reading the plugin…",
+      "unread": "Couldn't read this plugin",
+      "gone": "No list of this host holds this plugin now.",
+      "features": "Features",
+      "changelog": "Changelog",
+      "noReadme": "This version has no README.",
+      "identifier": "Identifier",
+      "published": "Published",
+      "list": "List",
+      "author": "Author",
+      "license": "License",
+      "categories": "Categories",
+      "resources": "Resources",
+      "repository": "Repository",
+      "homepage": "Homepage",
+      "issues": "Issues",
+      "marketplace": "Marketplace",
+      "noSettings": "It has no settings."
     }
   },
   "connectors": {

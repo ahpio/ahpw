@@ -1,7 +1,8 @@
 import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, DetailList, Markdown, Spinner, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, Badge, Button, DetailList, Spinner, Text, type DetailItem } from '@softov/scena/ui';
+import { Markdown } from '../../shell/markdown/Markdown.js';
 import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { automationReducer, type AgentInfo, type AutomationCapabilities, type AutomationEntry, type AutomationState as Catalogue } from '@microsoft/agent-host-protocol';
 import { ahpPaths, AUTOMATIONS, hostBridge } from '../../bridges/data.js';

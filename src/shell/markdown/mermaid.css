@@ -1,0 +1,18 @@
+/* A drawn diagram: centred, scaled down to the column, scrolled when it cannot shrink further. */
+.web-mermaid {
+  margin: 0.75em 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.web-mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* A diagram's source, shown as code until it parses. */
+.web-mermaid-code__error {
+  margin: 0.25em 0 0.75em;
+  color: var(--oo-color-danger);
+  font-size: 0.85em;
+}

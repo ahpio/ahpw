@@ -1,4 +1,5 @@
 import { getLocale, translate } from '@softov/scena';
+import { EMOJIcon } from '../emojis.js';
 import { limitWords, type LimitFigure, type Measure } from '../../bridges/policies.js';
 import { totalWords, type UsageTotal } from '../../bridges/usage.js';
 import { plural } from '../../i18n/locales.js';
@@ -22,6 +23,23 @@ export function tokensWord(tokens: number): string {
 /** Computer time: `1.5 h`. */
 export function hoursWord(hours: number): string {
   return translate('usage/total/hours', { count: totalWords({ hours }, getLocale()).hours });
+}
+
+/** The icon of what wrote a record, by its `source`. */
+const SOURCES: Readonly<Record<string, string>> = {
+  gateway: EMOJIcon.gateway,
+  agent: EMOJIcon.agents,
+  computer: EMOJIcon.computers,
+};
+
+/** The icon of what wrote a record; a source ahpw does not know has none. */
+export function sourceIcon(source: string): string {
+  return SOURCES[source] ?? '';
+}
+
+/** What wrote a record, in words; a source ahpw does not know reads as it is. */
+export function sourceWord(source: string): string {
+  return Object.hasOwn(SOURCES, source) ? translate(`usage/record/sources/${source}`) : source;
 }
 
 /** What a pool key's kind is called; a kind ahpw has no word for reads as it is. */

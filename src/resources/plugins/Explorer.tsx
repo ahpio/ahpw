@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Button, Spinner } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
@@ -8,15 +8,15 @@ import { useChannelOnEach } from '../../bridges/channel.js';
 import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import type { PeopleState } from '../../bridges/people.js';
-import { PLUGINS, pluginsReducer, restartNeeded, specEnabled, type PluginRow } from '../../bridges/plugins.js';
+import { availablePlugins, PLUGINS, pluginsReducer, restartNeeded, specEnabled, type ListedPlugin, type PluginRow } from '../../bridges/plugins.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { mayRestart } from '../../bridges/restart.js';
 import { RESTART_HOST } from '../host/restart.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList } from '../../shell/explorer/ExplorerList.js';
-import { mayReload, mayToggle, reloadOne, saidOf, toggleMethod, togglePlugin } from './actions.js';
-import { entryKeyOf, KNOWN_CATEGORIES, NO_CATEGORY, pluginRows, type PluginEntry, type PluginGrouping } from './rows.js';
-import { ACTIVE_PLUGIN, PLUGINS_GROUP } from './state.js';
+import { installListed, mayInstall, mayList, mayReload, mayToggle, reloadOne, saidOf, toggleMethod, togglePlugin } from './actions.js';
+import { entryKeyOf, KNOWN_CATEGORIES, listedKey, listedRows, NO_CATEGORY, pluginRows, type ListedEntry, type PluginEntry, type PluginGrouping } from './rows.js';
+import { ACTIVE_LISTED, ACTIVE_PLUGIN, INSTALLING, installKey, PLUGINS_GROUP } from './state.js';
 
 /** A menu entry's tooltip, when the host says what its command does. */
 const tooltip = (said: string | undefined): { tooltip?: string } => (said === undefined ? {} : { tooltip: said });
@@ -39,6 +39,25 @@ export default function PluginsExplorer(): ReactElement {
   const offers = useEach<Offers>(hosts.map((host) => ahpPaths(host).offers));
   const roots = useChannelOnEach<RootState>(hosts, ROOT, rootReducer);
   const active = useStore<{ host: string; id: string }>(ACTIVE_PLUGIN);
+  const activeListed = useStore<{ host: string; id: string; marketplace: string }>(ACTIVE_LISTED);
+  // The plugins each host's lists hold, asked of the hosts that answer them, and
+  // asked again when a host's plugin rows change, since an install moves an
+  // entry from listed to installed.
+  const listing = hosts.filter((host) => mayList(offers[hosts.indexOf(host)] ?? NO_OFFERS));
+  const rowsSeen = states.map((one) => (one?.records ?? []).map(({ id, record }) => `${id}@${record.version ?? ''}`).join(',')).join('|');
+  const [listed, setListed] = useState<Readonly<Record<string, ListedPlugin[]>>>({});
+  const installingNow = (useStore<string[]>(INSTALLING) ?? []).join('\n');
+  const installing = new Set(installingNow === '' ? [] : installingNow.split('\n'));
+  useEffect(() => {
+    let live = true;
+    for (const host of listing) {
+      availablePlugins(host)
+        .then((answer) => { if (live) setListed((held) => ({ ...held, [host]: answer.plugins })); })
+        .catch(() => { /* a host that cannot answer lists nothing; its rows still show */ });
+    }
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listing.join('\n'), rowsSeen]);
   const grouping = useStore<PluginGrouping | null>(PLUGINS_GROUP) ?? 'state';
   const open = (key: string): void => {
     const { host, id } = refOf(entryKeyOf(key));
@@ -76,6 +95,32 @@ export default function PluginsExplorer(): ReactElement {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hosts, states, offers, hostName, grouping, t]);
 
+  const listedEntries: ListedEntry[] = useMemo(
+    () => listing.flatMap((host) => (listed[host] ?? []).map((plugin) => ({ host, hostName: hostName(host), plugin }))),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [listing.join('\n'), listed, hostName],
+  );
+  const openListed = ({ host, plugin }: ListedEntry): void => {
+    void scena.commands.execute('ahp.openListedPlugin', { host, id: plugin.id, marketplace: plugin.marketplace, title: plugin.name ?? plugin.id });
+  };
+  // An install from the row opens nothing: the row becomes the installed one, and a page open on it turns into the installed page.
+  const install = (entry: ListedEntry): void => { void installListed(scena.store, entry.host, entry.plugin); };
+  const busy = (entry: ListedEntry): boolean => installing.has(installKey(entry.host, entry.plugin.marketplace, entry.plugin.id));
+  const searchRows = useMemo(() => listedRows(listedEntries, {
+    multi,
+    notInstalled: t('plugins/listed/notInstalled'),
+    install: (entry) => (mayInstall(offers[hosts.indexOf(entry.host)] ?? NO_OFFERS) ? t(busy(entry) ? 'plugins/listed/installing' : 'plugins/listed/install') : undefined),
+    busy: (key) => listedEntries.some((entry) => listedKey(entry) === key && busy(entry)),
+    run: install,
+    menu: (entry) => [{ title: t('plugins/actions/open'), onSelect: (picker) => { picker.closeMenu(); openListed(entry); } }],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [listedEntries, installingNow, offers, hosts, multi, t]);
+  const openRow = (key: string): void => {
+    const entry = listedEntries.find((one) => listedKey(one) === key);
+    if (entry === undefined) open(key);
+    else openListed(entry);
+  };
+
   // One host's notice in mono; in multi a host that is down says so in its own place.
   const error = multi ? null : errors[0] ?? null;
   const state = multi ? states.find((one) => one !== undefined) : states[0];
@@ -92,16 +137,20 @@ export default function PluginsExplorer(): ReactElement {
         ? <Spinner label={t('plugins/notices/reading')} />
         : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('plugins/explorer/empty')}</p>
           : roots.states.some(restartNeeded) ? <p className="web-note web-explorer__empty web-plugins__restart">{t('plugins/restartShort')} {restart}</p> : null;
-  const selected = active === undefined ? null : rows.find((row) => entryKeyOf(row.key) === refKey(active.host, active.id))?.key ?? null;
+  const selectedListed = activeListed === undefined ? undefined
+    : listedEntries.find((one) => one.host === activeListed.host && one.plugin.id === activeListed.id && one.plugin.marketplace === activeListed.marketplace);
+  const selected = selectedListed !== undefined ? listedKey(selectedListed)
+    : active === undefined ? null : rows.find((row) => entryKeyOf(row.key) === refKey(active.host, active.id))?.key ?? null;
 
   return (
     <ExplorerList
       label={t('plugins/explorer/title')}
       rows={rows}
+      searchRows={listing.length === 0 ? undefined : searchRows}
       selected={selected}
-      onOpen={open}
+      onOpen={openRow}
       notice={notice}
-      filterLabel={t('plugins/explorer/filter')}
+      filterLabel={t(listing.length === 0 ? 'plugins/explorer/filter' : 'plugins/explorer/search')}
       hostLines={multi}
     />
   );

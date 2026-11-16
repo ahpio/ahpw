@@ -13,10 +13,10 @@ const HOST: readonly Named[] = [
   ['limits', ['clientQueueBytes', 'replayBytes', 'wire']],
 ];
 
-// ahpd 0.13 renamed `http` to `httpApi` and `proxy` to `modelProxy`; an older host still sends the old names.
+// `http` is the name `httpApi` had before ahpd 0.13, which an older host still sends.
 const DAEMON: readonly Named[] = [
   ['listener', ['port', 'host', 'httpApi', 'http', 'routes']],
-  ['modelProxy', ['modelProxy', 'proxy']],
+  ['modelGateway', ['modelGateway']],
   ['sessions', ['closedChats', 'archiveDirtyWorktree', 'pullRequestLookup']],
   ['tools', ['advancedTools', 'sessionTools', 'sessionToolsProviders']],
   ['mcp', ['mcpServers']],

@@ -20,6 +20,9 @@ import { SESSION_VIEWS, VIEWS_PLACES, type Placing } from '../right-sidebar.js';
 import { BOT_CHAT_OPENS } from '../../resources/bots/sidebar.js';
 import { CANVAS_AUTO_OPEN, CANVAS_OPENS } from '../../resources/canvases/settings.js';
 import { CUSTOM_FILE_OPENS } from '../../resources/agents/custom-files.js';
+import { FILE_SAVE_MODE } from '../../resources/files/save-mode.js';
+import { TEXT_WRAP } from '../../resources/editor/wrap.js';
+import { FILE_COMMENTS } from '../../resources/files/comments-shown.js';
 import { DOCK_SETTINGS } from '../dock/settings.js';
 import { ARCHIVED_SESSION_OPEN, SESSION_MARKDOWN, TOOLS_EXPANDED, type ChatChoice } from '../../resources/sessions/view-settings.js';
 
@@ -131,6 +134,9 @@ export const UI_SETTINGS: readonly UiSetting[] = [
   chatSetting('ui.canvasOpens', CANVAS_OPENS),
   chatSetting('ui.canvasAutoOpen', CANVAS_AUTO_OPEN),
   chatSetting('ui.customFileOpens', CUSTOM_FILE_OPENS),
+  chatSetting('ui.fileSaveMode', FILE_SAVE_MODE),
+  chatSetting('ui.textWrap', TEXT_WRAP),
+  chatSetting('ui.fileComments', FILE_COMMENTS),
   ...DOCK_SETTINGS,
 ];
 

@@ -22,6 +22,15 @@ describe('settingsGroups', () => {
     expect(interfaceGroups().flatMap((group) => group.sections.flatMap((section) => section.keys))).toEqual(['ui.theme', 'ui.themeMode', 'ui.language', 'ui.layout', 'ui.settingsPlace', 'ui.confirmStyle', 'ui.sessionViewsPlace', 'ui.toolsExpanded', 'ui.sessionMarkdown', 'ui.archivedSessionOpen', 'ui.botChatOpens', 'ui.actionGroups', 'ui.newSessionButton', 'ui.newSessionPlace', 'ui.newSessionGroup', 'ui.newSessionOrder', 'ui.newSessionPosition', 'ui.paletteButton', 'ui.palettePlace', 'ui.paletteGroup', 'ui.paletteOrder', 'ui.palettePosition', 'ui.canvasOpens', 'ui.canvasAutoOpen', 'ui.customFileOpens']);
   });
 
+  it('puts modelGateway in the Model gateway section, and modelProxy in none', () => {
+    const daemon = settingsGroups(schema(['modelGateway', 'modelProxy'])).find((group) => group.id === 'daemon');
+    const gateway = daemon?.sections.find((section) => section.id === 'modelGateway');
+    expect([gateway?.title, gateway?.keys]).toEqual(['Model gateway', ['modelGateway']]);
+    const named = settingsGroups(schema([])).flatMap((group) => group.sections.flatMap((section) => section.keys));
+    expect(named).not.toContain('modelProxy');
+    expect(named).not.toContain('proxy');
+  });
+
   it('leaves a key it does not know to the view, which lists it under Other', () => {
     const named = settingsGroups(schema(['somethingNew'])).flatMap((group) => group.sections.flatMap((section) => section.keys));
     expect(named).not.toContain('somethingNew');

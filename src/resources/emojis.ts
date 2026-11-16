@@ -96,6 +96,9 @@ export const EMOJIcon = {
 
   // status and feedback
   check: '✓',
+  reopen: '↺',
+  collapse: '›',
+  wrap: '↵',
   cross: '✕',
   error: mono('✖'),
   warning: mono('⚠'),
@@ -116,6 +119,14 @@ export const EMOJIcon = {
   read: '≡',
   search: '⌕',
   edit: '✎',
+  // a shared file: read only, the two save modes, and save now
+  lock: mono('🔒'),
+  liveSave: mono('⚡'),
+  manualSave: mono('✍'),
+  save: mono('💾'),
+  // a file's comments: add one, and send a comment or a reply
+  comment: mono('💬'),
+  commentSend: '➤',
   subagent: '◈',
   canvas: '▣',
   web: '⊕',
@@ -152,7 +163,7 @@ export const EMOJIcon = {
   interface: mono('🪟'),
 
   // a usage record: what wrote it, and its tokens
-  proxy: '⇄',
+  gateway: '⇄',
   tokensIn: '↑',
   tokensOut: '↓',
   cacheRead: '⟲',

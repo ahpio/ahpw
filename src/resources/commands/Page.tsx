@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, Markdown, SchemaForm, Spinner, Text } from '@softov/scena/ui';
+import { Alert, Badge, Button, SchemaForm, Spinner, Text } from '@softov/scena/ui';
+import { Markdown } from '../../shell/markdown/Markdown.js';
 import { MANIFEST, runPath, type Run } from '../manifest/data.js';
 import { fieldsOf, schemaOf } from '../manifest/input.js';
 import { canRunWith, removalQuestion, runsOnOpening } from '../manifest/roles.js';

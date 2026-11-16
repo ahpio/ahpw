@@ -1,0 +1,61 @@
+/* The page the list tabs are on, listed or installed, whose width puts the facts column beside the panel or under it. */
+.web-listed,
+.web-plugin {
+  container: listed-page / inline-size;
+}
+
+/* A listed plugin's tab: the panel, and beside it the facts column, which goes under the panel on a page under 600 px. */
+.web-listed__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: var(--oo-spacing-lg, 24px);
+  align-items: start;
+  padding-top: var(--oo-spacing-md);
+}
+
+@container listed-page (width < 600px) {
+  .web-listed__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.web-listed__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  min-width: 0;
+}
+
+.web-listed__facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+}
+
+.web-listed__resources {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A plugin's description under its title, listed or installed. */
+.web-listed__description {
+  margin: 0;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+}
+
+/* One section of the facts column: its heading over its facts. */
+.web-listed__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs, 4px);
+}
+
+/* A path or a URL in the facts column, broken at any character so it fills the column's lines. */
+.web-listed__path {
+  word-break: break-all;
+  font-size: var(--oo-font-size-sm);
+}

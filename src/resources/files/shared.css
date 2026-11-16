@@ -1,0 +1,128 @@
+/* A shared file's header: the people in it, its state, the save mode, and the icon buttons. */
+.web-file__spacer {
+  flex: 1;
+}
+
+.web-file__people,
+.web-file__state,
+.web-file__mode,
+.web-file__head .web-icon-button {
+  flex: none;
+}
+
+.web-file__people {
+  display: inline-flex;
+  align-items: center;
+}
+
+.web-file__person {
+  position: relative;
+  display: inline-flex;
+  margin-left: -6px;
+  padding: 0;
+  border: 2px solid var(--oo-color-surface);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.web-file__person:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+/* What the person is, at the circle's foot, and a pencil at its top while they edit. */
+.web-file__person-kind,
+.web-file__person-editing {
+  position: absolute;
+  right: -5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--oo-color-surface);
+  color: var(--oo-color-text);
+  font-size: 8px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.web-file__person-kind {
+  bottom: -4px;
+}
+
+.web-file__person-editing {
+  top: -4px;
+  color: var(--oo-color-primary);
+}
+
+.web-file__person:first-child {
+  margin-left: 0;
+}
+
+.web-file__state {
+  color: var(--oo-color-muted);
+}
+
+.web-file__mode {
+  display: inline-flex;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-spacing-sm);
+  overflow: hidden;
+}
+
+.web-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--oo-spacing-sm);
+  background: none;
+  color: var(--oo-color-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.web-icon-button:hover:not(:disabled) {
+  border-color: var(--oo-color-border);
+}
+
+.web-icon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.web-icon-button--primary,
+.web-file__mode .web-icon-button[aria-pressed="true"] {
+  background: var(--oo-color-primary);
+  color: var(--oo-color-on-primary, #fff);
+}
+
+.web-file__mode .web-icon-button {
+  border: 0;
+  border-radius: 0;
+}
+
+/* The header's items sit on its middle, the copy button with them, though the path may wrap. */
+.web-file__head > * {
+  align-self: center;
+}
+
+.web-file__head .web-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.web-file__state {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}

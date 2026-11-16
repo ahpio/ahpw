@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { PluginRow } from '../../bridges/plugins.js';
-import { entryKeyOf, pluginRows, type PluginEntry, type RowWords } from './rows.js';
+import type { ListedPlugin, PluginRow } from '../../bridges/plugins.js';
+import { entryKeyOf, listedRows, pluginRows, type PluginEntry, type RowWords } from './rows.js';
 
 const entry = (id: string, row: Partial<PluginRow>): PluginEntry => ({ host: 'h', hostName: 'dev', id, row: { spec: id, name: id, state: 'ready', ...row } });
 
@@ -63,5 +63,37 @@ describe('pluginRows', () => {
   it('starts a row with the host name in a window with every host', () => {
     const [row] = pluginRows([entry('bot', {})], 'state', { ...WORDS, multi: true });
     expect(row?.lines[0]).toBe('dev');
+  });
+});
+
+describe('listedRows', () => {
+  const OURS = 'https://plugins.ahpio.com/v1/plugins.json';
+  const THEIRS = 'https://plugins.example.com/v1/plugins.json';
+  const words = { multi: false, notInstalled: 'Not installed', install: (): string | undefined => 'Install', busy: () => false, run: () => undefined, menu: () => [] };
+  const listed = (more: Partial<ListedPlugin> = {}): ListedPlugin => ({ id: 'webhook', name: 'Webhook', description: 'A URL that talks to a bot.', source: '@ahpd/webhook', marketplace: OURS, versions: [{ version: '0.14.0' }], ...more });
+
+  it('draws each listed plugin with its description, its list and its newest version, and Install', () => {
+    const [row] = listedRows([{ host: 'h', hostName: 'Home', plugin: listed() }], words);
+    expect(row).toMatchObject({ key: `listed|h|${OURS}|webhook`, title: 'Webhook', lines: ['A URL that talks to a bot.', 'plugins.ahpio.com · 0.14.0'], button: { label: 'Install', busy: false } });
+  });
+
+  it('keeps two lists with one id as two rows', () => {
+    const rows = listedRows([{ host: 'h', hostName: 'Home', plugin: listed() }, { host: 'h', hostName: 'Home', plugin: listed({ marketplace: THEIRS }) }], words);
+    expect(rows.map((row) => row.lines[1])).toEqual(['plugins.ahpio.com · 0.14.0', 'plugins.example.com · 0.14.0']);
+  });
+
+  it('leaves out an entry installed from its own list or from none, and keeps one installed from another list', () => {
+    const rows = listedRows([
+      { host: 'h', hostName: 'Home', plugin: listed({ installed: { id: 'ahpd-webhook', marketplace: OURS } }) },
+      { host: 'h', hostName: 'Home', plugin: listed({ id: 'bot', installed: { id: 'ahpd-bot' } }) },
+      { host: 'h', hostName: 'Home', plugin: listed({ marketplace: THEIRS, installed: { id: 'ahpd-webhook', marketplace: OURS } }) },
+    ], words);
+    expect(rows.map((row) => row.key)).toEqual([`listed|h|${THEIRS}|webhook`]);
+  });
+
+  it('draws no Install when the host does not install for this reader, and names the host when there are several', () => {
+    const [row] = listedRows([{ host: 'h', hostName: 'Home', plugin: listed() }], { ...words, install: () => undefined, multi: true });
+    expect(row?.button).toBeUndefined();
+    expect(row?.lines[1]).toBe('Home · plugins.ahpio.com · 0.14.0');
   });
 });
