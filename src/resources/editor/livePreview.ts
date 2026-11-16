@@ -117,6 +117,28 @@ const watchHeight = (view: EditorView, holder: PictureHolder, key: string, known
   holder.watch.observe(holder);
 };
 
+/**
+ * Keep a drawing's last measured height until its `count` images have loaded.
+ * The editor drops a drawing that scrolls far away and makes it again on the
+ * way back, and its image arrives a moment after: the kept height stops the
+ * text under it from jumping.
+ */
+const keepHeight = (holder: HTMLElement, height: number, count: number): void => {
+  if (height <= 0 || count === 0) return;
+  holder.style.minHeight = `${height}px`;
+  let done = 0;
+  const settle = (event: Event): void => {
+    if (!(event.target instanceof HTMLImageElement)) return;
+    done += 1;
+    if (done < count) return;
+    holder.style.minHeight = '';
+    holder.removeEventListener('load', settle, true);
+    holder.removeEventListener('error', settle, true);
+  };
+  holder.addEventListener('load', settle, true);
+  holder.addEventListener('error', settle, true);
+};
+
 /** What an image's element holds, so a later widget that reuses it can stop it. */
 interface PictureHolder extends HTMLElement {
   undraw?: () => void;
@@ -145,6 +167,7 @@ class Picture extends WidgetType {
     if (height !== undefined) holder.style.setProperty('--web-lp-image-height', height);
     holder.dataset.src = this.src;
     holder.undraw = this.options.image(holder, this.src, this.alt);
+    keepHeight(holder, this.height, 1);
     watchHeight(view, holder, this.src, this.height);
     return holder;
   }
@@ -182,6 +205,7 @@ class BlockDrawing extends WidgetType {
 class HtmlImages extends WidgetType {
   constructor(readonly html: string, readonly height: number, readonly options: LivePreviewOptions) { super(); }
   override eq(other: HtmlImages): boolean { return other.html === this.html && other.height === this.height; }
+  override get estimatedHeight(): number { return this.height > 0 ? this.height : -1; }
   toDOM(view: EditorView): HTMLElement {
     const holder: PictureHolder = document.createElement('div');
     holder.className = 'web-lp-html';
@@ -200,6 +224,7 @@ class HtmlImages extends WidgetType {
       holder.append(one);
     }
     holder.undraw = () => { for (const undraw of undraws) undraw(); };
+    keepHeight(holder, this.height, undraws.length);
     watchHeight(view, holder, this.html, this.height);
     return holder;
   }
@@ -212,12 +237,49 @@ class HtmlImages extends WidgetType {
   override ignoreEvent(): boolean { return false; }
 }
 
+/** A paragraph's line break, drawn as the space it is in a page. */
+class SoftBreak extends WidgetType {
+  override eq(): boolean { return true; }
+  toDOM(): HTMLElement {
+    const space = document.createElement('span');
+    space.textContent = ' ';
+    return space;
+  }
+}
+
+const softBreak = Decoration.replace({ widget: new SoftBreak() });
+
+/**
+ * The line breaks inside a paragraph, each joined to a space, as a page reads
+ * them: the badges of a README sit in one line. A break after two spaces or a
+ * backslash stays, and a paragraph with a caret in it keeps its lines.
+ */
+const softBreaks = (state: EditorState, from: number, to: number, shown: ReadonlySet<number>): Range<Decoration>[] => {
+  const first = state.doc.lineAt(from).number;
+  const last = state.doc.lineAt(to).number;
+  for (let line = first; line <= last; line += 1) if (shown.has(line)) return [];
+  const out: Range<Decoration>[] = [];
+  for (let number = first; number < last; number += 1) {
+    const line = state.doc.line(number);
+    if (/( {2}|\\)$/.test(line.text)) continue;
+    const next = state.doc.line(number + 1);
+    // The next line's indent and quote marks go with the break.
+    const lead = /^[ \t]*(?:>[ \t]?)*[ \t]*/.exec(next.text)?.[0].length ?? 0;
+    out.push(softBreak.range(line.to, next.from + lead));
+  }
+  return out;
+};
+
 /** The blocks drawn whole: each table and fenced block away from the caret's lines, and an HTML block's images. */
 export const blockDecorations = (state: EditorState, options: LivePreviewOptions, heights: ReadonlyMap<string, number> = new Map()): DecorationSet => {
   const shown = sourceLines(state);
   const ranges: Range<Decoration>[] = [];
   syntaxTree(state).iterate({
     enter: (node) => {
+      if (node.name === 'Paragraph') {
+        ranges.push(...softBreaks(state, node.from, node.to, shown));
+        return false;
+      }
       if (node.name !== 'FencedCode' && node.name !== 'Table' && node.name !== 'HTMLBlock') return true;
       const first = state.doc.lineAt(node.from);
       const last = state.doc.lineAt(node.to);
@@ -323,9 +385,14 @@ export const previewDecorations = (state: EditorState, options: LivePreviewOptio
         if (onSource(node.from) || url === undefined) return false;
         const marks = node.node.getChildren('LinkMark');
         const alt = marks.length >= 2 ? state.doc.sliceString(marks[0]!.to, marks[1]!.from) : '';
-        // An image inside a link, as a badge, stays in the line; an image alone is drawn under its line.
-        const inline = node.node.parent?.name === 'Link';
-        ranges.push(Decoration.replace({ widget: new Picture(url, alt, heights.get(url) ?? 0, options, { inline }) }).range(node.from, node.to));
+        // An image sits in its line, as in a page: one alone fills the line, and badges stand side by side.
+        ranges.push(Decoration.replace({ widget: new Picture(url, alt, heights.get(url) ?? 0, options, { inline: true }) }).range(node.from, node.to));
+        return false;
+      }
+      if (name === 'HorizontalRule') {
+        if (onSource(node.from)) return false;
+        ranges.push(Decoration.line({ class: 'web-lp-rule' }).range(state.doc.lineAt(node.from).from));
+        ranges.push(hidden.range(node.from, node.to));
         return false;
       }
       if (name === 'Blockquote') {
