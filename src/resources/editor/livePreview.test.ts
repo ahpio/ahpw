@@ -19,7 +19,8 @@ const stateOf = (doc: string, caret: number | null, readOnly = false): EditorSta
     extensions: [markdown({ base: markdownLanguage }), EditorState.readOnly.of(readOnly)],
   });
   ensureSyntaxTree(state, state.doc.length, 5000);
-  return state;
+  // A state keeps the tree of its own first parse; the next state takes the one parsed to the end.
+  return state.update({}).state;
 };
 
 interface Drawn { from: number; to: number; text: string; kind: string }
@@ -107,6 +108,11 @@ describe('the blocks drawn whole', () => {
 
   it('draws a table and a fenced block away from the caret', () => {
     expect(blocks(stateOf(doc, 0))).toEqual(['| a | b |\n| - | - |\n| 1 | 2 |', '```mermaid\nflowchart LR\n  A --> B\n```']);
+  });
+
+  it('draws a block past what a new state parses at once', () => {
+    const fence = '```mermaid\nflowchart LR\n  A --> B\n```';
+    expect(blocks(stateOf(`${'A line of text.\n\n'.repeat(400)}${fence}\n`, 0))).toEqual([fence]);
   });
 
   it('leaves a block as text while a caret is in it', () => {
