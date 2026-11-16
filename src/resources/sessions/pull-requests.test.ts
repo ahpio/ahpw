@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allMerged, ARTIFACTS_META, chipState, pullRequestFacts, pullRequestName, pullRequestsOf } from './pull-requests.js';
+import { allMerged, ARTIFACTS_META, chipState, PULL_REQUESTS_META, pullRequestFacts, pullRequestName, pullRequestsOf } from './pull-requests.js';
 
 const URL_A = 'https://github.com/example/repo/pull/248';
 const URL_B = 'https://github.com/example/repo/pull/251';
@@ -65,6 +65,44 @@ describe('pullRequestsOf', () => {
     expect(pullRequestsOf(meta)).toEqual([
       { url: URL_A, repository: 'example/repo', number: '248', base: 'main', head: 'agents/one', title: 'First', artifactId: 'a1' },
     ]);
+  });
+
+  it('takes the state, title and branches GitHub sent over the agent\'s label', () => {
+    const meta = {
+      ...branchMeta({ pullRequestState: 'open' }),
+      [ARTIFACTS_META]: [{ id: 'a1', type: 'pullRequest', label: 'The agent\'s label', isArtifact: true, link: URL_A, isGitHub: true }],
+      [PULL_REQUESTS_META]: {
+        [URL_A]: {
+          url: URL_A, state: 'merged', number: 248, title: 'GitHub\'s title', body: 'It builds.', isDraft: false,
+          author: { login: 'octocat' }, baseRef: 'release', headRef: 'fix/build', createdAt: '2026-11-15T10:00:00Z', mergedAt: '2026-11-16T10:00:00Z',
+        },
+      },
+    };
+    expect(pullRequestsOf(meta)).toEqual([{
+      url: URL_A, repository: 'example/repo', number: '248', artifactId: 'a1', state: 'merged', title: 'GitHub\'s title',
+      base: 'release', head: 'fix/build', body: 'It builds.', isDraft: false, author: { login: 'octocat' },
+      createdAt: '2026-11-15T10:00:00Z', mergedAt: '2026-11-16T10:00:00Z',
+    }]);
+  });
+
+  it('shows a recorded pull request of another branch merged', () => {
+    const meta = {
+      git: { branchName: 'agents/one', baseBranchName: 'main' },
+      github: { owner: 'example', repo: 'repo' },
+      [ARTIFACTS_META]: [{ id: 'a2', type: 'pullRequest', label: 'Second', isArtifact: true, link: URL_B, isGitHub: true }],
+      [PULL_REQUESTS_META]: { [`${URL_B}/`.toUpperCase().replace('HTTPS://GITHUB.COM', 'https://github.com')]: { url: URL_B, state: 'merged' } },
+    };
+    expect(pullRequestsOf(meta)[0]?.state).toBe('merged');
+    expect(allMerged(pullRequestsOf(meta))).toBe(true);
+  });
+
+  it('keeps a pull request with no details as it was', () => {
+    expect(pullRequestsOf({ ...branchMeta(), [PULL_REQUESTS_META]: { [URL_B]: { url: URL_B, state: 'open' } } })).toEqual(pullRequestsOf(branchMeta()));
+  });
+
+  it('drops a field of the wrong type', () => {
+    const meta = { ...branchMeta(), [PULL_REQUESTS_META]: { [URL_A]: { url: URL_A, state: 'gone', title: 7, isDraft: 'no', author: 'octocat', bodyTruncated: 'yes', createdAt: 1 } } };
+    expect(pullRequestsOf(meta)).toEqual(pullRequestsOf(branchMeta()));
   });
 
   it('reads nothing from a session without the keys', () => {

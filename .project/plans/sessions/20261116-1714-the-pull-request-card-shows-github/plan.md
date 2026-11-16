@@ -54,10 +54,14 @@ ahpd session/metaChanged -> summary._meta['ahpd.pullRequests'] -> pullRequestsOf
 | --- | --- | --- |
 | The card shows the repository, the date, the title and number, the state, the description, `base ← head` and the author | Softov, 2026-11-09 and 2026-11-16, with VS Code's card | 01, 03 |
 | A mockup comes first, and Softov approves it before the card code | (defaulted: every ahpw UI plan starts from a mockup he approves) | 01 |
+| The card is drawn as `.scratch/mockups/pull-request-card.html`, from VS Code's card in his screenshot of 2026-11-16 | Softov, 2026-11-16: "Approve as drawn" | 03 |
 | `ahpd.pullRequests` wins over `_meta.github` and the artifact for state, title and branches; the artifact keeps its id | (defaulted: GitHub's words over the agent's label) | 02 |
 | With no entry in `ahpd.pullRequests`, a pull request shows what it shows today | (defaulted: a daemon before the ahpd plan sends no details) | 02 |
-| The description renders as Markdown, as GitHub writes it | (defaulted: VS Code's card renders it) | 03 |
-| A cut description ends with a link to read the rest on GitHub | (defaulted: ahpd sends 1000 characters and `bodyTruncated`) | 03 |
+| The description is plain text: Markdown marks removed, white space joined, cut at 200 characters with `…` | Softov, 2026-11-16: "Plain text, as VS Code" | 03 |
+| The author line is `@login opened this pull request`, with no avatar | Softov, 2026-11-16: "No avatar, as VS Code" | 03 |
+| A cut description adds no link; the number in the title opens GitHub | Softov, 2026-11-16: "No extra link, as VS Code" | 03 |
+| `/session.pr` keeps today's flow: a row opens the list with the card as its header, and the actions as items | Softov, 2026-11-16: "Keep today's flow" | 03 |
+| Each state has its own icon, as the mockup and VS Code, on the card, the pill and the rows | Softov, 2026-11-16: "Four icons, as the mockup" | 03 |
 
 ## Proposed architecture
 
@@ -71,9 +75,9 @@ ahpd session/metaChanged -> summary._meta['ahpd.pullRequests'] -> pullRequestsOf
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - a mockup of the pull request card](task-01-a-mockup-of-the-pull-request-card.md) | todo | - |
-| [02 - the list reads each pull request's details](task-02-the-list-reads-each-pull-requests-details.md) | todo | - |
-| [03 - the card shows what GitHub says](task-03-the-card-shows-what-github-says.md) | todo | 01, 02 |
+| [01 - a mockup of the pull request card](task-01-a-mockup-of-the-pull-request-card.md) | done | - |
+| [02 - the list reads each pull request's details](task-02-the-list-reads-each-pull-requests-details.md) | implemented | - |
+| [03 - the card shows what GitHub says](task-03-the-card-shows-what-github-says.md) | implemented | 01, 02 |
 
 ## Risks and tradeoffs
 
@@ -82,8 +86,8 @@ ahpd session/metaChanged -> summary._meta['ahpd.pullRequests'] -> pullRequestsOf
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-a-mockup-of-the-pull-request-card.md](task-01-a-mockup-of-the-pull-request-card.md); task 02 can run beside it.
+- **Done so far:** task 01 approved, and tasks 02 and 03 built on 2026-11-16 on branch `sessions/20261116-1714-the-pull-request-card-shows-github`, awaiting review.
+- **Next action:** Softov reviews the PR; the check by hand waits for the ahpd plan's merge.
 - **Open questions:** none.
 - **Watch out for:**
   - Build against the approved mockup, and stop and ask at any difference.

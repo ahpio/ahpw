@@ -1,6 +1,6 @@
 ---
 title: A mockup of the pull request card
-status: todo
+status: done
 depends: []
 layer: "sessions"
 refs:
@@ -34,4 +34,6 @@ Softov approves a mockup of the pull request card before the card code.
 - Softov approves the mockup.
 
 ## Resume
+
+Done on 2026-11-16. The mockup is `.scratch/mockups/pull-request-card.html`, with `pull-request-card.mjs` for the screenshots, in the worktree `/github/ahpw.worktrees/pr-card`. Softov approved it as drawn, with plain text, no avatar and no extra link.
 

@@ -1,6 +1,6 @@
 ---
 title: The list reads each pull request's details
-status: todo
+status: implemented
 depends: []
 layer: "sessions"
 refs:
@@ -37,4 +37,9 @@ refs:
 - `pnpm typecheck` and `pnpm test` pass.
 
 ## Resume
+
+Built on 2026-11-16, awaiting review.
+
+- `detailsOf` is exported, and `pullRequestsOf` merges it into each pull request after the artifacts.
+- A pull request the host sent details for but that `_meta.github` and the artifacts do not list is not added.
 

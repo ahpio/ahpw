@@ -89,12 +89,15 @@ describe('pullRequestItems', () => {
 });
 
 describe('pullRequestRows', () => {
-  it('colours each glyph by the state the host sent, and none without one', () => {
+  it('draws each row with its state\'s icon, and the plain glyph without a state', () => {
     const merged = { url: 'https://github.com/example/repo/pull/2', repository: 'example/repo', number: '2', state: 'merged' as const };
+    const draft = { url: 'https://github.com/example/repo/pull/3', repository: 'example/repo', number: '3', state: 'open' as const, isDraft: true };
     const unknown = { url: 'https://github.com/example/repo/pull/1', repository: 'example/repo', number: '1' };
-    const rows = pullRequestRows([merged, unknown], () => undefined);
-    expect(rows.map((one) => ('color' in one ? one.color : undefined))).toEqual(['purple', undefined]);
-    expect(rows.every((one) => 'icon' in one && one.icon === '⎇')).toBe(true);
+    const rows = pullRequestRows([merged, draft, unknown], () => undefined);
+    const src = (one: PickerAction): string => decodeURIComponent('iconSrc' in one ? one.iconSrc ?? '' : '');
+    expect(src(rows[0] as PickerAction)).toContain('#8957e5');
+    expect(src(rows[1] as PickerAction)).toContain('#8b949e');
+    expect(rows[2] !== undefined && 'icon' in rows[2] && rows[2].icon === '⎇').toBe(true);
   });
 });
 
