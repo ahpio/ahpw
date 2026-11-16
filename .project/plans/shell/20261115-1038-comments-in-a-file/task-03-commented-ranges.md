@@ -1,6 +1,6 @@
 ---
 title: Commented ranges in the editor
-status: implemented
+status: done
 depends: [task-02-the-comments-channel.md]
 layer: "editor"
 refs:

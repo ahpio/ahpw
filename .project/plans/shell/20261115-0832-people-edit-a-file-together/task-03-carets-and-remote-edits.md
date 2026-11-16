@@ -1,6 +1,6 @@
 ---
 title: Carets and remote edits in the editor
-status: implemented
+status: done
 depends: [task-02-the-document-client.md]
 layer: "editor"
 refs:

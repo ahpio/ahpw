@@ -1,7 +1,7 @@
 ---
 title: Comments in a file
 domain: shell
-status: active
+status: built
 priority: medium
 created: 2026-11-15
 revalidated: 2026-11-15
@@ -80,9 +80,9 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 | Task | Status | Depends on |
 | --- | --- | --- |
 | [01 - A mockup of comments in a file](task-01-a-mockup-of-comments.md) | done | - |
-| [02 - The comments channel](task-02-the-comments-channel.md) | implemented | - |
-| [03 - Commented ranges in the editor](task-03-commented-ranges.md) | implemented | 02 |
-| [04 - Threads in the margin](task-04-threads-in-the-margin.md) | implemented | 01, 03 |
+| [02 - The comments channel](task-02-the-comments-channel.md) | done | - |
+| [03 - Commented ranges in the editor](task-03-commented-ranges.md) | done | 02 |
+| [04 - Threads in the margin](task-04-threads-in-the-margin.md) | done | 01, 03 |
 
 ## Risks and tradeoffs
 
@@ -91,10 +91,9 @@ select text -> add -> annotations/set with the first entry and the vscode.agentF
 
 ## Resume state
 
-- **Done so far:** Softov approved the mockup on 2026-11-15; tasks 02, 03 and 04 built on branch `shell/20261115-1038-comments-in-a-file`, stacked on the shared file branch.
-- **Next action:** the PR, then Softov merges on green CI.
+- **Done so far:** every task built, reviewed and merged in ahpio/ahpw#89 on 2026-11-15; `implemented.md` says what exists.
+- **Next action:** none; the plan is built.
 - **Open questions:** none.
-- **Watch out for:** the shared file page is on its branch, not on main; build on it.
 
 ## Final verification checklist
 

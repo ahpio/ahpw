@@ -1,6 +1,6 @@
 ---
 title: The shared file page
-status: implemented
+status: done
 depends: [task-01-a-mockup-of-the-shared-file-page.md, task-03-carets-and-remote-edits.md]
 layer: "files"
 refs:

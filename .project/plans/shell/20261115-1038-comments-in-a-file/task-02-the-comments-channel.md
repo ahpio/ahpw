@@ -1,6 +1,6 @@
 ---
 title: The comments channel
-status: implemented
+status: done
 depends: []
 layer: "files"
 refs:

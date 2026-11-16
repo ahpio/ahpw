@@ -1,7 +1,7 @@
 ---
 title: The Markdown view is a live preview
 domain: shell
-status: active
+status: built
 priority: medium
 created: 2026-11-15
 revalidated: 2026-11-15
@@ -71,11 +71,11 @@ Where the host serves no shared file, or the file is read-only, it opens `Simple
 | Task | Status | Depends on |
 | --- | --- | --- |
 | [01 - A mockup of the live preview](task-01-a-mockup-of-the-live-preview.md) | done | - |
-| [02 - The simple Markdown page](task-02-the-simple-markdown-page.md) | implemented | - |
-| [03 - The live preview extension](task-03-the-live-preview-extension.md) | implemented | 01 |
-| [04 - The Markdown view edits live](task-04-the-markdown-view-edits-live.md) | implemented | 02, 03 |
-| [05 - Comments fold away](task-05-comments-fold-away.md) | implemented | 01 |
-| [06 - Blocks drawn in the preview](task-06-blocks-drawn-in-the-preview.md) | implemented | 03 |
+| [02 - The simple Markdown page](task-02-the-simple-markdown-page.md) | done | - |
+| [03 - The live preview extension](task-03-the-live-preview-extension.md) | done | 01 |
+| [04 - The Markdown view edits live](task-04-the-markdown-view-edits-live.md) | done | 02, 03 |
+| [05 - Comments fold away](task-05-comments-fold-away.md) | done | 01 |
+| [06 - Blocks drawn in the preview](task-06-blocks-drawn-in-the-preview.md) | done | 03 |
 
 ## Risks and tradeoffs
 
@@ -84,11 +84,9 @@ Where the host serves no shared file, or the file is read-only, it opens `Simple
 
 ## Resume state
 
-- **Done so far:** Softov approved the mockup on 2026-11-15, at `.scratch/mockups/live-preview.html` in `/github/ahpw`.
-- **Done so far:** tasks 02 to 06 built on 2026-11-15.
-- **Next action:** the PR text for Softov; then Softov tests.
+- **Done so far:** every task built, reviewed and merged in ahpio/ahpw#90 on 2026-11-15; `implemented.md` says what exists.
+- **Next action:** none; the plan is built.
 - **Open questions:** none.
-- **Watch out for:** the comments margin works on the shared editor; the live preview must keep it working.
 
 ## Final verification checklist
 

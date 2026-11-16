@@ -1,6 +1,6 @@
 ---
 title: Threads in the margin
-status: implemented
+status: done
 depends: [task-01-a-mockup-of-comments.md, task-03-commented-ranges.md]
 layer: "files"
 refs:

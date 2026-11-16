@@ -1,6 +1,6 @@
 ---
 title: Blocks drawn in the preview
-status: implemented
+status: done
 depends: [task-03-the-live-preview-extension.md]
 layer: "editor"
 refs:

@@ -1,6 +1,6 @@
 ---
 title: HTML images draw in the preview
-status: implemented
+status: done
 depends: []
 layer: "editor"
 refs:

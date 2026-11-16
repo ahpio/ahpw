@@ -1,6 +1,6 @@
 ---
 title: The Markdown view edits live
-status: implemented
+status: done
 depends: [task-02-the-simple-markdown-page.md, task-03-the-live-preview-extension.md]
 layer: "files"
 refs:

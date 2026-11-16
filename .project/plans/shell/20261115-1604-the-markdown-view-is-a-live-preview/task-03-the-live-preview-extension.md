@@ -1,6 +1,6 @@
 ---
 title: The live preview extension
-status: implemented
+status: done
 depends: [task-01-a-mockup-of-the-live-preview.md]
 layer: "editor"
 refs:

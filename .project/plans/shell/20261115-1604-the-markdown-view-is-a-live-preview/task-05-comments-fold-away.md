@@ -1,6 +1,6 @@
 ---
 title: Comments fold away
-status: implemented
+status: done
 depends: [task-01-a-mockup-of-the-live-preview.md]
 layer: "files"
 refs:

@@ -1,6 +1,6 @@
 ---
 title: A mockup of the shared file page
-status: implemented
+status: done
 depends: []
 layer: "files"
 refs:

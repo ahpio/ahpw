@@ -1,6 +1,6 @@
 ---
 title: The document client
-status: implemented
+status: done
 depends: []
 layer: "files"
 refs:

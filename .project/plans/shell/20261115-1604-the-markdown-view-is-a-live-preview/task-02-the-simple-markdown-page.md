@@ -1,6 +1,6 @@
 ---
 title: The simple Markdown page
-status: implemented
+status: done
 depends: []
 layer: "files"
 refs:

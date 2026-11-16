@@ -1,6 +1,6 @@
 ---
 title: Long lines wrap
-status: implemented
+status: done
 depends: []
 layer: "editor"
 refs:

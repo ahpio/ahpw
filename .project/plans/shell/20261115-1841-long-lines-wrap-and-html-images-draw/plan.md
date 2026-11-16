@@ -1,7 +1,7 @@
 ---
 title: Long lines wrap, and HTML images draw
 domain: shell
-status: active
+status: built
 priority: medium
 created: 2026-11-15
 revalidated: 2026-11-15
@@ -45,13 +45,13 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - Long lines wrap](task-01-long-lines-wrap.md) | implemented | - |
-| [02 - HTML images draw in the preview](task-02-html-images-draw.md) | implemented | - |
+| [01 - Long lines wrap](task-01-long-lines-wrap.md) | done | - |
+| [02 - HTML images draw in the preview](task-02-html-images-draw.md) | done | - |
 
 ## Resume state
 
-- **Done so far:** tasks 01 and 02 built on 2026-11-15, on branch `shell/20261115-1841-long-lines-wrap-and-html-images-draw`.
-- **Next action:** the PR text for Softov.
+- **Done so far:** every task built, reviewed and merged in ahpio/ahpw#91 on 2026-11-15; `implemented.md` says what exists.
+- **Next action:** none; the plan is built.
 - **Open questions:** none.
 
 ## Final verification checklist

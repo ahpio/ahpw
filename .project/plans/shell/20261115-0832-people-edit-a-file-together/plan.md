@@ -1,7 +1,7 @@
 ---
 title: People edit a file together
 domain: shell
-status: active
+status: built
 priority: medium
 created: 2026-11-15
 revalidated: 2026-11-15
@@ -99,10 +99,10 @@ an envelope from the host -> own origin: confirmed; another's: moved past the ch
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A mockup of the shared file page](task-01-a-mockup-of-the-shared-file-page.md) | implemented | - |
-| [02 - The document client](task-02-the-document-client.md) | implemented | - |
-| [03 - Carets and remote edits in the editor](task-03-carets-and-remote-edits.md) | implemented | 02 |
-| [04 - The shared file page](task-04-the-shared-file-page.md) | implemented | 01, 03 |
+| [01 - A mockup of the shared file page](task-01-a-mockup-of-the-shared-file-page.md) | done | - |
+| [02 - The document client](task-02-the-document-client.md) | done | - |
+| [03 - Carets and remote edits in the editor](task-03-carets-and-remote-edits.md) | done | 02 |
+| [04 - The shared file page](task-04-the-shared-file-page.md) | done | 01, 03 |
 
 ## Risks and tradeoffs
 
@@ -113,10 +113,9 @@ an envelope from the host -> own origin: confirmed; another's: moved past the ch
 
 ## Resume state
 
-- **Done so far:** tasks 01 to 04 built on 2026-11-15, on branch `shell/20261115-0832-people-edit-a-file-together`; Softov tested them, and his notes of the same day are built and checked in two browsers.
-- **Next action:** Softov tests both branches; then review, `implemented.md`, and a PR for each.
+- **Done so far:** every task built, reviewed and merged in ahpio/ahpw#87 on 2026-11-15; `implemented.md` says what exists.
+- **Next action:** none; the plan is built.
 - **Open questions:** none.
-- **Watch out for:** `follow` reducers get no `origin`. A remote change is applied to CodeMirror only after it is moved past the person's own changes.
 
 ## Final verification checklist
 
