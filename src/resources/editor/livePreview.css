@@ -1,6 +1,6 @@
 /* The live preview: Markdown drawn as a page, in the page's font, clear of the gutter and the edge. */
 .web-lp .cm-content {
-  margin-inline: var(--oo-spacing-lg);
+  margin: var(--oo-spacing-lg);
   font-family: var(--oo-font-family);
   font-size: 14px;
   line-height: 22px;
