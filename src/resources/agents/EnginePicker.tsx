@@ -4,7 +4,8 @@ import type { EngineRow } from '../../bridges/agents.js';
 import { AdapterPicker } from '../connectors/AdapterPicker.js';
 
 /**
- * The engine of a new agent, picked as a connector's adapter is, and under it
+ * The engine of a new agent, picked as a connector's adapter is but always by
+ * plugin, since an engine's capabilities do not sort engines; and under it
  * what the record starts from: one of the engine's templates, or a blank one.
  * A made agent's engine is fixed, so it shows the engine alone.
  */
@@ -23,7 +24,7 @@ export function EnginePicker({ engines, value, template, labelOf, fixed, onPick,
   const templates = engine?.templates ?? [];
   return (
     <>
-      <AdapterPicker adapters={engines} value={value} labelOf={labelOf} fixed={fixed} onPick={onPick} words={{ label: t('agents/form/engine'), search: t('agents/form/searchEngines'), none: t('agents/form/noEngineMatch') }} />
+      <AdapterPicker adapters={engines} value={value} labelOf={labelOf} fixed={fixed} onPick={onPick} words={{ label: t('agents/form/engine'), search: t('agents/form/searchEngines'), none: t('agents/form/noEngineMatch') }} grouping="plugin" />
       {fixed || engine === undefined || templates.length === 0 ? null : (
         <div className="web-kind-templates" role="radiogroup" aria-label={t('agents/form/startFrom')}>
           <span className="web-connector-form__label">{t('agents/form/startFrom')}</span>

@@ -29,7 +29,7 @@ function AdapterLine({ adapter, size, plugin }: { adapter: Pickable; size: numbe
  * Change button. A made connector's adapter is fixed, so it shows no button.
  * An agent's kind is picked with it too, under its own `words`.
  */
-export function AdapterPicker({ adapters, value, labelOf, fixed, onPick, words }: {
+export function AdapterPicker({ adapters, value, labelOf, fixed, onPick, words, grouping: only }: {
   adapters: readonly Pickable[];
   value: string;
   /** A plugin's title, for its group's heading. */
@@ -38,6 +38,8 @@ export function AdapterPicker({ adapters, value, labelOf, fixed, onPick, words }
   onPick: (name: string) => void;
   /** The list's name, the search's placeholder and the line for no match; an adapter's, by default. */
   words?: { label: string; search: string; none: string };
+  /** The one grouping the list is drawn with, offering no other; the person's choice, by default. */
+  grouping?: AdapterGrouping;
 }): ReactElement | null {
   const { t } = useI18n();
   const picked = adapters.find((one) => one.name === value);
@@ -65,8 +67,8 @@ export function AdapterPicker({ adapters, value, labelOf, fixed, onPick, words }
     );
   }
 
-  const typed = adapters.some((one) => (one.capabilities?.length ?? 0) > 0);
-  const byType = typed && grouping === 'type';
+  const typed = only === undefined && adapters.some((one) => (one.capabilities?.length ?? 0) > 0);
+  const byType = (only ?? (typed ? grouping : 'plugin')) === 'type';
   const typeLabel = (type: string, title: string): string => (KNOWN_TYPES.includes(type) ? t(`connectors/capabilities/${type}`) : title || type);
   const groups = byType ? capabilityGroups(adapters, typeLabel, labelOf, t('connectors/picker/noCapability'), needle) : adapterGroups(adapters, labelOf, needle);
   // By type an adapter can sit in several groups, so a row is counted where it is drawn, not by adapter.
