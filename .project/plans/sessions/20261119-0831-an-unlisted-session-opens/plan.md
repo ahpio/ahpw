@@ -1,7 +1,7 @@
 ---
 title: An unlisted session opens
 domain: sessions
-status: active
+status: built
 priority: high
 created: 2026-11-19
 revalidated: 2026-11-19
@@ -51,13 +51,13 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 
 ## Resume state
 
-- **Done so far:** task 01, on branch `sessions/20261119-0831-an-unlisted-session-opens`.
-- **Next action:** the PR, then Softov's check in *Final verification checklist*.
+- **Done so far:** task 01, merged in #103 as `0bbaed8`, and checked by Softov on 2026-11-19. See [implemented.md](implemented.md).
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** the session list still lacks the session until its first turn, as ahpd lists it.
 
 ## Final verification checklist
 
-- [ ] Open chat on Gumbo opens the empty chat, with no "no longer exists".
-- [ ] A first message there gets Gumbo's answer, and the session joins the session list.
+- [x] Open chat on Gumbo opens the empty chat, with no "no longer exists".
+- [x] A first message there gets Gumbo's answer, and the session joins the session list.
 - [x] `pnpm typecheck` and the test suite pass.
