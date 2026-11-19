@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, CheckBox, Spinner, Text, type BadgeTone } from '@softov/scena/ui';
+import { Alert, Badge, Button, CheckBox, Text, type BadgeTone } from '@softov/scena/ui';
 import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
@@ -19,6 +19,7 @@ import { keepPluginTabKey, pluginTab, pluginTabKey } from './state.js';
 import { mayRestart } from '../../bridges/restart.js';
 import { RESTART_HOST } from '../host/restart.js';
 import { PageTitle } from '../../shell/HostIcon.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 const TONE: Record<PluginState, BadgeTone> = {
   error: 'danger',
@@ -92,7 +93,7 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
   }, [host, id, version, lists]);
 
   if (plugins.error !== null) return <PageAlert tone="danger" title={t('plugins/notices/none')} message={plugins.error} />;
-  if (plugins.state === undefined) return <Spinner label={t('plugins/notices/reading')} />;
+  if (plugins.state === undefined) return <PageSpinner label={t('plugins/notices/reading')} />;
   const row = plugins.state.records.find((one) => one.id === id)?.record;
   if (row === undefined) return <PageAlert tone="warning" message={t('plugins/page/gone')} />;
   const title = row.title ?? id;

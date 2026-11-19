@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, ContextMenu, Spinner } from '@softov/scena/ui';
+import { Button, ContextMenu } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
@@ -17,6 +17,7 @@ import PluginPage from './PluginPage.js';
 import { installedHere, listName } from './rows.js';
 import { ACTIVE_LISTED, INSTALLING, installKey, LISTED_AS, listedTab, pluginTab } from './state.js';
 import './ListedPluginPage.css';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 /** A button's tooltip, when the host says what its command does. */
 const said = (text: string | undefined): { title?: string } => (text === undefined ? {} : { title: text });
@@ -80,7 +81,7 @@ export default function ListedPluginPage({ host, plugin: id, marketplace }: { ho
     scena.store.set(LISTED_AS, { ...(scena.store.get<Record<string, string>>(LISTED_AS) ?? {}), [theirs]: own });
   }, [scena, host, id, marketplace, rowId]);
 
-  if (read === undefined) return <Spinner label={t('plugins/listed/reading')} />;
+  if (read === undefined) return <PageSpinner label={t('plugins/listed/reading')} />;
   if ('error' in read) return <PageAlert tone="danger" title={t('plugins/listed/unread')} message={read.error} />;
   if ('gone' in read) return <PageAlert tone="warning" message={t('plugins/listed/gone')} />;
   const { entry, details } = read;

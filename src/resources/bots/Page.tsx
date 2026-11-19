@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, DetailList, Spinner, Text, type DetailItem } from '@softov/scena/ui';
+import { Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
 import { useChannel } from '../../bridges/channel.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
@@ -12,6 +12,7 @@ import { refKey } from '../../bridges/hosts.js';
 import { BOT_CHAT_OPENING, BOT_EDIT_ASKED } from './state.js';
 import { BotForm } from './Edit.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 /** One bot: its figure, what it is for, whose it is, and its chat; Edit swaps the page for its form. */
 export default function BotPage({ host, slug }: { host: string; slug?: string }): ReactElement {
@@ -29,7 +30,7 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
     scena.store.set(BOT_EDIT_ASKED, null);
   }, [asked]);
   if (error !== null) return <PageAlert tone="danger" title={t('bots/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('bots/notices/reading')} />;
+  if (state === undefined) return <PageSpinner label={t('bots/notices/reading')} />;
   const bot = botsIn(state).find((one) => one.id === slug);
   if (bot === undefined) return <PageAlert tone="warning" message={t('bots/notices/gone')} />;
   if (editing) return <BotForm host={host} slug={bot.id} onDone={() => setEditing(false)} />;

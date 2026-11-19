@@ -14,6 +14,7 @@ import { UsageRecords } from './Records.js';
 import { totalLine } from './words.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import './pool-page.css';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 /** What a pool's range reads: its total and the records behind it, for the range and reload they were read for. */
 interface Ranged {
@@ -70,7 +71,7 @@ export default function UsagePoolPage({ host, pool }: { host: string; pool: stri
   }, [host, offers, pool, range, asked]);
 
   if (error !== null) return <PageAlert tone="danger" title={t('usage/notices/none')} message={error} />;
-  if (read === null) return <Spinner label={t('usage/notices/reading')} />;
+  if (read === null) return <PageSpinner label={t('usage/notices/reading')} />;
   const periods = read.held;
   const reading = read.asked !== asked || ranged === null || ranged.asked !== asked;
   const reload = t(reading ? 'usage/notices/reading' : 'common/reload');

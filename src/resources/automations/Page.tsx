@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, DetailList, Spinner, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, Badge, Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { automationReducer, type AgentInfo, type AutomationCapabilities, type AutomationEntry, type AutomationState as Catalogue } from '@microsoft/agent-host-protocol';
@@ -25,6 +25,7 @@ import type { Option } from '../sessions/composer-commands.js';
 import { settingLabels } from '../sessions/pill-labels.js';
 import { useSessionSettings } from './session-settings.js';
 import { AUTOMATION_SECTION, automationTabKey, keepAutomationTabKey, type AutomationAsk } from './state.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -206,7 +207,7 @@ export default function AutomationPage({ host, resource }: { host: string; resou
   const ask = useStore<AutomationAsk>(AUTOMATION_SECTION);
   const [failure, setFailure] = useState<string | null>(null);
   if (error !== null) return <PageAlert tone="danger" title={t('automations/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('automations/notices/reading')} />;
+  if (state === undefined) return <PageSpinner label={t('automations/notices/reading')} />;
   const entry = state.entries.find((one) => one.resource === resource);
   if (entry === undefined) return <PageAlert tone="warning" message={t('automations/notices/gone')} />;
 

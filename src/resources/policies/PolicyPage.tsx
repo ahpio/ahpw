@@ -21,6 +21,7 @@ import { PageTitle } from '../../shell/HostIcon.js';
 import { policyTab } from './state.js';
 import { limitWord, usedWord } from './words.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 /** What a new row starts as: everybody, allowed every model; the person names it and narrows it. */
 const FRESH: Record<string, unknown> = { id: '', scope: 'all', kind: 'model', effect: 'allow', match: {} };
@@ -129,7 +130,7 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
   useEffect(() => { setDraft(null); }, [held]);
 
   if (policies.error !== null) return <PageAlert tone="danger" title={t('policies/notices/none')} message={policies.error} />;
-  if (policies.state === undefined) return <Spinner label={t('policies/notices/reading')} />;
+  if (policies.state === undefined) return <PageSpinner label={t('policies/notices/reading')} />;
   if (!fresh && record === undefined) return <PageAlert tone="warning" message={t('policies/policy/gone')} />;
   if (schema === undefined) return <PageAlert tone="info" message={t('policies/policy/noManifest')} />;
 
