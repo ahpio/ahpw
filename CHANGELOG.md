@@ -5,6 +5,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-20
+
+The web UI for ahpd 0.15.0. It needs `@ahpd/sdk` 0.15. Since 0.8.0 it adds tunnels and clients, plugins added and written from the page, a session's usage, summary, artifacts and pull requests, and the actions docked beside the bots. The three release candidates below list each change.
+
 ### Added
 
 - **A host's client list names the page.** The page sends a name, a title and its version when it connects, as VS Code does. It is "ahpw" from `ahpw serve`, "ahpd web" from the ahpd plugin and "ahp-desk" in the desktop app. `--client-name` and `--client-title`, or `clientName` and `clientTitle` in the plugin's options, change them, and an embedder sets them with `client`.
@@ -12,12 +16,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- **Every host action asks first.** An action with no question of its own asks by its label and the record's name, such as "Disable Claude?", with the host's description as the note. An action with the host's own question asks as before, in the danger tone, and an action with a form asks nothing before the form. Enable, Pause, Disable and Check on the agent and connector pages ran without asking.
 - **A client id starts with `ahpw-`.** A browser that kept an id of another form gets a new one once, so it connects once as a new client.
 
 ### Fixed
 
 - **A session with no turn yet opens.** Open chat on a bot made its chat with no message, and the page said the session no longer existed, since the host lists a session from its first turn. The page now reads such a session from its own state, and the first message continues it.
-- `@ahpd/web` declares its `@ahpd/sdk` peer as `>=0.15.0-rc.2`, so npm installs it beside a release candidate of ahpd 0.15. The old `>=0.9` matched no prerelease, and npm refused it beside `0.15.0-rc.4`.
+- **An open folder is read once.** React's StrictMode second mount and a kept Refresh count both read every open folder again.
+- `@ahpd/web` declares its `@ahpd/sdk` peer as `>=0.15.0 <0.16.0-0`, the range of ahpd's first-party plugins. The old `>=0.9` matched no prerelease, and npm refused it beside `0.15.0-rc.4`.
 
 ## [0.9.0-rc.3] - 2026-11-13
 
@@ -422,7 +428,8 @@ The first release: a web UI for an [Agent Host Protocol](https://microsoft.githu
 - Page components load lazily, one chunk per page.
 - CI, an npm release with provenance, and screenshots.
 
-[Unreleased]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.3...HEAD
+[Unreleased]: https://github.com/ahpio/ahpw/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.3...v0.9.0
 [0.9.0-rc.3]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.2...v0.9.0-rc.3
 [0.9.0-rc.2]: https://github.com/ahpio/ahpw/compare/v0.9.0-rc.1...v0.9.0-rc.2
 [0.9.0-rc.1]: https://github.com/ahpio/ahpw/compare/v0.8.0...v0.9.0-rc.1
