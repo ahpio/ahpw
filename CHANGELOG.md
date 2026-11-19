@@ -11,6 +11,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- **A session with no turn yet opens.** Open chat on a bot made its chat with no message, and the page said the session no longer existed, since the host lists a session from its first turn. The page now reads such a session from its own state, and the first message continues it.
 - `@ahpd/web` declares its `@ahpd/sdk` peer as `>=0.15.0-rc.2`, so npm installs it beside a release candidate of ahpd 0.15. The old `>=0.9` matched no prerelease, and npm refused it beside `0.15.0-rc.4`.
 
 ## [0.9.0-rc.3] - 2026-11-13
