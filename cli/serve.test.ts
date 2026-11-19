@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_HOST, DEFAULT_PORT, settingsOf, warningsOf } from './serve.js';
+import { DEFAULT_CLIENT, DEFAULT_HOST, DEFAULT_PORT, settingsOf, warningsOf } from './serve.js';
 
 const files: Record<string, string> = { '/tok': ' from-file\n' };
 const read = (path: string): string => {
@@ -11,7 +11,13 @@ const read = (path: string): string => {
 describe('settingsOf', () => {
   it('fills the defaults', () => {
     const settings = settingsOf({ connect: 'ws://127.0.0.1:9187' }, {}, {}, read);
-    expect(settings).toEqual({ connect: new URL('ws://127.0.0.1:9187'), host: DEFAULT_HOST, port: DEFAULT_PORT, open: false });
+    expect(settings).toEqual({ connect: new URL('ws://127.0.0.1:9187'), host: DEFAULT_HOST, port: DEFAULT_PORT, open: false, client: { name: DEFAULT_CLIENT, title: DEFAULT_CLIENT } });
+  });
+
+  it('names the client from the file, a flag over it, and a blank one from the default', () => {
+    expect(settingsOf({ connect: 'ws://127.0.0.1:1' }, { clientName: 'office', clientTitle: 'Office' }, {}, read).client).toEqual({ name: 'office', title: 'Office' });
+    expect(settingsOf({ connect: 'ws://127.0.0.1:1', clientTitle: 'Desk' }, { clientName: 'office', clientTitle: 'Office' }, {}, read).client).toEqual({ name: 'office', title: 'Desk' });
+    expect(settingsOf({ connect: 'ws://127.0.0.1:1', clientName: ' ' }, {}, {}, read).client).toEqual({ name: DEFAULT_CLIENT, title: DEFAULT_CLIENT });
   });
 
   it('takes a flag over the file', () => {
@@ -79,7 +85,7 @@ describe('settingsOf, from the environment', () => {
 });
 
 describe('warningsOf', () => {
-  const base = { connect: new URL('ws://127.0.0.1:9187'), host: '127.0.0.1', port: 5190, open: false };
+  const base = { connect: new URL('ws://127.0.0.1:9187'), host: '127.0.0.1', port: 5190, open: false, client: { name: 'ahpw', title: 'ahpw' } };
 
   it('says nothing on loopback', () => {
     expect(warningsOf({ ...base, token: 't' })).toEqual([]);

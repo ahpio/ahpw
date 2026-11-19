@@ -107,7 +107,20 @@
   },
   "ahpd": {
     "entry": "./dist/plugin/index.js",
-    "title": "Web"
+    "title": "Web",
+    "optionsSchema": {
+      "type": "object",
+      "properties": {
+        "clientName": {
+          "type": "string",
+          "description": "The name the daemon's client list shows for the page. Default ahpd-web."
+        },
+        "clientTitle": {
+          "type": "string",
+          "description": "The title the daemon's client list shows for the page. Default ahpd web."
+        }
+      }
+    }
   },
   "dependencies": {
     "@cofold/bood": "^0.2.1",

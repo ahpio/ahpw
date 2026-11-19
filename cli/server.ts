@@ -15,6 +15,8 @@ export interface WebServerOptions {
   upstream: URL;
   /** The token added to the socket. Absent, the page signs in and its own is passed on. */
   token?: string | undefined;
+  /** What the page tells the AHP server it is, sent in `ahpw.json`. Absent, the page's own default. */
+  client?: { name: string; title: string } | undefined;
 }
 
 /** The server, and how to stop it with every socket it carries. */
@@ -29,7 +31,7 @@ export function createWebServer(options: WebServerOptions): WebServer {
   const files = staticRoute(options.app, '/');
   // The daemon's HTTP root, which a page served from here cannot see: a connector's URL starts with it.
   const daemon = new URL(options.upstream.href.replace(/^ws(s?):/, 'http$1:')).origin;
-  const about = JSON.stringify({ tokenHeld: options.token !== undefined, daemon });
+  const about = JSON.stringify({ tokenHeld: options.token !== undefined, daemon, ...(options.client === undefined ? {} : { client: options.client }) });
   const route = async (request: Request): Promise<Response> => {
     if (new URL(request.url).pathname !== SERVER_FILE) return await files(request);
     return new Response(about, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });

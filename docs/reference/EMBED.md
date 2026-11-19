@@ -8,7 +8,7 @@ The package `@ahpd/web` is an ahpd plugin. Its `package.json` names the plugin e
 
 The plugin serves the built page under `/plugins/web/` on the daemon's HTTP listener. A request for `/plugins/web` is redirected to `/plugins/web/`, because the page loads its files relative to its own address. Only `GET` and `HEAD` are answered.
 
-`/plugins/web/ahpw.json` answers `{"tokenHeld":false}`: the daemon does not add the token to the socket, so the page asks you to sign in. `ahpw serve` answers the same file.
+`/plugins/web/ahpw.json` answers `{"tokenHeld":false,"client":{"name":"ahpd-web","title":"ahpd web"}}`. The daemon does not add the token to the socket, so the page asks you to sign in. `client` is what the page tells the daemon it is, and the plugin's `clientName` and `clientTitle` options change it. `ahpw serve` answers the same file, with its own client.
 
 Every answer carries a content security policy that loads nothing from another origin and does not let another page frame ahpw, since the token sits in the page's storage. Built assets are cached for a year, and the page itself is checked on every load.
 
@@ -39,6 +39,7 @@ import type { Embedder } from '@ahpd/web/embed';
 | `onFocusHost(handler)` | Optional. In `multi`, a call when the app asks the window to show one host |
 | `window` | Optional. Present when ahpw draws the window's frame |
 | `profile` | Optional. Present when the app keeps the UI settings |
+| `client` | Optional. `{ name?, title? }`, what the host's client list shows for this window. A field left out is `ahp-desk` |
 
 A host is `{ id, name, url }`, where `url` is the host's WebSocket address, such as `ws://127.0.0.1:9187`. A token is never part of it.
 

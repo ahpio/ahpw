@@ -1,6 +1,6 @@
 ---
 title: Initialize carries the client info
-status: todo
+status: done
 depends: []
 layer: "bridges"
 refs:
@@ -51,4 +51,8 @@ The name and the title come from the `Embedder`'s `client` or from `ahpw.json`'s
 - `pnpm typecheck` and `pnpm test` pass.
 
 ## Resume
+
+Built on 2026-11-19. `clientInfoFrom` folds a given client over a default field by field, and `clientInfoOf` picks the source.
+`ahpw.json` is read before the first `initialize`, as `openSocket` already needs `serverHoldsToken()`.
+On the test daemon, a page from `ahpw serve` arrived as `ahpw`, with version `0.9.0-rc.3`.
 

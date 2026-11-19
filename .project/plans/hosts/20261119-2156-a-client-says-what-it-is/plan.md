@@ -1,7 +1,7 @@
 ---
 title: A client says what it is
 domain: hosts
-status: planned
+status: active
 priority: medium
 created: 2026-11-19
 revalidated: 2026-11-19
@@ -89,9 +89,9 @@ localClientIds.load() -> ahpw-<uuid> -> initialize clientId
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - initialize carries the client info](task-01-initialize-carries-the-client-info.md) | todo | - |
-| [02 - serve and the plugin name the client](task-02-serve-and-the-plugin-name-the-client.md) | todo | 01 |
-| [03 - a client id is ahpw-uuid](task-03-a-client-id-is-ahpw-uuid.md) | todo | - |
+| [01 - initialize carries the client info](task-01-initialize-carries-the-client-info.md) | done | - |
+| [02 - serve and the plugin name the client](task-02-serve-and-the-plugin-name-the-client.md) | done | 01 |
+| [03 - a client id is ahpw-uuid](task-03-a-client-id-is-ahpw-uuid.md) | done | - |
 
 ## Risks and tradeoffs
 
@@ -101,8 +101,8 @@ localClientIds.load() -> ahpw-<uuid> -> initialize clientId
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-initialize-carries-the-client-info.md](task-01-initialize-carries-the-client-info.md).
+- **Done so far:** tasks 01, 02 and 03, built on 2026-11-19.
+- **Next action:** the PR, then Softov's check, then `implemented.md`.
 - **Open questions:** none.
 - **Watch out for:** the library's `initialize` drops `clientInfo`, so it is added in the transport rewrite, never passed to the library.
 

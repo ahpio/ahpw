@@ -11,6 +11,9 @@ export const DEFAULT_PORT = 5190;
 /** The address bound unless one is named. */
 export const DEFAULT_HOST = '127.0.0.1';
 
+/** The name and the title the page sends, when neither is set. */
+export const DEFAULT_CLIENT = 'ahpw';
+
 /**
  * `serve`'s flags. Each is also a key in `~/.config/ahpw/config.json`, spelled
  * the same without the dashes. None has a `default`, so a flag can be told
@@ -46,6 +49,16 @@ export const serveFields = {
     type: 'boolean',
     description: 'Open the page in a browser once it is served.',
   },
+  clientName: {
+    type: 'string',
+    description: `The name the AHP server's client list shows for the page. Default ${DEFAULT_CLIENT}.`,
+    cli: { value: 'NAME' },
+  },
+  clientTitle: {
+    type: 'string',
+    description: `The title the AHP server's client list shows for the page. Default ${DEFAULT_CLIENT}.`,
+    cli: { value: 'TITLE' },
+  },
 } satisfies Record<string, Field>;
 
 /** What `serve` runs with, after the flags and the file are folded. */
@@ -57,10 +70,12 @@ export interface Settings {
   host: string;
   port: number;
   open: boolean;
+  /** What the page tells the AHP server it is. */
+  client: { name: string; title: string };
 }
 
 const KINDS: Readonly<Record<keyof typeof serveFields, string>> = {
-  connect: 'string', token: 'string', tokenFile: 'string', host: 'string', port: 'number', open: 'boolean',
+  connect: 'string', token: 'string', tokenFile: 'string', host: 'string', port: 'number', open: 'boolean', clientName: 'string', clientTitle: 'string',
 };
 
 /** `~` at the start of a path, as a shell would read it. A config file has no shell. */
@@ -151,8 +166,12 @@ export function settingsOf(flags: Readonly<Record<string, unknown>>, file: Reado
     host: (merged.host as string | undefined) ?? DEFAULT_HOST,
     port,
     open: merged.open === true,
+    client: { name: textOr(merged.clientName, DEFAULT_CLIENT), title: textOr(merged.clientTitle, DEFAULT_CLIENT) },
   };
 }
+
+/** `value` when it is a string with text, else `fallback`. */
+const textOr = (value: unknown, fallback: string): string => (typeof value === 'string' && value.trim() !== '' ? value : fallback);
 
 /** Whether an address is this machine only. */
 const loopback = (host: string): boolean => host === 'localhost' || host === '::1' || host.startsWith('127.');
@@ -202,7 +221,7 @@ export const declareServe = (registry: Registry<object>, app: string): Command =
     const settings = settingsOf(context.input, file.values as Record<string, unknown>, process.env);
     for (const line of warningsOf(settings)) process.stderr.write(`${line}\n`);
 
-    const { server, stop } = createWebServer({ app, upstream: settings.connect, token: settings.token });
+    const { server, stop } = createWebServer({ app, upstream: settings.connect, token: settings.token, client: settings.client });
     await new Promise<void>((resolve, reject) => {
       server.once('error', reject);
       server.listen(settings.port, settings.host, () => resolve());

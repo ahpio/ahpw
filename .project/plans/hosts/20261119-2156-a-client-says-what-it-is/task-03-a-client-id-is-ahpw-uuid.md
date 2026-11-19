@@ -1,6 +1,6 @@
 ---
 title: A client id is ahpw-uuid
-status: todo
+status: done
 depends: []
 layer: "bridges"
 refs:
@@ -38,4 +38,7 @@ A browser with no id, or with a stored id in another form, gets a new `ahpw-<uui
 - On the test daemon, a reload keeps the same `ahpw-` id in the Clients list.
 
 ## Resume
+
+Built on 2026-11-19. `load` returns a new `ahpwId()` and does not store it, because the protocol stores what `load` returns.
+On the test daemon, a reload kept the same `ahpw-` id.
 

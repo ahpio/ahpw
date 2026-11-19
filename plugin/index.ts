@@ -14,17 +14,28 @@ const APP = fileURLToPath(new URL('../app/', import.meta.url));
 /** Where the page is served. */
 const PREFIX = `/plugins/${name}/`;
 
-/**
- * What the page asks first: whether the server adds the token. The daemon does
- * not, so it says so, as `ahpw serve` answers the same file, rather than a 404
- * the browser prints as an error on every load.
- */
-const ABOUT = JSON.stringify({ tokenHeld: false });
+/** The name and the title the page sends from this plugin, when its options set neither. */
+export const DEFAULT_CLIENT = { name: 'ahpd-web', title: 'ahpd web' };
 
-export const apply: Plugin['apply'] = (host) => {
+/** `value` when it is a string with text, else `fallback`. */
+const textOr = (value: unknown, fallback: string): string => (typeof value === 'string' && value.trim() !== '' ? value : fallback);
+
+/**
+ * What the page asks first: whether the server adds the token, and what the
+ * page tells the daemon it is. The daemon adds no token, so it says so, as
+ * `ahpw serve` answers the same file, rather than a 404 the browser prints as
+ * an error on every load.
+ */
+const aboutOf = (options: Record<string, unknown>): string => JSON.stringify({
+  tokenHeld: false,
+  client: { name: textOr(options['clientName'], DEFAULT_CLIENT.name), title: textOr(options['clientTitle'], DEFAULT_CLIENT.title) },
+});
+
+export const apply: Plugin['apply'] = (host, options) => {
   const files = staticRoute(APP, PREFIX);
+  const about = aboutOf(options);
   host.registerRoute(async (request) => {
     if (new URL(request.url).pathname !== `${PREFIX}ahpw.json`) return await files(request);
-    return new Response(ABOUT, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
+    return new Response(about, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
   });
 };
