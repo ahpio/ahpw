@@ -9,6 +9,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - **Markdown draws Mermaid diagrams.** A ` ```mermaid ` fence in a chat, a markdown file or any other markdown is drawn in the scheme shown. Mermaid 13.0.0-alpha.3 loads with the first diagram. A diagram that does not parse shows its code and the error, and a fence indented into a list stays code.
 
+### Fixed
+
+- `@ahpd/web` declares its `@ahpd/sdk` peer as `>=0.15.0-rc.2`, so npm installs it beside a release candidate of ahpd 0.15. The old `>=0.9` matched no prerelease, and npm refused it beside `0.15.0-rc.4`.
+
 ## [0.9.0-rc.3] - 2026-11-13
 
 A candidate for ahpd 0.15.0-rc.2, on npm's `next` tag. The artifacts and references pills need a host that records `agentHost/sessionArtifacts`, and Remove needs one that offers `vscode/removeSessionArtifact`.
