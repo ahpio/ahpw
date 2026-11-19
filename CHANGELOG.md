@@ -7,7 +7,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- **A host's client list names the page.** The page sends a name, a title and its version when it connects, as VS Code does. It is "ahpw" from `ahpw serve`, "ahpd web" from the ahpd plugin and "ahp-desk" in the desktop app. `--client-name` and `--client-title`, or `clientName` and `clientTitle` in the plugin's options, change them, and an embedder sets them with `client`.
 - **Markdown draws Mermaid diagrams.** A ` ```mermaid ` fence in a chat, a markdown file or any other markdown is drawn in the scheme shown. Mermaid 13.0.0-alpha.3 loads with the first diagram. A diagram that does not parse shows its code and the error, and a fence indented into a list stays code.
+
+### Changed
+
+- **A client id starts with `ahpw-`.** A browser that kept an id of another form gets a new one once, so it connects once as a new client.
 
 ### Fixed
 

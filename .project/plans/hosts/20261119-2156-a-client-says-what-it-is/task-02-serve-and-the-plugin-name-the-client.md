@@ -1,6 +1,6 @@
 ---
 title: Serve and the plugin name the client
-status: todo
+status: done
 depends: [task-01-initialize-carries-the-client-info.md]
 layer: "cli, plugin"
 refs:
@@ -44,4 +44,8 @@ refs:
 - `pnpm typecheck` and `pnpm test` pass.
 
 ## Resume
+
+Built on 2026-11-19. The flags are `--client-name` and `--client-title`.
+A blank value takes the default, in `serve` and in the plugin.
+On the test daemon, `--client-title "Check page"` showed as the row's title.
 

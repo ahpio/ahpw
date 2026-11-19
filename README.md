@@ -56,6 +56,14 @@ Then open `http://127.0.0.1:9187/plugins/web/`.
 
 Keep `http.port` unset. On another port the API is on another origin, and the page cannot reach it.
 
+The daemon's client list shows the page as "ahpd web". `clientName` and `clientTitle` in the plugin's options change that:
+
+```json
+{
+  "plugins": [{ "source": "@ahpd/web", "options": { "clientTitle": "Office web" } }]
+}
+```
+
 ---
 
 ## Run it on its own
@@ -87,6 +95,8 @@ Then open `http://127.0.0.1:5190/`.
 | `--host ADDR` | Bind here, default `127.0.0.1` |
 | `--port N` | Listen here, default `5190` |
 | `--open` | Open the page in a browser |
+| `--client-name NAME` | The name the server's client list shows for the page, default `ahpw` |
+| `--client-title TITLE` | The title the server's client list shows for the page, default `ahpw` |
 
 A `tkn=` in the `--connect` URL counts as the token.
 

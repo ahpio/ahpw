@@ -134,6 +134,11 @@ export interface Embedder {
   browser?: EmbedBrowser;
   /** Present when the embedder shows ahpw's alerts itself; without it, they are the browser's notifications. */
   notifications?: EmbedNotifications;
+  /**
+   * The name and the title a host's client list shows for this window. A field
+   * left out is ahpw's default in an embedder: `ahp-desk` for both.
+   */
+  client?: { name?: string; title?: string };
 }
 
 /** The embedder, or undefined in a browser. Read once: a page never moves between the two. */

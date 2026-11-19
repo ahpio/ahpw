@@ -30,6 +30,14 @@ export function writeToken(token: string | null): void {
 let tokenHeld = false;
 let daemonRoot: string | undefined;
 
+/** The name and the title a host's client list shows for this page, as the server that sent it gives them. */
+export interface ServedClient {
+  name?: string;
+  title?: string;
+}
+
+let client: ServedClient | undefined;
+
 /** Whether the server holds the token, as `readServer` found. The page then sends none. */
 export function serverHoldsToken(): boolean {
   return tokenHeld;
@@ -43,6 +51,22 @@ export function servedDaemon(): string | undefined {
   return daemonRoot;
 }
 
+/** The client name and title the server that sent this page gave, as `readServer` found them. */
+export function servedClient(): ServedClient | undefined {
+  return client;
+}
+
+/** The string `name` and `title` of `ahpw.json`'s `client`, or nothing. */
+function clientOf(value: unknown): ServedClient | undefined {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const { name, title } = value as { name?: unknown; title?: unknown };
+  const named = {
+    ...(typeof name === 'string' && name !== '' ? { name } : {}),
+    ...(typeof title === 'string' && title !== '' ? { title } : {}),
+  };
+  return Object.keys(named).length === 0 ? undefined : named;
+}
+
 /**
  * Asks the server that sent this page whether it adds the token itself, and
  * where the daemon it stands in front of answers HTTP.
@@ -54,12 +78,14 @@ export async function readServer(): Promise<boolean> {
   try {
     const response = await fetch('./ahpw.json', { headers: { accept: 'application/json' }, cache: 'no-store' });
     if (!response.ok || !(response.headers.get('content-type') ?? '').includes('application/json')) return false;
-    const facts = await response.json() as { tokenHeld?: unknown; daemon?: unknown };
+    const facts = await response.json() as { tokenHeld?: unknown; daemon?: unknown; client?: unknown };
     tokenHeld = facts.tokenHeld === true;
     daemonRoot = typeof facts.daemon === 'string' && /^https?:\/\//u.test(facts.daemon) ? facts.daemon : undefined;
+    client = clientOf(facts.client);
   } catch {
     tokenHeld = false;
     daemonRoot = undefined;
+    client = undefined;
   }
   return tokenHeld;
 }

@@ -16,11 +16,15 @@
  * leaves out: as `locale` on `initialize`, and on `reconnect`, which has no
  * `locale` field, as `_meta["ahpd.locale"]`, where ahpd reads it. A host that
  * reads it answers in that language.
+ *
+ * It adds the page's `clientInfo` as well, which the SDK's `initialize` drops:
+ * what a host's client list shows for this page.
  */
 
 import { getLocale } from '@softov/scena';
 import { SUPPORTED_PROTOCOL_VERSIONS } from '@microsoft/agent-host-protocol';
 import type { AhpTransport } from '@microsoft/agent-host-protocol/client';
+import { clientInfoOf, type ClientInfo } from './client-info.js';
 
 /** VS Code 1.141's protocol version, offered after `1.0.0`. */
 export const VSCODE_1_141_VERSION = '0.10.0';
@@ -37,16 +41,17 @@ export const RECONNECT_LOCALE = 'ahpd.locale';
 
 /**
  * An `initialize` request offering `OFFERED_PROTOCOL_VERSIONS`, and an
- * `initialize` or `reconnect` carrying `locale` when one is given; any other
- * frame as it came.
+ * `initialize` or `reconnect` carrying `locale` when one is given; an
+ * `initialize` carries `clientInfo` when one is given; any other frame as it
+ * came.
  */
-export function offeringEveryVersion<T>(message: T, locale?: string): T {
+export function offeringEveryVersion<T>(message: T, locale?: string, clientInfo?: ClientInfo): T {
   const body = record(typeof message === 'string' ? parsed(message) : message);
   if (body?.method !== 'initialize' && body?.method !== 'reconnect') return message;
   if (body.method === 'reconnect' && locale === undefined) return message;
   const given = record(body.params);
   const params = body.method === 'initialize'
-    ? { ...given, protocolVersions: [...OFFERED_PROTOCOL_VERSIONS], ...(locale === undefined ? {} : { locale }) }
+    ? { ...given, protocolVersions: [...OFFERED_PROTOCOL_VERSIONS], ...(locale === undefined ? {} : { locale }), ...(clientInfo === undefined ? {} : { clientInfo }) }
     : { ...given, _meta: { ...record(given?._meta), [RECONNECT_LOCALE]: locale } };
   const rewritten = { ...body, params };
   return (typeof message === 'string' ? JSON.stringify(rewritten) : rewritten) as T;
@@ -66,10 +71,10 @@ function parsed(text: string): unknown {
   }
 }
 
-/** The same transport, with an `initialize` offering `OFFERED_PROTOCOL_VERSIONS` and the page's `locale` on its way out. */
+/** The same transport, with an `initialize` offering `OFFERED_PROTOCOL_VERSIONS`, the page's `locale` and its `clientInfo` on its way out. */
 export function offering(inner: AhpTransport): AhpTransport {
   return {
-    send: (message) => inner.send(offeringEveryVersion(message, getLocale())),
+    send: (message) => inner.send(offeringEveryVersion(message, getLocale(), clientInfoOf())),
     close: () => inner.close(),
     recv: () => inner.recv(),
   };

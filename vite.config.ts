@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Alias, Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
@@ -35,6 +36,9 @@ function scenaSource(checkout: string): Alias[] {
 }
 const scena = process.env['AHPW_SCENA'];
 
+/** ahpw's version, which the page sends a host as its `clientInfo`. */
+const version = (JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }).version;
+
 /**
  * The page asks the server that sent it whether it adds the token to the
  * socket (`ahpw.json`, as `ahpw serve` and the daemon's route answer). This dev
@@ -54,6 +58,7 @@ const serverFacts: Plugin = {
 
 export default defineConfig({
   plugins: [react(), serverFacts],
+  define: { __AHPW_VERSION__: JSON.stringify(version) },
   resolve: {
     // One React, whether scena is installed or comes from a checkout with its own.
     dedupe: ['react', 'react-dom'],

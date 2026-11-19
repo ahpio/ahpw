@@ -43,8 +43,8 @@ async function daemon(): Promise<{ port: number; heads: string[] }> {
   return { port: (server.address() as AddressInfo).port, heads };
 }
 
-async function serve(upstream: string, token?: string): Promise<{ port: number; web: WebServer }> {
-  const web = createWebServer({ app, upstream: new URL(upstream), token });
+async function serve(upstream: string, token?: string, client?: { name: string; title: string }): Promise<{ port: number; web: WebServer }> {
+  const web = createWebServer({ app, upstream: new URL(upstream), token, client });
   await new Promise<void>((resolve) => web.server.listen(0, '127.0.0.1', resolve));
   running.unshift(web);
   return { port: (web.server.address() as AddressInfo).port, web };
@@ -110,6 +110,11 @@ describe('createWebServer', () => {
   it('names a wss: daemon by its https: root', async () => {
     const { port } = await serve('wss://daemon.example.com:8443/ahp');
     expect(await (await fetch(`http://127.0.0.1:${port}/ahpw.json`)).json()).toEqual({ tokenHeld: false, daemon: 'https://daemon.example.com:8443' });
+  });
+
+  it('names the client it was given', async () => {
+    const { port } = await serve('ws://127.0.0.1:1', undefined, { name: 'ahpw', title: 'Office' });
+    expect(await (await fetch(`http://127.0.0.1:${port}/ahpw.json`)).json()).toEqual({ tokenHeld: false, daemon: 'http://127.0.0.1:1', client: { name: 'ahpw', title: 'Office' } });
   });
 
   it('says it holds no token when it was given none', async () => {
