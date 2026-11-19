@@ -15,6 +15,7 @@ import {
 } from '@microsoft/agent-host-protocol';
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
+import { unlistedSummary } from './unlisted.js';
 import { AGENTS, agentsReducer, servesAgents, type AgentRow } from '../../bridges/agents.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import type { PeopleState } from '../../bridges/people.js';
@@ -284,8 +285,9 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const scena = useScena();
   const { t } = useI18n();
   const sessions = useStore<SessionSummary[]>(ahpPaths(host).sessions);
-  const summary = sessions?.find((one) => one.resource === resource);
   const session = useChannel<SessionState>(host, resource, sessionReducer);
+  // A session the host does not list yet, as one made with no message, is read from its own state; the list has it from its first turn.
+  const summary = sessions?.find((one) => one.resource === resource) ?? (resource === undefined || session.state === undefined ? undefined : unlistedSummary(resource, session.state));
   // The chat the page shows: the one picked in the header while the session still has it, else the default.
   const [picked, setPicked] = useState<string | undefined>(undefined);
   const chosen = picked !== undefined && (session.state?.chats ?? []).some((one) => one.resource === picked) ? picked : undefined;
@@ -431,7 +433,11 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
     wasArchived.current = archived;
   }, [archived, resource, summary === undefined]);
 
-  if (summary === undefined) return <PageAlert tone="warning" message={t('sessions/chat/gone')} />;
+  if (summary === undefined) {
+    // Gone only once the read has answered: a session still being read is loading.
+    if (session.state === undefined && session.error === null) return <PageAlert tone="info" message={t('sessions/chat/loading')} />;
+    return <PageAlert tone="warning" message={t('sessions/chat/gone')} />;
+  }
   // A subagent's chat opens here when it is this session's; another session's, as a bot's back session, opens that session.
   const openSubagent = (uri: string): void => {
     if ((session.state?.chats ?? []).some((one) => one.resource === uri)) {
