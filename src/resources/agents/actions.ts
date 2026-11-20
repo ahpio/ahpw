@@ -54,8 +54,15 @@ export async function checkOne(host: string, row: AgentRow): Promise<void> {
   }
 }
 
-/** Moves an agent to a mode; a refusal is the host's, in its words. */
+/** Moves an agent to a mode once a person has said yes; a refusal is the host's, in its words. */
 export async function setMode(host: string, row: AgentRow, mode: AgentMode): Promise<void> {
+  const name = row.name || row.id;
+  if (!(await confirm({
+    title: translate(`agents/actions/${mode}Title`, { name }),
+    body: translate(`agents/actions/${mode}Body`),
+    confirmLabel: translate(`agents/actions/${mode}`),
+    tone: mode === 'enable' ? 'default' : 'danger',
+  }))) return;
   try {
     await setAgentMode(host, row.id, mode);
   } catch (error) {

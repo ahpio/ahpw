@@ -1,7 +1,7 @@
 ---
 title: The agent and plugin pages link and ask
 domain: plugins
-status: planned
+status: active
 priority: medium
 created: 2026-11-19
 revalidated: 2026-11-19
@@ -83,9 +83,9 @@ PluginPage / ListedPluginPage -> Overview: facts section, then README; Features 
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A change of state asks first](task-01-a-change-of-state-asks-first.md) | todo | - |
-| [02 - An agent links its plugin and sessions](task-02-an-agent-links-its-plugin-and-sessions.md) | todo | - |
-| [03 - Plugin facts sit before the README](task-03-plugin-facts-sit-before-the-readme.md) | todo | - |
+| [01 - A change of state asks first](task-01-a-change-of-state-asks-first.md) | doing | - |
+| [02 - An agent links its plugin and sessions](task-02-an-agent-links-its-plugin-and-sessions.md) | doing | - |
+| [03 - Plugin facts sit before the README](task-03-plugin-facts-sit-before-the-readme.md) | doing | - |
 
 ## Risks and tradeoffs
 
@@ -94,8 +94,8 @@ PluginPage / ListedPluginPage -> Overview: facts section, then README; Features 
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-a-change-of-state-asks-first.md](task-01-a-change-of-state-asks-first.md).
+- **Done so far:** tasks 01, 02 and 03 built on 2026-11-19, on branch `plugins/20261119-2340-agent-and-plugin-pages-link-and-ask`, waiting for review.
+- **Next action:** Softov reviews the [pending checks](../../../pending/agent-and-plugin-pages-checks.md); then the tasks are `done` and `implemented.md` is written.
 - **Watch out for:** the explorer menus call the same action functions as the pages; a question added in a page only leaves the menus silent.
 
 ## Final verification checklist

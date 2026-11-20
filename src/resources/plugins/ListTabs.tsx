@@ -36,7 +36,7 @@ export function urlOf(value: unknown): string | undefined {
   return typeof text === 'string' && /^https:\/\//iu.test(text) ? text : undefined;
 }
 
-/** One section of the facts column: its heading and its facts. */
+/** One part of a plugin's facts: its heading and its facts. */
 export interface FactsSection {
   title: string;
   items: DetailItem[];
@@ -49,12 +49,12 @@ export interface Resource {
 }
 
 /**
- * The column beside a plugin's tabs, as VS Code draws an extension's: an
+ * A plugin's facts at the top of its *Overview*, before the README: an
  * installed plugin's *Installation*, then *Marketplace* when a list holds it,
- * then its categories and where to read more. Each place is linked once, by
- * its URL and by its name.
+ * then its categories and where to read more, side by side while the page is
+ * wide enough. Each place is linked once, by its URL and by its name.
  */
-export function FactsColumn({ sections, categories, resources }: { sections: FactsSection[]; categories: readonly string[]; resources: Resource[] }): ReactElement {
+export function PluginFacts({ sections, categories, resources }: { sections: FactsSection[]; categories: readonly string[]; resources: Resource[] }): ReactElement | null {
   const { t } = useI18n();
   const seen = new Set<string>();
   const links = resources.filter((one): one is { title: string; url: string } => {
@@ -63,42 +63,39 @@ export function FactsColumn({ sections, categories, resources }: { sections: Fac
     seen.add(one.title);
     return true;
   });
+  const shown = sections.filter((one) => one.items.length > 0);
+  if (shown.length === 0 && categories.length === 0 && links.length === 0) return null;
   return (
-    <aside className="web-listed__facts">
-      {sections.filter((one) => one.items.length > 0).map((one) => (
-        <section key={one.title} className="web-listed__section">
+    <section className="web-plugin-facts">
+      {shown.map((one) => (
+        <div key={one.title} className="web-plugin-facts__part web-plugin-facts__part--wide">
           <Text variant="h3" text={one.title} />
-          <DetailList items={one.items} columns={1} />
-        </section>
+          <DetailList items={one.items} columns={2} />
+        </div>
       ))}
       {categories.length === 0 ? null : (
-        <section className="web-listed__section">
+        <div className="web-plugin-facts__part">
           <Text variant="h3" text={t('plugins/listed/categories')} />
           <div className="web-plugin__tags">
             {categories.map((category) => <RemovableChip key={category} label={categoryWord(t, category)} removeLabel={category} />)}
           </div>
-        </section>
+        </div>
       )}
       {links.length === 0 ? null : (
-        <section className="web-listed__section">
+        <div className="web-plugin-facts__part">
           <Text variant="h3" text={t('plugins/listed/resources')} />
           <ul className="web-listed__resources">
             {links.map((one) => <li key={one.url}><a href={one.url} target="_blank" rel="noreferrer">{one.title}</a></li>)}
           </ul>
-        </section>
+        </div>
       )}
-    </aside>
+    </section>
   );
 }
 
-/** A tab's panel beside the facts column; the column goes under it on a narrow page. */
-export function PageBody({ column, children }: { column: ReactNode; children: ReactNode }): ReactElement {
-  return (
-    <div className="web-listed__body">
-      <div className="web-listed__main">{children}</div>
-      {column}
-    </div>
-  );
+/** A tab's panel: its parts one under another. */
+export function TabBody({ children }: { children: ReactNode }): ReactElement {
+  return <div className="web-listed__main">{children}</div>;
 }
 
 /** The facts of a listed version, as *Marketplace* names them. */
@@ -141,11 +138,11 @@ function Problems({ details }: { details: PluginDetails }): ReactElement | null 
  * The tabs of a plugin a list holds and the host has not installed, from its
  * list entry and one version's files: *Overview*, the README; *Features*,
  * what it provides and its settings; and *Changelog* when the version has
- * one. Each sits beside the *Marketplace* column.
+ * one. *Overview* starts with the *Marketplace* facts.
  */
 export function listTabs(host: string, plugin: ListedPlugin, details: PluginDetails, t: (key: string) => string): KeptTab[] {
-  const column = (
-    <FactsColumn
+  const facts = (
+    <PluginFacts
       sections={[{ title: t('plugins/listed/marketplace'), items: marketplaceFacts(plugin, details.version, t) }]}
       categories={plugin.categories ?? []}
       resources={[
@@ -161,29 +158,30 @@ export function listTabs(host: string, plugin: ListedPlugin, details: PluginDeta
       key: 'overview',
       title: t('plugins/page/overview'),
       child: (
-        <PageBody column={column}>
+        <TabBody>
+          {facts}
           <Problems details={details} />
           {details.readme === undefined ? <p className="web-note">{t('plugins/listed/noReadme')}</p> : <ReadText text={details.readme} />}
-        </PageBody>
+        </TabBody>
       ),
     },
     {
       key: 'features',
       title: t('plugins/listed/features'),
       child: (
-        <PageBody column={column}>
+        <TabBody>
           <Text variant="h3" text={t('plugins/page/provides')} />
           <ProvidesList host={host} contracts={details.contracts} />
           {Object.keys(details.contracts ?? {}).length === 0 ? <p className="web-note">{t('plugins/page/providesNothing')}</p> : null}
           <Text variant="h3" text={t('plugins/page/settings')} />
           <SettingsList schema={details.optionsSchema} />
-        </PageBody>
+        </TabBody>
       ),
     },
     ...(details.changelog === undefined ? [] : [{
       key: 'changelog',
       title: t('plugins/listed/changelog'),
-      child: <PageBody column={column}><ReadText text={details.changelog} /></PageBody>,
+      child: <TabBody><ReadText text={details.changelog} /></TabBody>,
     }]),
   ];
 }

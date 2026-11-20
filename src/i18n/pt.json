@@ -1424,7 +1424,9 @@
         "disabled": "Desativado. As sessões mantêm o histórico, e o host não o abre nem o serve até ser ativado."
       },
       "noModelMatch": "Nenhum modelo corresponde.",
-      "modelsTab": "Modelos {count}"
+      "modelsTab": "Modelos {count}",
+      "openPlugin": "Abrir {id}",
+      "showSessions": "Mostrar as sessões deste agente"
     },
     "actions": {
       "check": "Verificar",
@@ -1439,7 +1441,13 @@
       "enableFailed": "Não foi possível ativar {name}",
       "pauseFailed": "Não foi possível pausar {name}",
       "disableFailed": "Não foi possível desativar {name}",
-      "checkNow": "Verificar agora"
+      "checkNow": "Verificar agora",
+      "enableTitle": "Ativar {name}?",
+      "enableBody": "O host o abre de novo e ele aceita novas sessões e mensagens.",
+      "pauseTitle": "Pausar {name}?",
+      "pauseBody": "Ele não aceita novas sessões nem mensagens até ser ativado. Suas sessões mantêm o histórico.",
+      "disableTitle": "Desativar {name}?",
+      "disableBody": "O host não o abre nem o serve até ser ativado. Suas sessões mantêm o histórico."
     },
     "form": {
       "newTitle": "Novo agente",
@@ -1833,7 +1841,8 @@
       "pin": "Fixar",
       "unpin": "Desafixar",
       "show": "Mostrar sessões",
-      "noneShown": "Nenhuma sessão corresponde. Tente outra opção em Mostrar sessões."
+      "noneShown": "Nenhuma sessão corresponde. Tente outra opção em Mostrar sessões ou Agente.",
+      "agent": "Agente"
     },
     "footer": {
       "window": "Janela de contexto do modelo: {window} tokens",
@@ -2178,6 +2187,9 @@
       "title": "Referências",
       "hint": "O que a sessão aponta para você",
       "remove": "Remover a referência {name} da sessão"
+    },
+    "agent": {
+      "all": "Todos os agentes"
     }
   },
   "host": {
@@ -2975,7 +2987,13 @@
       "reimportFailed": "Não foi possível reimportar {id}",
       "viewFailed": "{id} não conseguiu fazer isso",
       "apply": "Aplicar configuração",
-      "applyFailed": "Não foi possível aplicar a configuração"
+      "applyFailed": "Não foi possível aplicar a configuração",
+      "enableTitle": "Ativar {id}?",
+      "enableBody": "O host o carrega e inicia o que ele oferece.",
+      "disableTitle": "Desativar {id}?",
+      "disableBody": "O host o descarrega e o que ele oferece para até ser ativado.",
+      "reimportTitle": "Reimportar {id}?",
+      "reimportBody": "O host carrega o código de novo."
     },
     "new": {
       "title": "Novo plugin",
@@ -3082,7 +3100,10 @@
       "homepage": "Página",
       "issues": "Problemas",
       "marketplace": "Marketplace",
-      "noSettings": "Não tem configurações."
+      "noSettings": "Não tem configurações.",
+      "installTitle": "Instalar {title}?",
+      "installVersionTitle": "Instalar {title} {version}?",
+      "installBody": "O host o baixa, adiciona à configuração e o carrega."
     }
   },
   "connectors": {

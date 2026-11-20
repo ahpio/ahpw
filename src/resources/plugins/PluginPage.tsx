@@ -11,7 +11,7 @@ import { availablePlugins, installedFiles, PLUGINS, pluginsReducer, restartNeede
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
 import { mayList, mayReload, mayRemove, mayToggle, reloadOne, removeOne, saidOf, toggleMethod, togglePlugin } from './actions.js';
-import { FactsColumn, marketplaceFacts, PageBody, ReadText, urlOf } from './ListTabs.js';
+import { marketplaceFacts, PluginFacts, ReadText, TabBody, urlOf } from './ListTabs.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
 import { Options } from './Options.js';
 import { Features, installationFacts, Overview } from './Overview.js';
@@ -100,8 +100,8 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
   const manifest = row.manifest;
   const uri = [`${PLUGINS.channel}${id}`, row.version, row.module].filter((one) => one !== undefined).join(' \u{00B7} ');
 
-  const column = (
-    <FactsColumn
+  const facts = (
+    <PluginFacts
       sections={[
         { title: t('plugins/page/installation'), items: installationFacts(host, row, t) },
         ...(listed === undefined ? [] : [{ title: t('plugins/listed/marketplace'), items: marketplaceFacts(listed, listed.installed?.version ?? row.version ?? listed.versions[0]?.version ?? '', t) }]),
@@ -146,12 +146,12 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
       ) : null}
       <KeptTabs
         tabs={[
-          { key: 'overview', title: t('plugins/page/overview'), child: <PageBody column={column}><Overview host={host} id={id} row={row} readme={files?.readme} /></PageBody> },
-          { key: 'features', title: t('plugins/listed/features'), child: <PageBody column={column}><Features host={host} row={row} /></PageBody> },
+          { key: 'overview', title: t('plugins/page/overview'), child: <TabBody>{facts}<Overview host={host} id={id} row={row} readme={files?.readme} /></TabBody> },
+          { key: 'features', title: t('plugins/listed/features'), child: <TabBody><Features host={host} row={row} /></TabBody> },
           ...(files?.changelog === undefined ? [] : [{
             key: 'changelog',
             title: t('plugins/listed/changelog'),
-            child: <PageBody column={column}><ReadText text={files.changelog} /></PageBody>,
+            child: <TabBody><ReadText text={files.changelog} /></TabBody>,
           }]),
           { key: 'settings', title: t('plugins/page/settings'), child: (
             <>

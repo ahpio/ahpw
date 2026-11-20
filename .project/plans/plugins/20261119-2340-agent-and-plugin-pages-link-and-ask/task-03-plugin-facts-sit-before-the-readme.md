@@ -1,6 +1,6 @@
 ---
 title: Plugin facts sit before the README
-status: todo
+status: doing
 depends: []
 layer: "resources/plugins"
 refs:
@@ -45,3 +45,7 @@ A plugin page, installed or listed, has no column beside its tabs.
 
 ## Resume
 
+Built on 2026-11-19 and waiting for review.
+`PageBody` became `TabBody`, which keeps `web-listed__main` with no column, because a tab panel does not space its parts.
+The facts section has a line under it before the README.
+The visual check at two widths is in [the pending checks](../../../pending/agent-and-plugin-pages-checks.md).

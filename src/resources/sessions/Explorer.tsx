@@ -9,7 +9,7 @@ import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridg
 import { embedMode } from '../../shell/embed/index.js';
 import { folderLabel } from '../../bridges/words.js';
 import { ExplorerList, type Dot, type Row } from '../../shell/explorer/ExplorerList.js';
-import { ACTIVE_SESSION, SESSIONS_ARCHIVED, SESSIONS_GROUPING, SESSIONS_SHOW, SESSIONS_SORTING, SESSIONS_THEN_BY, type ActiveSession } from './state.js';
+import { ACTIVE_SESSION, SESSIONS_AGENT, SESSIONS_ARCHIVED, SESSIONS_GROUPING, SESSIONS_SHOW, SESSIONS_SORTING, SESSIONS_THEN_BY, type ActiveSession } from './state.js';
 import { DEFAULT_SORTING, sortSessions, type Sorting } from './sorting.js';
 import { SESSIONS_PINS, togglePin } from './pins.js';
 import { plural, dateFormat } from '../../i18n/locales.js';
@@ -62,6 +62,7 @@ export default function SessionExplorer(): ReactElement {
   const thenBy = useStore<Grouping | null>(SESSIONS_THEN_BY) ?? 'none';
   const sorting = useStore<Sorting>(SESSIONS_SORTING) ?? DEFAULT_SORTING;
   const show = useStore<SessionShow | null>(SESSIONS_SHOW) ?? 'all';
+  const agent = useStore<string | null>(SESSIONS_AGENT) ?? null;
   const pins = useStore<string[]>(SESSIONS_PINS);
 
   const open = (key: string): void => {
@@ -72,7 +73,7 @@ export default function SessionExplorer(): ReactElement {
     () => {
       const agentName = (host: string, provider: string): string => agentLists[hosts.indexOf(host)]?.find((candidate) => candidate.provider === provider)?.displayName ?? provider;
       const entries = hosts.flatMap((host, at) => (lists[at] ?? []).map((session): Entry => ({ host, session })));
-      const kept = sortSessions(entries.filter((one) => (archived || !isArchived(one.session.status)) && shows(one.session.status, show)), (one) => one.session, sorting);
+      const kept = sortSessions(entries.filter((one) => (archived || !isArchived(one.session.status)) && shows(one.session.status, show) && (agent === null || one.session.provider === agent)), (one) => one.session, sorting);
       const pinned = new Set(pins ?? []);
       const isPinned = ({ host, session }: Entry): boolean => pinned.has(refKey(host, session.resource));
       const now = new Date();
@@ -121,7 +122,7 @@ export default function SessionExplorer(): ReactElement {
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hosts, lists, agentLists, archived, show, grouping, thenBy, sorting, pins, hostName, t],
+    [hosts, lists, agentLists, archived, show, agent, grouping, thenBy, sorting, pins, hostName, t],
   );
 
   // One host's notice in mono; in multi a host that is down says so in its own place (hosts plan 02 task 03).
@@ -131,7 +132,7 @@ export default function SessionExplorer(): ReactElement {
     ? <Alert tone="danger" title={t('sessions/explorer/notConnected')} message={connection.error ?? t('sessions/explorer/refused')} />
     : connection?.status !== 'connected' && sessions === undefined
       ? <Spinner label={t('sessions/explorer/connecting')} />
-      : rows.length === 0 ? <p className="web-note">{show !== 'all' ? t('sessions/explorer/noneShown') : archived ? t('sessions/explorer/none') : t('sessions/explorer/noneYet')}</p> : null;
+      : rows.length === 0 ? <p className="web-note">{show !== 'all' || agent !== null ? t('sessions/explorer/noneShown') : archived ? t('sessions/explorer/none') : t('sessions/explorer/noneYet')}</p> : null;
 
   return (
     <ExplorerList

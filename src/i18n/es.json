@@ -1424,7 +1424,9 @@
         "disabled": "Desactivado. Sus sesiones conservan su historial, y el host no lo abre ni lo sirve hasta que se active."
       },
       "noModelMatch": "Ningún modelo coincide.",
-      "modelsTab": "Modelos {count}"
+      "modelsTab": "Modelos {count}",
+      "openPlugin": "Abrir {id}",
+      "showSessions": "Mostrar las sesiones de este agente"
     },
     "actions": {
       "check": "Comprobar",
@@ -1439,7 +1441,13 @@
       "enableFailed": "No se pudo activar {name}",
       "pauseFailed": "No se pudo pausar {name}",
       "disableFailed": "No se pudo desactivar {name}",
-      "checkNow": "Comprobar ahora"
+      "checkNow": "Comprobar ahora",
+      "enableTitle": "¿Activar {name}?",
+      "enableBody": "El host lo abre de nuevo y acepta sesiones y mensajes nuevos.",
+      "pauseTitle": "¿Pausar {name}?",
+      "pauseBody": "No acepta sesiones ni mensajes nuevos hasta que se active. Sus sesiones conservan el historial.",
+      "disableTitle": "¿Desactivar {name}?",
+      "disableBody": "El host no lo abre ni lo sirve hasta que se active. Sus sesiones conservan el historial."
     },
     "form": {
       "newTitle": "Nuevo agente",
@@ -1833,7 +1841,8 @@
       "pin": "Fijar",
       "unpin": "Desfijar",
       "show": "Mostrar sesiones",
-      "noneShown": "No hay sesiones que coincidan. Prueba otra opción en Mostrar sesiones."
+      "noneShown": "No hay sesiones que coincidan. Prueba otra opción en Mostrar sesiones o Agente.",
+      "agent": "Agente"
     },
     "footer": {
       "window": "Ventana de contexto del modelo: {window} tokens",
@@ -2178,6 +2187,9 @@
       "title": "Referencias",
       "hint": "Lo que la sesión te señala",
       "remove": "Quitar la referencia {name} de la sesión"
+    },
+    "agent": {
+      "all": "Todos los agentes"
     }
   },
   "host": {
@@ -2975,7 +2987,13 @@
       "reimportFailed": "No se pudo reimportar {id}",
       "viewFailed": "{id} no pudo hacer eso",
       "apply": "Aplicar configuración",
-      "applyFailed": "No se pudo aplicar la configuración"
+      "applyFailed": "No se pudo aplicar la configuración",
+      "enableTitle": "¿Activar {id}?",
+      "enableBody": "El host lo carga e inicia lo que ofrece.",
+      "disableTitle": "¿Desactivar {id}?",
+      "disableBody": "El host lo descarga y lo que ofrece se detiene hasta que se active.",
+      "reimportTitle": "¿Reimportar {id}?",
+      "reimportBody": "El host carga su código de nuevo."
     },
     "new": {
       "title": "Nuevo plugin",
@@ -3082,7 +3100,10 @@
       "homepage": "Página",
       "issues": "Incidencias",
       "marketplace": "Marketplace",
-      "noSettings": "No tiene configuración."
+      "noSettings": "No tiene configuración.",
+      "installTitle": "¿Instalar {title}?",
+      "installVersionTitle": "¿Instalar {title} {version}?",
+      "installBody": "El host lo descarga, lo añade a la configuración y lo carga."
     }
   },
   "connectors": {
