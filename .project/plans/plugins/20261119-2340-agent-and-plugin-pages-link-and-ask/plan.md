@@ -1,7 +1,7 @@
 ---
 title: The agent and plugin pages link and ask
 domain: plugins
-status: active
+status: built
 priority: medium
 created: 2026-11-19
 revalidated: 2026-11-19
@@ -38,7 +38,7 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 
 - `rg "setMode\(|togglePlugin\(|reloadOne\(|installListed\(" src` - each action has two callers: the page and the explorer's menu or row.
 - `rg "registerChoice" src` - every choice has a fixed list of values; only the host filter builds its menu from live data.
-- `rg -n "operations" packages/server/src packages/sdk/src -g '*agents*'` in ahpd - ahpd sends no agent operations, so ahpw's own mode buttons are the ones drawn.
+- `rg -n "operations" packages/server/src packages/sdk/src -g '*agents*'` in ahpd - ahpd sends agent and connector operations, and a page draws them in place of ahpw's own buttons.
 
 ### Runtime path
 
@@ -61,7 +61,7 @@ PluginPage / ListedPluginPage -> Overview: facts section, then README; Features 
 | The question is in the action function, so the page and the explorer menu both ask | `(defaulted: one broken entry point means fix every entry point)` | 01 |
 | Pause and Disable ask in the `danger` tone; Enable, Resume, Reimport and Install in the `default` tone | `(defaulted: only the actions that stop work are red)` | 01 |
 | Check and New session do not ask | `(defaulted: they change no state)` | 01 |
-| A host operation keeps the host's own `confirmation`; ahpw adds none | `(defaulted: clients draw only what the host sends)` | 01 |
+| A host operation with no `confirmation` asks too: its label and the record's name as the question, its description as the note, in the `default` tone | Softov, 2026-11-19: "Every action asks" | 01 |
 | The *Plugin* fact is a link to `ahp.openPlugin` | Softov, 2026-11-19 | 02 |
 | The link shows only when the host offers the plugins channel; else the fact stays plain | `(defaulted: a person who cannot read plugins has no page to open)` | 02 |
 | The *Sessions* count is a link that opens the Sessions explorer filtered by this agent | Softov, 2026-11-19 | 02 |
@@ -83,9 +83,9 @@ PluginPage / ListedPluginPage -> Overview: facts section, then README; Features 
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A change of state asks first](task-01-a-change-of-state-asks-first.md) | doing | - |
-| [02 - An agent links its plugin and sessions](task-02-an-agent-links-its-plugin-and-sessions.md) | doing | - |
-| [03 - Plugin facts sit before the README](task-03-plugin-facts-sit-before-the-readme.md) | doing | - |
+| [01 - A change of state asks first](task-01-a-change-of-state-asks-first.md) | done | - |
+| [02 - An agent links its plugin and sessions](task-02-an-agent-links-its-plugin-and-sessions.md) | done | - |
+| [03 - Plugin facts sit before the README](task-03-plugin-facts-sit-before-the-readme.md) | done | - |
 
 ## Risks and tradeoffs
 
@@ -94,14 +94,14 @@ PluginPage / ListedPluginPage -> Overview: facts section, then README; Features 
 
 ## Resume state
 
-- **Done so far:** tasks 01, 02 and 03 built on 2026-11-19, on branch `plugins/20261119-2340-agent-and-plugin-pages-link-and-ask`, waiting for review.
-- **Next action:** Softov reviews the [pending checks](../../../pending/agent-and-plugin-pages-checks.md); then the tasks are `done` and `implemented.md` is written.
-- **Watch out for:** the explorer menus call the same action functions as the pages; a question added in a page only leaves the menus silent.
+- **Done so far:** tasks 01, 02 and 03 are done; see [implemented.md](implemented.md).
+- **Next action:** none.
+- **Watch out for:** a page that draws the host's operations runs them through `runOperation`, not through the action functions.
 
 ## Final verification checklist
 
-- [ ] Each of the eight actions asks once from its page and once from its explorer menu or row, and *No* sends nothing.
-- [ ] The *Plugin* link opens the plugin page; with no plugins channel the fact is plain.
-- [ ] The *Sessions* link opens the Sessions explorer with the agent chosen, and *All agents* clears it.
-- [ ] Installed and listed plugin pages match the layout Softov picked, at 1280 px and 760 px, light and dark.
-- [ ] `pnpm typecheck` and `pnpm test` pass.
+- [x] Each of the eight actions asks once from its page and once from its explorer menu or row, and *No* sends nothing.
+- [x] The *Plugin* link opens the plugin page; with no plugins channel the fact is plain.
+- [x] The *Sessions* link opens the Sessions explorer with the agent chosen, and *All agents* clears it.
+- [x] Installed and listed plugin pages match the layout Softov picked, at 1280 px and 760 px, light and dark.
+- [x] `pnpm typecheck` and `pnpm test` pass.

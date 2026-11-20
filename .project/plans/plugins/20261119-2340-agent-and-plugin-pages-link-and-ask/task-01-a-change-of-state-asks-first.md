@@ -1,6 +1,6 @@
 ---
 title: A change of state asks first
-status: doing
+status: done
 depends: []
 layer: "resources/agents, resources/plugins"
 refs:
@@ -48,7 +48,9 @@ They ask from the page and from the explorer menu or row, because the question i
 
 ## Resume
 
-Built on 2026-11-19 and waiting for review.
+Done on 2026-11-19: built in PR #106, and Softov passed the checks by hand.
 `setMode`, `togglePlugin`, `reloadOne` and `installListed` ask with `confirm`, so the page buttons, the explorer menus and the sidebar's Install ask.
 `agents/actions.test.ts` and the new `plugins/actions.test.ts` hold the *Yes* and *No* cases.
 The plugin question bodies say only what the host does; the plan did not check what a reimport restarts.
+The agent and connector pages draw the host's operations, which had no question.
+PR #108 makes every host operation ask, as the plan's *Answers* table says.

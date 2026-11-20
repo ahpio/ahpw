@@ -1,6 +1,6 @@
 ---
 title: An agent links its plugin and sessions
-status: doing
+status: done
 depends: []
 layer: "resources/agents, resources/sessions"
 refs:
@@ -57,7 +57,7 @@ The Sessions explorer has an *Agent* choice beside *Show*, which a person can al
 
 ## Resume
 
-Built on 2026-11-19 and waiting for review.
+Done on 2026-11-19: built in PR #106, and Softov passed the checks by hand.
 The agent choice is in `agent-choice.ts`, as planned.
 A provider's command is `sessions.agentOf.<provider>`, so an agent named `all` does not take the id of *All agents*.
 `sessions/explorer/noneShown` now names *Agent* beside *Show sessions*.
