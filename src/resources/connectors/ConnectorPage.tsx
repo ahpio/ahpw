@@ -1,6 +1,6 @@
 import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, Spinner, Text, type BadgeTone } from '@softov/scena/ui';
+import { Alert, Badge, Button, Text, type BadgeTone } from '@softov/scena/ui';
 import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ADAPTERS, adaptersReducer, CONNECTORS, connectorsReducer, type AdapterRow, type ConnectorRow, type ConnectorState } from '../../bridges/connectors.js';
@@ -20,6 +20,7 @@ import { Overview } from './Overview.js';
 import { connectorTab, connectorTabKey, keepConnectorTabKey } from './state.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 const TONE: Record<ConnectorState, BadgeTone> = {
   ready: 'success',
@@ -44,7 +45,7 @@ export default function ConnectorPage({ host, connector: id }: { host: string; c
   const connectors = useMemo(() => (state?.records ?? []).map((one) => one.record), [state]);
 
   if (error !== null) return <PageAlert tone="danger" title={t('connectors/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('connectors/notices/reading')} />;
+  if (state === undefined) return <PageSpinner label={t('connectors/notices/reading')} />;
   const row = connectors.find((one) => one.id === id);
   if (row === undefined) return <PageAlert tone="warning" message={t('connectors/page/gone')} />;
   const adapter = adapters?.records.find((one) => one.id === row.adapter)?.record;

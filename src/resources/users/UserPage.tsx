@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Spinner, Text } from '@softov/scena/ui';
+import { Alert, Button, Text } from '@softov/scena/ui';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
@@ -21,6 +21,7 @@ import { servesTokens } from '../../bridges/tokens.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 const usersReducer = peopleReducer('users');
 const rolesReducer = peopleReducer('roles');
@@ -49,7 +50,7 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
   const [keysRefused, setKeysRefused] = useState(false);
 
   if (users.error !== null) return <PageAlert tone="danger" title={t('users/notices/none')} message={users.error} />;
-  if (users.state === undefined) return <Spinner label={t('users/notices/reading')} />;
+  if (users.state === undefined) return <PageSpinner label={t('users/notices/reading')} />;
   const record = fresh ? undefined : users.state.records.find((one) => one.id === id)?.record;
   if (!fresh && record === undefined) return <PageAlert tone="warning" message={t('users/user/gone')} />;
 

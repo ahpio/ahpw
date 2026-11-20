@@ -1,6 +1,6 @@
 import { useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Spinner, Text } from '@softov/scena/ui';
+import { Alert, Button, Text } from '@softov/scena/ui';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { useHostNames, useShownHosts } from '../../bridges/hosts.js';
@@ -14,6 +14,7 @@ import { Bood } from './Bood.js';
 import { BOT_PROVIDER, BOTS, BOTS_SCHEME, botsIn, botsReducer, editBot, makeBot, type BotsState } from './catalogue.js';
 import { draftOf, recordBody, renamedFor, type BotDraft } from './draft.js';
 import { BOT_BODIES, COLOR_HEX, knowsBody, slugOf } from './look.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 /** How many slugs a new bot tries, since a host never gives a deleted bot's slug again. */
 const SLUG_TRIES = 5;
@@ -44,7 +45,7 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
   const [failure, setFailure] = useState<string | null>(null);
 
   if (error !== null) return <PageAlert tone="danger" title={t('bots/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('bots/notices/reading')} />;
+  if (state === undefined) return <PageSpinner label={t('bots/notices/reading')} />;
   const bot = fresh ? undefined : botsIn(state).find((one) => one.id === slug);
   if (!fresh && bot === undefined) return <PageAlert tone="warning" message={t('bots/notices/gone')} />;
 

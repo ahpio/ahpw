@@ -1,7 +1,7 @@
 import { useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { getLocale } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, ContextMenu, Spinner, Text } from '@softov/scena/ui';
+import { Button, ContextMenu, Text } from '@softov/scena/ui';
 import {
   automationReducer,
   type AgentInfo,
@@ -27,6 +27,7 @@ import { NEW_AUTOMATION_TAB } from './state.js';
 import { SettingsBox } from './SettingsBox.js';
 import { useSessionSettings } from './session-settings.js';
 import { Section } from '../../shell/view/Section.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 /** Schedules most people want, so a cron expression is something to read rather than write. */
 const PRESETS: { key: string; expression: string }[] = [
@@ -210,7 +211,7 @@ export default function NewAutomationPage({ host: opened }: { host: string }): R
   const caps = useStore<AutomationCapabilities | null>(ahpPaths(host).automationCaps);
 
   if (error !== null) return <PageAlert tone="danger" title={t('automations/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('automations/notices/reading')} />;
+  if (state === undefined) return <PageSpinner label={t('automations/notices/reading')} />;
   if (caps?.create === undefined) return <PageAlert tone="warning" message={t('automations/edit/noCreate')} />;
 
   return (

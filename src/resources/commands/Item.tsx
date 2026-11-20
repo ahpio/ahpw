@@ -6,6 +6,7 @@ import { itemActionsOf, itemCommandsOf, keyOf, keyValuesOf, removalQuestion, rol
 import type { ProgramManifest } from '../manifest/types.js';
 import { runItemAction } from './Items.js';
 import Result from './Result.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 /** A field's value as a line of text. */
 const words = (value: unknown): string => (value === null || value === undefined ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value));
@@ -31,7 +32,7 @@ export default function ItemPage({ list, kind, title }: { list?: string; kind?: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [get?.id, getKey]);
 
-  if (manifest === undefined) return <Spinner label={t('commands/readingManifest')} />;
+  if (manifest === undefined) return <PageSpinner label={t('commands/readingManifest')} />;
   if (row === undefined) {
     return listed?.state === 'running' ? <Spinner label={t('commands/readingList')} /> : <Alert tone="warning" message={t('commands/item/gone', { kind: kind ?? '', title: title ?? '' })} />;
   }

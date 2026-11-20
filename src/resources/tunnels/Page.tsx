@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Badge, DetailList, Spinner, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, Badge, DetailList, Text, type DetailItem } from '@softov/scena/ui';
 import { useChannel } from '../../bridges/channel.js';
 import { isSecretRef } from '../../bridges/connectors.js';
 import { rowOperations } from '../../bridges/operations.js';
@@ -13,6 +13,7 @@ import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { EMOJIcon } from '../emojis.js';
 import { DangerOperations, OperationButtons } from '../operations/Buttons.js';
 import { factsOf, kindSchema, settingRows, statusKey, TUNNELS, tunnelsReducer, type TunnelFacts, type TunnelsState } from './tunnels.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 const TONE: Record<ReturnType<typeof statusKey>, Tone> = { busy: 'info', running: 'success', error: 'danger', stopped: 'default', disabled: 'default' };
@@ -51,7 +52,7 @@ export default function TunnelPage({ host, tunnel: id }: { host: string; tunnel?
   const entry = state?.records.find((one) => one.id === id);
 
   if (error !== null) return <PageAlert tone="danger" title={t('tunnels/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('tunnels/notices/reading')} />;
+  if (state === undefined) return <PageSpinner label={t('tunnels/notices/reading')} />;
   if (entry === undefined || id === undefined) return <PageAlert tone="warning" message={t('tunnels/notices/gone')} />;
 
   const facts = factsOf(entry.record);

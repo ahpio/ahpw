@@ -10,6 +10,7 @@ import Result from './Result.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { dateFormat } from '../../i18n/locales.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 /** What a command's effect looks like on its badge. */
 const EFFECT_TONE: Record<string, 'info' | 'success' | 'warning' | 'danger'> = { read: 'info', add: 'success', change: 'warning', remove: 'danger' };
@@ -41,7 +42,7 @@ export default function CommandPage({ commandId, initial }: { commandId?: string
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [command?.id]);
 
-  if (manifest === undefined) return <Spinner label={t('commands/readingManifest')} />;
+  if (manifest === undefined) return <PageSpinner label={t('commands/readingManifest')} />;
   if (command === undefined) return <PageAlert tone="warning" message={t('commands/page/noCommand', { id: commandId ?? '' })} />;
 
   const reads = command.effect === undefined ? command.http.method === 'GET' : command.effect === 'read';

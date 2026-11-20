@@ -20,6 +20,7 @@ import { teamTab } from './state.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 type Kind = 'teams' | 'projects';
 const reducers = { teams: peopleReducer('teams'), projects: peopleReducer('projects') };
@@ -47,7 +48,7 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
   const [failure, setFailure] = useState<string | null>(null);
 
   if (named.error !== null) return <PageAlert tone="danger" title={t('teams/notices/none')} message={named.error} />;
-  if (named.state === undefined) return <Spinner label={t('teams/notices/reading')} />;
+  if (named.state === undefined) return <PageSpinner label={t('teams/notices/reading')} />;
   const record = fresh ? undefined : named.state.records.find((one) => one.id === id)?.record;
   if (!fresh && record === undefined) return <PageAlert tone="warning" message={t(`teams/${word}/gone`)} />;
 

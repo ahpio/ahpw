@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Badge, Button, DetailList, Progress, Spinner, Text, type DetailItem } from '@softov/scena/ui';
+import { Badge, Button, DetailList, Progress, Text, type DetailItem } from '@softov/scena/ui';
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
@@ -15,6 +15,7 @@ import { sizeWords, usageOf, type Usage } from './usage.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 const TONE: Record<Standing, Tone> = { running: 'success', problem: 'danger', stopped: 'default' };
@@ -95,7 +96,7 @@ export default function ComputerPage({ host, machine: id }: { host: string; mach
   }, [host, id, running, offers]);
 
   if (error !== null) return <PageAlert tone="danger" title={t('computers/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('computers/notices/reading')} />;
+  if (state === undefined) return <PageSpinner label={t('computers/notices/reading')} />;
   if (entry === undefined || id === undefined) return <PageAlert tone="warning" message={t('computers/notices/gone')} />;
 
   const facts = factsOf(entry.record);

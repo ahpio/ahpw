@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Chip, Spinner, Text } from '@softov/scena/ui';
+import { Alert, Button, Chip, Text } from '@softov/scena/ui';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -15,6 +15,7 @@ import { RoleGrants } from './RoleGrants.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { DangerZone } from '../../shell/controls/DangerZone.js';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 const rolesReducer = peopleReducer('roles');
 
@@ -38,7 +39,7 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
   const catalog = useMemo(() => grantCatalog(root.state?._meta), [root.state?._meta]);
 
   if (roles.error !== null) return <PageAlert tone="danger" title={t('users/notices/none')} message={roles.error} />;
-  if (roles.state === undefined) return <Spinner label={t('users/notices/reading')} />;
+  if (roles.state === undefined) return <PageSpinner label={t('users/notices/reading')} />;
   const written = fresh ? undefined : roles.state.records.find((one) => one.id === id)?.record;
   // A built-in the file does not replace; saving it writes a role of its name, which then replaces it.
   const builtIn = !fresh && written === undefined && Object.hasOwn(BUILT_IN_ROLES, id) ? BUILT_IN_ROLES[id] : undefined;

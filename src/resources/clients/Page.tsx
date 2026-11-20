@@ -1,7 +1,7 @@
 import { useRef, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Badge, DetailList, Spinner, Text, type DetailItem } from '@softov/scena/ui';
+import { Badge, DetailList, Text, type DetailItem } from '@softov/scena/ui';
 import { useChannel } from '../../bridges/channel.js';
 import type { ChatSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths, channelPath, titlePath, type HostFacts } from '../../bridges/data.js';
@@ -23,6 +23,7 @@ import {
 } from './rows.js';
 import { describeChannels } from './channels.js';
 import './channels.css';
+import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
 const when = dateFormat({ dateStyle: 'medium', timeStyle: 'medium' });
 
@@ -190,7 +191,7 @@ export default function ClientPage({ host, client: id }: { host: string; client?
   const rate = useRate(facts?.traffic, now);
 
   if (error !== null) return <PageAlert tone="danger" title={t('clients/notices/none')} message={error} />;
-  if (state === undefined) return <Spinner label={t('clients/notices/reading')} />;
+  if (state === undefined) return <PageSpinner label={t('clients/notices/reading')} />;
   if (entry === undefined || facts === undefined || id === undefined) return <PageAlert tone="warning" message={t('clients/notices/gone')} />;
 
   const own = mine !== undefined && facts.clientId === mine;
