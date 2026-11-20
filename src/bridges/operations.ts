@@ -97,6 +97,22 @@ export async function askFirst(operation: Operation): Promise<boolean> {
   return await confirm({ title: labelOf(operation), body: question, confirmLabel: labelOf(operation), tone: 'danger' });
 }
 
+/**
+ * Ask before an operation that runs at once, with no form: the operation's own
+ * question when it has one, else its label and the record's name as the
+ * question and its description as the answer's note.
+ */
+export async function askBefore(operation: Operation, name: string | undefined): Promise<boolean> {
+  if (textOf(operation.confirmation) !== '') return await askFirst(operation);
+  const label = labelOf(operation);
+  return await confirm({
+    title: name === undefined ? translate('operations/askList', { label }) : translate('operations/ask', { label, name }),
+    body: operation.description ?? '',
+    confirmLabel: label,
+    tone: 'default',
+  });
+}
+
 /** Say a refusal of an operation, with the host's own words. */
 export function sayRefused(operation: Operation, error: unknown): void {
   failed(translate('operations/failed', { label: labelOf(operation) }), error);

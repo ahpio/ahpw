@@ -3266,7 +3266,9 @@
   "operations": {
     "failed": "Couldn't run {label}",
     "kept": "Kept. Leave empty to keep it.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "ask": "{label} {name}?",
+    "askList": "{label}?"
   },
   "tunnels": {
     "commands": {

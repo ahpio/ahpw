@@ -3266,7 +3266,9 @@
   "operations": {
     "failed": "No se pudo ejecutar {label}",
     "kept": "Guardado. Déjalo vacío para conservarlo.",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "ask": "¿{label} {name}?",
+    "askList": "¿{label}?"
   },
   "tunnels": {
     "commands": {
