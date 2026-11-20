@@ -132,12 +132,21 @@ export function HostFolders({ host, named, selected, onSelected, rooted }: {
   const held = rooted === undefined ? kept : own;
   const expanded = useMemo(() => new Set(held ?? []), [held]);
 
-  /** Read a folder; `quiet` keeps what it shows until the answer comes. */
-  const load = useCallback((uri: string, quiet = false): void => {
+  /** The folders a read is on its way for. */
+  const reading = useRef(new Set<string>());
+
+  /**
+   * Read a folder; `quiet` keeps what it shows until the answer comes.
+   * A folder already being read is not asked for again, unless `again`.
+   */
+  const load = useCallback((uri: string, quiet = false, again = false): void => {
+    if (!again && reading.current.has(uri)) return;
+    reading.current.add(uri);
     if (!quiet) setBranches((now) => new Map(now).set(uri, 'loading'));
     hostBridge(host).request('resourceList', { channel: ROOT, uri } as never)
       .then((found) => setBranches((now) => new Map(now).set(uri, orderEntries((found as { entries: DirectoryEntry[] }).entries))))
-      .catch(() => setBranches((now) => new Map(now).set(uri, 'failed')));
+      .catch(() => setBranches((now) => new Map(now).set(uri, 'failed')))
+      .finally(() => reading.current.delete(uri));
   }, [host]);
 
   // Each open folder is read once it is open, the ones left open when the tree is drawn again among them.
@@ -182,15 +191,17 @@ export function HostFolders({ host, named, selected, onSelected, rooted }: {
   // A folder a menu changed on this host is read again, when it has been read at all.
   useEffect(() => {
     if (stale?.host !== host) return;
-    for (const uri of stale.uris) if (branches.has(uri)) load(uri, true);
+    for (const uri of stale.uris) if (branches.has(uri)) load(uri, true, true);
   }, [stale]);
 
-  // The header's Refresh: every open folder is read again.
+  // The header's Refresh: every open folder is read again. The count the tree is drawn with is no Refresh.
   const reloads = useStore<number>(RELOAD_FOLDERS);
+  const reloaded = useRef(reloads);
   useEffect(() => {
-    if (reloads === undefined) return;
+    if (reloads === reloaded.current) return;
+    reloaded.current = reloads;
     setBranches(new Map());
-    for (const uri of expanded) if (uri !== HOST_NODE) load(uri);
+    for (const uri of expanded) if (uri !== HOST_NODE) load(uri, false, true);
   }, [reloads]);
 
   /** What a row that is no file or folder offers: this host's reload and Add folder. */
