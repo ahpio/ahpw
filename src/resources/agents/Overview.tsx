@@ -1,10 +1,11 @@
 import type { ReactElement } from 'react';
-import { useI18n, useStore } from '@softov/scena/react';
+import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { DetailList, Text, type DetailItem } from '@softov/scena/ui';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import type { AgentInfo, SessionSummary } from '@microsoft/agent-host-protocol';
 import type { EngineRow, AgentRow } from '../../bridges/agents.js';
 import { ahpPaths } from '../../bridges/data.js';
+import { PLUGINS } from '../../bridges/plugins.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
@@ -22,6 +23,7 @@ import { capabilitiesOf, signInOf } from './words.js';
  * facts only.
  */
 export function Overview({ host, info, record, engine }: { host: string; info?: AgentInfo; record?: AgentRow; engine?: EngineRow }): ReactElement {
+  const scena = useScena();
   const { t } = useI18n();
   const sessions = useStore<SessionSummary[]>(ahpPaths(host).sessions) ?? [];
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
@@ -37,11 +39,20 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
     ...(record === undefined ? [] : [
       { label: t('agents/page/facts/engine'), value: engine?.title ?? record.engine },
       { label: t('agents/page/facts/owner'), value: ownerWord(t, record.owner, meOn(offers)) },
-      ...(engine === undefined ? [] : [{ label: t('agents/page/facts/plugin'), value: <code>{engine.plugin}</code> }]),
+      // A person who may read the host's plugins opens the plugin's page from here.
+      ...(engine === undefined ? [] : [{
+        label: t('agents/page/facts/plugin'),
+        value: offers.channels.includes(PLUGINS.scheme)
+          ? <button type="button" className="web-link" title={t('agents/page/openPlugin', { id: engine.plugin })} onClick={() => void scena.commands.execute('ahp.openPlugin', { host, id: engine.plugin })}><code>{engine.plugin}</code></button>
+          : <code>{engine.plugin}</code>,
+      }]),
       { label: t('agents/page/facts/state'), value: t(`connectors/states/${record.state}`) },
     ]),
     ...(info === undefined ? [] : [
-      { label: t('agents/page/facts/sessions'), value: String(count) },
+      {
+        label: t('agents/page/facts/sessions'),
+        value: <button type="button" className="web-link" title={t('agents/page/showSessions')} onClick={() => void scena.commands.execute('ahp.showSessionsOf', { provider: id })}>{String(count)}</button>,
+      },
       { label: t('agents/page/facts/can'), value: capabilities.length === 0 ? t('agents/page/oneChat') : capabilities.join('; ') },
       ...(missing.length === 0 ? [] : [{ label: t('agents/page/customizations'), value: t('agents/customizations/noneOf', { kinds: missing.join(', ') }) }]),
     ]),

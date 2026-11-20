@@ -1424,7 +1424,9 @@
         "disabled": "Disabled. Its sessions keep their history, and the host doesn't open or serve it until it is enabled."
       },
       "noModelMatch": "No model matches.",
-      "modelsTab": "Models {count}"
+      "modelsTab": "Models {count}",
+      "openPlugin": "Open {id}",
+      "showSessions": "Show the sessions of this agent"
     },
     "actions": {
       "check": "Check",
@@ -1439,7 +1441,13 @@
       "enableFailed": "Couldn't enable {name}",
       "pauseFailed": "Couldn't pause {name}",
       "disableFailed": "Couldn't disable {name}",
-      "checkNow": "Check now"
+      "checkNow": "Check now",
+      "enableTitle": "Enable {name}?",
+      "enableBody": "The host opens it again, and it takes new sessions and messages.",
+      "pauseTitle": "Pause {name}?",
+      "pauseBody": "It takes no new session or message until it is enabled. Its sessions keep their history.",
+      "disableTitle": "Disable {name}?",
+      "disableBody": "The host doesn't open or serve it until it is enabled. Its sessions keep their history."
     },
     "form": {
       "newTitle": "New agent",
@@ -1833,7 +1841,8 @@
       "pin": "Pin",
       "unpin": "Unpin",
       "show": "Show sessions",
-      "noneShown": "No sessions match. Try another option in Show sessions."
+      "noneShown": "No sessions match. Try another option in Show sessions or Agent.",
+      "agent": "Agent"
     },
     "footer": {
       "window": "The model's context window: {window} tokens",
@@ -2178,6 +2187,9 @@
       "title": "References",
       "hint": "What the session points you at",
       "remove": "Remove Reference {name} from Session"
+    },
+    "agent": {
+      "all": "All agents"
     }
   },
   "host": {
@@ -2975,7 +2987,13 @@
       "reimportFailed": "Couldn't reimport {id}",
       "viewFailed": "{id} couldn't do that",
       "apply": "Apply configuration",
-      "applyFailed": "Couldn't apply the configuration"
+      "applyFailed": "Couldn't apply the configuration",
+      "enableTitle": "Enable {id}?",
+      "enableBody": "The host loads it and starts what it provides.",
+      "disableTitle": "Disable {id}?",
+      "disableBody": "The host unloads it, and what it provides stops until it is enabled.",
+      "reimportTitle": "Reimport {id}?",
+      "reimportBody": "The host loads its code again."
     },
     "new": {
       "title": "New plugin",
@@ -3082,7 +3100,10 @@
       "homepage": "Homepage",
       "issues": "Issues",
       "marketplace": "Marketplace",
-      "noSettings": "It has no settings."
+      "noSettings": "It has no settings.",
+      "installTitle": "Install {title}?",
+      "installVersionTitle": "Install {title} {version}?",
+      "installBody": "The host downloads it, adds it to the configuration and loads it."
     }
   },
   "connectors": {

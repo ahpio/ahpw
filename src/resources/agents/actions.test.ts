@@ -1,7 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { AGENTS, type AgentRow, type AgentState } from '../../bridges/agents.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
-import { agentModes, mayCheck, mayRemove } from './actions.js';
+import { agentModes, mayCheck, mayRemove, setMode } from './actions.js';
+
+const { confirm, setAgentMode } = vi.hoisted(() => ({ confirm: vi.fn(), setAgentMode: vi.fn() }));
+
+vi.mock('../../shell/notify/index.js', () => ({ confirm, failed: vi.fn() }));
+vi.mock('../../bridges/agents.js', async (actual) => ({ ...(await actual<object>()), setAgentMode }));
 
 const row = (state: AgentState): AgentRow => ({ id: 'claude', engine: 'claude', owner: 'host', name: 'Claude', config: {}, state });
 const offering = (...methods: string[]): Offers => ({ ...NO_OFFERS, methods });
@@ -62,5 +67,24 @@ describe('mayRemove', () => {
     expect(mayRemove(all, null)).toBe(true);
     expect(mayRemove(all, ['agent:put'])).toBe(false);
     expect(mayRemove(offering(AGENTS.check), null)).toBe(false);
+  });
+});
+
+describe('setMode', () => {
+  it('sends nothing on a no', async () => {
+    confirm.mockReset().mockResolvedValue(false);
+    setAgentMode.mockReset();
+    await setMode('h', row('ready'), 'pause');
+    expect(setAgentMode).not.toHaveBeenCalled();
+  });
+
+  it('asks in the danger tone to pause or disable, the default tone to enable, and sends the mode on a yes', async () => {
+    confirm.mockReset().mockResolvedValue(true);
+    setAgentMode.mockReset().mockResolvedValue(row('paused'));
+    await setMode('h', row('ready'), 'pause');
+    await setMode('h', row('ready'), 'disable');
+    await setMode('h', row('paused'), 'enable');
+    expect(confirm.mock.calls.map(([options]) => (options as { tone: string }).tone)).toEqual(['danger', 'danger', 'default']);
+    expect(setAgentMode.mock.calls).toEqual([['h', 'claude', 'pause'], ['h', 'claude', 'disable'], ['h', 'claude', 'enable']]);
   });
 });

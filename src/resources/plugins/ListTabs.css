@@ -1,35 +1,32 @@
-/* The page the list tabs are on, listed or installed, whose width puts the facts column beside the panel or under it. */
-.web-listed,
-.web-plugin {
-  container: listed-page / inline-size;
-}
-
-/* A listed plugin's tab: the panel, and beside it the facts column, which goes under the panel on a page under 600 px. */
-.web-listed__body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 200px;
-  gap: var(--oo-spacing-lg, 24px);
-  align-items: start;
-  padding-top: var(--oo-spacing-md);
-}
-
-@container listed-page (width < 600px) {
-  .web-listed__body {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 .web-listed__main {
   display: flex;
   flex-direction: column;
   gap: var(--oo-spacing-md);
+  padding-top: var(--oo-spacing-md);
   min-width: 0;
 }
 
-.web-listed__facts {
+/* A plugin's facts at the top of its Overview: its parts side by side, wrapping under each other on a narrow page, over a line before the README. */
+.web-plugin-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--oo-spacing-md) var(--oo-spacing-lg, 24px);
+  padding-bottom: var(--oo-spacing-md);
+  border-bottom: 1px solid var(--oo-color-border);
+}
+
+/* One part of the facts: its heading over its facts. */
+.web-plugin-facts__part {
   display: flex;
   flex-direction: column;
-  gap: var(--oo-spacing-md);
+  gap: var(--oo-spacing-xs, 4px);
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* A part with a list of facts takes the room left, so a path has a line of its own. */
+.web-plugin-facts__part--wide {
+  flex: 1 1 320px;
 }
 
 .web-listed__resources {
@@ -47,14 +44,8 @@
   font-size: var(--oo-font-size-sm);
 }
 
-/* One section of the facts column: its heading over its facts. */
-.web-listed__section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--oo-spacing-xs, 4px);
-}
 
-/* A path or a URL in the facts column, broken at any character so it fills the column's lines. */
+/* A path or a URL in the facts, broken at any character so it fills its lines. */
 .web-listed__path {
   word-break: break-all;
   font-size: var(--oo-font-size-sm);

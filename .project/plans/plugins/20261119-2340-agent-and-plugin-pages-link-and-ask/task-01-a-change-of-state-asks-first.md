@@ -1,6 +1,6 @@
 ---
 title: A change of state asks first
-status: todo
+status: doing
 depends: []
 layer: "resources/agents, resources/plugins"
 refs:
@@ -48,3 +48,7 @@ They ask from the page and from the explorer menu or row, because the question i
 
 ## Resume
 
+Built on 2026-11-19 and waiting for review.
+`setMode`, `togglePlugin`, `reloadOne` and `installListed` ask with `confirm`, so the page buttons, the explorer menus and the sidebar's Install ask.
+`agents/actions.test.ts` and the new `plugins/actions.test.ts` hold the *Yes* and *No* cases.
+The plugin question bodies say only what the host does; the plan did not check what a reimport restarts.

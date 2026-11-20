@@ -8,9 +8,10 @@ import type { SessionSummary } from '@microsoft/agent-host-protocol';
 import { hostBridge, titlePath, windowHost } from '../../bridges/data.js';
 import { HOST_FILTER_ACTION, shownHosts } from '../../bridges/hosts.js';
 import { embedMode } from '../../shell/embed/index.js';
-import { ACTIVE_SESSION, SESSIONS_ARCHIVED, SESSIONS_GROUPING, SESSIONS_RELOADING, SESSIONS_SHOW, SESSIONS_SORTED, SESSIONS_SORTING, SESSIONS_THEN_BY, type ActiveSession } from './state.js';
+import { ACTIVE_SESSION, SESSIONS_AGENT, SESSIONS_ARCHIVED, SESSIONS_GROUPING, SESSIONS_RELOADING, SESSIONS_SHOW, SESSIONS_SORTED, SESSIONS_SORTING, SESSIONS_THEN_BY, type ActiveSession } from './state.js';
 import { SESSION_SHOWS } from './status.js';
 import { registerChoice } from '../../shell/explorer/choice.js';
+import { AGENT_SLOT, registerAgentChoice, setAgentChoice } from './agent-choice.js';
 import { DEFAULT_SORTING, isDefaultSorting, readSorting, SORT_BYS, writeSorting, type Sorting } from './sorting.js';
 import { readPins, SESSIONS_PINS } from './pins.js';
 import { GROUPINGS, groupingLabel, readGrouping, readThenBy, writeGrouping, writeThenBy, type Grouping } from './grouping.js';
@@ -74,6 +75,18 @@ export function registerSessions(scena: Scena): Disposable {
   const sortingNow = (): Sorting => scena.store.get<Sorting>(SESSIONS_SORTING) ?? DEFAULT_SORTING;
   return combineDisposables(
     registerChoice(scena, { resource: 'sessions', name: 'show', slot: SHOW_SLOT, path: SESSIONS_SHOW, values: SESSION_SHOWS, usual: 'all', key: 'ahpd-web.session-show' }),
+    registerAgentChoice(scena),
+    // An agent page's session count: the list, with only that agent's sessions.
+    scena.commands.register({
+      id: 'ahp.showSessionsOf',
+      title: () => translate('sessions/commands/showSessions'),
+      run: (ctx, args) => {
+        const provider = (args as { provider?: string } | undefined)?.provider;
+        if (provider === undefined) return;
+        setAgentChoice(ctx.store, provider);
+        return ctx.commands.execute('sidebar.activate', { section: SESSIONS_SECTION });
+      },
+    }),
     registerComposerCommands(scena),
     watchSessions(scena),
     followFocus(scena),
@@ -88,6 +101,7 @@ export function registerSessions(scena: Scena): Disposable {
           { command: 'ahp.newSession', icon: '+', label: { t: 'sessions/commands/newSession' } },
           { command: 'sessions.reload', icon: EMOJIcon.reload, label: { t: 'sessions/explorer/reload' }, busy: `${SESSIONS_RELOADING} == true` },
           { command: 'sessions.show', menu: SHOW_SLOT, icon: EMOJIcon.filter, label: { t: 'sessions/explorer/show' }, active: `${SESSIONS_SHOW} != null` },
+          { command: 'sessions.agent', menu: AGENT_SLOT, icon: EMOJIcon.agents, label: { t: 'sessions/explorer/agent' }, active: `${SESSIONS_AGENT} != null` },
           { command: 'sessions.toggleArchived', icon: EMOJIcon.archived, label: { t: 'sessions/explorer/showArchived' }, active: `${SESSIONS_ARCHIVED} == true` },
           { command: 'sessions.group', menu: GROUPING_SLOT, icon: EMOJIcon.group, label: { t: 'sessions/explorer/group' }, active: `${SESSIONS_GROUPING} != null` },
           { command: 'sessions.sort', menu: SORTING_SLOT, icon: EMOJIcon.sort, label: { t: 'sessions/explorer/sort' }, active: `${SESSIONS_SORTED} == true` },

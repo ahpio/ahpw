@@ -27,5 +27,8 @@ export const SESSIONS_SORTED = '$/ahp/sessions/sorted' as BindingPath;
 /** Which sessions the list shows, by read or at work; null while it shows them all, so its button is pressed only when it does not. */
 export const SESSIONS_SHOW = '$/ahp/sessions/show' as BindingPath;
 
+/** The provider whose sessions the list shows; null while it shows every agent's, so its button is pressed only when it does not. */
+export const SESSIONS_AGENT = '$/ahp/sessions/agent' as BindingPath;
+
 /** True while the list is read again; the header's Reload turns. */
 export const SESSIONS_RELOADING = '$/ahp/sessions/reloading' as BindingPath;

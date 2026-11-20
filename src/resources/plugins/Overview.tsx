@@ -13,7 +13,7 @@ import { ProvidesList } from './ProvidesList.js';
 /** A state that is a problem, and how loud it is. */
 const PROBLEM_TONE: Partial<Record<PluginRow['state'], 'danger' | 'warning'>> = { error: 'danger', missing: 'danger', incompatible: 'warning', unconfigured: 'warning' };
 
-/** Where an installed plugin is and whether it runs, as the *Installation* section of its facts column names it. */
+/** Where an installed plugin is and whether it runs, as the *Installation* part of its facts names it. */
 export function installationFacts(host: string, row: PluginRow, t: (key: string) => string): DetailItem[] {
   return [
     ...(embedMode() === 'multi' ? [{ label: t('common/host'), value: <HostTag host={host} /> }] : []),
