@@ -1,12 +1,12 @@
 /**
  * Running a channel's operations from a list, a page or a menu: an operation
- * that takes input opens its form in a dialog over the page; any other asks the
- * host's confirmation, when it has one, and runs.
+ * that takes input opens its form in a dialog over the page; any other asks
+ * first, with the host's question when it has one, and runs.
  */
 
 import { combineDisposables, translate } from '@softov/scena';
 import type { BindingPath, Disposable, PickerAction, Scena } from '@softov/scena/types';
-import { askFirst, invokeOperation, labelOf, madeId, sayRefused, type Operation } from '../../bridges/operations.js';
+import { askBefore, invokeOperation, labelOf, madeId, sayRefused, type Operation } from '../../bridges/operations.js';
 
 type Bag = Record<string, unknown>;
 
@@ -37,13 +37,23 @@ export interface OpenDialog extends OperationPlace {
   operation: Operation;
 }
 
+/** The name a question calls the record by: its title or name, else its id; nothing for a list operation. */
+export function nameOf(place: OperationPlace): string | undefined {
+  if (place.target === undefined) return undefined;
+  for (const key of ['title', 'name', 'displayName']) {
+    const value = place.held?.[key];
+    if (typeof value === 'string' && value !== '') return value;
+  }
+  return place.target;
+}
+
 /** Run one operation: open its form when it takes input, else ask and invoke. */
 export async function runOperation(scena: Scena, place: OperationPlace, operation: Operation): Promise<void> {
   if (operation.input !== undefined) {
     scena.store.set(OPERATION_DIALOG, { ...place, operation } satisfies OpenDialog);
     return;
   }
-  if (!(await askFirst(operation))) return;
+  if (!(await askBefore(operation, nameOf(place)))) return;
   try {
     openMade(scena, place, await invokeOperation(place.host, place.channel, operation, place.target));
   } catch (error) {
