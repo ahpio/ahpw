@@ -106,8 +106,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       '@softov/scena':
-        specifier: ^0.8.2
-        version: 0.8.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: ^0.9.0
+        version: 0.9.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.5
@@ -1097,8 +1097,8 @@ packages:
   '@shikijs/vscode-textmate@10.1.0':
     resolution: {integrity: sha512-cVBuhDQjBZaNMTwBquYfPydrUP+E3hE6oYGasx8h6ZrODIM7/r+gxLDXdd66oszbrggZHEntdE6j+5gYIVyMWQ==}
 
-  '@softov/scena@0.8.2':
-    resolution: {integrity: sha512-kn5bVccFYDQp1DFcAHpK8F4pf9GQF8lVleq5jiGGWBjyktnka3NUua0QdosVDa71zpUC4atXI8Ui6PfmdQoBOA==}
+  '@softov/scena@0.9.0':
+    resolution: {integrity: sha512-CHi7Ryj6d2Q7DAOmPP6D/+GBr7Cnl/7SuJhmP4rLZ2jjoEG0tL4qaqES0xiodFFl6bg//V9ASsefgDun4hx7fQ==}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
@@ -2856,7 +2856,7 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.1.0': {}
 
-  '@softov/scena@0.8.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@softov/scena@0.9.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     optionalDependencies:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
