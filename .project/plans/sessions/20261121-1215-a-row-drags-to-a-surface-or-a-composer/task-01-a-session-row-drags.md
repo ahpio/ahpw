@@ -1,6 +1,6 @@
 ---
 title: A session row drags
-status: todo
+status: done
 depends: []
 layer: "shell explorer and sessions"
 refs:
@@ -17,7 +17,7 @@ A row of the session list drags onto any surface, where the session opens or its
 
 - `UPDATE: src/shell/explorer/ExplorerList.tsx:69-84` - take `onRowDragStart(event, key)`, and make the rows draggable when it is set.
 - `UPDATE: src/resources/sessions/Explorer.tsx:68-71` - start scena's open drag for a row.
-- `CREATE: src/shell/explorer/ExplorerList.test.tsx` - a row with the handler drags.
+- `UPDATE: src/shell/explorer/ExplorerList.test.ts` - a row with the handler drags, beside the `shownRows` cases.
 
 ## Steps
 
@@ -28,7 +28,12 @@ A row of the session list drags onto any surface, where the session opens or its
 
 ## Validation
 
-- `src/shell/explorer/ExplorerList.test.tsx`: a row's drag start calls the handler with its key; with no handler, a row is not draggable.
+- `src/shell/explorer/ExplorerList.test.ts`: a row's drag start calls the handler with its key; with no handler, a row is not draggable.
 - `npx vitest run` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 4. The handler takes the row, so the caller reads its key.
+- The title is a binding to the session's title path, as `ahp.openSession` gives it.
+- The test is `.ts` with static markup, as ahpw's other component tests are; it checks that a row is draggable only with the handler.
+- `tsc -b` and the tests pass.

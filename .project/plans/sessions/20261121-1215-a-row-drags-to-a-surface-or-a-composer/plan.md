@@ -1,7 +1,7 @@
 ---
 title: A session row drags to a surface or a composer
 domain: sessions
-status: planned
+status: active
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -76,8 +76,8 @@ drop on a composer -> useDropArea -> a session: chatAttachment; a file tab: reso
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - a session row drags](task-01-a-session-row-drags.md) | todo | - |
-| [02 - the composer takes a session or a file tab](task-02-the-composer-takes-a-tab.md) | todo | 01 |
+| [01 - a session row drags](task-01-a-session-row-drags.md) | done | - |
+| [02 - the composer takes a session or a file tab](task-02-the-composer-takes-a-tab.md) | doing | 01 |
 
 ## Risks and tradeoffs
 
@@ -87,8 +87,8 @@ drop on a composer -> useDropArea -> a session: chatAttachment; a file tab: reso
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** merge [#114](https://github.com/ahpio/ahpw/pull/114), then [task-01-a-session-row-drags.md](task-01-a-session-row-drags.md).
+- **Done so far:** task 01 done 2026-11-21. Task 02 started 2026-11-21.
+- **Next action:** [task-02-the-composer-takes-a-tab.md](task-02-the-composer-takes-a-tab.md).
 - **Open questions:** none.
 - **Watch out for:** a session's summary is needed for `chatAttachment`; read it from the host's session list in the store.
 

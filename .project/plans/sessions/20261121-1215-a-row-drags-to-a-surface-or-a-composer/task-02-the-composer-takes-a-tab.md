@@ -1,6 +1,6 @@
 ---
 title: The composer takes a session or a file tab
-status: todo
+status: doing
 depends: [task-01-a-session-row-drags.md]
 layer: "sessions"
 refs:
