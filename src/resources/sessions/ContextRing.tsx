@@ -12,7 +12,7 @@ export function ContextRing({ fraction, text, onOpen }: { fraction: number; text
   const { t } = useI18n();
   return (
     <span aria-label={t('sessions/usage/ring', { text, percent: Math.round(fraction * 100) })} role="img">
-      <Button variant="borderless" size="sm" title={text} disabled={onOpen === undefined} {...(onOpen === undefined ? {} : { onClick: onOpen })}>
+      <Button variant="ghost" size="sm" title={text} disabled={onOpen === undefined} {...(onOpen === undefined ? {} : { onClick: onOpen })}>
         <Donut size={18} thickness={3} slices={[{ value: fraction, color: ringColor(fraction) }, { value: 1 - fraction, color: 'transparent' }]} />
       </Button>
     </span>
