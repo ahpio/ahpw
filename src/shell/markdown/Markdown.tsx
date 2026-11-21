@@ -1,7 +1,13 @@
-import { useCallback, type ReactElement, type ReactNode } from 'react';
+import { useCallback, useRef, useState, type PointerEvent, type ReactElement, type ReactNode } from 'react';
 import { Markdown as ScenaMarkdown, type MarkdownBlock, type MarkdownProps } from '@softov/scena/ui';
 import { MermaidDiagram } from './Mermaid.js';
 import { isOpenFence } from './fences.js';
+import { quotesOf } from './quotes.js';
+import { CopyButton } from '../controls/CopyButton.js';
+import './quote-copy.css';
+
+/** The quote the pointer is over: which top-level blockquote it is, where its corner is, and what it holds as markdown. */
+interface Hovered { index: number; top: number; right: number; text: string }
 
 /**
  * scena's Markdown, with ```mermaid fences drawn as diagrams through its
@@ -15,7 +21,27 @@ export function Markdown({ text = '', className, style, image, block }: Markdown
     if (one.kind !== 'code' || one.lang !== 'mermaid') return undefined;
     return <MermaidDiagram source={one.body} closed={!isOpenFence(text, one.body)} />;
   }, [block, text]);
+  const root = useRef<HTMLDivElement>(null);
+  const [over, setOver] = useState<Hovered | null>(null);
+  // A pointer over a quote, or a tap on it for a touch screen, shows the copy icon at its top right corner.
+  const point = (event: PointerEvent<HTMLDivElement>): void => {
+    const box = root.current;
+    const target = event.target as HTMLElement;
+    if (box === null || target.closest('.web-md-quotes__copy') !== null) return;
+    let quote = target.closest('blockquote');
+    while (quote?.parentElement?.closest('blockquote') != null) quote = quote.parentElement.closest('blockquote');
+    if (quote === null || !box.contains(quote)) { setOver(null); return; }
+    const all = Array.from(box.querySelectorAll('blockquote')).filter((one) => one.parentElement?.closest('blockquote') == null);
+    const index = all.indexOf(quote);
+    const mine = quotesOf(text);
+    // The source's own words when the quotes line up with the page; else the words as the page shows them.
+    const said = mine.length === all.length ? mine[index] : undefined;
+    const rect = quote.getBoundingClientRect();
+    const frame = box.getBoundingClientRect();
+    setOver({ index, top: rect.top - frame.top + 2, right: frame.right - rect.right + 2, text: said ?? quote.innerText.trim() });
+  };
   return (
+    <div ref={root} className="web-md-quotes" onPointerOver={point} onPointerDown={point} onPointerLeave={() => setOver(null)}>
     <ScenaMarkdown
       text={text}
       block={draw}
@@ -23,5 +49,11 @@ export function Markdown({ text = '', className, style, image, block }: Markdown
       {...(style === undefined ? {} : { style })}
       {...(image === undefined ? {} : { image })}
     />
+      {over === null ? null : (
+        <span className="web-md-quotes__copy" style={{ top: over.top, right: over.right }}>
+          <CopyButton text={over.text} icon="⧉" />
+        </span>
+      )}
+    </div>
   );
 }
