@@ -1,10 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createScena } from '@softov/scena/core';
 import { RIGHT_SIDEBAR } from '../../shell/right-sidebar.js';
-import { canvasKey, canvasName, joined } from './canvases.js';
+import { canvasKey, canvasName, canvasUriOf, joined } from './canvases.js';
 import { registerCanvases } from './index.js';
 
 const STATE = { instanceId: 'i', extensionId: 'me.canvas', canvasId: 'board' };
+
+describe('canvasUriOf', () => {
+  it('reads uri, the 1.1.0 name, before url, the 1.0.0 one', () => {
+    expect(canvasUriOf({ ...STATE, uri: 'https://example.com/new', url: 'https://example.com/old' } as never)).toBe('https://example.com/new');
+    expect(canvasUriOf({ ...STATE, url: 'https://example.com/old' })).toBe('https://example.com/old');
+    expect(canvasUriOf(STATE)).toBeUndefined();
+    expect(canvasUriOf(undefined)).toBeUndefined();
+  });
+});
 
 describe('canvasName', () => {
   it('is the title, then the canvas id, then nothing', () => {

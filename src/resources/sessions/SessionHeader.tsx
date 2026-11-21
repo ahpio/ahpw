@@ -10,7 +10,7 @@ import { inFolder } from '../terminals/terminal.js';
 import type { BotMark } from '../bots/chat/mark.js';
 import { viewEntries } from '../../shell/right-sidebar.js';
 import { claimedTerminals, subagentChats, subagentsOf } from './header.js';
-import { canvasName, useCanvasAutoOpen, useChatCanvases } from '../canvases/canvases.js';
+import { canvasName, canvasUriOf, useCanvasAutoOpen, useChatCanvases } from '../canvases/canvases.js';
 import { refKey } from '../../bridges/hosts.js';
 import { sessionActs } from './acts.js';
 import { sessionKey } from './focus.js';
@@ -111,7 +111,7 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
     onSelect: (picked) => { picked.closeMenu(); onSubagent(one.chat); },
   })));
   const canvasMenu = (event: MouseEvent<HTMLButtonElement>): void => show(event, canvases.map((one, at) => {
-    const about = [one.state?.status, one.state !== undefined && one.state.url === undefined ? t('canvases/unavailable') : undefined].filter((part) => part !== undefined && part !== '');
+    const about = [one.state?.status, one.state !== undefined && canvasUriOf(one.state) === undefined ? t('canvases/unavailable') : undefined].filter((part) => part !== undefined && part !== '');
     return {
       title: canvasName(one.state) ?? t('canvases/canvasN', { n: at + 1 }),
       ...(about.length === 0 ? {} : { description: about.join(' \u{00B7} ') }),

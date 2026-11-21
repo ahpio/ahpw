@@ -20,6 +20,15 @@ export function useChatCanvases(host: string, refs: readonly CanvasReference[] |
   return resources.map((resource, at) => ({ resource, state: states[at] }));
 }
 
+/**
+ * The page a canvas shows: `uri` from AHP 1.1.0, or `url`, the name 1.0.0
+ * gives it and a 1.1.0 host still sends beside `uri`.
+ */
+export function canvasUriOf(state: CanvasState | undefined): string | undefined {
+  const named = state as (CanvasState & { uri?: string }) | undefined;
+  return named?.uri ?? named?.url;
+}
+
 /** What a canvas is called: its title, its canvas id, or null when it has neither. */
 export function canvasName(state: CanvasState | undefined): string | null {
   if (state?.title !== undefined && state.title !== '') return state.title;
