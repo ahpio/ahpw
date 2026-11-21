@@ -4,7 +4,7 @@ import { useI18n, useScena } from '@softov/scena/react';
 import { useChannel } from '../../bridges/channel.js';
 import { SANDBOX } from '../../shell/browser/sandbox.js';
 import { EMOJIcon } from '../emojis.js';
-import { canvasKey, canvasName } from './canvases.js';
+import { canvasKey, canvasName, canvasUriOf } from './canvases.js';
 
 /**
  * A canvas: its page in an iframe, with the Browser view's sandbox, under a
@@ -26,7 +26,7 @@ export default function CanvasView({ host, chat, resource }: { host: string; cha
     if (gone) scena.surfaces.close(key);
   }, [gone, scena, key]);
 
-  const url = state?.url;
+  const url = canvasUriOf(state);
   const name = canvasName(state) ?? t('canvases/tab');
   const button = (icon: string, label: string, run: () => void, disabled: boolean): ReactElement => (
     <button type="button" className="web-explorer__action" title={label} aria-label={label} disabled={disabled} onClick={run}>
