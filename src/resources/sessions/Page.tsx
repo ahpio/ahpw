@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
+import { isBeside, useMountSurface } from './beside.js';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Badge, Button, Spinner, Text } from '@softov/scena/ui';
 import {
@@ -260,12 +261,14 @@ function useOpenQuestions(host: string, needed: SessionState['inputNeeded'], cha
 /**
  * One session: what it is, its chat, and a composer to talk to it. A pointer
  * down anywhere in it gives its tab the focus in
- * `main`, so the right sidebar follows the session a person works in. With
- * `beside`, the page is drawn in the right sidebar, beside that session, and
- * leaves the session's unread mark alone.
+ * `main`, so the right sidebar follows the session a person works in. While
+ * its tab is on the right sidebar, the page is drawn beside that session, and
+ * leaves the session's unread mark alone; a drag of the tab changes it. The
+ * `beside` prop holds until the tab's surface is found.
  */
-export default function SessionPage({ host, resource, beside = false }: { host: string; resource?: string; beside?: boolean }): ReactElement {
+export default function SessionPage({ host, resource, beside: opened = false }: { host: string; resource?: string; beside?: boolean }): ReactElement {
   const scena = useScena();
+  const beside = isBeside(useMountSurface(resource === undefined ? undefined : sessionKey(host, resource)), opened);
   const focus = (): void => {
     if (resource === undefined) return;
     const key = sessionKey(host, resource);

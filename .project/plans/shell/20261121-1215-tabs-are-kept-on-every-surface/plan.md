@@ -77,8 +77,8 @@ a session tab moves -> SessionPage reads its surface -> beside = surface is side
 | --- | --- | --- |
 | [01 - tabs are kept on every surface](task-01-tabs-are-kept-on-every-surface.md) | done | - |
 | [02 - keys reach a window](task-02-keys-reach-a-window.md) | done | - |
-| [03 - beside follows the tab](task-03-beside-follows-the-tab.md) | doing | - |
-| [04 - the records follow the drag](task-04-the-records-follow-the-drag.md) | todo | 01, 03 |
+| [03 - beside follows the tab](task-03-beside-follows-the-tab.md) | done | - |
+| [04 - the records follow the drag](task-04-the-records-follow-the-drag.md) | doing | 01, 03 |
 
 ## Risks and tradeoffs
 
@@ -87,8 +87,8 @@ a session tab moves -> SessionPage reads its surface -> beside = surface is side
 
 ## Resume state
 
-- **Done so far:** task 01 and 02 done 2026-11-21. Task 03 started 2026-11-21.
-- **Next action:** [task-03-beside-follows-the-tab.md](task-03-beside-follows-the-tab.md).
+- **Done so far:** task 01 to 03 done 2026-11-21. Task 04 started 2026-11-21.
+- **Next action:** [task-04-the-records-follow-the-drag.md](task-04-the-records-follow-the-drag.md).
 - **Open questions:** none.
 - **Watch out for:** the right sidebar's fixed panes are mounts too; keeping them would mount them twice.
 

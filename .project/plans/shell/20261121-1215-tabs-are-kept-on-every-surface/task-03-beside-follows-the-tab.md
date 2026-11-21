@@ -1,6 +1,6 @@
 ---
 title: Beside follows the tab
-status: todo
+status: done
 depends: []
 layer: "sessions"
 refs:
@@ -18,6 +18,7 @@ A drag of its tab changes it.
 
 - `UPDATE: src/resources/sessions/Page.tsx:260-285` - derive `beside` from the surface of its mount.
 - `UPDATE: src/resources/sessions/index.ts:280-290` - stop passing `beside: true`.
+- `CREATE: src/resources/sessions/beside.ts` - `surfaceOf`, `useMountSurface` and `isBeside`.
 - `CREATE: src/resources/sessions/beside.test.ts` - the derivation.
 
 ## Steps
@@ -33,3 +34,8 @@ A drag of its tab changes it.
 - `npx vitest run` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 4. The hook and the rule are in `beside.ts`.
+- ahpw has no React test library, so the test checks `surfaceOf` and `isBeside` as a tab moves.
+- The hook only reads `surfaceOf` again on each mount event.
+- `tsc -b` and the tests (1066) pass.

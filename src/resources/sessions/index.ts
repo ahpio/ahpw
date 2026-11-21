@@ -283,7 +283,7 @@ export function registerSessions(scena: Scena): Disposable {
         const props = { title: { path: titlePath(host, resource) } };
         if (place === 'right') {
           // Drawn beside the focused session, it does not become the focused session.
-          ctx.surfaces.open({ surface: RIGHT_SIDEBAR, key, resource: { component: 'SessionPage', host, resource, beside: true }, props });
+          ctx.surfaces.open({ surface: RIGHT_SIDEBAR, key, resource: { component: 'SessionPage', host, resource }, props });
           const right = ctx.scena.layout.get().surfaces[RIGHT_SIDEBAR];
           ctx.scena.layout.setSurface(RIGHT_SIDEBAR, { ...right, visible: true, activeContainerKey: key });
           hideOverlaidSidebar(ctx.scena, ctx.store.get<ModusClass>(MODUS_CLASS) ?? 'large');
