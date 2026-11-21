@@ -1,6 +1,6 @@
 ---
 title: The form runs once or continues
-status: implemented
+status: done
 depends: [01]
 layer: "automations"
 refs:
