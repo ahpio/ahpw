@@ -43,6 +43,7 @@ import { customAgents } from './custom-agents.js';
 import { slashCommandsOf } from '../agents/words.js';
 import { useAgentIconSrc } from '../agents/icons.js';
 import { warn } from '../../shell/notify/index.js';
+import { readLastChoice, writeLastChoice } from './last-choice.js';
 import { agentCommands, COMPOSER_FOCUS, registerHostCommands } from './host-commands.js';
 
 /** The prefixes the new session box's picker answers to. Module level: an inline array re-renders forever. */
@@ -134,8 +135,11 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
   useCloseGuard(() => (text.trim() !== '' || attachments.length > 0 ? t('sessions/new/unsent') : null));
 
   useEffect(() => {
-    if (provider === '' && agents[0] !== undefined) setProvider(agents[0].provider);
-  }, [agents, provider]);
+    if (provider !== '' || agents[0] === undefined) return;
+    // The harness last used on this host, while it is still offered.
+    const last = readLastChoice(host)?.provider;
+    setProvider(agents.some((one) => one.provider === last) ? last as string : agents[0].provider);
+  }, [agents, provider, host]);
   useEffect(() => {
     if (folder === '' && home !== undefined && home !== null) setFolder(folderLabel(home));
   }, [home, folder]);
@@ -302,6 +306,24 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
     return () => registration.dispose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scena, shape]);
+
+  // The model and settings last used with this harness come back once the host has listed them; a choice no longer offered is left out.
+  const restored = useRef('');
+  useEffect(() => {
+    if (provider === '' || resolved === null || restored.current === `${host}\n${provider}`) return;
+    restored.current = `${host}\n${provider}`;
+    const last = readLastChoice(host);
+    const lastModel = last?.models[provider];
+    if (lastModel !== undefined && models.some((one) => one.id === lastModel)) setModel(lastModel);
+    const config = last?.config[provider] ?? {};
+    const keep: Record<string, unknown> = {};
+    for (const [key, schema] of settings) {
+      const value = config[key];
+      if (value === undefined || (schema.enum !== undefined && !schema.enum.includes(value as never))) continue;
+      keep[key] = value;
+    }
+    if (Object.keys(keep).length > 0) setChosen((held) => ({ ...keep, ...held }));
+  }, [provider, host, resolved, models, settings]);
 
   const pickAgent = useCallback((next: string): void => {
     setProvider(next);
@@ -506,6 +528,7 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
         ...(Object.keys(config).length === 0 ? {} : { config }),
       } as never);
       writeLastHost(host);
+      writeLastChoice(host, provider, model, config);
       await scena.commands.execute('ahp.openSession', { host, resource });
       scena.surfaces.close('session:new');
       if (said !== '' || attachments.length > 0) {
