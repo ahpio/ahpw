@@ -62,9 +62,15 @@ export function useComposerDrop({ host: on, own, attach, insert, upload }: {
   const scena = useScena();
   // Whether Shift was down at the drop: a file tab then also goes in as `@path`.
   const shift = useRef(false);
+  // What the scena drag over the box is, as the drop area judged it last.
+  const over = useRef<Taken['kind'] | null>(null);
   // A tab or a row from scena: its own drag, read before the host file and the computer's files.
   const area = useDropArea({
-    accepts: (thing) => asAttachment(scena, thing, on, own) !== null,
+    accepts: (thing) => {
+      const taken = asAttachment(scena, thing, on, own);
+      over.current = taken?.kind ?? null;
+      return taken !== null;
+    },
     onDrop: (thing) => {
       const taken = asAttachment(scena, thing, on, own);
       if (taken === null) return;
@@ -78,10 +84,15 @@ export function useComposerDrop({ host: on, own, attach, insert, upload }: {
     },
   });
   return {
-    dropping: dropping ?? (area.over ? 'attach' : null),
+    dropping,
     onDragOver: (event) => {
       area.props.onDragOver(event as DragEvent<HTMLElement>);
-      if (event.isPropagationStopped()) return;
+      // The area took it: the box shows what a drop would do, as for a host
+      // file, with Shift on a file tab as a mention.
+      if (event.isPropagationStopped()) {
+        setDropping(event.shiftKey && over.current === 'file' ? 'mention' : 'attach');
+        return;
+      }
       const host = carriesHostFile(event.dataTransfer);
       if (!host && !Array.from(event.dataTransfer.types).includes('Files')) return;
       event.preventDefault();
