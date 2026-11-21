@@ -2404,6 +2404,12 @@
           "panel": "Novo painel",
           "modal": "Diálogo"
         },
+        "sessionOpens": {
+          "title": "Sessão",
+          "description": "Onde uma sessão abre na primeira vez. Uma sessão aberta é mostrada onde está.",
+          "main": "Área principal",
+          "right": "Barra lateral direita"
+        },
         "archivedSessionOpen": {
           "title": "Sessão arquivada",
           "description": "O que uma sessão aberta faz quando é arquivada.",

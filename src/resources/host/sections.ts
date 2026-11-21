@@ -40,7 +40,7 @@ const UI: readonly Named[] = [
   ['language', ['ui.language']],
   ['layout', ['ui.layout', 'ui.settingsPlace']],
   ['dialogs', ['ui.confirmStyle']],
-  ['session', ['ui.sessionViewsPlace', 'ui.toolsExpanded', 'ui.sessionMarkdown', 'ui.archivedSessionOpen']],
+  ['session', ['ui.sessionOpens', 'ui.sessionViewsPlace', 'ui.toolsExpanded', 'ui.sessionMarkdown', 'ui.archivedSessionOpen']],
   ['bot', ['ui.botChatOpens']],
   ['actions', DOCK_KEYS],
   ['canvas', ['ui.canvasOpens', 'ui.canvasAutoOpen']],
