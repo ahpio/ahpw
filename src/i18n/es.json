@@ -1963,6 +1963,8 @@
       "safety": "{safety}/10 seguro",
       "arguments": "Argumentos",
       "acceptResult": "Aceptar resultado",
+      "runInBackground": "Ejecutar en segundo plano",
+      "moveFailed": "No se pudo pasar el comando al segundo plano",
       "reject": "Rechazar",
       "thinkingAbout": "Pensando: {text}",
       "approve": "Aprobar",

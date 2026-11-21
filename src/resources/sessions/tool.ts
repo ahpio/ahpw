@@ -9,6 +9,17 @@ const SUBJECT_KEYS = ['command', 'file_path', 'path', 'pattern', 'query', 'url',
 const STARTED = 'ahpd.startedAt';
 const DURATION = 'ahpd.durationMs';
 
+/** `_meta` key ahpd writes on a running call that can move to the background: `true` while it can. */
+const MOVABLE = 'ahpd.backgroundToolCall';
+
+/** The method that moves a running call to the background; it takes the chat and the call's id, and answers `backgrounded`. */
+export const MOVE_CALL = 'x-ahpd/backgroundToolCall';
+
+/** Whether ahpd can move this call to the background. */
+export function movableOf(call: ToolCallState): boolean {
+  return (call._meta as Record<string, unknown> | undefined)?.[MOVABLE] === true;
+}
+
 /** A call's `toolInput` parsed, or undefined when it is absent or not JSON. */
 export function inputOf(call: ToolCallState): unknown {
   const raw = 'toolInput' in call ? call.toolInput : undefined;
