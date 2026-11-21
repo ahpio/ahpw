@@ -67,4 +67,4 @@ What exists today: [00-sessions.md](sessions/00-sessions.md).
 | Plan | Status | Next |
 | --- | --- | --- |
 | [01 - Raw view and header buttons](sessions/01-raw-view-and-header/plan.md) | built | - |
-| [20261121-0639 - A running call moves to the background](sessions/20261121-0639-a-running-call-moves-to-the-background/plan.md) | planned | ahpd host plan, merged in #407 |
+| [20261121-0639 - A running call moves to the background](sessions/20261121-0639-a-running-call-moves-to-the-background/plan.md) | built | ahpd host plan, merged in #407 |
