@@ -225,7 +225,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     setText(`${before}${lead}${words}${textRef.current.slice(at)}`);
     focusCaret(before.length + lead.length + words.length);
   }, [focusCaret]);
-  const drop = useComposerDrop({ host, attach, insert, upload: (list) => void upload(list) });
+  const drop = useComposerDrop({ host, own: summary.resource, attach, insert, upload: (list) => void upload(list) });
 
   // `@` asks the host what the text so far can refer to.
   const textRef = useRef(text);

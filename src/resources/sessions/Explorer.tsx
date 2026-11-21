@@ -1,10 +1,10 @@
 import { useEffect, useMemo, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
-import { useI18n, useScena, useStore } from '@softov/scena/react';
+import { startOpenDrag, useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Spinner } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
 import type { AgentInfo, SessionSummary } from '@microsoft/agent-host-protocol';
-import { ahpPaths, type Connection } from '../../bridges/data.js';
+import { ahpPaths, titlePath, type Connection } from '../../bridges/data.js';
 import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { folderLabel } from '../../bridges/words.js';
@@ -16,6 +16,7 @@ import { plural, dateFormat } from '../../i18n/locales.js';
 import { activityLabel, activityOf, isArchived, isRead, shows, type Activity, type SessionShow } from './status.js';
 import { arrangeTwo, groupOf, type Group, type Grouping } from './grouping.js';
 import { sessionActs } from './acts.js';
+import { sessionKey } from './focus.js';
 
 const sameDay = dateFormat({ hour: '2-digit', minute: '2-digit' });
 const otherDay = dateFormat({ month: 'short', day: 'numeric' });
@@ -140,6 +141,15 @@ export default function SessionExplorer(): ReactElement {
       rows={rows}
       selected={active === undefined ? null : refKey(active.host, active.resource)}
       onOpen={open}
+      // A row drags onto a surface, where the session opens or its tab moves, or onto a composer as a reference.
+      onRowDragStart={(event, row) => {
+        const { host, id } = refOf(row.key);
+        startOpenDrag(event.dataTransfer, {
+          key: sessionKey(host, id),
+          resource: { component: 'SessionPage', host, resource: id },
+          props: { title: { path: titlePath(host, id) } },
+        });
+      }}
       notice={notice}
       filterLabel={t('sessions/explorer/filter')}
       hostLines={multi}
