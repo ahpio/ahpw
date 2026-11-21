@@ -189,6 +189,7 @@ const TurnView = memo(function TurnView({ turn, live, send, session, origins, on
           <div className={askHit ? 'web-turn__ask web-hit' : 'web-turn__ask'}>
             {turn.message.text}
             {attachments}
+            {turn.message.text === '' ? null : <span className="web-turn__ask-copy"><CopyButton text={turn.message.text} icon="⧉" /></span>}
           </div>
         </>
       )}

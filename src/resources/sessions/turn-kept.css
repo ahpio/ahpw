@@ -12,3 +12,23 @@
   flex: 1;
   border-top: 1px solid var(--oo-color-border);
 }
+
+/* The copy icon of a message sent: beside the bubble's left edge, shown while the pointer is over the bubble or a tap has focused it. */
+.web-turn__ask {
+  position: relative;
+}
+
+.web-turn__ask-copy {
+  position: absolute;
+  top: 0;
+  right: 100%;
+  margin-right: var(--oo-spacing-xs);
+  white-space: normal;
+  opacity: 0;
+}
+
+.web-turn__ask:hover .web-turn__ask-copy,
+.web-turn__ask:focus-within .web-turn__ask-copy,
+.web-turn__ask-copy:hover {
+  opacity: 1;
+}
