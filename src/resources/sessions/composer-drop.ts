@@ -1,8 +1,37 @@
-import { useState, type ClipboardEvent, type DragEvent } from 'react';
-import type { MessageAttachment } from '@microsoft/agent-host-protocol';
+import { useRef, useState, type ClipboardEvent, type DragEvent } from 'react';
+import type { MessageAttachment, SessionSummary } from '@microsoft/agent-host-protocol';
+import type { DroppedThing, Scena } from '@softov/scena/types';
+import { useDropArea, useScena } from '@softov/scena/react';
+import { ahpPaths } from '../../bridges/data.js';
+import { fileTabOf, viewersOf } from '../files/viewers.js';
 import { folderLabel } from '../../bridges/words.js';
 import { carriesHostFile, droppedHostFile } from '../folders/drag.js';
-import { resourceAttachment, withToken } from './attachments.js';
+import { chatAttachment, resourceAttachment, withToken } from './attachments.js';
+
+/** A dropped tab or row the composer takes, and what it attaches. */
+export type Taken =
+  | { kind: 'session'; attachment: MessageAttachment }
+  | { kind: 'file'; attachment: MessageAttachment; uri: string };
+
+/**
+ * What a composer on `host` makes of a tab or a row dropped on it: a session of
+ * that host, not the composer's own (`own`), becomes a chat reference; a file
+ * tab of that host becomes a file attachment. Anything else is null, and passes
+ * on to the surface.
+ */
+export function asAttachment(scena: Scena, thing: DroppedThing, host: string, own: string | undefined): Taken | null {
+  const node = thing.resource as { component?: unknown; host?: unknown; resource?: unknown; uri?: unknown };
+  if (node.component === 'SessionPage' && node.host === host && typeof node.resource === 'string') {
+    if (node.resource === own) return null;
+    const summary = (scena.store.get<SessionSummary[]>(ahpPaths(host).sessions) ?? []).find((one) => one.resource === node.resource);
+    return summary === undefined ? null : { kind: 'session', attachment: chatAttachment(summary) };
+  }
+  const file = fileTabOf(thing.key);
+  if (file !== undefined && file.host === host && viewersOf(scena, file.uri).some((viewer) => viewer.component === file.component)) {
+    return { kind: 'file', attachment: resourceAttachment(file.uri, false), uri: file.uri };
+  }
+  return null;
+}
 
 /** What a drop over a composer box would do: attach, or with Shift also write the path in as `@path`. */
 export type Dropping = 'attach' | 'mention' | null;
@@ -11,10 +40,14 @@ export type Dropping = 'attach' | 'mention' | null;
  * A composer box as a drop target: a host file from the explorer attaches, and with
  * Shift is also written in as `@path`; this computer's files attach as content.
  * A paste of files, as a screenshot or a copied file, attaches them the same way.
+ * A session dropped as a tab or a row becomes a chat reference, and a file tab
+ * attaches as a host file does; the tab stays where it was.
  */
-export function useComposerDrop({ host: on, attach, insert, upload }: {
+export function useComposerDrop({ host: on, own, attach, insert, upload }: {
   /** The host the composer sends to; a file from another host's tree is not dropped. */
   host: string;
+  /** The composer's own session, which it does not take as a reference. */
+  own?: string;
   attach: (attachment: MessageAttachment) => void;
   insert: (words: string) => void;
   upload: (files: FileList) => void;
@@ -26,9 +59,29 @@ export function useComposerDrop({ host: on, attach, insert, upload }: {
   onPaste: (event: ClipboardEvent) => void;
 } {
   const [dropping, setDropping] = useState<Dropping>(null);
+  const scena = useScena();
+  // Whether Shift was down at the drop: a file tab then also goes in as `@path`.
+  const shift = useRef(false);
+  // A tab or a row from scena: its own drag, read before the host file and the computer's files.
+  const area = useDropArea({
+    accepts: (thing) => asAttachment(scena, thing, on, own) !== null,
+    onDrop: (thing) => {
+      const taken = asAttachment(scena, thing, on, own);
+      if (taken === null) return;
+      if (taken.kind === 'file' && shift.current) {
+        const token = `@${folderLabel(taken.uri)}`;
+        insert(`${token} `);
+        attach(withToken(taken.attachment, token));
+        return;
+      }
+      attach(taken.attachment);
+    },
+  });
   return {
-    dropping,
+    dropping: dropping ?? (area.over ? 'attach' : null),
     onDragOver: (event) => {
+      area.props.onDragOver(event as DragEvent<HTMLElement>);
+      if (event.isPropagationStopped()) return;
       const host = carriesHostFile(event.dataTransfer);
       if (!host && !Array.from(event.dataTransfer.types).includes('Files')) return;
       event.preventDefault();
@@ -36,10 +89,14 @@ export function useComposerDrop({ host: on, attach, insert, upload }: {
       setDropping(host && event.shiftKey ? 'mention' : 'attach');
     },
     onDragLeave: (event) => {
+      area.props.onDragLeave(event as DragEvent<HTMLElement>);
       if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropping(null);
     },
     onDrop: (event) => {
       setDropping(null);
+      shift.current = event.shiftKey;
+      area.props.onDrop(event as DragEvent<HTMLElement>);
+      if (event.isPropagationStopped()) return;
       const host = droppedHostFile(event.dataTransfer);
       if (host !== null) {
         event.preventDefault();

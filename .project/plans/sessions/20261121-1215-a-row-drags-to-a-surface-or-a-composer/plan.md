@@ -1,7 +1,7 @@
 ---
 title: A session row drags to a surface or a composer
 domain: sessions
-status: active
+status: built
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -77,7 +77,7 @@ drop on a composer -> useDropArea -> a session: chatAttachment; a file tab: reso
 | Task | Status | Depends on |
 | --- | --- | --- |
 | [01 - a session row drags](task-01-a-session-row-drags.md) | done | - |
-| [02 - the composer takes a session or a file tab](task-02-the-composer-takes-a-tab.md) | doing | 01 |
+| [02 - the composer takes a session or a file tab](task-02-the-composer-takes-a-tab.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -87,14 +87,14 @@ drop on a composer -> useDropArea -> a session: chatAttachment; a file tab: reso
 
 ## Resume state
 
-- **Done so far:** task 01 done 2026-11-21. Task 02 started 2026-11-21.
-- **Next action:** [task-02-the-composer-takes-a-tab.md](task-02-the-composer-takes-a-tab.md).
+- **Done so far:** every task done 2026-11-21. [implemented.md](implemented.md) says what exists, and that the check by hand is left.
+- **Next action:** the check by hand against a host.
 - **Open questions:** none.
 - **Watch out for:** a session's summary is needed for `chatAttachment`; read it from the host's session list in the store.
 
 ## Final verification checklist
 
-- [ ] `tsc -b`, the tests and the build pass.
+- [x] `tsc -b`, the tests and the build pass.
 - [ ] A session row opens where it is dropped on `main`, a group edge, the right sidebar and a window.
 - [ ] A session row and a session tab on a composer add a chat reference; a file tab adds a file.
 - [ ] A click on a row still follows `ui.sessionOpens`.

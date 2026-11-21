@@ -1,6 +1,6 @@
 ---
 title: The composer takes a session or a file tab
-status: doing
+status: done
 depends: [task-01-a-session-row-drags.md]
 layer: "sessions"
 refs:
@@ -41,3 +41,6 @@ Anything else passes on to the surface.
 - `npx vitest run` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 8. The drop area is scena's `useDropArea`; its handlers run first, and the old ones run when it did not take the drop.
+- `tsc -b`, the tests (1071) and the build pass.
