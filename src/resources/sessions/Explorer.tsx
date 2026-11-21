@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { droppedAt, endedOutside, openInWindow } from '@softov/scena';
 import { endOpenDrag, startOpenDrag, useI18n, useScena, useStore } from '@softov/scena/react';
@@ -81,8 +81,15 @@ export default function SessionExplorer(): ReactElement {
     const { host, id } = refOf(key);
     void scena.commands.execute('ahp.openSession', { host, resource: id });
   };
+  // Each session's row, by its summary object, so a change to one session builds one row again and
+  // the list keeps the others' objects, which ExplorerList's rows compare. Anything else a row reads
+  // starts a new cache.
+  const built = useRef<{ inputs: readonly unknown[]; rows: WeakMap<SessionSummary, Row> }>({ inputs: [], rows: new WeakMap() });
   const rows = useMemo<Row[]>(
     () => {
+      const inputs = [hosts, agentLists, archived, show, agent, grouping, thenBy, sorting, pins, hostName, t, multi, new Date().toDateString()];
+      if (inputs.length !== built.current.inputs.length || inputs.some((one, at) => one !== built.current.inputs[at])) built.current = { inputs, rows: new WeakMap() };
+      const cache = built.current.rows;
       const agentName = (host: string, provider: string): string => agentLists[hosts.indexOf(host)]?.find((candidate) => candidate.provider === provider)?.displayName ?? provider;
       const entries = hosts.flatMap((host, at) => (lists[at] ?? []).map((session): Entry => ({ host, session })));
       const kept = sortSessions(entries.filter((one) => (archived || !isArchived(one.session.status)) && shows(one.session.status, show) && (agent === null || one.session.provider === agent)), (one) => one.session, sorting);
@@ -103,6 +110,9 @@ export default function SessionExplorer(): ReactElement {
         return { entry, group, sub: group === undefined || inner === undefined ? undefined : { key: `${group.key}/${inner.key}`, label: inner.label } };
       })].map(({ entry, group: inGroup, sub }): Row => {
         const { host, session: one } = entry;
+        // A time grouping can move a session that did not change, so its headings are checked too.
+        const kept = cache.get(one);
+        if (kept !== undefined && kept.group?.key === inGroup?.key && kept.subgroup?.key === sub?.key) return kept;
         const activity = activityOf(one.status);
         const unread = activity === 'idle' && !isRead(one.status);
         const agent = agentName(host, one.provider);
@@ -119,7 +129,7 @@ export default function SessionExplorer(): ReactElement {
         const doing = activity !== 'idle'
           ? `${activityLabel(activity)}${said === '' ? '' : ` \u{00B7} ${said}`}`
           : undefined;
-        return {
+        const row: Row = {
           key: refKey(host, one.resource),
           dot: isArchived(one.status) ? 'off' : unread ? 'fresh' : DOT[activity],
           dotLabel: isArchived(one.status) ? t('sessions/status/archived') : unread ? t('sessions/status/unread') : activityLabel(activity),
@@ -131,6 +141,8 @@ export default function SessionExplorer(): ReactElement {
           ...(inGroup === undefined ? {} : { group: inGroup }),
           ...(sub === undefined ? {} : { subgroup: sub }),
         };
+        cache.set(one, row);
+        return row;
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
