@@ -90,6 +90,37 @@ describe('draftOf and definitionOf', () => {
     expect(definitionOf({ ...draft, agent: '', config: {} }, kept.definition).session).toEqual({ provider: 'claude' });
   });
 
+  it('writes a one-time trigger in place of the schedule, with no end conditions, and reads it back', () => {
+    const kept = entry();
+    const draft = { ...draftOf(kept), once: true, runAt: '2030-01-02T09:00', misfire: 'runOnce' as const };
+    const definition = definitionOf(draft, kept.definition);
+    expect(definition.triggers).toEqual([{ id: 'once', kind: 'oneTime', runAt: new Date('2030-01-02T09:00').toISOString(), misfirePolicy: 'runOnce' }]);
+    expect(definition.disableConditions).toBeUndefined();
+    const back = draftOf({ ...kept, definition });
+    expect(back.once).toBe(true);
+    expect(back.runAt).toBe('2030-01-02T09:00');
+    expect(back.misfire).toBe('runOnce');
+  });
+
+  it('writes where each run goes, and over the older pinned mode says a new session in so many words', () => {
+    const kept = entry();
+    const base = draftOf(kept);
+    expect(base.target).toBe('newSession');
+    expect(definitionOf(base, kept.definition)).not.toHaveProperty('target');
+    expect((definitionOf({ ...base, target: 'previousSession' }, kept.definition) as { target?: unknown }).target).toEqual({ kind: 'previousSession' });
+    expect((definitionOf({ ...base, target: 'chat', chat: 'ahp-chat:/c', chatSession: 'ahp-session:/s' }, kept.definition) as { target?: unknown }).target)
+      .toEqual({ kind: 'chat', chat: 'ahp-chat:/c', session: 'ahp-session:/s' });
+    const pinned = entry({}, { _meta: { ahpd: { session: 'pinned' } } } as never);
+    expect(draftOf(pinned).target).toBe('previousSession');
+    expect((definitionOf({ ...draftOf(pinned), target: 'newSession' }, pinned.definition) as { target?: unknown }).target).toEqual({ kind: 'newSession' });
+  });
+
+  it('names a missing time or chat', () => {
+    const ready = { ...draftOf(undefined), title: 't', message: 'm' };
+    expect(draftProblem({ ...ready, once: true, runAt: '' })).toBe('Pick when it runs.');
+    expect(draftProblem({ ...ready, target: 'chat', chat: '' })).toBe('Pick the chat each run goes to.');
+  });
+
   it('names what is missing', () => {
     const empty = draftOf(undefined);
     expect(draftProblem(empty)).toBe('Add a title.');

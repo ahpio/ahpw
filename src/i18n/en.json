@@ -683,7 +683,9 @@
       "title": "Add a title.",
       "message": "Add a message.",
       "schedule": "Use five fields for the schedule: minute, hour, day, month and weekday.",
-      "runs": "Enter a whole number of runs."
+      "runs": "Enter a whole number of runs.",
+      "runAt": "Pick when it runs.",
+      "chat": "Pick the chat each run goes to."
     },
     "state": {
       "running": "Running",
@@ -771,7 +773,9 @@
       "changed": "Changed",
       "notOffered": "Not offered",
       "customAgent": "Custom agent",
-      "never": "Never"
+      "never": "Never",
+      "ran": "Already ran",
+      "eachRun": "Each run"
     },
     "page": {
       "overview": "Overview",
@@ -792,7 +796,8 @@
       "sections": {
         "agent": "Agent",
         "schedule": "Schedule",
-        "details": "Details"
+        "details": "Details",
+        "target": "Where each run goes"
       }
     },
     "edit": {
@@ -817,7 +822,8 @@
         "every6Hours": "Every 6 hours",
         "dailyAt9": "Every day at 09:00",
         "weekdaysAt9": "Weekdays at 09:00",
-        "mondayAt5": "Every Monday at 05:00"
+        "mondayAt5": "Every Monday at 05:00",
+        "once": "Once, at a set time"
       },
       "custom": "Custom",
       "cron": "Cron expression",
@@ -845,7 +851,21 @@
       "notOfferedPill": "{model} · not offered",
       "notOfferedNote": "{agent} doesn't offer {model}. Pick a model, or runs fail.",
       "instructionsPlaceholder": "What should it do each time it runs?",
-      "modelHint": "The model each run uses"
+      "modelHint": "The model each run uses",
+      "runAt": "Runs at",
+      "runAtHint": "Your time, {zone}.",
+      "eachRun": "Each run",
+      "chat": "Chat",
+      "targets": {
+        "newSession": "In a new session",
+        "newSessionHint": "Each run starts a session of its own.",
+        "previousSession": "In the last run's session",
+        "previousSessionHint": "Each run adds a turn to the session of the run before.",
+        "chat": "In one chat",
+        "chatHint": "If a turn is running there, the message waits its turn."
+      },
+      "locked": "This automation already ran once, so it can't be changed.",
+      "lockedOther": "This host doesn't let this automation be changed."
     },
     "group": {
       "none": "No groups",
@@ -872,7 +892,8 @@
       "on": "On",
       "off": "Off",
       "failed": "Failed"
-    }
+    },
+    "onceAt": "Once at {time}"
   },
   "computers": {
     "commands": {

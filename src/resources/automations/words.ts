@@ -1,4 +1,5 @@
 import type { AutomationDefinition, AutomationEntry, AutomationRunSummary, AutomationScheduleTrigger, AutomationTrigger } from '@microsoft/agent-host-protocol';
+import { oneTimeOf, targetOf, type RunTarget } from './next.js';
 import { translate } from '@softov/scena';
 import { folderLabel, folderUri } from '../../bridges/words.js';
 import { plural, dateFormat } from '../../i18n/locales.js';
@@ -15,6 +16,8 @@ export function timeOf(iso: string | undefined): string {
 /** One trigger, in a line: a schedule's expression and zone, or an event's title. */
 export function triggerLine(trigger: AutomationTrigger): string {
   if ('schedule' in trigger) return `${trigger.schedule.expression} (${trigger.schedule.timeZone})`;
+  const once = oneTimeOf(trigger);
+  if (once !== undefined) return translate('automations/onceAt', { time: new Date(once.runAt).toLocaleString() });
   return trigger.title;
 }
 
@@ -50,7 +53,11 @@ export function cronWords(expression: string): string {
 export function whenLine(entry: AutomationEntry): string {
   const triggers = entry.definition.triggers;
   if (triggers.length === 0) return translate('automations/byHand');
-  return triggers.map((trigger) => ('schedule' in trigger ? cronWords(trigger.schedule.expression) : trigger.title)).join(', ');
+  return triggers.map((trigger) => {
+    const once = oneTimeOf(trigger);
+    if (once !== undefined) return translate('automations/onceAt', { time: new Date(once.runAt).toLocaleString() });
+    return 'schedule' in trigger ? cronWords(trigger.schedule.expression) : trigger.title;
+  }).join(', ');
 }
 
 /** A run's state, start and end, read off whichever lifecycle it is in. */
@@ -105,6 +112,16 @@ export interface Draft {
   expression: string;
   timeZone: string;
   misfire: 'skip' | 'runOnce';
+  /** Whether it runs once, at `runAt`, rather than on `expression`. */
+  once: boolean;
+  /** When a one-time automation runs, as a `datetime-local` value in this browser's zone. */
+  runAt: string;
+  /** Where each run goes. */
+  target: RunTarget['kind'];
+  /** The chat a `chat` target sends to. */
+  chat: string;
+  /** The session that chat belongs to, as the host last said it. */
+  chatSession: string;
   enabled: boolean;
   afterRuns: string;
   afterDate: string;
@@ -117,6 +134,8 @@ export const localZone = (): string => Intl.DateTimeFormat().resolvedOptions().t
 export function draftOf(entry: AutomationEntry | undefined, defaults: { provider?: string; folder?: string } = {}): Draft {
   const definition = entry?.definition;
   const schedule = definition?.triggers.find((trigger) => 'schedule' in trigger) as AutomationScheduleTrigger | undefined;
+  const once = definition?.triggers.map(oneTimeOf).find((one) => one !== undefined);
+  const target = targetOf(definition as Parameters<typeof targetOf>[0]);
   const conditions = definition?.disableConditions ?? [];
   const afterRuns = conditions.find((one) => 'max' in one) as { max: number } | undefined;
   const afterDate = conditions.find((one) => 'date' in one) as { date: string } | undefined;
@@ -130,7 +149,12 @@ export function draftOf(entry: AutomationEntry | undefined, defaults: { provider
     folder: definition?.session.workingDirectories?.[0] === undefined ? defaults.folder ?? '' : folderLabel(definition.session.workingDirectories[0]),
     expression: schedule?.schedule.expression ?? '',
     timeZone: schedule?.schedule.timeZone ?? localZone(),
-    misfire: String(schedule?.misfirePolicy ?? 'skip') === 'runOnce' ? 'runOnce' : 'skip',
+    misfire: String(schedule?.misfirePolicy ?? once?.misfirePolicy ?? 'skip') === 'runOnce' ? 'runOnce' : 'skip',
+    once: once !== undefined,
+    runAt: once === undefined ? '' : localInput(once.runAt),
+    target: target.kind,
+    chat: target.kind === 'chat' ? target.chat : '',
+    chatSession: target.kind === 'chat' ? target.session : '',
     enabled: definition?.enabled ?? true,
     afterRuns: afterRuns === undefined ? '' : String(afterRuns.max),
     afterDate: afterDate === undefined ? '' : afterDate.date.slice(0, 10),
@@ -141,21 +165,29 @@ export function draftOf(entry: AutomationEntry | undefined, defaults: { provider
 export function draftProblem(draft: Draft): string | undefined {
   if (draft.title.trim() === '') return translate('automations/problems/title');
   if (draft.message.trim() === '') return translate('automations/problems/message');
-  if (draft.expression.trim() !== '' && draft.expression.trim().split(/\s+/).length !== 5) return translate('automations/problems/schedule');
+  if (draft.once && Number.isNaN(Date.parse(draft.runAt))) return translate('automations/problems/runAt');
+  if (!draft.once && draft.expression.trim() !== '' && draft.expression.trim().split(/\s+/).length !== 5) return translate('automations/problems/schedule');
+  if (draft.target === 'chat' && draft.chat === '') return translate('automations/problems/chat');
   if (draft.afterRuns.trim() !== '' && !/^[1-9]\d*$/.test(draft.afterRuns.trim())) return translate('automations/problems/runs');
   return undefined;
 }
 
 /** The definition a draft describes. Event triggers the form does not edit are kept from `kept`. */
 export function definitionOf(draft: Draft, kept?: AutomationDefinition): AutomationDefinition {
-  const events = (kept?.triggers ?? []).filter((trigger) => !('schedule' in trigger));
-  const expression = draft.expression.trim();
-  const conditions = [
+  const events = (kept?.triggers ?? []).filter((trigger) => !('schedule' in trigger) && oneTimeOf(trigger) === undefined);
+  const expression = draft.once ? '' : draft.expression.trim();
+  // A one-time automation has no end date or run cap, which the host refuses beside it.
+  const conditions = draft.once ? [] : [
     ...(draft.afterRuns.trim() === '' ? [] : [{ kind: 'afterRuns', max: Number(draft.afterRuns.trim()) }]),
     ...(draft.afterDate === '' ? [] : [{ kind: 'afterDate', date: new Date(`${draft.afterDate}T23:59:59`).toISOString() }]),
   ];
   // What the form owns is rebuilt from the draft, so clearing a field clears it; everything else is kept.
-  const { disableConditions: _conditions, ...base } = kept ?? ({} as Partial<AutomationDefinition>);
+  const { disableConditions: _conditions, target: _target, ...base } = (kept ?? {}) as Partial<AutomationDefinition> & { target?: unknown };
+  // A new session writes no `target`, except over the older pinned mode, which it has to say it replaces.
+  const pinnedBefore = targetOf(kept as Parameters<typeof targetOf>[0]).kind === 'previousSession' && (kept as { target?: unknown } | undefined)?.target === undefined;
+  const target: RunTarget | undefined = draft.target === 'previousSession' ? { kind: 'previousSession' }
+    : draft.target === 'chat' ? { kind: 'chat', chat: draft.chat, session: draft.chatSession }
+      : pinnedBefore ? { kind: 'newSession' } : undefined;
   const { provider: _provider, model: _model, agent: _agent, workingDirectories: _folders, config: _config, ...session } = kept?.session ?? {};
   return {
     ...base,
@@ -172,8 +204,18 @@ export function definitionOf(draft: Draft, kept?: AutomationDefinition): Automat
     enabled: draft.enabled,
     triggers: [
       ...(expression === '' ? [] : [{ id: 'schedule', kind: 'schedule', schedule: { expression, timeZone: draft.timeZone.trim() || 'UTC' }, misfirePolicy: draft.misfire }]),
-      ...events,
+      ...(draft.once ? [{ id: 'once', kind: 'oneTime', runAt: new Date(draft.runAt).toISOString(), misfirePolicy: draft.misfire }] : []),
+      ...(draft.once ? [] : events),
     ],
     ...(conditions.length === 0 ? {} : { disableConditions: conditions }),
+    ...(target === undefined ? {} : { target }),
   } as AutomationDefinition;
+}
+
+/** An ISO time as a `datetime-local` value in this browser's zone. */
+export function localInput(iso: string): string {
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return '';
+  const pad = (value: number): string => String(value).padStart(2, '0');
+  return `${String(at.getFullYear())}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}T${pad(at.getHours())}:${pad(at.getMinutes())}`;
 }

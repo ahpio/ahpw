@@ -683,7 +683,9 @@
       "title": "Agrega un título.",
       "message": "Agrega un mensaje.",
       "schedule": "Usa cinco campos para la programación: minuto, hora, día, mes y día de la semana.",
-      "runs": "Ingresa un número entero de ejecuciones."
+      "runs": "Ingresa un número entero de ejecuciones.",
+      "runAt": "Elige cuándo se ejecuta.",
+      "chat": "Elige el chat al que va cada ejecución."
     },
     "state": {
       "running": "En ejecución",
@@ -771,7 +773,9 @@
       "changed": "Modificada",
       "notOffered": "No ofrecido",
       "customAgent": "Agente personalizado",
-      "never": "Nunca"
+      "never": "Nunca",
+      "ran": "Ya se ejecutó",
+      "eachRun": "Cada ejecución"
     },
     "page": {
       "overview": "Resumen",
@@ -792,7 +796,8 @@
       "sections": {
         "agent": "Agente",
         "schedule": "Programación",
-        "details": "Detalles"
+        "details": "Detalles",
+        "target": "Adónde va cada ejecución"
       }
     },
     "edit": {
@@ -817,7 +822,8 @@
         "every6Hours": "Cada 6 horas",
         "dailyAt9": "Todos los días a las 09:00",
         "weekdaysAt9": "De lunes a viernes a las 09:00",
-        "mondayAt5": "Todos los lunes a las 05:00"
+        "mondayAt5": "Todos los lunes a las 05:00",
+        "once": "Una vez, a una hora fija"
       },
       "custom": "Personalizada",
       "cron": "Expresión cron",
@@ -845,7 +851,21 @@
       "notOfferedPill": "{model} · no ofrecido",
       "notOfferedNote": "{agent} no ofrece {model}. Elige un modelo, o las ejecuciones fallan.",
       "instructionsPlaceholder": "¿Qué debe hacer cada vez que se ejecute?",
-      "modelHint": "El modelo de cada ejecución"
+      "modelHint": "El modelo de cada ejecución",
+      "runAt": "Se ejecuta el",
+      "runAtHint": "Tu hora, {zone}.",
+      "eachRun": "Cada ejecución",
+      "chat": "Chat",
+      "targets": {
+        "newSession": "En una sesión nueva",
+        "newSessionHint": "Cada ejecución abre una sesión propia.",
+        "previousSession": "En la sesión de la última ejecución",
+        "previousSessionHint": "Cada ejecución añade un turno a la sesión de la anterior.",
+        "chat": "En un chat",
+        "chatHint": "Si hay un turno en curso, el mensaje espera su turno."
+      },
+      "locked": "Esta automatización ya se ejecutó una vez, así que no se puede cambiar.",
+      "lockedOther": "Este host no permite cambiar esta automatización."
     },
     "group": {
       "none": "Sin grupos",
@@ -872,7 +892,8 @@
       "on": "Activas",
       "off": "Apagadas",
       "failed": "Con fallo"
-    }
+    },
+    "onceAt": "Una vez el {time}"
   },
   "computers": {
     "commands": {
