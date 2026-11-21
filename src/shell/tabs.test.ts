@@ -23,4 +23,36 @@ describe('keepTabs', () => {
     kept?.dispose();
     vi.unstubAllGlobals();
   });
+
+  it('keeps the tabs of main, the right sidebar and a window, each with its title, and not a sidebar view', async () => {
+    const held = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => held.get(key) ?? null,
+      setItem: (key: string, value: string) => { held.set(key, value); },
+      removeItem: (key: string) => { held.delete(key); },
+    });
+    vi.resetModules();
+    const { keepTabs } = await import('./tabs.js');
+    const { mountRight } = await import('./right-sidebar.js');
+    const first = createScena();
+    first.components.register({ component: 'Page', category: 'page', renderer: { kind: 'react', load: async () => ({ default: () => null }) } });
+    const view = mountRight(first, { key: 'details', resource: { component: 'Page' }, props: { title: 'Details' } }, 'i');
+    await keepTabs(first, () => true);
+    for (const [surface, key] of [['main', 'a'], ['sidebar:right', 'b'], ['window:1', 'c'], ['panel:bottom', 'd']] as const) {
+      first.surfaces.open({ surface, key, resource: { component: 'Page' }, props: { title: `Tab ${key}`, icon: 'x' } } as never);
+    }
+    await first.session.save();
+    const saved = JSON.parse(held.get('ahpd-web.session.v1') ?? '{}') as { mounts: { key: string; surface: string; props?: object }[] };
+    expect(saved.mounts.map((one) => `${one.surface}:${one.key}`).sort()).toEqual(['main:a', 'sidebar:right:b', 'window:1:c']);
+    expect(saved.mounts.find((one) => one.key === 'b')?.props).toEqual({ title: 'Tab b' });
+
+    const second = createScena();
+    second.components.register({ component: 'Page', category: 'page', renderer: { kind: 'react', load: async () => ({ default: () => null }) } });
+    const kept = await keepTabs(second, () => true);
+    expect(second.surfaces.listAt('sidebar:right').map((one) => [one.key, one.props?.title])).toEqual([['b', 'Tab b']]);
+    expect(second.surfaces.listAt('window:1').map((one) => one.key)).toEqual(['c']);
+    kept?.dispose();
+    view.dispose();
+    vi.unstubAllGlobals();
+  });
 });

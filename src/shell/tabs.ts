@@ -1,42 +1,51 @@
-import type { Disposable, Label, Scena, SessionMount, SessionSnapshot, SessionStorage } from '@softov/scena/types';
+import type { Disposable, Label, Scena, SessionMount, SessionSnapshot, SessionStorage, SurfaceName } from '@softov/scena/types';
 import { createLocalStorageSessionStorage } from '@softov/scena/core';
+import { isWindowSurface } from '@softov/scena';
 import { hostKey } from '../lib/storage-keys.js';
+import { isView, RIGHT_SIDEBAR } from './right-sidebar.js';
 
-/** A main tab as kept: scena's mount, with the title its tab showed until the page loads its own. */
+/** A tab as kept. A save before scena 0.8.0 kept the title here; scena now keeps it in `props`. */
 type KeptMount = SessionMount & { title?: Label };
 
 const stored = createLocalStorageSessionStorage({ key: hostKey('ahpd-web.session.v1') });
 
-/** The main panel's tabs only; the sidebars are the shell's, mounted when it registers. */
-function keeper(scena: Scena): SessionStorage {
+/** The surfaces whose tabs are kept: `main`, the right sidebar, and each window a tab was dragged out to. */
+function keptSurface(surface: SurfaceName): boolean {
+  return surface === 'main' || surface === RIGHT_SIDEBAR || isWindowSurface(surface);
+}
+
+/** Whether a mount is kept: a tab on a kept surface, but not a view the shell mounts in the sidebar itself. */
+function kept(mount: { key: string; surface: SurfaceName }): boolean {
+  return keptSurface(mount.surface) && !(mount.surface === RIGHT_SIDEBAR && isView(mount.key));
+}
+
+function keeper(): SessionStorage {
   return {
     load: () => stored.load(),
     clear: () => stored.clear(),
-    // The icon is the component's, so a tab shows the current one.
-    save: (snapshot: SessionSnapshot) => {
-      const shown = new Map(scena.surfaces.listAt('main').map((one) => [one.key, one.props?.title]));
-      const mounts: KeptMount[] = snapshot.mounts
-        .filter((one) => one.surface === 'main')
-        .map((one) => {
-          const title = shown.get(one.key);
-          return title === undefined ? one : { ...one, title };
-        });
-      return stored.save({ ...snapshot, mounts });
-    },
+    // Only the title: the icon and the colour are the component's, so a reopened tab shows the current ones.
+    save: (snapshot: SessionSnapshot) => stored.save({
+      ...snapshot,
+      mounts: snapshot.mounts.filter(kept).map(({ props, ...mount }) => (props?.title === undefined ? mount : { ...mount, props: { title: props.title } })),
+    }),
   };
 }
 
-/** Reopens the main panel's tabs from the last visit, then keeps them as they change. */
+/** Reopens the tabs of the last visit, each on its surface, then keeps them as they change. */
 export async function keepTabs(scena: Scena, live: () => boolean): Promise<Disposable | null> {
   const snapshot = await stored.load();
   if (!live()) return null;
-  // Each open focuses its tab, so the tab that had the focus gets it back after the last one.
-  const focused = scena.layout.get().surfaces.main?.activeContainerKey;
-  for (const mount of (snapshot?.mounts ?? []) as KeptMount[]) {
-    if (mount.surface !== 'main' || scena.components.get(mount.component.component) === undefined) continue;
-    scena.surfaces.open({ surface: 'main', key: mount.key, resource: mount.component, ...(mount.title === undefined ? {} : { props: { title: mount.title } }) } as never);
+  const mounts = ((snapshot?.mounts ?? []) as KeptMount[]).filter((mount) => kept(mount) && scena.components.get(mount.component.component) !== undefined);
+  // Each open focuses its tab, so each surface's focused tab gets the focus back after the last one.
+  const surfaces = [...new Set(mounts.map((mount) => mount.surface))];
+  const focused = new Map(surfaces.map((surface) => [surface, scena.layout.get().surfaces[surface]?.activeContainerKey]));
+  for (const mount of mounts) {
+    const props = mount.props ?? (mount.title === undefined ? undefined : { title: mount.title });
+    scena.surfaces.open({ surface: mount.surface, key: mount.key, resource: mount.component, ...(props === undefined ? {} : { props }) } as never);
   }
-  if (focused !== undefined && scena.surfaces.listAt('main').some((mount) => mount.key === focused)) scena.surfaces.focus(focused);
-  scena.setSessionStorage(keeper(scena));
+  for (const [surface, key] of focused) {
+    if (key !== undefined && scena.surfaces.listAt(surface).some((mount) => mount.key === key)) scena.surfaces.focus(key);
+  }
+  scena.setSessionStorage(keeper());
   return scena.session.enableAutoPersist();
 }

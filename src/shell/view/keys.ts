@@ -11,7 +11,8 @@ function isTyping(event: KeyboardEvent): boolean {
 
 /**
  * Runs the command bound to a key. scena keeps the bindings a command's `keys`
- * declare but does not listen to the window; this does. A key with Ctrl, Alt
+ * declare but does not listen to the window; this does, on the page and on
+ * each window a tab opens in. A key with Ctrl, Alt
  * or Meta is a shortcut even while typing; a bare key is not.
  */
 export function attachKeys(scena: Scena): Disposable {
@@ -32,6 +33,25 @@ export function attachKeys(scena: Scena): Disposable {
       event.preventDefault();
     }
   };
+  // A tab dragged out into a window of its own gets its keys on that window,
+  // so each window scena opens listens too, until it closes.
+  const windows = new Set<Window>([window]);
   window.addEventListener('keydown', onKeyDown);
-  return { dispose: () => window.removeEventListener('keydown', onKeyDown) };
+  const opened = scena.events.on('scena:window:opened', (raw) => {
+    const { window: other } = raw as { window: Window };
+    windows.add(other);
+    other.addEventListener('keydown', onKeyDown);
+  });
+  const closed = scena.events.on('scena:window:closed', (raw) => {
+    const { window: other } = raw as { window: Window };
+    windows.delete(other);
+    other.removeEventListener('keydown', onKeyDown);
+  });
+  return {
+    dispose: () => {
+      opened.dispose();
+      closed.dispose();
+      for (const one of windows) one.removeEventListener('keydown', onKeyDown);
+    },
+  };
 }
