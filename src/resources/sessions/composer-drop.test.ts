@@ -1,9 +1,12 @@
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { createScena } from '@softov/scena/core';
+import { ScenaProvider } from '@softov/scena/react';
 import type { DroppedThing } from '@softov/scena/types';
 import { ahpPaths } from '../../bridges/data.js';
 import { FILE_KIND } from '../files/viewers.js';
-import { asAttachment, pastedFiles } from './composer-drop.js';
+import { asAttachment, pastedFiles, useComposerDrop } from './composer-drop.js';
 
 const files = (count: number) => ({ length: count }) as unknown as FileList;
 
@@ -48,5 +51,16 @@ describe('asAttachment', () => {
     expect(asAttachment(scena, session('h', 'ahp-session://gone'), 'h', undefined)).toBeNull();
     expect(asAttachment(scena, { ...fileTab, key: 'file:other:FilePage:/repo/README.md' }, 'h', undefined)).toBeNull();
     expect(asAttachment(scena, { from: 'tab', key: 'agent:h:claude', resource: { component: 'AgentPage' }, surface: 'main' }, 'h', undefined)).toBeNull();
+  });
+});
+
+describe('useComposerDrop', () => {
+  it('marks the box as a drop area, so a tab group under it hides its drop box there', () => {
+    const Box = (): ReturnType<typeof createElement> => {
+      const drop = useComposerDrop({ host: 'h', attach: () => {}, insert: () => {}, upload: () => {} });
+      return createElement('div', drop.props);
+    };
+    const markup = renderToStaticMarkup(createElement(ScenaProvider, { scena: createScena(), children: createElement(Box) }));
+    expect(markup).toContain('data-scena-drop-area="true"');
   });
 });

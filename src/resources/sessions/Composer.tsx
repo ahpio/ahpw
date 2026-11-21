@@ -508,10 +508,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         className="web-composer__box"
         data-drop={drop.dropping ?? undefined}
         data-ring={ringOf(summary.status)}
-        onDragOver={drop.onDragOver}
-        onDragLeave={drop.onDragLeave}
-        onDrop={drop.onDrop}
-        onPaste={drop.onPaste}
+        {...drop.props}
       >
         <Attached
           attachments={attachments}
