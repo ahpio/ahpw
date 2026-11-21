@@ -1,7 +1,7 @@
 ---
 title: A session dragged from the list opens in a tab group
 domain: sessions
-status: planned
+status: dropped
 priority: medium
 created: 2026-10-28
 revalidated: 2026-10-28
@@ -68,7 +68,7 @@ group dragover (capture) -> preventDefault -> drop -> ahp.openSession -> move th
 
 ## Resume state
 
-- **Done so far:** nothing.
+- **Done so far:** nothing. Dropped 2026-11-21: scena 0.8.0 takes the drop this plan caught by hand, and [`sessions/20261121-1215-a-row-drags-to-a-surface-or-a-composer`](../20261121-1215-a-row-drags-to-a-surface-or-a-composer/plan.md) replaces it.
 - **Next action:** [task-01-a-session-row-drags.md](task-01-a-session-row-drags.md).
 - **Open questions:** none.
 - **Watch out for:** scena reconciles a tree key that has no mount away, so open the session before you move its key.
