@@ -585,7 +585,7 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
             </button>
           </div>
         )}
-        <div className="web-composer__box" data-drop={drop.dropping ?? undefined} onDragOver={drop.onDragOver} onDragLeave={drop.onDragLeave} onDrop={drop.onDrop} onPaste={drop.onPaste}>
+        <div className="web-composer__box" data-drop={drop.dropping ?? undefined} {...drop.props}>
           <Attached attachments={attachments} folder={where} onRemove={(index) => setAttachments((held) => held.filter((_, at) => at !== index))} />
           <div className="web-composer__bar">
             <textarea

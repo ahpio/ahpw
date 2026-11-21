@@ -53,10 +53,17 @@ export function useComposerDrop({ host: on, own, attach, insert, upload }: {
   upload: (files: FileList) => void;
 }): {
   dropping: Dropping;
-  onDragOver: (event: DragEvent) => void;
-  onDragLeave: (event: DragEvent) => void;
-  onDrop: (event: DragEvent) => void;
-  onPaste: (event: ClipboardEvent) => void;
+  /**
+   * Spread on the box. `data-scena-drop-area` tells a tab group under it that
+   * the box takes its own drops, so the group hides its drop box over it.
+   */
+  props: {
+    onDragOver: (event: DragEvent) => void;
+    onDragLeave: (event: DragEvent) => void;
+    onDrop: (event: DragEvent) => void;
+    onPaste: (event: ClipboardEvent) => void;
+    'data-scena-drop-area': true;
+  };
 } {
   const [dropping, setDropping] = useState<Dropping>(null);
   const scena = useScena();
@@ -85,54 +92,57 @@ export function useComposerDrop({ host: on, own, attach, insert, upload }: {
   });
   return {
     dropping,
-    onDragOver: (event) => {
-      area.props.onDragOver(event as DragEvent<HTMLElement>);
-      // The area took it: the box shows what a drop would do, as for a host
-      // file, with Shift on a file tab as a mention.
-      if (event.isPropagationStopped()) {
-        setDropping(event.shiftKey && over.current === 'file' ? 'mention' : 'attach');
-        return;
-      }
-      const host = carriesHostFile(event.dataTransfer);
-      if (!host && !Array.from(event.dataTransfer.types).includes('Files')) return;
-      event.preventDefault();
-      event.dataTransfer.dropEffect = 'copy';
-      setDropping(host && event.shiftKey ? 'mention' : 'attach');
-    },
-    onDragLeave: (event) => {
-      area.props.onDragLeave(event as DragEvent<HTMLElement>);
-      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropping(null);
-    },
-    onDrop: (event) => {
-      setDropping(null);
-      shift.current = event.shiftKey;
-      area.props.onDrop(event as DragEvent<HTMLElement>);
-      if (event.isPropagationStopped()) return;
-      const host = droppedHostFile(event.dataTransfer);
-      if (host !== null) {
-        event.preventDefault();
-        if (host.host !== on) return;
-        const attachment = resourceAttachment(host.uri, host.directory);
-        if (!event.shiftKey) {
-          attach(attachment);
+    props: {
+      onDragOver: (event) => {
+        area.props.onDragOver(event as DragEvent<HTMLElement>);
+        // The area took it: the box shows what a drop would do, as for a host
+        // file, with Shift on a file tab as a mention.
+        if (event.isPropagationStopped()) {
+          setDropping(event.shiftKey && over.current === 'file' ? 'mention' : 'attach');
           return;
         }
-        // As ahpapp: the path goes in as `@path` (a folder with its slash) and the file is attached
-        // with that token, so the host gets the file and the text says where it was named.
-        const token = `@${folderLabel(host.uri)}${host.directory ? '/' : ''}`;
-        insert(`${token} `);
-        attach(withToken(attachment, token));
-        return;
-      }
-      if (event.dataTransfer.files.length === 0) return;
-      event.preventDefault();
-      upload(event.dataTransfer.files);
-    },
-    onPaste: (event) => {
-      const files = pastedFiles(event.clipboardData);
-      if (files === null) return;
-      event.preventDefault();
-      upload(files);
+        const host = carriesHostFile(event.dataTransfer);
+        if (!host && !Array.from(event.dataTransfer.types).includes('Files')) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+        setDropping(host && event.shiftKey ? 'mention' : 'attach');
+      },
+      onDragLeave: (event) => {
+        area.props.onDragLeave(event as DragEvent<HTMLElement>);
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropping(null);
+      },
+      onDrop: (event) => {
+        setDropping(null);
+        shift.current = event.shiftKey;
+        area.props.onDrop(event as DragEvent<HTMLElement>);
+        if (event.isPropagationStopped()) return;
+        const host = droppedHostFile(event.dataTransfer);
+        if (host !== null) {
+          event.preventDefault();
+          if (host.host !== on) return;
+          const attachment = resourceAttachment(host.uri, host.directory);
+          if (!event.shiftKey) {
+            attach(attachment);
+            return;
+          }
+          // As ahpapp: the path goes in as `@path` (a folder with its slash) and the file is attached
+          // with that token, so the host gets the file and the text says where it was named.
+          const token = `@${folderLabel(host.uri)}${host.directory ? '/' : ''}`;
+          insert(`${token} `);
+          attach(withToken(attachment, token));
+          return;
+        }
+        if (event.dataTransfer.files.length === 0) return;
+        event.preventDefault();
+        upload(event.dataTransfer.files);
+      },
+      onPaste: (event) => {
+        const files = pastedFiles(event.clipboardData);
+        if (files === null) return;
+        event.preventDefault();
+        upload(files);
+      },
+      'data-scena-drop-area': true,
     },
   };
 }
