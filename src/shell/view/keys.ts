@@ -1,4 +1,5 @@
 import type { Disposable, Scena } from '@softov/scena/types';
+import { listSurfaceWindows } from '@softov/scena/react';
 
 /** Elements where a bare key is typing, not a shortcut. */
 const TYPING_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
@@ -34,9 +35,14 @@ export function attachKeys(scena: Scena): Disposable {
     }
   };
   // A tab dragged out into a window of its own gets its keys on that window,
-  // so each window scena opens listens too, until it closes.
+  // so each window scena opens listens too, until it closes. The windows open
+  // already, as after a reload, which opens them before this runs, listen now.
   const windows = new Set<Window>([window]);
   window.addEventListener('keydown', onKeyDown);
+  for (const { window: other } of listSurfaceWindows(scena)) {
+    windows.add(other);
+    other.addEventListener('keydown', onKeyDown);
+  }
   const opened = scena.events.on('scena:window:opened', (raw) => {
     const { window: other } = raw as { window: Window };
     windows.add(other);
