@@ -67,6 +67,11 @@ interface View {
 
 const views = new Map<string, View>();
 
+/** Whether `key` is a view `mountRight` holds: the shell mounts it in the sidebar on each load, so it is not kept there. */
+export function isView(key: string): boolean {
+  return views.has(key);
+}
+
 /** Whether `surface` has the tab `key` open. */
 const isOpenAt = (scena: Scena, surface: string, key: string): boolean => scena.surfaces.listAt(surface).some((mount) => mount.key === key);
 

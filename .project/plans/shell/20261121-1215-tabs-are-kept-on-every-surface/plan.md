@@ -1,7 +1,7 @@
 ---
 title: Tabs are kept on every surface, and a window works
 domain: shell
-status: planned
+status: active
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -75,8 +75,8 @@ a session tab moves -> SessionPage reads its surface -> beside = surface is side
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - tabs are kept on every surface](task-01-tabs-are-kept-on-every-surface.md) | todo | - |
-| [02 - keys reach a window](task-02-keys-reach-a-window.md) | todo | - |
+| [01 - tabs are kept on every surface](task-01-tabs-are-kept-on-every-surface.md) | done | - |
+| [02 - keys reach a window](task-02-keys-reach-a-window.md) | doing | - |
 | [03 - beside follows the tab](task-03-beside-follows-the-tab.md) | todo | - |
 | [04 - the records follow the drag](task-04-the-records-follow-the-drag.md) | todo | 01, 03 |
 
@@ -87,8 +87,8 @@ a session tab moves -> SessionPage reads its surface -> beside = surface is side
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** merge [#114](https://github.com/ahpio/ahpw/pull/114), then [task-01-tabs-are-kept-on-every-surface.md](task-01-tabs-are-kept-on-every-surface.md).
+- **Done so far:** task 01 done 2026-11-21. Task 02 started 2026-11-21.
+- **Next action:** [task-02-keys-reach-a-window.md](task-02-keys-reach-a-window.md).
 - **Open questions:** none.
 - **Watch out for:** the right sidebar's fixed panes are mounts too; keeping them would mount them twice.
 

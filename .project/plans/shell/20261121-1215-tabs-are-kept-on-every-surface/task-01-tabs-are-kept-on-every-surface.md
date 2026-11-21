@@ -1,6 +1,6 @@
 ---
 title: Tabs are kept on every surface
-status: todo
+status: done
 depends: []
 layer: "shell"
 refs:
@@ -32,3 +32,8 @@ The right sidebar's fixed panes are not kept.
 - `npx vitest run` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 5. A view `mountRight` holds is told by `isView` in `right-sidebar.ts`; on `main` it is still kept, as before.
+- The saved props hold the title only, so a reopened tab shows the component's current icon, as the old code meant.
+- A save from before scena 0.8.0 keeps its title in `title`; the reopening still reads it.
+- `tsc -b` and the tests pass.
