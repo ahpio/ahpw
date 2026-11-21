@@ -1,4 +1,4 @@
-import { Fragment, useState, type DragEvent, type MouseEvent, type ReactElement, type ReactNode } from 'react';
+import { Fragment, memo, useMemo, useRef, useState, type DragEvent, type ReactElement, type ReactNode } from 'react';
 import { useI18n } from '@softov/scena/react';
 import { ContextMenu } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
@@ -96,10 +96,14 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowD
   const needle = filter.trim().toLowerCase();
   const shown = shownRows(rows, searchRows, needle);
 
-  const openMenu = (event: MouseEvent, row: Row): void => {
-    event.preventDefault();
-    setMenu({ x: event.clientX, y: event.clientY, items: row.menu });
-  };
+  // The latest callbacks, read when a row calls, so the rows keep one `acts`.
+  const latest = useRef({ onOpen, onRowDragStart });
+  latest.current = { onOpen, onRowDragStart };
+  const acts = useMemo<RowActs>(() => ({
+    open: (key) => latest.current.onOpen(key),
+    dragStart: (event, row) => latest.current.onRowDragStart?.(event, row),
+    menu: (x, y, row) => setMenu({ x, y, items: row.menu }),
+  }), []);
 
   return (
     <div className="web-explorer">
@@ -148,68 +152,7 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowD
                   </li>
                 ) : null}
                 {hidden ? null : (
-                  <li
-                    role="option"
-                    aria-selected={row.key === selected}
-                    tabIndex={0}
-                    className="web-row"
-                    data-selected={row.key === selected ? 'true' : 'false'}
-                    onClick={() => onOpen(row.key)}
-                    {...(onRowDragStart === undefined ? {} : { draggable: true, onDragStart: (event: DragEvent<HTMLElement>) => onRowDragStart(event, row) })}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        onOpen(row.key);
-                      }
-                      if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
-                        event.preventDefault();
-                        const box = event.currentTarget.getBoundingClientRect();
-                        setMenu({ x: box.left + 24, y: box.bottom, items: row.menu });
-                      }
-                    }}
-                    onContextMenu={(event) => openMenu(event, row)}
-                  >
-                    {row.icon !== undefined
-                      ? <span className="web-row__icon" title={row.dotLabel} aria-label={row.dotLabel}>{row.icon}</span>
-                      : <RowMark row={row} />}
-                    <span className="web-row__body">
-                      <span className="web-row__head">
-                        <span className="web-row__title" data-strong={row.strong === true ? 'true' : 'false'}>{row.title}</span>
-                        {row.time === undefined ? null : <span className="web-row__time">{row.time}</span>}
-                        {row.button === undefined ? null : (
-                          <button
-                            type="button"
-                            className="web-row__button"
-                            data-variant="primary"
-                            disabled={row.button.busy === true}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              row.button?.run();
-                            }}
-                            onKeyDown={(event) => event.stopPropagation()}
-                          >
-                            {row.button.label}
-                          </button>
-                        )}
-                        {row.action === undefined ? null : (
-                          <button
-                            type="button"
-                            className="web-row__action"
-                            title={row.action.label}
-                            aria-label={row.action.label}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              row.action?.run();
-                            }}
-                            onKeyDown={(event) => event.stopPropagation()}
-                          >
-                            {row.action.icon}
-                          </button>
-                        )}
-                      </span>
-                      {row.lines.map((line, index) => <span key={index} className="web-row__line">{line}</span>)}
-                    </span>
-                  </li>
+                  <ListRow row={row} selected={row.key === selected} drags={onRowDragStart !== undefined} acts={acts} />
                 )}
               </Fragment>
             );
@@ -221,6 +164,88 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowD
     </div>
   );
 }
+
+/** What a row calls; one object for the list's life, so a row redraws only when its own props change. */
+interface RowActs {
+  open: (key: string) => void;
+  dragStart: (event: DragEvent<HTMLElement>, row: Row) => void;
+  menu: (x: number, y: number, row: Row) => void;
+}
+
+/**
+ * One row. Memoised: a click that selects a row redraws that row and the one
+ * it unselects, not the whole list. A row redraws when its `Row` object
+ * changes, so a caller that builds its rows in a `useMemo` keeps the rest.
+ */
+const ListRow = memo(function ListRow({ row, selected, drags, acts }: { row: Row; selected: boolean; drags: boolean; acts: RowActs }): ReactElement {
+  return (
+    <li
+      role="option"
+      aria-selected={selected}
+      tabIndex={0}
+      className="web-row"
+      data-selected={selected ? 'true' : 'false'}
+      onClick={() => acts.open(row.key)}
+      {...(drags ? { draggable: true, onDragStart: (event: DragEvent<HTMLElement>) => acts.dragStart(event, row) } : {})}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          acts.open(row.key);
+        }
+        if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+          event.preventDefault();
+          const box = event.currentTarget.getBoundingClientRect();
+          acts.menu(box.left + 24, box.bottom, row);
+        }
+      }}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        acts.menu(event.clientX, event.clientY, row);
+      }}
+    >
+      {row.icon !== undefined
+        ? <span className="web-row__icon" title={row.dotLabel} aria-label={row.dotLabel}>{row.icon}</span>
+        : <RowMark row={row} />}
+      <span className="web-row__body">
+        <span className="web-row__head">
+          <span className="web-row__title" data-strong={row.strong === true ? 'true' : 'false'}>{row.title}</span>
+          {row.time === undefined ? null : <span className="web-row__time">{row.time}</span>}
+          {row.button === undefined ? null : (
+            <button
+              type="button"
+              className="web-row__button"
+              data-variant="primary"
+              disabled={row.button.busy === true}
+              onClick={(event) => {
+                event.stopPropagation();
+                row.button?.run();
+              }}
+              onKeyDown={(event) => event.stopPropagation()}
+            >
+              {row.button.label}
+            </button>
+          )}
+          {row.action === undefined ? null : (
+            <button
+              type="button"
+              className="web-row__action"
+              title={row.action.label}
+              aria-label={row.action.label}
+              onClick={(event) => {
+                event.stopPropagation();
+                row.action?.run();
+              }}
+              onKeyDown={(event) => event.stopPropagation()}
+            >
+              {row.action.icon}
+            </button>
+          )}
+        </span>
+        {row.lines.map((line, index) => <span key={index} className="web-row__line">{line}</span>)}
+      </span>
+    </li>
+  );
+});
 
 /** A row's dot, or its host icon with the dot as a badge on its corner. */
 function RowMark({ row }: { row: Row }): ReactElement {
