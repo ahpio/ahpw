@@ -1,6 +1,6 @@
 ---
 title: Keys reach a window
-status: todo
+status: done
 depends: []
 layer: "shell"
 refs:
@@ -28,3 +28,6 @@ A key binding works in a window of its own, as it does in the page.
 - `npx vitest run` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 3. The test uses a same-origin iframe as the window.
+- `tsc -b` and the tests pass.
