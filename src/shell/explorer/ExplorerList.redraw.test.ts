@@ -53,3 +53,24 @@ describe('ExplorerList redraws', () => {
     host.remove();
   });
 });
+
+describe('ExplorerList row drags', () => {
+  it('hands a row\'s drag end to onRowDragEnd, with the row', async () => {
+    (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+    const ended = vi.fn();
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const root = createRoot(host);
+    await act(async () => {
+      root.render(createElement(ScenaProvider, { scena: createScena(), children: createElement(ExplorerList, { label: 'List', rows: [row('a')], selected: null, onOpen: () => {}, onRowDragStart: () => {}, onRowDragEnd: ended }) }));
+    });
+    const li = host.querySelector('li[role="option"]') as HTMLElement;
+    await act(async () => {
+      li.dispatchEvent(new Event('dragend', { bubbles: true }));
+    });
+    expect(ended).toHaveBeenCalledTimes(1);
+    expect(ended.mock.calls[0]?.[1]).toMatchObject({ key: 'a' });
+    await act(async () => root.unmount());
+    host.remove();
+  });
+});

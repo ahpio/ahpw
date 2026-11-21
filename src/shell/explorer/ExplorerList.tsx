@@ -66,7 +66,7 @@ interface Menu {
  * right-click. Its section's title and buttons are scena's header, declared on
  * the section's component; `label` only names the list for assistive tech.
  */
-export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowDragStart, notice, filterLabel, hostLines }: {
+export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowDragStart, onRowDragEnd, notice, filterLabel, hostLines }: {
   label: string;
   rows: Row[];
   /**
@@ -79,6 +79,8 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowD
   onOpen: (key: string) => void;
   /** With it, a row drags: it fills the drag's data, as a session row starts scena's open drag. */
   onRowDragStart?: (event: DragEvent<HTMLElement>, row: Row) => void;
+  /** Called when a row's drag ends, taken or not, as a session row opens a window when dropped outside the browser. */
+  onRowDragEnd?: (event: DragEvent<HTMLElement>, row: Row) => void;
   notice?: ReactNode;
   filterLabel?: string;
   /** With every host, a line above the rows for each shown host that is not connected. */
@@ -97,11 +99,12 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowD
   const shown = shownRows(rows, searchRows, needle);
 
   // The latest callbacks, read when a row calls, so the rows keep one `acts`.
-  const latest = useRef({ onOpen, onRowDragStart });
-  latest.current = { onOpen, onRowDragStart };
+  const latest = useRef({ onOpen, onRowDragStart, onRowDragEnd });
+  latest.current = { onOpen, onRowDragStart, onRowDragEnd };
   const acts = useMemo<RowActs>(() => ({
     open: (key) => latest.current.onOpen(key),
     dragStart: (event, row) => latest.current.onRowDragStart?.(event, row),
+    dragEnd: (event, row) => latest.current.onRowDragEnd?.(event, row),
     menu: (x, y, row) => setMenu({ x, y, items: row.menu }),
   }), []);
 
@@ -169,6 +172,7 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowD
 interface RowActs {
   open: (key: string) => void;
   dragStart: (event: DragEvent<HTMLElement>, row: Row) => void;
+  dragEnd: (event: DragEvent<HTMLElement>, row: Row) => void;
   menu: (x: number, y: number, row: Row) => void;
 }
 
@@ -186,7 +190,7 @@ const ListRow = memo(function ListRow({ row, selected, drags, acts }: { row: Row
       className="web-row"
       data-selected={selected ? 'true' : 'false'}
       onClick={() => acts.open(row.key)}
-      {...(drags ? { draggable: true, onDragStart: (event: DragEvent<HTMLElement>) => acts.dragStart(event, row) } : {})}
+      {...(drags ? { draggable: true, onDragStart: (event: DragEvent<HTMLElement>) => acts.dragStart(event, row), onDragEnd: (event: DragEvent<HTMLElement>) => acts.dragEnd(event, row) } : {})}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();

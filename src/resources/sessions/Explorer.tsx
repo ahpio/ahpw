@@ -1,6 +1,7 @@
 import { useEffect, useMemo, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
-import { startOpenDrag, useI18n, useScena, useStore } from '@softov/scena/react';
+import { droppedAt, endedOutside, openInWindow } from '@softov/scena';
+import { endOpenDrag, startOpenDrag, useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Spinner } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
 import type { AgentInfo, SessionSummary } from '@microsoft/agent-host-protocol';
@@ -39,6 +40,16 @@ function menuOf(host: string, session: SessionSummary, open: () => void, pinned:
     { title: translate('sessions/explorer/open'), onSelect: (menu) => { menu.closeMenu(); open(); } },
     ...sessionActs(host, session, { pinned, pin }),
   ];
+}
+
+/** What a session row's drag carries: the session's page, as a surface opens it. */
+function rowDrag(key: string) {
+  const { host, id } = refOf(key);
+  return {
+    key: sessionKey(host, id),
+    resource: { component: 'SessionPage', host, resource: id },
+    props: { title: { path: titlePath(host, id) } },
+  };
 }
 
 /** One session and the host it is on. */
@@ -142,13 +153,13 @@ export default function SessionExplorer(): ReactElement {
       selected={active === undefined ? null : refKey(active.host, active.resource)}
       onOpen={open}
       // A row drags onto a surface, where the session opens or its tab moves, or onto a composer as a reference.
-      onRowDragStart={(event, row) => {
-        const { host, id } = refOf(row.key);
-        startOpenDrag(event.dataTransfer, {
-          key: sessionKey(host, id),
-          resource: { component: 'SessionPage', host, resource: id },
-          props: { title: { path: titlePath(host, id) } },
-        });
+      onRowDragStart={(event, row) => startOpenDrag(event.dataTransfer, rowDrag(row.key))}
+      // Dropped outside the browser, where nothing took it, the session opens in a window of its own there, as a tab dragged out does.
+      onRowDragEnd={(event, row) => {
+        endOpenDrag();
+        const win = event.currentTarget.ownerDocument.defaultView;
+        if (win === null || !endedOutside(win, event)) return;
+        openInWindow(scena, rowDrag(row.key), droppedAt(win, event.screenX, event.screenY));
       }}
       notice={notice}
       filterLabel={t('sessions/explorer/filter')}
