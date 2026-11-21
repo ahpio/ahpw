@@ -8,6 +8,7 @@ import {
   type AutomationCapabilities,
   type AutomationEntry,
   type AutomationState as Catalogue,
+  type SessionSummary,
   type StateAction,
 } from '@microsoft/agent-host-protocol';
 import { ahpPaths, AUTOMATIONS, hostBridge } from '../../bridges/data.js';
@@ -16,7 +17,8 @@ import { embedMode } from '../../shell/embed/index.js';
 import { writeLastHost } from '../sessions/last-host.js';
 import { useChannel } from '../../bridges/channel.js';
 import { folderLabel, newId } from '../../bridges/words.js';
-import { cronWords, definitionOf, draftOf, draftProblem, type Draft } from './words.js';
+import { cronWords, definitionOf, draftOf, draftProblem, localInput, localZone, type Draft } from './words.js';
+import { oneTimeOf, type NextCapabilities } from './next.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { Field } from '../../shell/view/Field.js';
 import { plural } from '../../i18n/locales.js';
@@ -90,8 +92,9 @@ export function AutomationForm({ host, entry, header }: { host: string; entry?: 
   const scena = useScena();
   const { t } = useI18n();
   const agents = useStore<AgentInfo[]>(ahpPaths(host).agents) ?? [];
-  const caps = useStore<AutomationCapabilities | null>(ahpPaths(host).automationCaps);
+  const caps = useStore<AutomationCapabilities | null>(ahpPaths(host).automationCaps) as NextCapabilities | null;
   const home = useStore<string | null>(ahpPaths(host).defaultDirectory);
+  const sessions = useStore<SessionSummary[]>(ahpPaths(host).sessions) ?? [];
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -104,6 +107,23 @@ export function AutomationForm({ host, entry, header }: { host: string; entry?: 
   const problem = draftProblem(shown);
   const minimum = caps?.schedules?.minIntervalMinutes;
   const preset = PRESETS.find((one) => one.expression === shown.expression.trim());
+  // A host that refuses an update, as after a one-time trigger ran, leaves the form to be read.
+  const locked = entry !== undefined && !entry.operations.includes('update' as never);
+  const ranOnce = entry?.definition.triggers.some((trigger) => oneTimeOf(trigger) !== undefined) === true;
+  // The run targets this host offers, and the one the automation already has.
+  const targets = caps?.targets === undefined ? [] : [
+    'newSession',
+    ...(caps.targets.previousSession === undefined && shown.target !== 'previousSession' ? [] : ['previousSession']),
+    ...(caps.targets.chat === undefined && shown.target !== 'chat' ? [] : ['chat']),
+  ] as Draft['target'][];
+  // Each session's chats, named `session › chat`, for a chat target.
+  const chats = sessions.flatMap((one) => (one.chats ?? []).map((chat) => ({
+    chat: chat.resource,
+    session: one.resource,
+    label: chat.title === '' || chat.title === one.title ? one.title : `${one.title} › ${chat.title}`,
+  })));
+  // Tomorrow at 09:00, which is what a person most often means by "once".
+  const tomorrow = (): string => { const at = new Date(); at.setDate(at.getDate() + 1); at.setHours(9, 0, 0, 0); return localInput(at.toISOString()); };
 
   const save = (): void => {
     if (problem !== undefined) return;
@@ -131,6 +151,7 @@ export function AutomationForm({ host, entry, header }: { host: string; entry?: 
         />
       ) : null}
 
+      <fieldset className="web-automation-form__fields" disabled={locked}>
       <Field label={t('automations/edit/title')}>
         <input className="web-field" value={shown.title} onChange={(event) => set({ title: event.target.value })} />
       </Field>
@@ -141,20 +162,45 @@ export function AutomationForm({ host, entry, header }: { host: string; entry?: 
       <Section icon={EMOJIcon.automations} title={t('automations/page/sections/schedule')} />
       <div className="web-form__row">
         <Field label={t('automations/edit/schedule')}>
-          <select className="web-field" value={preset?.expression ?? 'custom'} onChange={(event) => { if (event.target.value !== 'custom') set({ expression: event.target.value }); }}>
+          <select
+            className="web-field"
+            value={shown.once ? 'once' : preset?.expression ?? 'custom'}
+            onChange={(event) => {
+              const value = event.target.value;
+              if (value === 'once') set({ once: true, runAt: shown.runAt === '' ? tomorrow() : shown.runAt });
+              else if (value !== 'custom') set({ once: false, expression: value });
+              else set({ once: false });
+            }}
+          >
             {PRESETS.map((one) => <option key={one.key} value={one.expression}>{t(`automations/edit/presets/${one.key}`)}</option>)}
+            {caps?.oneTime === undefined && !shown.once ? null : <option value="once">{t('automations/edit/presets/once')}</option>}
             <option value="custom">{t('automations/edit/custom')}</option>
           </select>
         </Field>
-        <Field
-          label={t('automations/edit/cron')}
-          hint={`${shown.expression.trim() === '' ? t('automations/edit/byHandHint') : cronWords(shown.expression)}${minimum === undefined ? '' : ` ${plural('automations/edit/minimum', minimum)}`}`}
-        >
-          <input className="web-field" value={shown.expression} placeholder={t('automations/edit/cronPlaceholder')} onChange={(event) => set({ expression: event.target.value })} />
-        </Field>
+        {shown.once ? (
+          <Field label={t('automations/edit/runAt')} hint={t('automations/edit/runAtHint', { zone: localZone() })}>
+            <input className="web-field" type="datetime-local" value={shown.runAt} onChange={(event) => set({ runAt: event.target.value })} />
+          </Field>
+        ) : (
+          <Field
+            label={t('automations/edit/cron')}
+            hint={`${shown.expression.trim() === '' ? t('automations/edit/byHandHint') : cronWords(shown.expression)}${minimum === undefined ? '' : ` ${plural('automations/edit/minimum', minimum)}`}`}
+          >
+            <input className="web-field" value={shown.expression} placeholder={t('automations/edit/cronPlaceholder')} onChange={(event) => set({ expression: event.target.value })} />
+          </Field>
+        )}
       </div>
 
-      {shown.expression.trim() === '' ? null : (
+      {shown.once ? (
+        <div className="web-form__row">
+          <Field label={t('automations/edit/missedRuns')} hint={t('automations/edit/missedHint')}>
+            <select className="web-field" value={shown.misfire} onChange={(event) => set({ misfire: event.target.value === 'runOnce' ? 'runOnce' : 'skip' })}>
+              <option value="skip">{t('automations/edit/skip')}</option>
+              <option value="runOnce">{t('automations/edit/runOnce')}</option>
+            </select>
+          </Field>
+        </div>
+      ) : shown.expression.trim() === '' ? null : (
         <div className="web-form__row">
           <Field label={t('automations/edit/timeZone')}>
             <input className="web-field" value={shown.timeZone} onChange={(event) => set({ timeZone: event.target.value })} />
@@ -168,6 +214,7 @@ export function AutomationForm({ host, entry, header }: { host: string; entry?: 
         </div>
       )}
 
+      {shown.once ? null : (
       <div className="web-form__row">
         <Field label={t('automations/edit/afterRuns')} hint={t('automations/edit/keepsOn')}>
           <input className="web-field" type="number" min={1} step={1} value={shown.afterRuns} onChange={(event) => set({ afterRuns: event.target.value })} />
@@ -176,6 +223,37 @@ export function AutomationForm({ host, entry, header }: { host: string; entry?: 
           <input className="web-field" type="date" value={shown.afterDate} onChange={(event) => set({ afterDate: event.target.value })} />
         </Field>
       </div>
+      )}
+
+      {targets.length === 0 ? null : (
+        <>
+          <Section icon={EMOJIcon.forward} title={t('automations/page/sections/target')} />
+          <div className="web-form__row">
+            <Field label={t('automations/edit/eachRun')} hint={t(`automations/edit/targets/${shown.target}Hint`)}>
+              <select className="web-field" value={shown.target} onChange={(event) => set({ target: event.target.value as Draft['target'] })}>
+                {targets.map((one) => <option key={one} value={one}>{t(`automations/edit/targets/${one}`)}</option>)}
+              </select>
+            </Field>
+            {shown.target !== 'chat' ? null : (
+              <Field label={t('automations/edit/chat')}>
+                <select
+                  className="web-field"
+                  value={shown.chat}
+                  onChange={(event) => {
+                    const picked = chats.find((one) => one.chat === event.target.value);
+                    set({ chat: event.target.value, chatSession: picked?.session ?? '' });
+                  }}
+                >
+                  <option value="" disabled />
+                  {chats.map((one) => <option key={one.chat} value={one.chat}>{one.label}</option>)}
+                  {shown.chat === '' || chats.some((one) => one.chat === shown.chat) ? null : <option value={shown.chat}>{shown.chat}</option>}
+                </select>
+              </Field>
+            )}
+          </div>
+        </>
+      )}
+      </fieldset>
 
       {entry === undefined ? (
         <label className="web-input__row">
@@ -184,7 +262,8 @@ export function AutomationForm({ host, entry, header }: { host: string; entry?: 
         </label>
       ) : null}
 
-      {problem === undefined ? null : <p className="web-note">{problem}</p>}
+      {locked ? <p className="web-note">{t(ranOnce ? 'automations/edit/locked' : 'automations/edit/lockedOther')}</p> : null}
+      {problem === undefined || locked ? null : <p className="web-note">{problem}</p>}
       {entry === undefined ? (
         <div className="web-page__actions">
           <Button label={t('automations/edit/create')} variant="primary" disabled={problem !== undefined} onClick={save} />

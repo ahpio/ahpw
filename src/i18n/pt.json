@@ -683,7 +683,9 @@
       "title": "Adicione um título.",
       "message": "Adicione uma mensagem.",
       "schedule": "Use cinco campos no agendamento: minuto, hora, dia, mês e dia da semana.",
-      "runs": "Digite um número inteiro de execuções."
+      "runs": "Digite um número inteiro de execuções.",
+      "runAt": "Escolha quando roda.",
+      "chat": "Escolha o chat para onde vai cada execução."
     },
     "state": {
       "running": "Em execução",
@@ -771,7 +773,9 @@
       "changed": "Alterada",
       "notOffered": "Não oferecido",
       "customAgent": "Agente personalizado",
-      "never": "Nunca"
+      "never": "Nunca",
+      "ran": "Já rodou",
+      "eachRun": "Cada execução"
     },
     "page": {
       "overview": "Visão geral",
@@ -792,7 +796,8 @@
       "sections": {
         "agent": "Agente",
         "schedule": "Agendamento",
-        "details": "Detalhes"
+        "details": "Detalhes",
+        "target": "Para onde vai cada execução"
       }
     },
     "edit": {
@@ -817,7 +822,8 @@
         "every6Hours": "A cada 6 horas",
         "dailyAt9": "Todos os dias às 09:00",
         "weekdaysAt9": "De segunda a sexta às 09:00",
-        "mondayAt5": "Toda segunda-feira às 05:00"
+        "mondayAt5": "Toda segunda-feira às 05:00",
+        "once": "Uma vez, em um horário"
       },
       "custom": "Personalizado",
       "cron": "Expressão cron",
@@ -845,7 +851,21 @@
       "notOfferedPill": "{model} · não oferecido",
       "notOfferedNote": "{agent} não oferece {model}. Escolha um modelo, ou as execuções falham.",
       "instructionsPlaceholder": "O que ele deve fazer a cada execução?",
-      "modelHint": "O modelo de cada execução"
+      "modelHint": "O modelo de cada execução",
+      "runAt": "Roda em",
+      "runAtHint": "Seu horário, {zone}.",
+      "eachRun": "Cada execução",
+      "chat": "Chat",
+      "targets": {
+        "newSession": "Em uma sessão nova",
+        "newSessionHint": "Cada execução abre uma sessão própria.",
+        "previousSession": "Na sessão da última execução",
+        "previousSessionHint": "Cada execução adiciona um turno à sessão da anterior.",
+        "chat": "Em um chat",
+        "chatHint": "Se houver um turno em andamento, a mensagem espera a vez."
+      },
+      "locked": "Esta automação já rodou uma vez, então não pode ser alterada.",
+      "lockedOther": "Este host não permite alterar esta automação."
     },
     "group": {
       "none": "Sem grupos",
@@ -872,7 +892,8 @@
       "on": "Ligadas",
       "off": "Desligadas",
       "failed": "Com falha"
-    }
+    },
+    "onceAt": "Uma vez em {time}"
   },
   "computers": {
     "commands": {

@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
+import { oneTimeOf, targetOf } from './next.js';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Badge, Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
@@ -88,7 +89,10 @@ function agentFacts(host: string, entry: AutomationEntry, words: AgentWords): De
 function scheduleFacts(entry: AutomationEntry): DetailItem[] {
   const { definition } = entry;
   const schedules = definition.triggers.filter((trigger) => 'schedule' in trigger);
-  const events = definition.triggers.filter((trigger) => !('schedule' in trigger));
+  const onces = definition.triggers.map(oneTimeOf).filter((one) => one !== undefined);
+  // An event trigger is one that is neither a schedule nor a one-time trigger, which has no `events`.
+  const events = definition.triggers.filter((trigger) => !('schedule' in trigger) && oneTimeOf(trigger) === undefined);
+  const ran = typeof (definition._meta?.['ahpd'] as { oneTimeRun?: unknown } | undefined)?.oneTimeRun === 'string';
   const stops = (definition.disableConditions ?? []).map((one) => ('max' in one ? plural('automations/facts/afterRuns', one.max) : translate('automations/facts/afterDate', { date: timeOf(one.date) })));
   const items: DetailItem[] = [];
   for (const trigger of schedules) {
@@ -96,12 +100,24 @@ function scheduleFacts(entry: AutomationEntry): DetailItem[] {
     items.push({ label: translate('automations/facts/schedule'), value: lines([cronWords(trigger.schedule.expression), <span key="raw" className="web-method">{`${trigger.schedule.expression} \u{00B7} ${trigger.schedule.timeZone}`}</span>]) });
     items.push({ label: translate('automations/facts/missedRuns'), value: translate(String(trigger.misfirePolicy) === 'runOnce' ? 'automations/facts/runOnce' : 'automations/facts/skipped') });
   }
-  if (schedules.length === 0 && events.length === 0) items.push({ label: translate('automations/facts/schedule'), value: translate('automations/facts/byHandOnly') });
+  for (const once of onces) {
+    items.push({ label: translate('automations/facts/schedule'), value: translate('automations/onceAt', { time: timeOf(once.runAt) }) });
+    items.push({ label: translate('automations/facts/missedRuns'), value: translate(String(once.misfirePolicy) === 'runOnce' ? 'automations/facts/runOnce' : 'automations/facts/skipped') });
+  }
+  if (schedules.length === 0 && onces.length === 0 && events.length === 0) items.push({ label: translate('automations/facts/schedule'), value: translate('automations/facts/byHandOnly') });
   for (const trigger of events) {
     if ('schedule' in trigger) continue;
     items.push({ label: translate('automations/facts/event'), value: `${trigger.title}${trigger.events.length === 0 ? '' : `: ${trigger.events.map((one) => one.title).join(', ')}`}` });
   }
-  items.push({ label: translate('automations/facts/turnsOff'), value: stops.length === 0 ? <span className="web-note">{translate('automations/facts/never')}</span> : lines(stops) });
+  if (onces.length === 0) items.push({ label: translate('automations/facts/turnsOff'), value: stops.length === 0 ? <span className="web-note">{translate('automations/facts/never')}</span> : lines(stops) });
+  const target = targetOf(definition as Parameters<typeof targetOf>[0]);
+  if (target.kind !== 'newSession') items.push({ label: translate('automations/facts/eachRun'), value: translate(`automations/edit/targets/${target.kind}`) });
+  if (onces.length > 0) {
+    items.push({
+      label: translate('automations/facts/nextRun'),
+      value: ran ? <span className="web-note">{translate('automations/facts/ran')}</span> : entry.nextRunAt === undefined ? '' : timeOf(entry.nextRunAt),
+    });
+  }
   if (schedules.length > 0) {
     items.push({
       label: translate('automations/facts/nextRun'),
@@ -234,7 +250,8 @@ export default function AutomationPage({ host, resource }: { host: string; resou
             { key: 'overview', title: t('automations/page/overview'), child: overview },
             { key: 'settings', title: t('automations/page/settings'), child: (
               <>
-                {can('update') ? <AutomationForm host={host} entry={entry} /> : null}
+                {/* Shown read-only where the host refuses an update, so the fields still say what it does. */}
+                <AutomationForm host={host} entry={entry} />
                 {can('remove') ? <DangerZone label={t('automations/actions/delete')} onClick={() => void remove(host, entry)} /> : null}
               </>
             ) },

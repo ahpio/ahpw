@@ -1543,7 +1543,8 @@
 
 /* A section after another keeps a line of space over its heading. */
 .web-automation__overview > .web-section:not(:first-child),
-.web-automation-form > .web-section {
+.web-automation-form > .web-section,
+.web-automation-form__fields > .web-section {
   margin-top: var(--oo-spacing-sm);
 }
 
@@ -1562,7 +1563,8 @@
 
 /* A field straight in a form page is one row of a column: it keeps its height. `flex: 1` is for fields side by side. */
 .web-page.web-form > .web-form__field,
-.web-automation-form > .web-form__field {
+.web-automation-form > .web-form__field,
+.web-automation-form__fields > .web-form__field {
   flex: none;
 }
 
@@ -1607,6 +1609,11 @@
 
 .web-automation__warn {
   color: var(--oo-color-warning);
+}
+
+/* The fields a host may lock, as after a one-time trigger ran: no box of its own, so the form lays them out as before. */
+.web-automation-form__fields {
+  display: contents;
 }
 
 /* An automation's fields, on the new automation's page or in its page's Settings tab. */
