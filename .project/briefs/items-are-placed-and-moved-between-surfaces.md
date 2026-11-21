@@ -2,6 +2,7 @@
 title: Items are placed and moved between surfaces
 created: 2026-11-19
 refs:
+  - git://602d21c - the commit of ahpw the drag facts were checked at again, after scena 0.8.0
   - git://f6531a866e058413bb6096d071bbfaa9141a1e21 - the commit of this repository the facts were checked at
   - git://3756caaa1ff346d60e3210bed5f5868346dd097b - the commit of scena the facts were checked at
   - "[code://src/shell/tabs.ts#L10-L44](../../src/shell/tabs.ts#L10-L44) - `keepTabs`: the main tabs are kept as scena session mounts and opened again after a reload"
@@ -76,8 +77,11 @@ The activity items do not change.
 - ahpw sets one drag type, `application/x-ahpw-host-file` ([`drag.ts`](../../src/resources/folders/drag.ts#L1-L30)). The explorer sets it on a file row.
 - A composer takes a host file or a local file as a drop ([`composer-drop.ts`](../../src/resources/sessions/composer-drop.ts#L15-L62)).
 - A chat can hold a session as a reference, [`chatAttachment`](../../src/resources/sessions/attachments.ts#L27-L35). Today a person adds it from the composer menu only ([`composer-commands.ts`](../../src/resources/sessions/composer-commands.ts#L140-L150)).
-- The session list sets no drag. The plan [`sessions/20261028-0951-drag-a-session-into-a-tab-group`](../plans/sessions/20261028-0951-drag-a-session-into-a-tab-group/plan.md) adds a second type, `application/x-ahpw-session`, for a drop on a `main` group.
-- scena's tab drags read their own types only. The scena plan [*A tab drags between surfaces*](file:///github/scena/.project/plans/layout/20261121-0906-a-tab-drags-between-surfaces/plan.md) gives a tab drag the mount key and the source surface, and calls [`surfaces.move`](https://github.com/softov/scena/blob/3756caaa1ff346d60e3210bed5f5868346dd097b/packages/scena/src/sdk/mount-surface.ts#L184).
+- scena 0.8.0, which ahpw takes, moves a tab between surfaces by a drag. A surface takes the drop anywhere on it.
+- A tab dropped outside the page opens in a window of its own.
+- scena 0.8.0 has an open drag for a list row, `startOpenDrag`, with a key, a component node and a title. A drop opens the key, or moves its tab when it is open.
+- scena 0.8.0 has drop areas, `useDropArea` and `DropArea`, which take a tab or a row and leave the tab where it was: a link.
+- The session list sets no drag yet. The plan [`sessions/20261121-1215-a-row-drags-to-a-surface-or-a-composer`](../plans/sessions/20261121-1215-a-row-drags-to-a-surface-or-a-composer/plan.md) adds the row drag, and makes the composer take a session or a file tab as a reference. It replaces the plan that added `application/x-ahpw-session`.
 
 ### Show and hide
 
@@ -119,10 +123,10 @@ The activity items do not change.
 
 ### The payload
 
-- A drag carries one ahpw type with the kind, the name of the item, and, for a mount, its key and its source surface.
-- The host file and the session use this payload; `application/x-ahpw-host-file` and the planned `application/x-ahpw-session` go.
-- The scena tab payload carries the same mount key and source surface, so a tab drag is also an item drag.
-- The payload is what `keepTabs` needs to open the item again: for a session, its host and its resource.
+- scena 0.8.0 has the two payloads. A tab carries its key and its surface; a row carries its key, its component node and its title.
+- A drop area reads both as one `DroppedThing`.
+- A kind is read from the component node, such as `SessionPage` for a session. Softov chose the key and the node over a kind registry in scena, 2026-11-21.
+- `application/x-ahpw-host-file` stays for a file row of the folder explorer, until a kind registry or the open drag takes it.
 
 ### Docks are surfaces
 
@@ -134,7 +138,7 @@ The activity items do not change.
 
 - The placed items, the docks and the tabs are kept in this browser for now. Softov chose this on 2026-11-19.
 - They are kept in one shape that ahpd can save later as a person's workspace. A sync to ahpd then adds a store and changes no shape. Softov: "it become easy to sync with ahpd. The thing is we need like a workspace to be saved onto ahpd", 2026-11-19.
-- The sessions opened on the right sidebar are kept, as the tabs of `main` are. The fixed panes of the right sidebar are not kept, because the shell mounts them. Softov chose this on 2026-11-19.
+- The sessions opened on the right sidebar are kept, as the tabs of `main` are, and so are the tabs of a window. The fixed panes of the right sidebar are not kept. Softov chose this on 2026-11-19; [`shell/20261121-1215-tabs-are-kept-on-every-surface`](../plans/shell/20261121-1215-tabs-are-kept-on-every-surface/plan.md) built it.
 - An item from a host that is not shown is hidden and kept, as a bot is today. It shows again when its host comes back. Softov chose this on 2026-11-19.
 
 ### The word

@@ -1,6 +1,6 @@
 ---
 title: The records follow the drag
-status: todo
+status: done
 depends: [task-01-tabs-are-kept-on-every-surface.md, task-03-beside-follows-the-tab.md]
 layer: ".project"
 refs:
@@ -28,3 +28,5 @@ The bot chat's deferred drag is closed, and the `items` brief keeps only what is
 - The prose check passes on both files.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 3.

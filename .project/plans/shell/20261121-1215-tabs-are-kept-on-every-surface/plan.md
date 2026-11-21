@@ -1,7 +1,7 @@
 ---
 title: Tabs are kept on every surface, and a window works
 domain: shell
-status: active
+status: built
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -78,7 +78,7 @@ a session tab moves -> SessionPage reads its surface -> beside = surface is side
 | [01 - tabs are kept on every surface](task-01-tabs-are-kept-on-every-surface.md) | done | - |
 | [02 - keys reach a window](task-02-keys-reach-a-window.md) | done | - |
 | [03 - beside follows the tab](task-03-beside-follows-the-tab.md) | done | - |
-| [04 - the records follow the drag](task-04-the-records-follow-the-drag.md) | doing | 01, 03 |
+| [04 - the records follow the drag](task-04-the-records-follow-the-drag.md) | done | 01, 03 |
 
 ## Risks and tradeoffs
 
@@ -87,14 +87,14 @@ a session tab moves -> SessionPage reads its surface -> beside = surface is side
 
 ## Resume state
 
-- **Done so far:** task 01 to 03 done 2026-11-21. Task 04 started 2026-11-21.
-- **Next action:** [task-04-the-records-follow-the-drag.md](task-04-the-records-follow-the-drag.md).
+- **Done so far:** every task done 2026-11-21. [implemented.md](implemented.md) says what exists, and that the check by hand is left.
+- **Next action:** the check by hand against a host.
 - **Open questions:** none.
 - **Watch out for:** the right sidebar's fixed panes are mounts too; keeping them would mount them twice.
 
 ## Final verification checklist
 
-- [ ] `tsc -b`, the tests and the build pass.
+- [x] `tsc -b`, the tests and the build pass.
 - [ ] A session dragged to the right sidebar, and one dragged out into a window, come back there after a reload.
 - [ ] A key binding works in a window.
 - [ ] A session dragged to the right sidebar draws beside the focused session; dragged back to `main`, it is the focused session again.
