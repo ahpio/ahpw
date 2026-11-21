@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import type { Disposable, Scena, ScopeBackendFactory } from '@softov/scena/types';
 import { createI18nBackend, createLocalStorageLayoutStorage, createModusBackend, registerLayoutCommands } from '@softov/scena';
-import { SURFACE_DEFAULTS } from './shell/surfaces.js';
+import { DEFAULT_SURFACE_LAYOUTS } from '@softov/scena/core';
 import { Scena as ScenaRoot, useScena } from '@softov/scena/react/core';
 import { DefaultShell, useI18n } from '@softov/scena/react';
 import { Limen, PortaContextProvider, SIGILLUM_PATHS, createPorta, registerPortaBlocks, useSession } from '@softov/scena/porta';
@@ -25,8 +25,8 @@ const backendFactories: ScopeBackendFactory[] = [
   { scope: 't', create: () => createI18nBackend() },
 ];
 
-/** scena's surfaces as ahpw starts them; see `shell/surfaces.ts`. */
-const surfaceDefaults = SURFACE_DEFAULTS;
+/** scena's surfaces, with the right sidebar open, its panes as tabs: the open session's details and its changes. */
+const surfaceDefaults = { ...DEFAULT_SURFACE_LAYOUTS, 'sidebar:right': { visible: true, layout: 'tab', size: 300 } };
 
 // Module scope: a new object per render would re-initialise scena.
 const options = { layoutStorage, backendFactories, surfaceDefaults };
