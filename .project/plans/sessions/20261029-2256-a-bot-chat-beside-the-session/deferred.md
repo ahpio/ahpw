@@ -7,4 +7,4 @@ The drag waits on a change in scena.
 
 | What | Why it waits | Where it goes |
 | --- | --- | --- |
-| A drag of a chat tab from `main` to the right sidebar | scena has no drag of a tab from one surface to another | The scena brief `drag-a-tab-between-surfaces.md` |
+| A drag of a chat tab from `main` to the right sidebar | scena has no drag of a tab from one surface to another | The scena plan `layout/20261121-0906-a-tab-drags-between-surfaces` |

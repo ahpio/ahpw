@@ -19,6 +19,7 @@ import { PALETTE_SLOT, openPalette } from '../../shell/CommandPalette.js';
 import { EMOJIcon } from '../emojis.js';
 import { mountRight, RIGHT_SIDEBAR, SESSION_VIEWS } from '../../shell/right-sidebar.js';
 import { followFocus, sessionKey } from './focus.js';
+import { SESSION_OPENS } from './view-settings.js';
 
 /** The display size class the modus backend publishes. */
 const MODUS_CLASS = '$/modus/class' as BindingPath;
@@ -39,7 +40,7 @@ export interface OpenSessionArgs {
   resource: string;
   /** The session's host; the window's host by default. */
   host?: string;
-  /** `right` opens it in the right sidebar, beside the focused session; `main` by default. */
+  /** `right` opens it in the right sidebar, beside the focused session; by default, where `ui.sessionOpens` says. An open session is focused where it is. */
   place?: 'main' | 'right';
 }
 
@@ -267,12 +268,19 @@ export function registerSessions(scena: Scena): Disposable {
       run: (ctx, args) => {
         const target = args as OpenSessionArgs | undefined;
         if (target?.resource === undefined) return;
-        const { resource, host = windowHost(), place = 'main' } = target;
+        const { resource, host = windowHost() } = target;
         const key = sessionKey(host, resource);
+        // Open already: focus it where it is, wherever a person moved it.
+        const at = ctx.surfaces.listSurfaces().find((surface) => ctx.surfaces.listAt(surface).some((mount) => mount.key === key));
+        if (at !== undefined) {
+          if (at === 'main') ctx.store.set(ACTIVE_SESSION, { host, resource } satisfies ActiveSession);
+          const shown = ctx.scena.layout.get().surfaces[at];
+          if (at === RIGHT_SIDEBAR && shown?.visible === false) ctx.scena.layout.setSurface(at, { ...shown, visible: true });
+          ctx.surfaces.focus(key);
+          return;
+        }
+        const place = target.place ?? (SESSION_OPENS.read(ctx.store) === 'right' ? 'right' : 'main');
         const props = { title: { path: titlePath(host, resource) } };
-        // One tab per session: opening it in one place takes it from the other.
-        const other = place === 'main' ? RIGHT_SIDEBAR : 'main';
-        if (ctx.surfaces.listAt(other).some((mount) => mount.key === key)) ctx.surfaces.close(key);
         if (place === 'right') {
           // Drawn beside the focused session, it does not become the focused session.
           ctx.surfaces.open({ surface: RIGHT_SIDEBAR, key, resource: { component: 'SessionPage', host, resource, beside: true }, props });

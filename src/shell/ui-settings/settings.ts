@@ -24,7 +24,7 @@ import { FILE_SAVE_MODE } from '../../resources/files/save-mode.js';
 import { TEXT_WRAP } from '../../resources/editor/wrap.js';
 import { FILE_COMMENTS } from '../../resources/files/comments-shown.js';
 import { DOCK_SETTINGS } from '../dock/settings.js';
-import { ARCHIVED_SESSION_OPEN, SESSION_MARKDOWN, TOOLS_EXPANDED, type ChatChoice } from '../../resources/sessions/view-settings.js';
+import { ARCHIVED_SESSION_OPEN, SESSION_MARKDOWN, SESSION_OPENS, TOOLS_EXPANDED, type ChatChoice } from '../../resources/sessions/view-settings.js';
 
 /** A UI setting's key: `ui.<name>`, flat, as the host's keys are. */
 export type UiKey = `ui.${string}`;
@@ -129,6 +129,7 @@ export const UI_SETTINGS: readonly UiSetting[] = [
   placeSetting('ui.sessionViewsPlace', SESSION_VIEWS),
   chatSetting('ui.toolsExpanded', TOOLS_EXPANDED),
   chatSetting('ui.sessionMarkdown', SESSION_MARKDOWN),
+  chatSetting('ui.sessionOpens', SESSION_OPENS),
   chatSetting('ui.archivedSessionOpen', ARCHIVED_SESSION_OPEN),
   chatSetting('ui.botChatOpens', BOT_CHAT_OPENS),
   chatSetting('ui.canvasOpens', CANVAS_OPENS),

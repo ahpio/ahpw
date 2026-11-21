@@ -20,7 +20,7 @@ refs:
   - https://github.com/softov/scena/blob/3756caaa1ff346d60e3210bed5f5868346dd097b/packages/scena/src/sdk/mount-surface.ts#L184 - `surfaces.move`, which nothing calls
   - https://github.com/softov/scena/blob/3756caaa1ff346d60e3210bed5f5868346dd097b/packages/scena/src/sdk/session.ts#L6-L12 - `SessionMount`: key, surface, component node, state, open time
   - https://github.com/softov/scena/blob/3756caaa1ff346d60e3210bed5f5868346dd097b/packages/scena/src/sdk/layout.ts#L91-L158 - `SurfaceLayoutState`: per surface, the tab tree, the order, the hidden keys
-  - file:///github/scena/.project/briefs/drag-a-tab-between-surfaces.md - a tab drag that carries the mount key and the source surface
+  - file:///github/scena/.project/plans/layout/20261121-0906-a-tab-drags-between-surfaces/plan.md - the scena plan for a tab drag that carries the mount key and the source surface
   - file:///github/scena/.project/plans/layout/20261118-0318-panes-and-the-rail-have-menus/plan.md - the menus that tick items to show or hide them
   - https://code.visualstudio.com/docs/configure/custom-layout - views move between the side bars and the panel, checked 2026-11-19
 ---
@@ -77,7 +77,7 @@ The activity items do not change.
 - A composer takes a host file or a local file as a drop ([`composer-drop.ts`](../../src/resources/sessions/composer-drop.ts#L15-L62)).
 - A chat can hold a session as a reference, [`chatAttachment`](../../src/resources/sessions/attachments.ts#L27-L35). Today a person adds it from the composer menu only ([`composer-commands.ts`](../../src/resources/sessions/composer-commands.ts#L140-L150)).
 - The session list sets no drag. The plan [`sessions/20261028-0951-drag-a-session-into-a-tab-group`](../plans/sessions/20261028-0951-drag-a-session-into-a-tab-group/plan.md) adds a second type, `application/x-ahpw-session`, for a drop on a `main` group.
-- scena's tab drags read their own types only. The scena brief [*Drag a tab between surfaces*](file:///github/scena/.project/briefs/drag-a-tab-between-surfaces.md) gives a tab drag the mount key and the source surface, and calls [`surfaces.move`](https://github.com/softov/scena/blob/3756caaa1ff346d60e3210bed5f5868346dd097b/packages/scena/src/sdk/mount-surface.ts#L184).
+- scena's tab drags read their own types only. The scena plan [*A tab drags between surfaces*](file:///github/scena/.project/plans/layout/20261121-0906-a-tab-drags-between-surfaces/plan.md) gives a tab drag the mount key and the source surface, and calls [`surfaces.move`](https://github.com/softov/scena/blob/3756caaa1ff346d60e3210bed5f5868346dd097b/packages/scena/src/sdk/mount-surface.ts#L184).
 
 ### Show and hide
 
