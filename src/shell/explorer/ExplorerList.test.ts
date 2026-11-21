@@ -1,5 +1,9 @@
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { shownRows, type Row } from './ExplorerList.js';
+import { createScena } from '@softov/scena/core';
+import { ScenaProvider } from '@softov/scena/react';
+import { ExplorerList, shownRows, type Row } from './ExplorerList.js';
 
 const row = (key: string, title: string, group?: string): Row => ({
   key, title, dot: 'ok', dotLabel: 'ok', lines: [`${title} line`], menu: [],
@@ -22,5 +26,27 @@ describe('shownRows', () => {
 
   it('keeps the groups of a filter with no search rows', () => {
     expect(shownRows(installed, undefined, 'agent')).toEqual([installed[0]]);
+  });
+});
+
+describe('ExplorerList rows', () => {
+  const markup = (drags: boolean): string =>
+    renderToStaticMarkup(createElement(ScenaProvider, {
+      scena: createScena(),
+      children: createElement(ExplorerList, {
+        label: 'Sessions',
+        rows: [row('h|s1', 'A session')],
+        selected: null,
+        onOpen: () => {},
+        ...(drags ? { onRowDragStart: () => {} } : {}),
+      }),
+    }));
+
+  it('drag with a drag handler', () => {
+    expect(markup(true)).toContain('draggable="true"');
+  });
+
+  it('stay still with none', () => {
+    expect(markup(false)).not.toContain('draggable');
   });
 });

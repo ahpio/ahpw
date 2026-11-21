@@ -1,7 +1,7 @@
 ---
 title: A session row drags to a surface or a composer
 domain: sessions
-status: planned
+status: built
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -76,8 +76,8 @@ drop on a composer -> useDropArea -> a session: chatAttachment; a file tab: reso
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - a session row drags](task-01-a-session-row-drags.md) | todo | - |
-| [02 - the composer takes a session or a file tab](task-02-the-composer-takes-a-tab.md) | todo | 01 |
+| [01 - a session row drags](task-01-a-session-row-drags.md) | done | - |
+| [02 - the composer takes a session or a file tab](task-02-the-composer-takes-a-tab.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -87,14 +87,14 @@ drop on a composer -> useDropArea -> a session: chatAttachment; a file tab: reso
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** merge [#114](https://github.com/ahpio/ahpw/pull/114), then [task-01-a-session-row-drags.md](task-01-a-session-row-drags.md).
+- **Done so far:** every task done 2026-11-21. [implemented.md](implemented.md) says what exists, and that the check by hand is left.
+- **Next action:** the check by hand against a host.
 - **Open questions:** none.
 - **Watch out for:** a session's summary is needed for `chatAttachment`; read it from the host's session list in the store.
 
 ## Final verification checklist
 
-- [ ] `tsc -b`, the tests and the build pass.
+- [x] `tsc -b`, the tests and the build pass.
 - [ ] A session row opens where it is dropped on `main`, a group edge, the right sidebar and a window.
 - [ ] A session row and a session tab on a composer add a chat reference; a file tab adds a file.
 - [ ] A click on a row still follows `ui.sessionOpens`.

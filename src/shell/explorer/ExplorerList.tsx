@@ -1,4 +1,4 @@
-import { Fragment, useState, type MouseEvent, type ReactElement, type ReactNode } from 'react';
+import { Fragment, useState, type DragEvent, type MouseEvent, type ReactElement, type ReactNode } from 'react';
 import { useI18n } from '@softov/scena/react';
 import { ContextMenu } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
@@ -66,7 +66,7 @@ interface Menu {
  * right-click. Its section's title and buttons are scena's header, declared on
  * the section's component; `label` only names the list for assistive tech.
  */
-export function ExplorerList({ label, rows, searchRows, selected, onOpen, notice, filterLabel, hostLines }: {
+export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowDragStart, notice, filterLabel, hostLines }: {
   label: string;
   rows: Row[];
   /**
@@ -77,6 +77,8 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, notice
   searchRows?: Row[] | undefined;
   selected: string | null;
   onOpen: (key: string) => void;
+  /** With it, a row drags: it fills the drag's data, as a session row starts scena's open drag. */
+  onRowDragStart?: (event: DragEvent<HTMLElement>, row: Row) => void;
   notice?: ReactNode;
   filterLabel?: string;
   /** With every host, a line above the rows for each shown host that is not connected. */
@@ -153,6 +155,7 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, notice
                     className="web-row"
                     data-selected={row.key === selected ? 'true' : 'false'}
                     onClick={() => onOpen(row.key)}
+                    {...(onRowDragStart === undefined ? {} : { draggable: true, onDragStart: (event: DragEvent<HTMLElement>) => onRowDragStart(event, row) })}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
