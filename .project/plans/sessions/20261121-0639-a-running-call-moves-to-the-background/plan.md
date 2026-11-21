@@ -1,7 +1,7 @@
 ---
 title: A running call moves to the background
 domain: sessions
-status: planned
+status: built
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
