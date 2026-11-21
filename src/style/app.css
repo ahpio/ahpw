@@ -320,7 +320,7 @@
   padding: 1px 0;
   font: inherit;
   font-size: var(--oo-font-size-sm);
-  color: var(--oo-color-muted);
+  color: rgba(var(--oo-rgb-muted) / 50%);
   text-align: left;
   background: none;
   border: 0;
@@ -1108,10 +1108,13 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--oo-spacing-sm);
-  color: var(--oo-color-muted);
+  color: rgba(var(--oo-rgb-muted) / 50%);
   font-size: var(--oo-font-size-xs);
 }
 
+.web-turn__facts:hover {
+  color: var(--oo-color-text);
+}
 
 .web-turn__attached {
   display: flex;

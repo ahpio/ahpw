@@ -10,7 +10,7 @@
   background: none;
   font: inherit;
   font-size: var(--oo-font-size-sm);
-  color: var(--oo-color-muted);
+  color: rgba(var(--oo-rgb-muted) / 50%);
   cursor: pointer;
   text-align: left;
 }
