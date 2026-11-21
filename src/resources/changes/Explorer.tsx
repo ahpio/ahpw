@@ -3,7 +3,7 @@ import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, ContextMenu, Spinner, Tree, type TreeNode } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
 import { sessionReducer, type ChangesetOperation, type SessionState, type SessionSummary } from '@microsoft/agent-host-protocol';
-import { ahpPaths, hostBridge } from '../../bridges/data.js';
+import { ahpPaths, hostBridge, summaryPath } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ACTIVE_SESSION, type ActiveSession } from '../sessions/state.js';
 import { openAsItems, viewersOf } from '../files/viewers.js';
@@ -52,8 +52,7 @@ export default function ChangesExplorer(): ReactElement {
   // The active session's host; nothing is read while no session is open.
   const at = opened?.host ?? '';
   const active = opened?.resource;
-  const sessions = useStore<SessionSummary[]>(ahpPaths(at).sessions);
-  const summary = sessions?.find((one) => one.resource === active);
+  const summary = useStore<SessionSummary>(active === undefined ? undefined : summaryPath(at, active));
   const session = useChannel<SessionState>(at, active, sessionReducer);
   const scopes = useMemo(() => scopesOf(session.state?.changesets), [session.state?.changesets]);
   const [chosen, setChosen] = useState<string | undefined>(undefined);

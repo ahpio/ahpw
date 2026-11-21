@@ -96,6 +96,8 @@ export interface HostFacts {
 }
 /** A session's or a terminal's title as a tab shows it, kept current as the host renames it. */
 export const titlePath = (host: string, resource: string): BindingPath => `${hostBase(host)}/titles/${encodeURIComponent(resource)}` as BindingPath;
+/** One session's summary, the object of the host's list; written only when that session changes, so a page that shows one session reads this, not the list. */
+export const summaryPath = (host: string, resource: string): BindingPath => `${hostBase(host)}/summaries/${encodeURIComponent(resource)}` as BindingPath;
 /** Why a followed channel could not be read, or null. */
 export const channelErrorPath = (host: string, uri: string): BindingPath => `${hostBase(host)}/channelErrors/${encodeURIComponent(uri)}` as BindingPath;
 
@@ -402,8 +404,7 @@ function makeBridge(id: string): HostBridge {
       if (store === undefined) return;
       const result = await request('listSessions', { channel: ROOT } as never) as { items: SessionSummary[] };
       dataOf(id).newer = listed(result.items);
-      store.set(ahpPaths(id).sessions, sessionsByChange(result.items));
-      for (const summary of result.items) store.set(titlePath(id, summary.resource), summary.title === '' ? translate('bridges/untitled') : summary.title);
+      writeSessions(store, id, sessionsByChange(result.items));
     },
     async readOnce<S>(uri: string) {
       const multi = await ready(id);
@@ -535,11 +536,29 @@ function setIfChanged(store: ReactiveStore, path: BindingPath, value: unknown): 
   if (store.get(path) !== value) store.set(path, value);
 }
 
+/**
+ * Writes a host's session list, and beside it each session's title and
+ * summary where they changed. A session no longer listed has its summary
+ * cleared.
+ */
+export function writeSessions(store: ReactiveStore, id: string, summaries: SessionSummary[]): void {
+  const before = store.get<SessionSummary[]>(ahpPaths(id).sessions) ?? [];
+  store.set(ahpPaths(id).sessions, summaries);
+  const listed = new Set<string>();
+  for (const summary of summaries) {
+    listed.add(summary.resource);
+    setIfChanged(store, summaryPath(id, summary.resource), summary);
+    setIfChanged(store, titlePath(id, summary.resource), summary.title === '' ? translate('bridges/untitled') : summary.title);
+  }
+  for (const gone of before) {
+    if (!listed.has(gone.resource)) setIfChanged(store, summaryPath(id, gone.resource), undefined);
+  }
+}
+
 function publishHost(store: ReactiveStore, multi: MultiHostClient, id: string): void {
   const newer = dataOf(id).newer;
   const summaries = sessionsByChange(multi.aggregatedSessions().filter((one) => one.hostId === id).map((one) => laid(one.summary, newer)));
-  store.set(ahpPaths(id).sessions, summaries);
-  for (const summary of summaries) setIfChanged(store, titlePath(id, summary.resource), summary.title === '' ? translate('bridges/untitled') : summary.title);
+  writeSessions(store, id, summaries);
   const counts = countsOf(summaries.map((one) => one.status));
   setIfChanged(store, ahpPaths(id).sessionsUnread, counts.unread);
   setIfChanged(store, ahpPaths(id).sessionsWorking, counts.working);

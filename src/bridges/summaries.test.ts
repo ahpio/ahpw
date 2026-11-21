@@ -33,3 +33,18 @@ describe('the session summaries newer than the SDK cache', () => {
     expect(laid(other, newer)).toBe(other);
   });
 });
+
+describe('a row laid over', () => {
+  it('is the same object for the same row and the same kept fields, and a new one when either changes', () => {
+    const cached = row('s:/1');
+    const newer = heard(NOTHING_NEWER, { type: 'sessionSummaryChanged', params: { session: 's:/1', changes: { title: 'n' } } });
+    const first = laid(cached, newer);
+    expect(laid(cached, newer)).toBe(first);
+    // Another session's change keeps this session's kept fields.
+    const other = heard(newer, { type: 'sessionSummaryChanged', params: { session: 's:/2', changes: { title: 'o' } } });
+    expect(laid(cached, other)).toBe(first);
+    const again = heard(other, { type: 'sessionSummaryChanged', params: { session: 's:/1', changes: { title: 'm' } } });
+    expect(laid(cached, again)).not.toBe(first);
+    expect(laid(cached, again).title).toBe('m');
+  });
+});

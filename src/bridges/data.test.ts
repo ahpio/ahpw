@@ -283,3 +283,26 @@ describe('a window with every host', () => {
   });
 });
 
+
+describe('a host\'s session list', () => {
+  it('writes each session\'s summary only when it changes, and clears one no longer listed', () => {
+    const values = new Map<string, unknown>();
+    const kept = { set: vi.fn((path: string, value: unknown) => values.set(path, value)), get: (path: string) => values.get(path) };
+    const one = { resource: 's:/1', title: 'one', modifiedAt: 'b' } as never;
+    const two = { resource: 's:/2', title: 'two', modifiedAt: 'a' } as never;
+    data.writeSessions(kept as never, 'h', [one, two]);
+    expect(values.get(data.summaryPath('h', 's:/1'))).toBe(one);
+    expect(values.get(data.summaryPath('h', 's:/2'))).toBe(two);
+
+    // Session 2 changes: session 1's path is not written again.
+    kept.set.mockClear();
+    const twoNow = { resource: 's:/2', title: 'two', modifiedAt: 'c' } as never;
+    data.writeSessions(kept as never, 'h', [twoNow, one]);
+    const written = kept.set.mock.calls.map(([path]) => path);
+    expect(written).toContain(data.summaryPath('h', 's:/2'));
+    expect(written).not.toContain(data.summaryPath('h', 's:/1'));
+
+    data.writeSessions(kept as never, 'h', [twoNow]);
+    expect(values.get(data.summaryPath('h', 's:/1'))).toBeUndefined();
+  });
+});

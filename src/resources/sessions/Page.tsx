@@ -14,7 +14,7 @@ import {
   type StateAction,
   type Turn,
 } from '@microsoft/agent-host-protocol';
-import { ahpPaths, hostBridge } from '../../bridges/data.js';
+import { ahpPaths, hostBridge, summaryPath } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { unlistedSummary } from './unlisted.js';
 import { AGENTS, agentsReducer, servesAgents, type AgentRow } from '../../bridges/agents.js';
@@ -288,10 +288,11 @@ export default function SessionPage({ host, resource, beside: opened = false }: 
 function SessionView({ host, resource, beside }: { host: string; resource?: string; beside: boolean }): ReactElement {
   const scena = useScena();
   const { t } = useI18n();
-  const sessions = useStore<SessionSummary[]>(ahpPaths(host).sessions);
+  // This session's summary only: the host's list changes whenever any session does.
+  const listed = useStore<SessionSummary>(resource === undefined ? undefined : summaryPath(host, resource));
   const session = useChannel<SessionState>(host, resource, sessionReducer);
   // A session the host does not list yet, as one made with no message, is read from its own state; the list has it from its first turn.
-  const summary = sessions?.find((one) => one.resource === resource) ?? (resource === undefined || session.state === undefined ? undefined : unlistedSummary(resource, session.state));
+  const summary = listed ?? (resource === undefined || session.state === undefined ? undefined : unlistedSummary(resource, session.state));
   // The chat the page shows: the one picked in the header while the session still has it, else the default.
   const [picked, setPicked] = useState<string | undefined>(undefined);
   const chosen = picked !== undefined && (session.state?.chats ?? []).some((one) => one.resource === picked) ? picked : undefined;

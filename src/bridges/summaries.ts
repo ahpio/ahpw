@@ -39,8 +39,20 @@ export function listed(items: readonly SessionSummary[]): Newer {
   return new Map(items.map((summary) => [summary.resource, summary]));
 }
 
-/** The SDK's row with what is kept for it laid over; the same row when nothing is. */
+/** Each row laid over, with what was laid on it, so the same two give back the same object. */
+const layings = new WeakMap<SessionSummary, { kept: Partial<SessionSummary>; out: SessionSummary }>();
+
+/**
+ * The SDK's row with what is kept for it laid over; the same row when nothing
+ * is. The same row and the same kept fields give the same object each time, so
+ * a page that reads one session draws again only when that session changes.
+ */
 export function laid(summary: SessionSummary, newer: Newer): SessionSummary {
   const kept = newer.get(summary.resource);
-  return kept === undefined ? summary : { ...summary, ...kept };
+  if (kept === undefined) return summary;
+  const known = layings.get(summary);
+  if (known?.kept === kept) return known.out;
+  const out = { ...summary, ...kept };
+  layings.set(summary, { kept, out });
+  return out;
 }
