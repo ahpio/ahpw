@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactElement } from 'react';
-import { useI18n, useStore } from '@softov/scena/react';
+import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { ContextMenu, Modal } from '@softov/scena/ui';
 import type { BindingPath, PickerAction } from '@softov/scena/types';
 import type { MessageAttachment, SessionSummary } from '@microsoft/agent-host-protocol';
@@ -66,7 +66,8 @@ export function AddButton({ host, path, onOpenChange, openNow = false, onOpened 
   onOpened?: () => void;
 }): ReactElement {
   const { t } = useI18n();
-  const sessions = useStore<SessionSummary[]>(ahpPaths(host).sessions);
+  // Read when the menu opens, not followed: the list changes whenever any session does.
+  const scena = useScena();
   const [menu, setMenu] = useState<{ rect: DOMRect; y: number; items: PickerAction[] } | null>(null);
   const button = useRef<HTMLButtonElement>(null);
   const holder = useRef<HTMLSpanElement>(null);
@@ -97,7 +98,7 @@ export function AddButton({ host, path, onOpenChange, openNow = false, onOpened 
     const rect = button.current?.getBoundingClientRect();
     if (api === undefined || rect === undefined) return;
     const image = await clipboardImage();
-    setMenu({ rect, y: rect.bottom + MENU_GAP, items: contextItems(api, sessions ?? [], image) });
+    setMenu({ rect, y: rect.bottom + MENU_GAP, items: contextItems(api, scena.store.get<SessionSummary[]>(ahpPaths(host).sessions) ?? [], image) });
     onOpenChange(true);
   };
 
