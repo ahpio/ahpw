@@ -35,7 +35,7 @@ import { Activity } from './Activity.js';
 import { groupParts, stepWaits } from './activity-parts.js';
 import { Composer } from './Composer.js';
 import { HeaderLine, SessionInfo } from './HeaderInfo.js';
-import { SessionHostContext, WorkspaceContext } from './workspace.js';
+import { ChatContext, SessionHostContext, WorkspaceContext } from './workspace.js';
 import { ACTIVITY_TONE, activityLabel, activityOf, isArchived, isRead } from './status.js';
 import { closesOnArchive } from './archived.js';
 import { marksRead, type ReadMark } from './read-marks.js';
@@ -498,9 +498,11 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
     // A bot's bubble draws a question or an approval as a transcript part, which reads the session's host and folder.
     return (
       <SessionHostContext.Provider value={host}>
-        <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
-          <BotChat host={host} mark={mark} summary={summary} session={session} chat={chat} chatUri={chatUri} send={send} tools={tools} rawView={rawView} />
-        </WorkspaceContext.Provider>
+        <ChatContext.Provider value={chatUri ?? null}>
+          <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
+            <BotChat host={host} mark={mark} summary={summary} session={session} chat={chat} chatUri={chatUri} send={send} tools={tools} rawView={rawView} />
+          </WorkspaceContext.Provider>
+        </ChatContext.Provider>
       </SessionHostContext.Provider>
     );
   }
@@ -544,21 +546,23 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
               <OlderTurns host={host} chatUri={chatUri} cursor={chat.state.turnsNextCursor} {...(active === null ? {} : { note: t('sessions/filter/older') })} />
             )}
             <SessionHostContext.Provider value={host}>
-              <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
-                {rawView ?? (
-                  <>
-                    {chat.state?.turns.map((turn, at) => {
-                      const match = matches?.[at];
-                      if (match !== undefined && !active!.highlight && match.count === 0) return null;
-                      return <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} origins={origins} onSource={openSource} hideCalls={callsHidden} {...(match === undefined ? {} : { match, only: !active!.highlight, number: at + 1 })} />;
-                    })}
-                    {chat.state?.activeTurn === undefined || (activeMatch !== undefined && !active!.highlight && activeMatch.count === 0) ? null : (
-                      <TurnView turn={chat.state.activeTurn} live send={send} session={resource} origins={origins} onSource={openSource} open={open} hideCalls={callsHidden} {...(activeMatch === undefined ? {} : { match: activeMatch, only: !active!.highlight, number: turns + 1 })} />
-                    )}
-                    {active !== null && !active.highlight && kept === 0 ? <p className="web-note">{t('sessions/filter/none')}</p> : null}
-                  </>
-                )}
-              </WorkspaceContext.Provider>
+              <ChatContext.Provider value={chatUri ?? null}>
+                <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
+                  {rawView ?? (
+                    <>
+                      {chat.state?.turns.map((turn, at) => {
+                        const match = matches?.[at];
+                        if (match !== undefined && !active!.highlight && match.count === 0) return null;
+                        return <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} origins={origins} onSource={openSource} hideCalls={callsHidden} {...(match === undefined ? {} : { match, only: !active!.highlight, number: at + 1 })} />;
+                      })}
+                      {chat.state?.activeTurn === undefined || (activeMatch !== undefined && !active!.highlight && activeMatch.count === 0) ? null : (
+                        <TurnView turn={chat.state.activeTurn} live send={send} session={resource} origins={origins} onSource={openSource} open={open} hideCalls={callsHidden} {...(activeMatch === undefined ? {} : { match: activeMatch, only: !active!.highlight, number: turns + 1 })} />
+                      )}
+                      {active !== null && !active.highlight && kept === 0 ? <p className="web-note">{t('sessions/filter/none')}</p> : null}
+                    </>
+                  )}
+                </WorkspaceContext.Provider>
+              </ChatContext.Provider>
             </SessionHostContext.Provider>
             {chat.state !== undefined && turns === 0 && chat.state.activeTurn === undefined ? <p className="web-note">{t('sessions/chat/empty')}</p> : null}
           </>

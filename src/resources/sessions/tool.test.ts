@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ToolCallState } from '@microsoft/agent-host-protocol';
-import { durationOf, fileOf, inputText, kindOf, lineOf, outcomeOf, outputOf, segmentsOf, subjectOf } from './tool.js';
+import { durationOf, fileOf, inputText, kindOf, lineOf, movableOf, outcomeOf, outputOf, segmentsOf, subjectOf } from './tool.js';
 
 const call = (fields: Record<string, unknown>): ToolCallState => ({
   toolCallId: 't1',
@@ -123,5 +123,14 @@ describe('segmentsOf', () => {
 
   it('leaves a line with no file whole', () => {
     expect(segmentsOf('Listed /tmp', undefined)).toEqual([{ text: 'Listed /tmp' }]);
+  });
+});
+
+describe('movableOf', () => {
+  it('is true only while ahpd says the call can move', () => {
+    expect(movableOf(call({ _meta: { 'ahpd.backgroundToolCall': true } }))).toBe(true);
+    expect(movableOf(call({ _meta: { 'ahpd.backgroundToolCall': 'true' } }))).toBe(false);
+    expect(movableOf(call({ _meta: { 'ahpd.backgroundToolCall': false } }))).toBe(false);
+    expect(movableOf(call({}))).toBe(false);
   });
 });

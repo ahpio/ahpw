@@ -1942,6 +1942,8 @@
       "safety": "{safety}/10 safe",
       "arguments": "Arguments",
       "acceptResult": "Accept result",
+      "runInBackground": "Run in background",
+      "moveFailed": "Could not move the command to the background",
       "reject": "Reject",
       "thinkingAbout": "Thinking: {text}",
       "approve": "Approve",

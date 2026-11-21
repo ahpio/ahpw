@@ -10,11 +10,13 @@ import type {
 import { elapsed, folderLabel, textOf } from '../../bridges/words.js';
 import { codePath, fileLink } from '../files/link.js';
 import { linkClicks } from '../files/clicks.js';
-import { useSessionHost, WorkspaceContext } from './workspace.js';
+import { useChatUri, useSessionHost, WorkspaceContext } from './workspace.js';
+import { hostBridge } from '../../bridges/data.js';
+import { failed } from '../../shell/notify/index.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { Confirm } from './Confirm.js';
 import { InputRequest } from './Question.js';
-import { durationOf, fileOf, inputText, kindOf, lineOf, outcomeOf, outputOf, segmentsOf, type Outcome, type Output, type ToolKind } from './tool.js';
+import { durationOf, fileOf, inputText, kindOf, lineOf, MOVE_CALL, movableOf, outcomeOf, outputOf, segmentsOf, type Outcome, type Output, type ToolKind } from './tool.js';
 import { EMOJIcon } from '../emojis.js';
 import { SESSION_MARKDOWN, TOOLS_EXPANDED } from './view-settings.js';
 
@@ -141,6 +143,24 @@ export function ToolCall({ call, send, live, turnId }: { call: ToolCallState; se
   const outcome = outcomeOf(call);
   const waiting = live && (outcome === 'approval' || outcome === 'review' || outcome === 'sign-in');
   const scena = useScena();
+  const host = useSessionHost();
+  const chat = useChatUri();
+  const [asking, setAsking] = useState(false);
+  const [moved, setMoved] = useState(false);
+  // The host keeps the flag until the call completes, so a move the host answered is hidden here.
+  const movable = live && outcome === 'running' && movableOf(call) && !moved && chat !== null;
+  const moveOn = async (): Promise<void> => {
+    if (chat === null) return;
+    setAsking(true);
+    try {
+      const answer = await hostBridge(host).request(MOVE_CALL as never, { chat, toolCallId: call.toolCallId } as never) as { backgrounded?: unknown } | undefined;
+      setMoved(typeof answer?.backgrounded === 'boolean');
+    } catch (error) {
+      failed(t('sessions/tool/moveFailed'), error);
+    } finally {
+      setAsking(false);
+    }
+  };
   // The setting is the row's first state only; a row a person opened or closed stays so.
   const [open, setOpen] = useState(() => TOOLS_EXPANDED.read(scena.store) === 'expanded');
   const shown = open || waiting;
@@ -173,6 +193,11 @@ export function ToolCall({ call, send, live, turnId }: { call: ToolCallState; se
           </dl>
           {input === '' ? null : <Block title={t('sessions/tool/arguments')} text={input} />}
           {output.map((one, index) => <OutputView key={index} out={one} />)}
+          {movable ? (
+            <div className="web-tool__actions">
+              <Button label={t('sessions/tool/runInBackground')} disabled={asking} onClick={() => void moveOn()} />
+            </div>
+          ) : null}
           {live && call.status === PENDING_CONFIRMATION ? <Confirm call={call} send={send} turnId={turnId} /> : null}
           {live && call.status === PENDING_RESULT_CONFIRMATION ? (
             <div className="web-tool__actions">
