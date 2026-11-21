@@ -1,7 +1,7 @@
 ---
 title: The automation form runs once or continues
 domain: hosts
-status: active
+status: built
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -45,7 +45,7 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 | Task | Status | Depends on |
 | --- | --- | --- |
 | [01 - A mockup of the form](task-01-a-mockup-of-the-form.md) | done | - |
-| [02 - The form runs once or continues](task-02-the-form-runs-once-or-continues.md) | implemented | 01 |
+| [02 - The form runs once or continues](task-02-the-form-runs-once-or-continues.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -53,8 +53,8 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 
 ## Resume state
 
-- **Done so far:** the mockup, approved on 2026-11-21. Task 02 implemented on 2026-11-21.
-- **Next action:** Softov reviews the PR. The plan closes as `built` on his word.
+- **Done so far:** both tasks. Task 02 merged in ahpw #112, and Softov closed the plan as built on 2026-11-21.
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** a one-time trigger has no `events`, so code that reads the triggers checks `oneTimeOf` first.
 
