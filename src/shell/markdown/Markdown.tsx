@@ -6,8 +6,8 @@ import { quotesOf } from './quotes.js';
 import { CopyButton } from '../controls/CopyButton.js';
 import './quote-copy.css';
 
-/** The quote the pointer is over: which top-level blockquote it is, where its corner is, and what it holds as markdown. */
-interface Hovered { index: number; top: number; right: number; text: string }
+/** The quote or code block the pointer is over: where its corner is, and what it holds as markdown or code. */
+interface Hovered { top: number; right: number; text: string }
 
 /**
  * scena's Markdown, with ```mermaid fences drawn as diagrams through its
@@ -23,11 +23,19 @@ export function Markdown({ text = '', className, style, image, block }: Markdown
   }, [block, text]);
   const root = useRef<HTMLDivElement>(null);
   const [over, setOver] = useState<Hovered | null>(null);
-  // A pointer over a quote, or a tap on it for a touch screen, shows the copy icon at its top right corner.
+  // A pointer over a quote, or a tap on it for a touch screen, shows the copy icon at the top right corner of a quote or code block.
   const point = (event: PointerEvent<HTMLDivElement>): void => {
     const box = root.current;
     const target = event.target as HTMLElement;
     if (box === null || target.closest('.web-md-quotes__copy') !== null) return;
+    // A code block is copied as the code it shows, the innermost thing under the pointer, even inside a quote.
+    const code = target.closest('pre');
+    if (code !== null && box.contains(code)) {
+      const at = code.getBoundingClientRect();
+      const around = box.getBoundingClientRect();
+      setOver({ top: at.top - around.top + 2, right: around.right - at.right + 2, text: (code.textContent ?? '').replace(/\n$/, '') });
+      return;
+    }
     let quote = target.closest('blockquote');
     while (quote?.parentElement?.closest('blockquote') != null) quote = quote.parentElement.closest('blockquote');
     if (quote === null || !box.contains(quote)) { setOver(null); return; }
@@ -38,7 +46,7 @@ export function Markdown({ text = '', className, style, image, block }: Markdown
     const said = mine.length === all.length ? mine[index] : undefined;
     const rect = quote.getBoundingClientRect();
     const frame = box.getBoundingClientRect();
-    setOver({ index, top: rect.top - frame.top + 2, right: frame.right - rect.right + 2, text: said ?? quote.innerText.trim() });
+    setOver({ top: rect.top - frame.top + 2, right: frame.right - rect.right + 2, text: said ?? quote.innerText.trim() });
   };
   return (
     <div ref={root} className="web-md-quotes" onPointerOver={point} onPointerDown={point} onPointerLeave={() => setOver(null)}>

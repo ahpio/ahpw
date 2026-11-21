@@ -1,4 +1,4 @@
-/* The copy icon over a quote: shown at the quote's top right while the pointer is over it, or after a tap. */
+/* The copy icon over a quote or a code block: shown at its top right while the pointer is over it, or after a tap. */
 .web-md-quotes {
   position: relative;
 }
