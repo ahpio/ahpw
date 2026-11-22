@@ -169,6 +169,25 @@ export function Bood({ body, color, mood = 'idle', width, still = false, arrive,
     let rest = 0;
     let place: DOMRect | null = null;
     let measuredAt = 0;
+    // The body's place on the page, from an IntersectionObserver: it reports after the browser's own
+    // layout, so following the pointer never forces one. A frame or two late, which a glance does not show.
+    let measuring = false;
+    const measure = (): void => {
+      if (measuring || typeof IntersectionObserver !== 'function') return;
+      measuring = true;
+      const watch = new IntersectionObserver((entries) => {
+        watch.disconnect();
+        measuring = false;
+        const entry = entries[entries.length - 1];
+        if (!live || entry === undefined) return;
+        place = entry.boundingClientRect;
+        measuredAt = Date.now();
+        follow();
+      });
+      watch.observe(held);
+      unmeasure = () => watch.disconnect();
+    };
+    let unmeasure = (): void => {};
 
     const poseNow = (): BoodPose => {
       const { from, to, start, ms } = posing;
@@ -190,11 +209,8 @@ export function Bood({ body, color, mood = 'idle', width, still = false, arrive,
       frame = requestAnimationFrame(() => {
         frame = 0;
         if (latest === null || wandering) return;
-        const now = Date.now();
-        if (place === null || now - measuredAt > MEASURE_MS) {
-          place = held.getBoundingClientRect();
-          measuredAt = now;
-        }
+        if (place === null || Date.now() - measuredAt > MEASURE_MS) measure();
+        if (place === null) return;
         // A body in a hidden tab has no size, and nothing to turn.
         if (place.width === 0 || place.height === 0) return;
         if (!following && (gaze.x !== 0 || gaze.y !== 0)) look(0, 0);
@@ -271,6 +287,7 @@ export function Bood({ body, color, mood = 'idle', width, still = false, arrive,
       timers.forEach((timer) => window.clearTimeout(timer));
       window.clearTimeout(rest);
       cancelAnimationFrame(frame);
+      unmeasure();
       unwatch();
       moves.forEach((_, at) => shown.stop(`ambient:${at}`));
       for (const key of ['blink', 'pose', 'glance', 'swing', 'act']) shown.stop(key);
