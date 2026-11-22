@@ -6,6 +6,7 @@ import { totalWords, type UsageEntry } from '../../bridges/usage.js';
 import { timeOf } from '../automations/words.js';
 import { EMOJIcon } from '../emojis.js';
 import { hoursWord, sourceIcon, sourceWord } from './words.js';
+import { numberFormat } from '../../i18n/locales.js';
 
 type Cost = NonNullable<UsageEntry['cost']>;
 
@@ -28,7 +29,7 @@ function compactWord(n: number): string {
 /** An amount of money, to the digits a call's fraction of a cent needs. */
 function moneyWord(amount: number, currency: string): string {
   try {
-    return new Intl.NumberFormat(getLocale(), { style: 'currency', currency: currency.toUpperCase(), maximumFractionDigits: 6 }).format(amount);
+    return numberFormat(getLocale(), { style: 'currency', currency: currency.toUpperCase(), maximumFractionDigits: 6 }).format(amount);
   } catch {
     // A currency Intl does not know is written as the host sent it.
     return `${String(amount)} ${currency}`;

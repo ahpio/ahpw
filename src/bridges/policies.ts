@@ -13,6 +13,7 @@ import type { LimitFigure, LimitMember, LimitPool, Measure, Period as LimitPerio
 import { hostBridge } from './data.js';
 import { allows, type Offers } from './offers.js';
 import { recordsReducer, type PeopleState } from './people.js';
+import { numberFormat } from '../i18n/locales.js';
 
 export type { LimitFigure, LimitMember, LimitPool, LimitPeriod, Measure, Policy, PolicyKind, PolicyLimit, PolicyLimits };
 
@@ -125,9 +126,9 @@ export interface LimitWords {
 
 function measureWords(value: number, measure: Measure, locale: string): string {
   switch (measure) {
-    case 'usd': return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(value);
-    case 'tokens': return new Intl.NumberFormat(locale, { notation: 'compact' }).format(value);
-    default: return new Intl.NumberFormat(locale).format(value);
+    case 'usd': return numberFormat(locale, { style: 'currency', currency: 'USD' }).format(value);
+    case 'tokens': return numberFormat(locale, { notation: 'compact' }).format(value);
+    default: return numberFormat(locale).format(value);
   }
 }
 

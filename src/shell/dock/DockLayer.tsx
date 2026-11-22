@@ -99,18 +99,26 @@ const LOCK = (
   <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><rect x="1.5" y="4.5" width="7" height="5" rx="1" fill="currentColor" /><path d="M3 4.5V3a2 2 0 0 1 4 0v1.5" fill="none" stroke="currentColor" strokeWidth="1.2" /></svg>
 );
 
-/** How tall the title bar and the status bar are, so a dock on the top or bottom edge fits the bar it rests on. */
+/**
+ * How tall the title bar and the status bar are, so a dock on the top or
+ * bottom edge fits the bar it rests on. Read from a ResizeObserver, which
+ * reports each bar after the browser lays it out: a measure of its own would
+ * force a layout of the whole page on every layout change, as each tab click is.
+ */
 function useBarHeights(layout: ScenaLayout): { top: number; bottom: number } {
   const [heights, setHeights] = useState({ top: 22, bottom: 22 });
   useEffect(() => {
     const bars = (['titlebar', 'statusbar'] as const).map((name) => document.querySelector<HTMLElement>(`[data-surface="${name}"]`));
-    const measure = (): void => {
-      const [top, bottom] = bars.map((bar) => bar?.getBoundingClientRect().height ?? 0);
-      setHeights((was) => (was.top === top && was.bottom === bottom ? was : { top: top || 22, bottom: bottom || 22 }));
-    };
-    measure();
-    const watch = new ResizeObserver(measure);
-    for (const bar of bars) if (bar !== null) watch.observe(bar);
+    const seen = new Map<Element, number>();
+    const watch = new ResizeObserver((entries) => {
+      for (const entry of entries) seen.set(entry.target, entry.borderBoxSize[0]?.blockSize ?? entry.contentRect.height);
+      const [top, bottom] = bars.map((bar) => (bar === null ? 0 : seen.get(bar) ?? 0));
+      setHeights((was) => {
+        const next = { top: top || 22, bottom: bottom || 22 };
+        return was.top === next.top && was.bottom === next.bottom ? was : next;
+      });
+    });
+    for (const bar of bars) if (bar !== null) watch.observe(bar, { box: 'border-box' });
     return () => watch.disconnect();
   }, [layout]);
   return heights;

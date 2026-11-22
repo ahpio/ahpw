@@ -1,4 +1,5 @@
 import type { ConnectorModel } from '../../bridges/connectors.js';
+import { numberFormat } from '../../i18n/locales.js';
 
 /** Whether a model's id or name holds every word of a search, ignoring case. The proxy name is left out: its prefix is the same on every row. */
 export function matches(model: ConnectorModel, query: string): boolean {
@@ -12,7 +13,7 @@ export function perMillion(perToken: string | undefined, locale: string): string
   if (perToken === undefined || perToken === '') return undefined;
   const dollars = Number(perToken) * 1_000_000;
   if (!Number.isFinite(dollars) || dollars < 0) return undefined;
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: dollars < 1 ? 3 : 2 }).format(dollars);
+  return numberFormat(locale, { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: dollars < 1 ? 3 : 2 }).format(dollars);
 }
 
 /** A model's price as prompt over answer per million tokens, such as `$3 / $15`; nothing when it has neither. */
