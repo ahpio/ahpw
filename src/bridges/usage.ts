@@ -13,6 +13,7 @@
 import type { UsageEntry, UsageKey, UsageNamedGroup, UsagePeriods, UsagePool, UsageTotal } from '@ahpd/sdk';
 import { hostBridge, ROOT } from './data.js';
 import type { Offers } from './offers.js';
+import { numberFormat } from '../i18n/locales.js';
 
 export type { UsageEntry, UsageKey, UsageNamedGroup, UsagePeriods, UsagePool, UsageTotal };
 
@@ -145,9 +146,9 @@ export interface TotalWords {
 export function totalWords(total: UsageTotal, locale: string): TotalWords {
   const usd = total.usd ?? ((total.calls ?? 0) > 0 ? undefined : 0);
   return {
-    ...(usd === undefined ? {} : { cost: new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(usd) }),
-    ...(total.tokens === undefined ? {} : { tokens: new Intl.NumberFormat(locale, { notation: 'compact' }).format(total.tokens) }),
+    ...(usd === undefined ? {} : { cost: numberFormat(locale, { style: 'currency', currency: 'USD' }).format(usd) }),
+    ...(total.tokens === undefined ? {} : { tokens: numberFormat(locale, { notation: 'compact' }).format(total.tokens) }),
     ...(total.calls === undefined ? {} : { calls: total.calls.toLocaleString(locale) }),
-    ...(total.hours === undefined ? {} : { hours: new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(total.hours) }),
+    ...(total.hours === undefined ? {} : { hours: numberFormat(locale, { maximumFractionDigits: 1 }).format(total.hours) }),
   };
 }

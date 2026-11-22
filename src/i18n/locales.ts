@@ -41,6 +41,23 @@ export function dateFormat(options: Intl.DateTimeFormatOptions): { format(date: 
   };
 }
 
+/** Number formatters already made, by language and options: making one costs far more than using it. */
+const numberFormats = new Map<string, Intl.NumberFormat>();
+
+/** An Intl number formatter for `locale` and `options`, made once and kept. */
+export function numberFormat(locale: string | undefined, options: Intl.NumberFormatOptions = {}): Intl.NumberFormat {
+  const key = `${locale ?? ''}\u{0000}${JSON.stringify(options)}`;
+  let made = numberFormats.get(key);
+  if (made === undefined) {
+    made = new Intl.NumberFormat(locale, options);
+    numberFormats.set(key, made);
+  }
+  return made;
+}
+
+/** The plural rules of each language, made once. */
+const pluralRules = new Map<string, Intl.PluralRules>();
+
 /**
  * A message that changes with a count: `<key>/one` or `<key>/other`, as the
  * chosen language's plural rules pick, with `{count}` and `params` filled in.
@@ -48,6 +65,12 @@ export function dateFormat(options: Intl.DateTimeFormatOptions): { format(date: 
  */
 export function plural(key: string, count: number, params: Record<string, unknown> = {}): string {
   // 0 takes the plural in every language ahpw speaks: "0 sessões", though CLDR counts 0 as one in Portuguese.
-  const form = count !== 0 && new Intl.PluralRules(getLocale()).select(count) === 'one' ? 'one' : 'other';
+  const locale = getLocale();
+  let rules = pluralRules.get(locale);
+  if (rules === undefined) {
+    rules = new Intl.PluralRules(locale);
+    pluralRules.set(locale, rules);
+  }
+  const form = count !== 0 && rules.select(count) === 'one' ? 'one' : 'other';
   return translate(`${key}/${form}`, { ...params, count });
 }

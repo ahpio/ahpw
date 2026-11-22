@@ -76,3 +76,12 @@ describe('dateFormat', () => {
     setLocale('en');
   });
 });
+
+describe('numberFormat', () => {
+  it('keeps one formatter per language and options', async () => {
+    const { numberFormat } = await import('./locales.js');
+    expect(numberFormat('en', { notation: 'compact' })).toBe(numberFormat('en', { notation: 'compact' }));
+    expect(numberFormat('en', { notation: 'compact' })).not.toBe(numberFormat('pt-BR', { notation: 'compact' }));
+    expect(numberFormat('en', { notation: 'compact' }).format(12_300)).toBe('12K');
+  });
+});

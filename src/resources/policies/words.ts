@@ -1,7 +1,7 @@
 import { getLocale, translate } from '@softov/scena';
 import { totalWords } from '../../bridges/usage.js';
 import type { LimitFigure, Measure, Policy, PolicyLimit } from '../../bridges/policies.js';
-import { plural } from '../../i18n/locales.js';
+import { plural, numberFormat } from '../../i18n/locales.js';
 import { hoursWord, tokensWord } from '../usage/words.js';
 
 /** An amount in its measure: `$400.00`, `2M tokens`, `30 turns`. */
@@ -10,7 +10,7 @@ export function amountWord(measure: Measure, amount: number): string {
     case 'usd': return totalWords({ usd: amount }, getLocale()).cost ?? String(amount);
     case 'tokens': return tokensWord(amount);
     case 'hours': return hoursWord(amount);
-    default: return plural(`policies/measure/${measure}`, amount, { n: new Intl.NumberFormat(getLocale()).format(amount) });
+    default: return plural(`policies/measure/${measure}`, amount, { n: numberFormat(getLocale()).format(amount) });
   }
 }
 

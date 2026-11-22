@@ -17,6 +17,7 @@ import {
 } from '../../bridges/usage-meta.js';
 import { tokens, when } from './turn.js';
 import './usage.css';
+import { numberFormat } from '../../i18n/locales.js';
 
 type T = ReturnType<typeof useI18n>['t'];
 
@@ -34,7 +35,7 @@ const share = (part: number, whole: number): string =>
 function untilWords(ms: number): string {
   const minutes = Math.max(0, Math.round(ms / 60_000));
   const unit = (value: number, kind: 'day' | 'hour' | 'minute'): string =>
-    new Intl.NumberFormat(getLocale(), { style: 'unit', unit: kind, unitDisplay: 'short' }).format(value);
+    numberFormat(getLocale(), { style: 'unit', unit: kind, unitDisplay: 'short' }).format(value);
   if (minutes < 60) return unit(minutes, 'minute');
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return minutes % 60 === 0 ? unit(hours, 'hour') : `${unit(hours, 'hour')} ${unit(minutes % 60, 'minute')}`;
