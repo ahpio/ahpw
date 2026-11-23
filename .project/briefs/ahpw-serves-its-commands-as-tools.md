@@ -67,10 +67,14 @@ The answers are Softov's, from 2026-11-23.
 | Which window runs a call | The window used last. Windows keep one client id, and the window that has focus holds a browser lock. |
 | What happens on each call | A setting per command: run, notify or ask. The default is notify: the call runs and a toast names it. |
 | The first commands to mark | Open: `ahp.openSession`, `ahp.openFile`, `ahp.openDiff`, `ahp.openTerminal`. Create: `ahp.newSession`, `ahp.newTerminal`. Layout: `ahp.manage.layout`, `ahp.manage.theme`. Settings: `ahp.openSettings`, `ahp.openInterfaceSettings`. |
+| What the model reads | An English text in the mark, kept to the minimum the model needs. |
+| The arguments | A JSON Schema in the mark. `runCommand` checks a call against it before it runs. |
+| A call without `host` | ahpw fills in the host of the session that made the call. |
+| When ahpw announces its tools | Only while one command or more is on. |
+| Which sessions get the tools | Every session open in a tab, in any window of this browser. |
+| Where "ask" asks | In the chat, at the call, with Allow and Deny. A toast says so when that chat is not in view. |
+| A call nobody answers | ahpw keeps no timer. ahpd ends the call after 10 minutes, and ahpw removes the prompt. |
 
 ## Open points
 
-- What the model reads for each command: scena's `title` and `description`, or a text written for the model in the mark.
-- How `runCommand` gets the arguments a command needs, such as `host`, when scena's `args` has no JSON Schema.
-- Whether ahpw announces `listCommands` and `runCommand` in each session it opens, or only while one command is on.
-- What `ask` shows while a call waits, and what ahpw answers when the person does not respond before ahpd gives up.
+- `ahp.manage.layout` and `ahp.manage.theme` open a menu to pick from, which an agent cannot use. Each needs an argument with the choice.
