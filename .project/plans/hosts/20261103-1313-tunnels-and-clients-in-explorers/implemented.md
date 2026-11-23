@@ -31,7 +31,7 @@ Manage lists Tunnels and Clients while a host serves their channels. Each opens 
   - A tunnel is made from the dialog, and its row shows the host's error.
   - Edit opens with the row's settings. Disable works, and Remove asks the host's question first.
 - Two browser contexts: Clients marks this app's row, and Drop closes the other socket, which then connects again.
-- Not verified: a tunnel that runs, with a signed-in `devtunnel` connector. That check waits in [tunnels-clients-checks.md](../../../pending/tunnels-clients-checks.md).
+- Softov checked a running tunnel with a signed-in `devtunnel` connector, and the Clients page from a second device, on 2026-11-23, and they passed.
 
 ## Departures from the plan
 

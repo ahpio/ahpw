@@ -17,7 +17,7 @@ ahpw sends its language as `locale` in `initialize` and `reconnect`. A change of
 ## Verified
 
 - `pnpm typecheck` and `pnpm test` passed.
-- Not verified: the frames in the log, and the host's text in Portuguese. Those checks wait in [hosts-locale-checks.md](../../../pending/hosts-locale-checks.md).
+- Softov checked the frames in the log and the host's text in Portuguese on 2026-11-23, and they passed.
 
 ## Departures from the plan
 

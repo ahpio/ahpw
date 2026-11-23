@@ -27,4 +27,4 @@ Every copy in ahpw reaches the clipboard, also on a page served over plain http.
 
 ## Left for later
 
-- Softov's check on his own browser, in [explorers-copy-checks.md](../../../pending/explorers-copy-checks.md).
+- None. Softov checked each copy on Softov's own browser on 2026-11-23, and it passed.

@@ -22,7 +22,7 @@ The new session box takes VS Code's layout. The line above the box holds the fol
 - Softov approved the mockup on 2026-10-29.
 - `pnpm typecheck` and `pnpm test` passed, and CI passed on PR #18.
 - By hand at 1280 light and 760 dark: each pill opens its list, `<` folds, `>` unfolds, and the page does not scroll sideways.
-- Not verified: a session starts with the settings from the line. That check waits in [composer-line-start-check.md](../../../pending/composer-line-start-check.md).
+- Softov checked on 2026-11-23 that a session starts with the Approvals and Isolation set on the line, and it passed.
 
 ## Departures from the plan
 

@@ -42,4 +42,4 @@ A host that lists none keeps ahpw's own buttons from plan plugins/20261111-1228.
 
 ## Left for later
 
-- The devtunnel checks wait for a signed-in Dev Tunnels account, in [operations-tunnel-checks.md](../../../pending/operations-tunnel-checks.md).
+- Softov checked the devtunnel operations with a signed-in Dev Tunnels account on 2026-11-23, and they passed.
