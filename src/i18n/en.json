@@ -2228,7 +2228,9 @@
       "others": {
         "one": "{count} other client in this session",
         "other": "{count} other clients in this session"
-      }
+      },
+      "said": "Client: {state}",
+      "held": "Session: {state}"
     },
     "tooling": {
       "tools": "Tools",
@@ -2248,7 +2250,9 @@
       "always": "Always available",
       "fromClient": "From this client",
       "required": "required",
+      "on": "On",
       "off": "Off",
+      "onAt": "On ({scope})",
       "offAt": "Off ({scope})",
       "scopes": {
         "session": "Session",

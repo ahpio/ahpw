@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { ChatState, SessionActiveClient, SessionState, SessionSummary, TerminalState } from '@microsoft/agent-host-protocol';
+import type { ChatState, Customization, SessionActiveClient, SessionState, SessionSummary, TerminalState } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena } from '@softov/scena/react';
 import { Badge, StatusDot, type DetailItem } from '@softov/scena/ui';
 import type { Scena } from '@softov/scena/types';
@@ -11,7 +11,7 @@ import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { foldTerminal, inFolder } from '../terminals/terminal.js';
-import { clientName } from './tooling.js';
+import { clientName, clientPlugins } from './tooling.js';
 import { tokens, totalsOf, when } from './turn.js';
 import './facts.css';
 
@@ -28,20 +28,41 @@ function FolderTerminal({ host, uri, folder }: { host: string; uri: string; fold
   );
 }
 
-/** The session's clients: each one's name, id and what it gives the agent; this window's marked. */
-function ClientList({ clients, own }: { clients: readonly SessionActiveClient[]; own: string | undefined }): ReactElement {
+/**
+ * The session's clients: each one's name, id and what it gives the agent;
+ * this window's marked. Under each, the plugins it announced with its
+ * decision, and the session's when the two differ.
+ */
+function ClientList({ clients, own, items }: { clients: readonly SessionActiveClient[]; own: string | undefined; items: readonly Customization[] | undefined }): ReactElement {
   const { t } = useI18n();
   return (
     <span className="web-details__clients">
-      {clients.map((client) => (
-        <span key={client.clientId} className="web-details__client">
-          <StatusDot tone="success" />
-          <strong>{clientName(client)}</strong>
-          {client.clientId === own ? <Badge text={t('sessions/clients/thisWindow')} tone="info" /> : null}
-          <CopiedId id={client.clientId} />
-          <span className="web-details__muted">{[plural('sessions/clients/tools', client.tools.length), plural('sessions/clients/plugins', client.customizations?.length ?? 0)].join(' \u{00B7} ')}</span>
-        </span>
-      ))}
+      {clients.map((client) => {
+        const plugins = clientPlugins(client, items);
+        return (
+          <span key={client.clientId} className="web-details__entry">
+            <span className="web-details__client">
+              <StatusDot tone="success" />
+              <strong>{clientName(client)}</strong>
+              {client.clientId === own ? <Badge text={t('sessions/clients/thisWindow')} tone="info" /> : null}
+              <CopiedId id={client.clientId} />
+              <span className="web-details__muted">{[plural('sessions/clients/tools', client.tools.length), plural('sessions/clients/plugins', plugins.length)].join(' \u{00B7} ')}</span>
+            </span>
+            {plugins.length === 0 ? null : (
+              <span className="web-details__plugins">
+                {plugins.map((plugin) => (
+                  <span key={plugin.uri} className="web-details__plugin" data-differs={plugin.held === undefined ? undefined : 'true'}>
+                    <span className="web-details__name" title={plugin.uri}>{plugin.name}</span>
+                    {plugin.held === undefined
+                      ? <span className="web-details__muted">{plugin.said}</span>
+                      : <span className="web-details__muted">{[t('sessions/clients/said', { state: plugin.said }), t('sessions/clients/held', { state: plugin.held })].join(' \u{00B7} ')}</span>}
+                  </span>
+                ))}
+              </span>
+            )}
+          </span>
+        );
+      })}
     </span>
   );
 }
@@ -138,6 +159,6 @@ export function sessionFacts(scena: Scena, t: (key: string, values?: Record<stri
     });
   }
   if (origin !== undefined && String(origin.kind) === 'automation') facts.push({ label: t('sessions/details/from'), value: t('sessions/details/automation') });
-  if (clients.length > 0) facts.push({ label: t('sessions/details/clients', { count: clients.length }), value: <ClientList clients={clients} own={hostBridge(host).clientId()} />, span: true });
+  if (clients.length > 0) facts.push({ label: t('sessions/details/clients', { count: clients.length }), value: <ClientList clients={clients} own={hostBridge(host).clientId()} items={session?.customizations} />, span: true });
   return facts;
 }

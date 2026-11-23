@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CustomizationEnablement, McpServerCustomization, McpServerState, PluginCustomization, SessionActiveClient, SessionState, SkillCustomization, ToolDefinition } from '@microsoft/agent-host-protocol';
-import { clientName, offWord, onAt, otherClients, pluginGroups, searchRows, searchTools, serverGroups, toolGroups, toolHints, toolParams, withDecision } from './tooling.js';
+import { clientName, clientPlugins, decisionWord, offWord, onAt, otherClients, pluginGroups, searchRows, searchTools, serverGroups, toolGroups, toolHints, toolParams, withDecision } from './tooling.js';
 
 const tool = (name: string, fields: Partial<ToolDefinition> = {}): ToolDefinition => ({ name, ...fields });
 const client = (clientId: string, fields: Partial<SessionActiveClient> = {}): SessionActiveClient => ({ clientId, tools: [], ...fields });
@@ -133,5 +133,31 @@ describe('withDecision', () => {
     expect(onAt(row!, 'global')).toBe(true);
     expect(onAt(row!, 'workspace')).toBe(false);
     expect(offWord(row!)).toBe('Off (Session)');
+  });
+});
+
+describe('clientPlugins', () => {
+  const uri = 'file:///home/ana/.plugins/tidy';
+  const announced = (enablement?: CustomizationEnablement[]) => client('vscode', { customizations: [{ type: 'plugin', uri, name: 'tidy', nonce: 'n1', ...(enablement === undefined ? {} : { enablement }) } as never] });
+
+  it('reads the most specific decision, and none as on', () => {
+    expect(decisionWord(undefined)).toBe('On');
+    expect(decisionWord([decision('global', true), decision('session', false)])).toBe('Off (Session)');
+    expect(decisionWord([decision('global', true)])).toBe('On (Everywhere)');
+  });
+
+  it('gives the client\'s decision alone when the session holds the same', () => {
+    const items = [plugin({ clientId: 'vscode', uri, enablement: [decision('global', true)] } as never)];
+    expect(clientPlugins(announced([decision('global', true)]), items)).toEqual([{ uri, name: 'tidy', said: 'On (Everywhere)' }]);
+  });
+
+  it('gives both when the session holds another decision', () => {
+    const items = [plugin({ clientId: 'vscode', uri, enablement: [decision('global', false)] } as never)];
+    expect(clientPlugins(announced([decision('global', true)]), items)[0]).toEqual({ uri, name: 'tidy', said: 'On (Everywhere)', held: 'Off (Everywhere)' });
+  });
+
+  it('matches only the plugin of the same client', () => {
+    const items = [plugin({ clientId: 'other', uri, enablement: [decision('global', false)] } as never)];
+    expect(clientPlugins(announced([decision('global', true)]), items)[0]?.held).toBeUndefined();
   });
 });

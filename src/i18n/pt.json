@@ -2228,7 +2228,9 @@
       "others": {
         "one": "Mais {count} cliente nesta sessão",
         "other": "Mais {count} clientes nesta sessão"
-      }
+      },
+      "said": "Cliente: {state}",
+      "held": "Sessão: {state}"
     },
     "tooling": {
       "tools": "Ferramentas",
@@ -2248,7 +2250,9 @@
       "always": "Sempre disponível",
       "fromClient": "Deste cliente",
       "required": "obrigatório",
+      "on": "Ligado",
       "off": "Desligado",
+      "onAt": "Ligado ({scope})",
       "offAt": "Desligado ({scope})",
       "scopes": {
         "session": "Sessão",
