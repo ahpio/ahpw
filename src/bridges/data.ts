@@ -674,6 +674,9 @@ function awaitEcho(id: string, channel: string, seq: number): Promise<string | n
 /** The method ahpd, as VS Code's agent host, asks a client with before a session moves to or adds a folder it does not trust. */
 const TRUST_REQUEST = 'vscode/requestWorkspaceTrust';
 
+/** The method ahpd, as VS Code's agent host, asks a client with after ten seconds without a frame from it. */
+const PING = 'ping';
+
 /**
  * What a client says when a host connects: the folders this browser trusts
  * that the host does not, joined to the host's own list, and an answer to the
@@ -684,14 +687,24 @@ function greet(store: ReactiveStore, multi: MultiHostClient, id: string): void {
   keepTrust(store, id, answers);
   const uris = trustedUris(answers);
   if (uris.length > 0) void pushMissingTrust(store, multi, id, uris);
-  multi.client(id)?.rawClient().setServerRequestHandler((async (method: string, params: unknown) => {
+  multi.client(id)?.rawClient().setServerRequestHandler(hostRequests(store, id) as never);
+}
+
+/**
+ * The answers to what host `id` asks this browser: its liveness `ping`, as
+ * the host answers a client's, and its trust question. Every other method is
+ * refused.
+ */
+export function hostRequests(store: ReactiveStore, id: string): (method: string, params: unknown) => Promise<unknown> {
+  return async (method, params) => {
+    if (method === PING) return {};
     if (method !== TRUST_REQUEST) throw new RpcError(-32601, `ahpw does not answer ${method}`);
     const workspace = (params as { workspace?: unknown } | undefined)?.workspace;
     if (typeof workspace !== 'string' || workspace === '') throw new RpcError(-32602, `${TRUST_REQUEST} needs workspace, a folder URI`);
     // Loaded when asked: the prompt reaches back into this module.
     const { answerTrust } = await import('./trust-ask.js');
     return { trusted: await answerTrust(store, id, workspace) };
-  }) as never);
+  };
 }
 
 /**
