@@ -37,4 +37,4 @@ Every copy in ahpw calls `copyText`, so it works on plain http, and a test keeps
 
 - The five callers use `copyText`. `clipboard.test.ts` passes, and it fails when a direct call is added back.
 - Headless Chrome on a non-secure origin (`http://e2e.test:5191`, where `navigator.clipboard` is undefined) copied each path through the fallback and showed the toast.
-- The check on Softov's own browser is in [explorers-copy-checks.md](../../../pending/explorers-copy-checks.md).
+- Softov checked each copy on Softov's own browser on 2026-11-23, and it passed.

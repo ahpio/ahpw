@@ -101,7 +101,7 @@ const FOLDED_KEY = 'ahpw.composerFolded';
  * and send, queue, steer and stop. Folded, it is one line: the `+`, the
  * draft's first line or the agent and model, what waits, and send or stop.
  */
-export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastUsage, usage, onUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false, blocked = false, notice, onEngage, onInfo }: {
+export const Composer = memo(function Composer({ host, chatUri, activeId, activeStart, queued: held, steering, draft, lastModel, lastAgent, lastUsage, usage, onUsage, config, changesets, customizations, backgroundWork, summary, send, placeholder, steers = false, blocked = false, notice, onEngage, onInfo }: {
   /** The session's host. */
   host: string;
   chatUri: string;
@@ -111,6 +111,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   steering: PendingMessage | undefined;
   draft: Message | undefined;
   lastModel: string | undefined;
+  /** The custom agent of the chat's latest turn, which the Agent pill shows until another is chosen, as VS Code does. */
+  lastAgent?: string | undefined;
   /** The last turn's usage, for the context readout beside the model. */
   lastUsage: UsageInfo | undefined;
   /** What the session says of its usage, which the readout reads first. */
@@ -151,7 +153,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   const [text, setText] = useState(() => draft?.text ?? '');
   const [caret, setCaret] = useState<number | null>(null);
   const [model, setModel] = useState<string | undefined>(() => draft?.model?.id ?? lastModel);
-  const [customAgent, setCustomAgent] = useState<string | undefined>(() => draft?.agent?.uri);
+  const [customAgent, setCustomAgent] = useState<string | undefined>(() => draft?.agent?.uri ?? lastAgent);
   const agentsOfSession = useMemo(() => customAgents(customizations), [customizations]);
   const [attachments, setAttachments] = useState<MessageAttachment[]>(() => draft?.attachments ?? []);
   const area = useRef<HTMLTextAreaElement>(null);
