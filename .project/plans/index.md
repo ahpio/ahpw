@@ -68,3 +68,5 @@ What exists today: [00-sessions.md](sessions/00-sessions.md).
 | --- | --- | --- |
 | [01 - Raw view and header buttons](sessions/01-raw-view-and-header/plan.md) | built | - |
 | [20261121-0639 - A running call moves to the background](sessions/20261121-0639-a-running-call-moves-to-the-background/plan.md) | built | ahpd host plan, merged in #407 |
+| [20261123-1358 - ahpw serves its commands as tools for the agent](sessions/20261123-1358-ahpw-serves-its-commands-as-tools/plan.md) | planned | task 01 |
+| [20261123-1359 - An ahpw tool call asks in the chat before it runs](sessions/20261123-1359-a-tool-call-asks-in-the-chat/plan.md) | planned | after 20261123-1358 |
