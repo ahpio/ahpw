@@ -1801,8 +1801,8 @@
       },
       "from": "Origem",
       "automation": "Uma execução de automação",
-      "watching": "Assistindo",
-      "cached": "{count} em cache"
+      "cached": "{count} em cache",
+      "clients": "Clientes · {count}"
     },
     "grouping": {
       "none": "Sem grupos",
@@ -2213,6 +2213,78 @@
     },
     "agent": {
       "all": "Todos os agentes"
+    },
+    "clients": {
+      "unnamed": "Cliente {id}",
+      "thisWindow": "Esta janela",
+      "tools": {
+        "one": "{count} ferramenta",
+        "other": "{count} ferramentas"
+      },
+      "plugins": {
+        "one": "{count} plugin",
+        "other": "{count} plugins"
+      },
+      "others": {
+        "one": "Mais {count} cliente nesta sessão",
+        "other": "Mais {count} clientes nesta sessão"
+      }
+    },
+    "tooling": {
+      "tools": "Ferramentas",
+      "servers": "Servidores MCP",
+      "plugins": "Plugins",
+      "host": "Host",
+      "claudeCli": "Claude CLI",
+      "pluginNote": "plugin",
+      "noSession": "Abra uma sessão para ver o que ela pode usar.",
+      "searchTools": "Buscar ferramentas",
+      "searchServers": "Buscar servidores MCP",
+      "searchPlugins": "Buscar plugins",
+      "noTools": "Esta sessão não tem ferramentas.",
+      "noServers": "Esta sessão não tem servidores MCP.",
+      "noPlugins": "Esta sessão não tem plugins.",
+      "noMatch": "Nada encontrado.",
+      "always": "Sempre disponível",
+      "fromClient": "Deste cliente",
+      "required": "obrigatório",
+      "off": "Desligado",
+      "offAt": "Desligado ({scope})",
+      "scopes": {
+        "session": "Sessão",
+        "workspace": "Pasta",
+        "global": "Em todo lugar"
+      },
+      "turnOn": "Ligar nesta sessão",
+      "turnOff": "Desligar nesta sessão",
+      "hints": {
+        "readOnly": "Somente leitura",
+        "changes": "Faz alterações",
+        "destructive": "Destrutiva",
+        "notDestructive": "Não destrutiva",
+        "openWorld": "Acessa o exterior"
+      },
+      "menu": {
+        "title": "Mais ações",
+        "server": "Servidor",
+        "switch": "Ligar ou desligar",
+        "more": "Mais",
+        "start": "Iniciar",
+        "restart": "Reiniciar",
+        "stop": "Parar",
+        "configuration": "Mostrar configuração",
+        "copyId": "Copiar ID",
+        "enable": {
+          "session": "Ligar nesta sessão",
+          "workspace": "Ligar nesta pasta",
+          "global": "Ligar em todo lugar"
+        },
+        "disable": {
+          "session": "Desligar nesta sessão",
+          "workspace": "Desligar nesta pasta",
+          "global": "Desligar em todo lugar"
+        }
+      }
     }
   },
   "host": {

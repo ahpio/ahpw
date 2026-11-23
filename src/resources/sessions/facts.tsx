@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react';
-import type { ChatState, SessionState, SessionSummary, TerminalState } from '@microsoft/agent-host-protocol';
+import type { ChatState, SessionActiveClient, SessionState, SessionSummary, TerminalState } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena } from '@softov/scena/react';
-import type { DetailItem } from '@softov/scena/ui';
+import { Badge, StatusDot, type DetailItem } from '@softov/scena/ui';
 import type { Scena } from '@softov/scena/types';
-import type { HostFacts } from '../../bridges/data.js';
+import { hostBridge, type HostFacts } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { elapsed, folderLabel } from '../../bridges/words.js';
 import { plural } from '../../i18n/locales.js';
@@ -11,6 +11,7 @@ import { CopyButton } from '../../shell/controls/CopyButton.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { foldTerminal, inFolder } from '../terminals/terminal.js';
+import { clientName } from './tooling.js';
 import { tokens, totalsOf, when } from './turn.js';
 import './facts.css';
 
@@ -24,6 +25,24 @@ function FolderTerminal({ host, uri, folder }: { host: string; uri: string; fold
     <button type="button" className="web-link" title={t('sessions/details/openTerminal')} onClick={() => void scena.commands.execute('ahp.openTerminal', { uri })}>
       {state?.title === '' || state?.title === undefined ? t('sessions/details/terminal') : state.title}
     </button>
+  );
+}
+
+/** The session's clients: each one's name, id and what it gives the agent; this window's marked. */
+function ClientList({ clients, own }: { clients: readonly SessionActiveClient[]; own: string | undefined }): ReactElement {
+  const { t } = useI18n();
+  return (
+    <span className="web-details__clients">
+      {clients.map((client) => (
+        <span key={client.clientId} className="web-details__client">
+          <StatusDot tone="success" />
+          <strong>{clientName(client)}</strong>
+          {client.clientId === own ? <Badge text={t('sessions/clients/thisWindow')} tone="info" /> : null}
+          <CopiedId id={client.clientId} />
+          <span className="web-details__muted">{[plural('sessions/clients/tools', client.tools.length), plural('sessions/clients/plugins', client.customizations?.length ?? 0)].join(' \u{00B7} ')}</span>
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -63,7 +82,7 @@ export function sessionFacts(scena: Scena, t: (key: string, values?: Record<stri
   const folder = summary.workingDirectories?.[0];
   const changes = summary.changes;
   const origin = summary.origin;
-  const watching = session?.activeClients.length ?? 0;
+  const clients = session?.activeClients ?? [];
   const chatUri = of.chatUri ?? session?.defaultChat ?? summary.defaultChat;
   const facts: DetailItem[] = [];
   // With every host, the host first: the rest is that host's.
@@ -119,6 +138,6 @@ export function sessionFacts(scena: Scena, t: (key: string, values?: Record<stri
     });
   }
   if (origin !== undefined && String(origin.kind) === 'automation') facts.push({ label: t('sessions/details/from'), value: t('sessions/details/automation') });
-  if (watching > 0) facts.push({ label: t('sessions/details/watching'), value: String(watching) });
+  if (clients.length > 0) facts.push({ label: t('sessions/details/clients', { count: clients.length }), value: <ClientList clients={clients} own={hostBridge(host).clientId()} />, span: true });
   return facts;
 }

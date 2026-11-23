@@ -306,3 +306,11 @@ describe('a host\'s session list', () => {
     expect(values.get(data.summaryPath('h', 's:/1'))).toBeUndefined();
   });
 });
+
+describe('what a host asks this browser', () => {
+  it('answers a ping, as the host answers a client\'s, and refuses a method it does not know', async () => {
+    const answer = data.hostRequests(store as never, 'a');
+    await expect(answer('ping', { channel: 'ahp-root://' })).resolves.toEqual({});
+    await expect(answer('nothing/here', {})).rejects.toMatchObject({ code: -32601 });
+  });
+});

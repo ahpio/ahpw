@@ -15,6 +15,7 @@ import { refKey } from '../../bridges/hosts.js';
 import { sessionActs } from './acts.js';
 import { sessionKey } from './focus.js';
 import { SESSIONS_PINS, togglePin } from './pins.js';
+import { otherClients } from './tooling.js';
 
 /**
  * The session's terminals: the ones it holds by claim, and the others whose
@@ -54,7 +55,7 @@ function useSessionTerminals(host: string, session: string, folder: string | und
  * the chat reads: the Raw view, and the calls hidden. Each of those, while
  * on, shows its icon, which turns it off.
  */
-export function SessionHeaderTools({ host, summary, session, chat, chatUri, onChat, onSubagent, raw, onRaw, calls, bot, onUsage, filter }: {
+export function SessionHeaderTools({ host, summary, session, chat, chatUri, onChat, onSubagent, raw, onRaw, info, calls, bot, onUsage, filter }: {
   host: string;
   summary: SessionSummary;
   session: SessionState | undefined;
@@ -65,6 +66,8 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
   onSubagent: (chat: string) => void;
   raw: boolean;
   onRaw: (on: boolean) => void;
+  /** Whether the session's info shows in place of the chat, and its toggle, which the other-clients button calls. */
+  info?: { open: boolean; onToggle: () => void };
   /** Whether the chat hides its calls, on a page that draws them. */
   calls?: { hidden: boolean; onHidden: (hidden: boolean) => void };
   /** The bot the session is a chat with. */
@@ -89,6 +92,7 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
   const ownAt = own.findIndex((one) => one.resource === chatUri);
   const inSubagent = spawned.some((one) => one.resource === chatUri);
   const run = (command: string, args?: unknown): void => { void scena.commands.execute(command, args); };
+  const others = otherClients(session, hostBridge(host).clientId());
   const canvasRefs = chat === undefined ? undefined : chat.canvases ?? [];
   const canvases = useChatCanvases(host, canvasRefs);
   const openCanvas = (resource: string): void => { if (chatUri !== undefined) run('ahp.openCanvas', { host, chat: chatUri, resource }); };
@@ -144,6 +148,11 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
           <span>{`${EMOJIcon.file} ${String(changes.files)}`}</span>
           <span className="web-diff--add">+{changes.additions ?? 0}</span>
           <span className="web-diff--remove">{'\u{2212}'}{changes.deletions ?? 0}</span>
+        </button>
+      )}
+      {others.length === 0 || info === undefined ? null : (
+        <button type="button" className="web-chat__tool" data-on={info.open ? 'true' : undefined} title={plural('sessions/clients/others', others.length)} onClick={info.onToggle}>
+          {`${EMOJIcon.clients} ${String(others.length)}`}
         </button>
       )}
       {terminals.length === 0 ? null : (

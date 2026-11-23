@@ -34,6 +34,15 @@ export function Pill({ label, short, icon, image, lead, title, onOpen, on }: { l
   );
 }
 
+/**
+ * Whether a click on the pill for command `id` closes the list: only when the
+ * list is open and that pill opened it. `opened` is the command of the pill
+ * that opened the list, undefined once the person typed.
+ */
+export function pillCloses(opened: string | undefined, id: string, visible: boolean): boolean {
+  return visible && opened === id;
+}
+
 /** A pill with a text box in it. */
 export function TextPill({ label, title, value, placeholder, onChange, width }: {
   label: string;

@@ -1801,8 +1801,8 @@
       },
       "from": "From",
       "automation": "An automation run",
-      "watching": "Watching",
-      "cached": "{count} cached"
+      "cached": "{count} cached",
+      "clients": "Clients · {count}"
     },
     "grouping": {
       "none": "No groups",
@@ -2213,6 +2213,78 @@
     },
     "agent": {
       "all": "All agents"
+    },
+    "clients": {
+      "unnamed": "Client {id}",
+      "thisWindow": "This window",
+      "tools": {
+        "one": "{count} tool",
+        "other": "{count} tools"
+      },
+      "plugins": {
+        "one": "{count} plugin",
+        "other": "{count} plugins"
+      },
+      "others": {
+        "one": "{count} other client in this session",
+        "other": "{count} other clients in this session"
+      }
+    },
+    "tooling": {
+      "tools": "Tools",
+      "servers": "MCP servers",
+      "plugins": "Plugins",
+      "host": "Host",
+      "claudeCli": "Claude CLI",
+      "pluginNote": "plugin",
+      "noSession": "Open a session to see what it can use.",
+      "searchTools": "Search tools",
+      "searchServers": "Search MCP servers",
+      "searchPlugins": "Search plugins",
+      "noTools": "This session has no tools.",
+      "noServers": "This session has no MCP servers.",
+      "noPlugins": "This session has no plugins.",
+      "noMatch": "Nothing matches.",
+      "always": "Always available",
+      "fromClient": "From this client",
+      "required": "required",
+      "off": "Off",
+      "offAt": "Off ({scope})",
+      "scopes": {
+        "session": "Session",
+        "workspace": "Folder",
+        "global": "Everywhere"
+      },
+      "turnOn": "Turn on in this session",
+      "turnOff": "Turn off in this session",
+      "hints": {
+        "readOnly": "Read only",
+        "changes": "Changes things",
+        "destructive": "Destructive",
+        "notDestructive": "Not destructive",
+        "openWorld": "Reaches outside"
+      },
+      "menu": {
+        "title": "More actions",
+        "server": "Server",
+        "switch": "On or off",
+        "more": "More",
+        "start": "Start",
+        "restart": "Restart",
+        "stop": "Stop",
+        "configuration": "Show configuration",
+        "copyId": "Copy ID",
+        "enable": {
+          "session": "Turn on in this session",
+          "workspace": "Turn on in this folder",
+          "global": "Turn on everywhere"
+        },
+        "disable": {
+          "session": "Turn off in this session",
+          "workspace": "Turn off in this folder",
+          "global": "Turn off everywhere"
+        }
+      }
     }
   },
   "host": {

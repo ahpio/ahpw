@@ -318,3 +318,15 @@ export function registerSessionFiles(scena: Scena): Disposable {
     mountRight(scena, { key: 'session:files', resource: { component: 'SessionFiles' }, props: { title: { t: 'sessions/files/tab' } } }, EMOJIcon.folder, { keys: 'ctrl+shift+e' }),
   );
 }
+
+/** The focused session's tools, MCP servers and plugins: tabs in the right sidebar before Files, placed with Session Info. */
+export function registerSessionTooling(scena: Scena): Disposable {
+  return combineDisposables(
+    scena.components.register({ component: 'SessionTools', category: 'page', renderer: { kind: 'react', load: () => import('./ToolsView.js') } }),
+    scena.components.register({ component: 'SessionMcpServers', category: 'page', renderer: { kind: 'react', load: () => import('./McpView.js') } }),
+    scena.components.register({ component: 'SessionPlugins', category: 'page', renderer: { kind: 'react', load: () => import('./PluginsView.js') } }),
+    mountRight(scena, { key: 'session:tools', resource: { component: 'SessionTools' }, props: { title: { t: 'sessions/tooling/tools' } } }, EMOJIcon.tools, { placed: SESSION_VIEWS }),
+    mountRight(scena, { key: 'session:mcp', resource: { component: 'SessionMcpServers' }, props: { title: { t: 'sessions/tooling/servers' } } }, EMOJIcon.mcpServer, { placed: SESSION_VIEWS }),
+    mountRight(scena, { key: 'session:plugins', resource: { component: 'SessionPlugins' }, props: { title: { t: 'sessions/tooling/plugins' } } }, EMOJIcon.plugin, { placed: SESSION_VIEWS }),
+  );
+}

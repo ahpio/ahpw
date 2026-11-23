@@ -18,7 +18,7 @@ import type {
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { folderLabel, newId } from '../../bridges/words.js';
 import type { Send } from './Parts.js';
-import { Pill } from './pills.js';
+import { Pill, pillCloses } from './pills.js';
 import { isArchived, ringOf } from './status.js';
 import { AgentPicker } from './AgentPicker.js';
 import { customAgents } from './custom-agents.js';
@@ -233,8 +233,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   const textRef = useRef(text);
   textRef.current = text;
   const caretRef = useRef(caret);
-  // Whether the open list came from a pill, until the person types.
-  const fromPill = useRef(false);
+  // The command whose list a pill opened, until the person types.
+  const fromPill = useRef<string | undefined>(undefined);
   caretRef.current = caret;
   const mentions = useCallback(async (): Promise<PickerAction[]> => {
     const said = textRef.current;
@@ -380,7 +380,13 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   }, [scena, shape]);
 
   function openCommand(id: string): void {
-    fromPill.current = true;
+    // A second click on the pill closes its list, as Esc does.
+    if (pillCloses(fromPill.current, id, picker.menuVisible)) {
+      fromPill.current = undefined;
+      picker.closeMenu();
+      return;
+    }
+    fromPill.current = id;
     const position = picker.openCommand(id);
     focusCaret(position ?? area.current?.value.length ?? text.length);
   }
@@ -527,7 +533,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
             aria-label={t('sessions/composer/message')}
             placeholder={placeholder ?? (active === undefined ? t('sessions/composer/placeholder') : t('sessions/composer/placeholderRunning'))}
             onChange={(event) => {
-              fromPill.current = false;
+              fromPill.current = undefined;
               typed.current = true;
               setText(event.currentTarget.value);
               setCaret(event.currentTarget.selectionStart);
@@ -540,9 +546,9 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
             onClick={(event) => setCaret(event.currentTarget.selectionStart)}
             onKeyDown={(event) => {
               // Esc on a list a pill opened takes back the command the pill typed.
-              if (event.key === 'Escape' && fromPill.current && picker.menuVisible) {
+              if (event.key === 'Escape' && fromPill.current !== undefined && picker.menuVisible) {
                 event.preventDefault();
-                fromPill.current = false;
+                fromPill.current = undefined;
                 picker.closeMenu();
                 return;
               }
