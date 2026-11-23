@@ -1,6 +1,6 @@
 ---
 title: The session settings move to the line above the box
-status: implemented
+status: done
 depends: [task-01-a-mockup-of-the-line-and-box.md]
 layer: "composer"
 refs:

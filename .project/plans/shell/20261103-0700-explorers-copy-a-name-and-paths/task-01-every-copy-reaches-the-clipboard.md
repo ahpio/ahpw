@@ -1,6 +1,6 @@
 ---
 title: Every copy reaches the clipboard
-status: implemented
+status: done
 depends: []
 layer: "ahpw resources"
 refs:

@@ -1,6 +1,6 @@
 ---
 title: A person's limits in usage
-status: implemented
+status: done
 depends:
   - task-01-the-policies-bridge.md
 layer: "src/resources/usage"

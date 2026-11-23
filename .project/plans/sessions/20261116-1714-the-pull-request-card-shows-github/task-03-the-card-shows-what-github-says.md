@@ -1,6 +1,6 @@
 ---
 title: The card shows what GitHub says
-status: implemented
+status: done
 depends: [task-01-a-mockup-of-the-pull-request-card.md, task-02-the-list-reads-each-pull-requests-details.md]
 layer: "sessions"
 refs:

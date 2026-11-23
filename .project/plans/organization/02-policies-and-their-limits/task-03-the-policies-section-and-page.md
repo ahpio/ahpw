@@ -1,6 +1,6 @@
 ---
 title: The policies section and page
-status: implemented
+status: done
 depends:
   - task-01-the-policies-bridge.md
 layer: "src/resources/policies"

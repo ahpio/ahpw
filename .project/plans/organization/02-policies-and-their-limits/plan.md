@@ -84,10 +84,10 @@ form -> x-ahpd/policies/put {id, record, createOnly?} | resourceWrite policy://<
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - the policies bridge](task-01-the-policies-bridge.md) | implemented | - |
-| [02 - a person's limits in usage](task-02-a-persons-limits-in-usage.md) | implemented | 01 |
-| [03 - the policies section and page](task-03-the-policies-section-and-page.md) | implemented | 01 |
-| [04 - the domain says what exists](task-04-the-domain-says-what-exists.md) | implemented | 02, 03 |
+| [01 - the policies bridge](task-01-the-policies-bridge.md) | done | - |
+| [02 - a person's limits in usage](task-02-a-persons-limits-in-usage.md) | done | 01 |
+| [03 - the policies section and page](task-03-the-policies-section-and-page.md) | done | 01 |
+| [04 - the domain says what exists](task-04-the-domain-says-what-exists.md) | done | 02, 03 |
 
 ## Risks and tradeoffs
 

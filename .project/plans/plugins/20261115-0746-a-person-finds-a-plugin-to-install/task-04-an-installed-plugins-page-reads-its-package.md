@@ -1,6 +1,6 @@
 ---
 title: An installed plugin's page reads its own package
-status: implemented
+status: done
 depends: [task-03-a-listed-plugins-page.md]
 layer: "ahpw plugins screen"
 refs:

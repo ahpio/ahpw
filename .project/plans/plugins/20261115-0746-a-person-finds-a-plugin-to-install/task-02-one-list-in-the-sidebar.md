@@ -1,6 +1,6 @@
 ---
 title: One list in the sidebar
-status: implemented
+status: done
 depends: [task-01-the-bridge-reads-the-lists.md]
 layer: "ahpw plugins screen"
 refs:

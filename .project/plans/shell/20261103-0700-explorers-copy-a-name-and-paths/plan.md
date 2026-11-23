@@ -1,7 +1,7 @@
 ---
 title: The explorers copy a name and paths
 domain: shell
-status: active
+status: built
 priority: medium
 created: 2026-11-03
 revalidated: 2026-11-03
@@ -66,8 +66,8 @@ row right-click -> menu item -> copyText -> clipboard or hidden text box -> toas
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - Every copy reaches the clipboard](task-01-every-copy-reaches-the-clipboard.md) | implemented | - |
-| [02 - The menus copy a name and paths](task-02-the-menus-copy-a-name-and-paths.md) | implemented | 01 |
+| [01 - Every copy reaches the clipboard](task-01-every-copy-reaches-the-clipboard.md) | done | - |
+| [02 - The menus copy a name and paths](task-02-the-menus-copy-a-name-and-paths.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -76,7 +76,7 @@ row right-click -> menu item -> copyText -> clipboard or hidden text box -> toas
 ## Resume state
 
 - **Done so far:** tasks 01 and 02 are implemented and wait for review.
-- **Next action:** Softov reviews the diff, and does the check in [explorers-copy-checks.md](../../../pending/explorers-copy-checks.md).
+- **Next action:** none. Closed as built on 2026-11-22 in the audit of `.project/`, with the work on main.
 - **Open questions:** none.
 - **Watch out for:** test the copy on `http://200.11.121.81:5180`, not on localhost, where `navigator.clipboard` exists.
 

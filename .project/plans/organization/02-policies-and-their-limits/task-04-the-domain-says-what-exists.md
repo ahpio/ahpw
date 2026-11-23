@@ -1,6 +1,6 @@
 ---
 title: The domain says what exists
-status: implemented
+status: done
 depends:
   - task-02-a-persons-limits-in-usage.md
   - task-03-the-policies-section-and-page.md

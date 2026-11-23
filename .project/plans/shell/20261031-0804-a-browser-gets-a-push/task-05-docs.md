@@ -1,6 +1,6 @@
 ---
 title: The docs say how to turn push on
-status: implemented
+status: done
 depends: [task-03-a-browser-subscribes.md, task-04-an-embedder-shows-alerts.md]
 layer: docs
 refs:

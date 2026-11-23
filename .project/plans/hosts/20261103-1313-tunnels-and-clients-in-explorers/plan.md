@@ -1,7 +1,7 @@
 ---
 title: Tunnels and clients in explorers
 domain: hosts
-status: active
+status: built
 priority: medium
 created: 2026-11-03
 revalidated: 2026-11-03
@@ -87,9 +87,9 @@ Manage > Tunnels -> sidebar.activate { section: ahp:tunnels } -> TunnelExplorer
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The operations bridge](task-01-the-operations-bridge.md) | implemented | - |
-| [02 - A tunnels explorer, page and dialog](task-02-a-tunnels-explorer-page-and-dialog.md) | implemented | 01 |
-| [03 - A clients explorer and page](task-03-a-clients-explorer-and-page.md) | implemented | 01 |
+| [01 - The operations bridge](task-01-the-operations-bridge.md) | done | - |
+| [02 - A tunnels explorer, page and dialog](task-02-a-tunnels-explorer-page-and-dialog.md) | done | 01 |
+| [03 - A clients explorer and page](task-03-a-clients-explorer-and-page.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -100,7 +100,7 @@ Manage > Tunnels -> sidebar.activate { section: ahp:tunnels } -> TunnelExplorer
 ## Resume state
 
 - **Done so far:** tasks 01, 02 and 03 are implemented. See [implemented.md](implemented.md).
-- **Next action:** Softov reviews the branch, and does the checks in [tunnels-clients-checks.md](../../../pending/tunnels-clients-checks.md).
+- **Next action:** none. Closed as built on 2026-11-22 in the audit of `.project/`, with the work on main.
 - **Open questions:** none.
 - **Watch out for:** ahpd sends a tunnel operation's id as `<kind>/<name>`, and the target as `{ id }`, not a changeset's `{ kind, resource }`.
 

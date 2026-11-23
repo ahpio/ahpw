@@ -1,6 +1,6 @@
 ---
 title: The bridge reads the lists
-status: implemented
+status: done
 depends: []
 layer: "ahpw bridges"
 refs:

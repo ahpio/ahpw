@@ -1,7 +1,7 @@
 ---
 title: The settings move to a line above the new session box
 domain: composer
-status: active
+status: built
 priority: medium
 created: 2026-10-28
 revalidated: 2026-10-28
@@ -65,8 +65,8 @@ NewSessionPage -> tray (wherePill, harness pill, fold) -> box -> footer (+, left
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - a mockup of the line and the box](task-01-a-mockup-of-the-line-and-box.md) | implemented | - |
-| [02 - the settings move to the line](task-02-the-settings-move-to-the-line.md) | implemented | 01 |
+| [01 - a mockup of the line and the box](task-01-a-mockup-of-the-line-and-box.md) | done | - |
+| [02 - the settings move to the line](task-02-the-settings-move-to-the-line.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -76,7 +76,7 @@ NewSessionPage -> tray (wherePill, harness pill, fold) -> box -> footer (+, left
 ## Resume state
 
 - **Done so far:** tasks 01 and 02 are implemented and merged in PR #18. See [implemented.md](implemented.md).
-- **Next action:** Softov does the start check in [composer-line-start-check.md](../../../pending/composer-line-start-check.md), then the plan closes.
+- **Next action:** none. Closed as built on 2026-11-22 in the audit of `.project/`, with the work on main.
 - **Open questions:** none.
 - **Watch out for:** the folded line shows the harness and the folder in one chip.
 

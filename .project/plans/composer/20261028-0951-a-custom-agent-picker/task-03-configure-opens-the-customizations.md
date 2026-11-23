@@ -1,6 +1,6 @@
 ---
 title: Configure Custom Agents opens the agent page at its customizations
-status: implemented
+status: done
 depends: [task-02-the-picker-sends-the-agent.md]
 layer: "agents"
 refs:

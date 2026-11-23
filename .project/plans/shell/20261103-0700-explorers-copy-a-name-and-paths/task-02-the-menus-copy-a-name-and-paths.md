@@ -1,6 +1,6 @@
 ---
 title: The menus copy a name and paths
-status: implemented
+status: done
 depends: [task-01-every-copy-reaches-the-clipboard.md]
 layer: "ahpw resources"
 refs:
