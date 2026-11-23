@@ -1,7 +1,7 @@
 ---
 title: The pull request card shows what GitHub says
 domain: sessions
-status: planned
+status: built
 priority: high
 created: 2026-11-16
 revalidated: 2026-11-16
@@ -76,8 +76,8 @@ ahpd session/metaChanged -> summary._meta['ahpd.pullRequests'] -> pullRequestsOf
 | Task | Status | Depends on |
 | --- | --- | --- |
 | [01 - a mockup of the pull request card](task-01-a-mockup-of-the-pull-request-card.md) | done | - |
-| [02 - the list reads each pull request's details](task-02-the-list-reads-each-pull-requests-details.md) | implemented | - |
-| [03 - the card shows what GitHub says](task-03-the-card-shows-what-github-says.md) | implemented | 01, 02 |
+| [02 - the list reads each pull request's details](task-02-the-list-reads-each-pull-requests-details.md) | done | - |
+| [03 - the card shows what GitHub says](task-03-the-card-shows-what-github-says.md) | done | 01, 02 |
 
 ## Risks and tradeoffs
 
@@ -87,7 +87,7 @@ ahpd session/metaChanged -> summary._meta['ahpd.pullRequests'] -> pullRequestsOf
 ## Resume state
 
 - **Done so far:** task 01 approved, and tasks 02 and 03 built on 2026-11-16 on branch `sessions/20261116-1714-the-pull-request-card-shows-github`, awaiting review.
-- **Next action:** Softov reviews the PR; the check by hand waits for the ahpd plan's merge.
+- **Next action:** none. Closed as built on 2026-11-22 in the audit of `.project/`, with the work on main.
 - **Open questions:** none.
 - **Watch out for:**
   - Build against the approved mockup, and stop and ask at any difference.

@@ -1,6 +1,6 @@
 ---
 title: The list reads each pull request's details
-status: implemented
+status: done
 depends: []
 layer: "sessions"
 refs:

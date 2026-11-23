@@ -1,7 +1,7 @@
 ---
 title: The model gateway section
 domain: hosts
-status: active
+status: built
 priority: high
 created: 2026-11-15
 revalidated: 2026-11-15
@@ -70,7 +70,7 @@ usage://records -> UsageEntry.source -> Records.tsx SOURCES -> the icon
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - ahpw says model gateway](task-01-ahpw-says-model-gateway.md) | implemented | - |
+| [01 - ahpw says model gateway](task-01-ahpw-says-model-gateway.md) | done | - |
 
 ## Risks and tradeoffs
 
@@ -81,7 +81,7 @@ usage://records -> UsageEntry.source -> Records.tsx SOURCES -> the icon
 ## Resume state
 
 - **Done so far:** task 01, 2026-11-15, in one PR that waits for Softov's review and for ahpd #345.
-- **Next action:** merge after ahpd #345, then [implemented.md](implemented.md) closes the plan.
+- **Next action:** none. Closed as built on 2026-11-22 in the audit of `.project/`, with the work on main.
 - **Open questions:** none.
 - **Departures:** the source icon and word moved from `Records.tsx` to `sourceIcon` and `sourceWord` in `usage/words.ts`, with `words.test.ts`. The `usage/record/sources` label is `gateway` in the three i18n files. In the manifest test, `project` is `Pr` now that no `proxy` shares its start.
 - **Watch out for:** the `network` section's `http.proxy` keys are VS Code's outgoing proxy, not the model gateway.

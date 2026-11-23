@@ -1,7 +1,7 @@
 ---
 title: A browser gets a push
 domain: shell
-status: active
+status: built
 priority: medium
 created: 2026-10-31
 revalidated: 2026-10-31
@@ -88,11 +88,11 @@ embedder: alert -> embedder channel -> embedder.notifications.show
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - A host keeps this browser's client id](task-01-a-host-keeps-the-client-id.md) | implemented | - |
-| [02 - A service worker shows a push](task-02-a-service-worker-shows-a-push.md) | implemented | - |
-| [03 - A browser subscribes to a host's push](task-03-a-browser-subscribes.md) | implemented | 01, 02 |
-| [04 - An embedder shows ahpw's alerts](task-04-an-embedder-shows-alerts.md) | implemented | - |
-| [05 - The docs say how to turn push on](task-05-docs.md) | implemented | 03, 04 |
+| [01 - A host keeps this browser's client id](task-01-a-host-keeps-the-client-id.md) | done | - |
+| [02 - A service worker shows a push](task-02-a-service-worker-shows-a-push.md) | done | - |
+| [03 - A browser subscribes to a host's push](task-03-a-browser-subscribes.md) | done | 01, 02 |
+| [04 - An embedder shows ahpw's alerts](task-04-an-embedder-shows-alerts.md) | done | - |
+| [05 - The docs say how to turn push on](task-05-docs.md) | done | 03, 04 |
 
 ## Risks and tradeoffs
 
@@ -104,7 +104,7 @@ embedder: alert -> embedder channel -> embedder.notifications.show
 ## Resume state
 
 - **Done so far:** tasks 01 to 05 are implemented. See [implemented.md](implemented.md).
-- **Next action:** Softov does the checks in [push-browser-checks.md](../../../pending/push-browser-checks.md), then the plan closes.
+- **Next action:** none. Closed as built on 2026-11-22 in the audit of `.project/`, with the work on main.
 - **Open questions:** none.
 - **Watch out for:**
   - Not checked: whether Safari accepts `subscribe()` after an `await` in a command, or only inside the gesture's own handler.

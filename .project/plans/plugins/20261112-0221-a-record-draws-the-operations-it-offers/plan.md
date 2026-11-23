@@ -1,7 +1,7 @@
 ---
 title: A record draws the operations it offers
 domain: plugins
-status: active
+status: built
 priority: medium
 created: 2026-11-12
 revalidated: 2026-11-12
@@ -91,7 +91,7 @@ The mockups are in `/home/softov/.local/cache/tmp/claude-1000/-home-softov/b8736
 ## Resume state
 
 - **Done so far:** the three tasks are done and merged in ahpio/ahpw#67, as [implemented.md](implemented.md) says.
-- **Next action:** Softov runs [operations-tunnel-checks.md](../../../pending/operations-tunnel-checks.md); ahpd sends the agents and connectors operations list.
+- **Next action:** none. Closed as built on 2026-11-22 in the audit of `.project/`, with the work on main.
 - **Open questions:** none.
 - **Watch out for:** a host on an older ahpd must still see the turn-off buttons.
 

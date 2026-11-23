@@ -1,6 +1,6 @@
 ---
 title: A mockup of the line and the box
-status: implemented
+status: done
 depends: []
 layer: "composer"
 refs:

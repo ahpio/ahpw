@@ -1,6 +1,6 @@
 ---
 title: An embedder shows ahpw's alerts
-status: implemented
+status: done
 depends: []
 layer: "shell embed"
 refs:

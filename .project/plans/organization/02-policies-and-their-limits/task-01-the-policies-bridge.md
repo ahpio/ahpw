@@ -1,6 +1,6 @@
 ---
 title: The policies bridge
-status: implemented
+status: done
 depends: []
 layer: "src/bridges"
 refs:

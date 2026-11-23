@@ -1,6 +1,6 @@
 ---
 title: A tunnels explorer, page and dialog
-status: implemented
+status: done
 depends: [task-01-the-operations-bridge.md]
 layer: "resources/tunnels, shell"
 refs:

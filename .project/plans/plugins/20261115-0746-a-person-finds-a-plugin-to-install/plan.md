@@ -1,7 +1,7 @@
 ---
 title: A person finds a plugin to install
 domain: plugins
-status: planned
+status: built
 priority: medium
 created: 2026-11-15
 revalidated: 2026-11-15
@@ -96,10 +96,10 @@ installed row -> PluginPage -> details {installed: true} -> Overview, Features, 
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The bridge reads the lists](task-01-the-bridge-reads-the-lists.md) | implemented | - |
-| [02 - One list in the sidebar](task-02-one-list-in-the-sidebar.md) | implemented | 01 |
-| [03 - A listed plugin's page](task-03-a-listed-plugins-page.md) | implemented | 01 |
-| [04 - An installed plugin's page reads its own package](task-04-an-installed-plugins-page-reads-its-package.md) | implemented | 03 |
+| [01 - The bridge reads the lists](task-01-the-bridge-reads-the-lists.md) | done | - |
+| [02 - One list in the sidebar](task-02-one-list-in-the-sidebar.md) | done | 01 |
+| [03 - A listed plugin's page](task-03-a-listed-plugins-page.md) | done | 01 |
+| [04 - An installed plugin's page reads its own package](task-04-an-installed-plugins-page-reads-its-package.md) | done | 03 |
 
 ## Risks and tradeoffs
 
@@ -110,7 +110,7 @@ installed row -> PluginPage -> details {installed: true} -> Overview, Features, 
 ## Resume state
 
 - **Done so far:** tasks 01 to 04 are built on branch `plugins/20261115-0746-a-person-finds-a-plugin-to-install` in `/github/ahpw.worktrees/plugin-browse` on 2026-11-15, not committed. The screens from the build are in `.scratch/mockups/plugin-list/check/`.
-- **Next action:** Softov tests the branch against a host from the ahpd branch. The tree is committed and a PR is opened on his word.
+- **Next action:** none. Closed as built on 2026-11-22 in the audit of `.project/`, with the work on main.
 - **Open questions:** none.
 - **Watch out for:** the list's id is not the row's id for a first-party plugin, such as `agent-acp` and `ahpd-agent-acp`. Match by `installed.id`.
 

@@ -1,6 +1,6 @@
 ---
 title: ahpw says model gateway
-status: implemented
+status: done
 depends: []
 layer: "ahpw resources, i18n and bridges"
 refs:

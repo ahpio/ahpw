@@ -1,7 +1,7 @@
 ---
 title: A client says what it is
 domain: hosts
-status: active
+status: built
 priority: medium
 created: 2026-11-19
 revalidated: 2026-11-19
@@ -102,7 +102,7 @@ localClientIds.load() -> ahpw-<uuid> -> initialize clientId
 ## Resume state
 
 - **Done so far:** tasks 01, 02 and 03, built on 2026-11-19.
-- **Next action:** the PR, then Softov's check, then `implemented.md`.
+- **Next action:** none. Closed as built on 2026-11-22 in the audit of `.project/`, with the work on main.
 - **Open questions:** none.
 - **Watch out for:** the library's `initialize` drops `clientInfo`, so it is added in the transport rewrite, never passed to the library.
 

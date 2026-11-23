@@ -1,6 +1,6 @@
 ---
 title: A clients explorer and page
-status: implemented
+status: done
 depends: [task-01-the-operations-bridge.md]
 layer: "resources/clients, shell"
 refs:

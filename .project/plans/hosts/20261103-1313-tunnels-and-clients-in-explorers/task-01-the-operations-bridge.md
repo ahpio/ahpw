@@ -1,6 +1,6 @@
 ---
 title: The operations bridge
-status: implemented
+status: done
 depends: []
 layer: "bridges"
 refs:

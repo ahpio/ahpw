@@ -1,6 +1,6 @@
 ---
 title: The Agent picker sends the chosen agent with each message
-status: implemented
+status: done
 depends: [task-01-the-custom-agents-of-a-tree.md]
 layer: "composer"
 refs:
