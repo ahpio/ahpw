@@ -468,6 +468,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
       onSubagent={openSubagent}
       raw={raw}
       onRaw={setRaw}
+      info={{ open: infoOpen, onToggle: () => toggleInfo(!infoOpen) }}
       {...(mark === undefined || raw ? { filter: { open: filter !== null, onToggle: toggleFilter } } : {})}
       {...(openUsage === undefined ? {} : { onUsage: openUsage })}
       {...(mark === undefined ? { calls: { hidden: callsHidden, onHidden: setCallsHidden } } : { bot: mark })}

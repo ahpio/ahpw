@@ -156,6 +156,8 @@ export const EMOJIcon = {
   /** The host's own plugins, which 🧩 is not: that is an agent's. */
   hostPlugins: mono('🔣'),
   mcpServer: mono('🔌'),
+  /** The tools a session's agent can call. */
+  tools: mono('🛠'),
   /** The host's connectors; the same plug an agent's MCP server shows. */
   connectors: mono('🔌'),
   receive: mono('📥'),

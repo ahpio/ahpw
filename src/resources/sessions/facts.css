@@ -6,3 +6,23 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+/* The session's clients, one per line: a dot, the name, this window's mark, the id and what it gives the agent. */
+.web-details__clients {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+}
+
+.web-details__client {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  min-width: 0;
+}
+
+.web-details__muted {
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+}

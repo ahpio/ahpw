@@ -1801,8 +1801,8 @@
       },
       "from": "Origen",
       "automation": "Una ejecución de automatización",
-      "watching": "Viendo",
-      "cached": "{count} en caché"
+      "cached": "{count} en caché",
+      "clients": "Clientes · {count}"
     },
     "grouping": {
       "none": "Sin grupos",
@@ -2213,6 +2213,78 @@
     },
     "agent": {
       "all": "Todos los agentes"
+    },
+    "clients": {
+      "unnamed": "Cliente {id}",
+      "thisWindow": "Esta ventana",
+      "tools": {
+        "one": "{count} herramienta",
+        "other": "{count} herramientas"
+      },
+      "plugins": {
+        "one": "{count} plugin",
+        "other": "{count} plugins"
+      },
+      "others": {
+        "one": "{count} cliente más en esta sesión",
+        "other": "{count} clientes más en esta sesión"
+      }
+    },
+    "tooling": {
+      "tools": "Herramientas",
+      "servers": "Servidores MCP",
+      "plugins": "Plugins",
+      "host": "Host",
+      "claudeCli": "Claude CLI",
+      "pluginNote": "plugin",
+      "noSession": "Abre una sesión para ver lo que puede usar.",
+      "searchTools": "Buscar herramientas",
+      "searchServers": "Buscar servidores MCP",
+      "searchPlugins": "Buscar plugins",
+      "noTools": "Esta sesión no tiene herramientas.",
+      "noServers": "Esta sesión no tiene servidores MCP.",
+      "noPlugins": "Esta sesión no tiene plugins.",
+      "noMatch": "No hay coincidencias.",
+      "always": "Siempre disponible",
+      "fromClient": "De este cliente",
+      "required": "obligatorio",
+      "off": "Desactivado",
+      "offAt": "Desactivado ({scope})",
+      "scopes": {
+        "session": "Sesión",
+        "workspace": "Carpeta",
+        "global": "En todas partes"
+      },
+      "turnOn": "Activar en esta sesión",
+      "turnOff": "Desactivar en esta sesión",
+      "hints": {
+        "readOnly": "Solo lectura",
+        "changes": "Hace cambios",
+        "destructive": "Destructiva",
+        "notDestructive": "No destructiva",
+        "openWorld": "Sale al exterior"
+      },
+      "menu": {
+        "title": "Más acciones",
+        "server": "Servidor",
+        "switch": "Activar o desactivar",
+        "more": "Más",
+        "start": "Iniciar",
+        "restart": "Reiniciar",
+        "stop": "Detener",
+        "configuration": "Mostrar configuración",
+        "copyId": "Copiar ID",
+        "enable": {
+          "session": "Activar en esta sesión",
+          "workspace": "Activar en esta carpeta",
+          "global": "Activar en todas partes"
+        },
+        "disable": {
+          "session": "Desactivar en esta sesión",
+          "workspace": "Desactivar en esta carpeta",
+          "global": "Desactivar en todas partes"
+        }
+      }
     }
   },
   "host": {

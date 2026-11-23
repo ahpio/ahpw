@@ -8,7 +8,7 @@ import { registerThemeController } from '@softov/scena/styles';
 import { registerConnection } from '../bridges/index.js';
 import { registerHosts, sessionCountPaths } from '../bridges/hosts.js';
 import { registerSummary, summaryPaths } from '../bridges/summary.js';
-import { SESSIONS_SECTION, hideOverlaidSidebar, registerSessionFiles, registerSessions } from '../resources/sessions/index.js';
+import { SESSIONS_SECTION, hideOverlaidSidebar, registerSessionFiles, registerSessions, registerSessionTooling } from '../resources/sessions/index.js';
 import { AGENTS_SECTION, registerAgents } from '../resources/agents/index.js';
 import { AUTOMATIONS_SECTION, registerAutomations } from '../resources/automations/index.js';
 import { COMPUTERS_SECTION, registerComputers } from '../resources/computers/index.js';
@@ -329,6 +329,8 @@ export function registerShell(scena: Scena): Disposable {
     registerAgents(scena),
     registerChanges(scena),
     registerBrowser(scena),
+    // Before Files, so a new browser still opens the right sidebar on Files.
+    registerSessionTooling(scena),
     registerSessionFiles(scena),
     registerAutomations(scena),
     registerComputers(scena),
