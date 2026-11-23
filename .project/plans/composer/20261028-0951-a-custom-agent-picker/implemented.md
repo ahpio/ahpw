@@ -28,7 +28,9 @@ Both composers have an Agent pill that opens the `/agent` list: Agent, the defau
 - [`code://src/resources/sessions/message.test.ts`](../../../../src/resources/sessions/message.test.ts) - `messageOf` with an agent, and without one.
 - `pnpm typecheck`, `pnpm test` (613 passed) and `pnpm build` passed after the rebase, and CI passed on PR #18.
 - By hand on the test ahpd, the menu lists the Claude Code custom agents in both composers. Configure Custom Agents opens the page at the customizations.
-- Not verified: a message with an agent chosen carries `agent.uri`, and the reply comes from that agent. That check waits in [composer-agent-send-check.md](../../../pending/composer-agent-send-check.md).
+- Softov checked on 2026-11-23 that a message with Explore chosen carries `agent.uri` and that Explore answers.
+- The same check found the Agent pill going back to *Agent* after the send.
+  #133 makes it keep the chat's agent, and Softov saw it show Explore.
 
 ## Departures from the plan
 
