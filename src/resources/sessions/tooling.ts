@@ -239,3 +239,38 @@ export function offWord(row: ToggleRow): string {
   if (row.enabled) return '';
   return row.decidedAt === undefined ? translate('sessions/tooling/off') : translate('sessions/tooling/offAt', { scope: translate(`sessions/tooling/scopes/${row.decidedAt}`) });
 }
+
+/** One plugin a client announced, with its decision and, when it differs, the session's. */
+export interface ClientPluginRow {
+  uri: string;
+  name: string;
+  /** What the client decided: "On", "On (Everywhere)", "Off (Folder)". */
+  said: string;
+  /** What holds in the session when it is not what the client decided; absent when the two agree. */
+  held?: string;
+}
+
+/** The order the protocol reads decisions in: session, then folder, then everywhere. */
+const SPECIFIC: Record<string, number> = { session: 0, workspace: 1, global: 2 };
+
+/** A decision list in words: the most specific decision, or "On" with none, as every reader takes none. */
+export function decisionWord(enablement: readonly CustomizationEnablement[] | undefined): string {
+  const first = [...(enablement ?? [])].sort((a, b) => (SPECIFIC[a.kind as string] ?? 3) - (SPECIFIC[b.kind as string] ?? 3))[0];
+  const scope = first === undefined ? undefined : decidedAt([first]);
+  const word = first?.enabled === false ? 'off' : 'on';
+  return scope === undefined ? translate(`sessions/tooling/${word}`) : translate(`sessions/tooling/${word}At`, { scope: translate(`sessions/tooling/scopes/${scope}`) });
+}
+
+/**
+ * The plugins `client` announced, each with the client's decision and the
+ * one the session holds for it, matched by client and URI. A plugin the
+ * session does not list yet carries the client's decision only.
+ */
+export function clientPlugins(client: SessionActiveClient, items: readonly Customization[] | undefined): ClientPluginRow[] {
+  return (client.customizations ?? []).map((announced) => {
+    const said = decisionWord(announced.enablement);
+    const listed = (items ?? []).find((item) => String(item.type) === 'plugin' && (item as { clientId?: string }).clientId === client.clientId && item.uri === announced.uri);
+    const held = listed === undefined ? undefined : decisionWord(enablementOf(listed));
+    return { uri: announced.uri, name: announced.name, said, ...(held === undefined || held === said ? {} : { held }) };
+  });
+}
