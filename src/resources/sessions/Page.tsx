@@ -584,6 +584,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           steering={chat.state.steeringMessage}
           draft={chat.state.draft}
           lastModel={chat.state.turns.at(-1)?.message.model?.id}
+          lastAgent={(chat.state.activeTurn ?? chat.state.turns.at(-1))?.message.agent?.uri}
           lastUsage={chat.state.turns.at(-1)?.usage}
           usage={usage}
           {...(openUsage === undefined ? {} : { onUsage: openUsage })}
