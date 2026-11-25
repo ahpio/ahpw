@@ -2,9 +2,12 @@ import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Spinner } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
+import { ahpPaths } from '../../bridges/data.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
-import { refKey, refOf, useHostNames, useShownHosts } from '../../bridges/hosts.js';
+import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { channelScheme, everyRole, PEOPLE, peopleReducer, type ListedUser, type PeopleState, type Role } from '../../bridges/people.js';
+import type { Offers } from '../../bridges/offers.js';
+import { mayDelete, useOwnGrantsOnEach } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList, type Row } from '../../shell/explorer/ExplorerList.js';
@@ -24,6 +27,8 @@ export default function UsersExplorer(): ReactElement {
   const shown = useShownHosts();
   const userHosts = useServingHosts(shown, channelScheme('users'));
   const roleHosts = useServingHosts(shown, channelScheme('roles'));
+  const offers = useEach<Offers>(shown.map((host) => ahpPaths(host).offers));
+  const grants = useOwnGrantsOnEach(shown, offers);
   const hostName = useHostNames();
   const multi = embedMode() === 'multi';
   const users = useChannelOnEach<PeopleState<ListedUser>>(userHosts, PEOPLE.users.channel, usersReducer);
@@ -31,7 +36,12 @@ export default function UsersExplorer(): ReactElement {
   const active = useStore<{ host: string; domain: Kind; id: string }>(ACTIVE_PERSON);
 
   const rows = useMemo<Row[]>(() => {
-    const row = (kind: Kind, host: string, id: string, lines: string[]): Row => {
+    const deletes = (kind: Kind, host: string): boolean => {
+      const at = shown.indexOf(host);
+      const offered = offers[at];
+      return offered !== undefined && mayDelete(offered, grants[at] ?? null, kind);
+    };
+    const row = (kind: Kind, host: string, id: string, lines: string[], deletable: boolean): Row => {
       const key = rowKey(kind, host, id);
       const run = (command: string): void => { void scena.commands.execute(command, { host, id }); };
       const item = (title: string, command: string, extra: Partial<PickerAction> = {}): PickerAction => ({ title, onSelect: (menu) => { menu.closeMenu(); run(command); }, ...extra });
@@ -46,19 +56,19 @@ export default function UsersExplorer(): ReactElement {
         lines: [[multi ? hostName(host) : undefined, ...lines].filter((bit) => bit !== undefined && bit !== '').join(' \u{00B7} ')].filter((line) => line !== ''),
         menu: [
           item(t('users/actions/open'), open),
-          item(t('users/actions/delete'), kind === 'users' ? 'ahp.deleteUser' : 'ahp.deleteRole', { group: 'more', color: 'red' }),
+          ...(deletable ? [item(t('users/actions/delete'), kind === 'users' ? 'ahp.deleteUser' : 'ahp.deleteRole', { group: 'more', color: 'red' })] : []),
         ],
       };
     };
     const byId = <T extends { id: string }>(list: T[]): T[] => list.sort((a, b) => a.id.localeCompare(b.id));
     const userRows = byId(userHosts.flatMap((host, at) => (users.states[at]?.records ?? []).map((one) => ({ host, ...one }))))
-      .map(({ host, id, record }) => row('users', host, id, [record.roles.join(', ')]));
+      .map(({ host, id, record }) => row('users', host, id, [record.roles.join(', ')], deletes('users', host)));
     // A host's built-in roles are listed once its roles channel has answered, beside the ones its file writes.
     const roleRows = byId(roleHosts.flatMap((host, at) => (roles.states[at] === undefined ? [] : everyRole(roles.states[at]!.records)).map((one) => ({ host, ...one }))))
-      .map(({ host, id, record, builtIn }) => row('roles', host, id, [builtIn ? t('users/role/builtIn') : undefined, t('users/role/grantCount', { count: record.grants.length })].filter((bit): bit is string => bit !== undefined)));
+      .map(({ host, id, record, builtIn }) => row('roles', host, id, [builtIn ? t('users/role/builtIn') : undefined, t('users/role/grantCount', { count: record.grants.length })].filter((bit): bit is string => bit !== undefined), !builtIn && deletes('roles', host)));
     return [...userRows, ...roleRows];
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userHosts, roleHosts, users.states, roles.states, hostName, t]);
+  }, [shown, offers, grants, userHosts, roleHosts, users.states, roles.states, hostName, t]);
 
   const error = multi ? null : users.errors[0] ?? null;
   const read = multi ? users.states.some((one) => one !== undefined) : users.states[0] !== undefined;

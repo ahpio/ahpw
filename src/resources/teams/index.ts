@@ -6,12 +6,13 @@ import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { HOST_FILTER_ACTION, shownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { channelScheme, PEOPLE, removePerson, servesPeople } from '../../bridges/people.js';
+import { mayPut, ownGrantsOf, trackMayPut } from '../../bridges/own-grants.js';
 import { trackServed } from '../../bridges/served.js';
 import { confirm, failed } from '../../shell/notify/index.js';
 import { readLastHost, startHost } from '../sessions/last-host.js';
 import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
-import { ACTIVE_TEAM, teamTab, TEAMS_SERVED } from './state.js';
+import { ACTIVE_TEAM, teamTab, MAY_ADD_TEAM, MAY_ADD_PROJECT, TEAMS_SERVED } from './state.js';
 
 /** The display size class the modus backend publishes. */
 const MODUS_CLASS = '$/modus/class' as BindingPath;
@@ -42,7 +43,7 @@ export function registerTeams(scena: Scena): Disposable {
 
   const opener = (kind: Kind) => (_ctx: unknown, args: unknown): void => {
     const target = (args ?? {}) as NamedArgs;
-    const host = target.host ?? startHost(servingHosts(), readLastHost());
+    const host = target.host ?? startHost(servingHosts().filter((one) => target.id !== undefined || mayPut(offersOf(one), ownGrantsOf(scena, one), kind)), readLastHost());
     if (host === undefined) return;
     if (target.id !== undefined) scena.store.set(ACTIVE_TEAM, { host, domain: kind, id: target.id });
     const title = target.id ?? bound(kind === 'teams' ? 'teams/commands/newTeam' : 'teams/commands/newProject');
@@ -67,6 +68,8 @@ export function registerTeams(scena: Scena): Disposable {
 
   return combineDisposables(
     trackServed(scena, channelScheme('teams'), TEAMS_SERVED, []),
+    trackMayPut(scena, 'teams', MAY_ADD_TEAM),
+    trackMayPut(scena, 'projects', MAY_ADD_PROJECT),
     scena.components.register({
       component: 'TeamsExplorer',
       category: 'page',
@@ -74,7 +77,7 @@ export function registerTeams(scena: Scena): Disposable {
       props: {
         title: { t: 'teams/explorer/title' },
         actions: [
-          { command: 'teams.new', menu: NEW_SLOT, icon: '+', label: { t: 'teams/commands/new' } },
+          { command: 'teams.new', menu: NEW_SLOT, icon: '+', label: { t: 'teams/commands/new' }, when: `${MAY_ADD_TEAM} == true || ${MAY_ADD_PROJECT} == true` },
           { command: 'teams.reload', icon: EMOJIcon.reload, label: { t: 'common/reload' } },
           HOST_FILTER_ACTION,
         ],
@@ -91,15 +94,15 @@ export function registerTeams(scena: Scena): Disposable {
       },
     }),
     // The + menu's two rows; no category, so the menu has no heading over them.
-    scena.commands.register({ id: 'teams.new.team', title: () => translate('teams/commands/newTeam'), slots: [NEW_SLOT], run: (ctx) => ctx.commands.execute('ahp.newTeam') }),
-    scena.commands.register({ id: 'teams.new.project', title: () => translate('teams/commands/newProject'), slots: [NEW_SLOT], run: (ctx) => ctx.commands.execute('ahp.newProject') }),
+    scena.commands.register({ id: 'teams.new.team', title: () => translate('teams/commands/newTeam'), slots: [NEW_SLOT], when: () => scena.store.get<boolean>(MAY_ADD_TEAM) === true, run: (ctx) => ctx.commands.execute('ahp.newTeam') }),
+    scena.commands.register({ id: 'teams.new.project', title: () => translate('teams/commands/newProject'), slots: [NEW_SLOT], when: () => scena.store.get<boolean>(MAY_ADD_PROJECT) === true, run: (ctx) => ctx.commands.execute('ahp.newProject') }),
     scena.commands.register({
       id: 'ahp.newTeam',
       title: () => translate('teams/commands/newTeam'),
       keywords: [english('teams/commands/newTeam')],
       category: 'Teams',
       slots: [PALETTE_SLOT],
-      when: () => scena.store.get<boolean>(TEAMS_SERVED) === true,
+      when: () => scena.store.get<boolean>(MAY_ADD_TEAM) === true,
       run: (ctx, args) => opener('teams')(ctx, { host: (args as NamedArgs | undefined)?.host }),
     }),
     scena.commands.register({
@@ -108,7 +111,7 @@ export function registerTeams(scena: Scena): Disposable {
       keywords: [english('teams/commands/newProject')],
       category: 'Teams',
       slots: [PALETTE_SLOT],
-      when: () => scena.store.get<boolean>(TEAMS_SERVED) === true,
+      when: () => scena.store.get<boolean>(MAY_ADD_PROJECT) === true,
       run: (ctx, args) => opener('projects')(ctx, { host: (args as NamedArgs | undefined)?.host }),
     }),
     scena.commands.register({

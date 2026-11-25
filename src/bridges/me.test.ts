@@ -9,6 +9,7 @@ vi.mock('./data.js', async (original) => ({ ...await original<typeof import('./d
 const { ahpPaths, windowHost } = await import('./data.js');
 const { ME, grantsHeld, profileOf, readMe, trackMe } = await import('./me.js');
 const { NO_OFFERS } = await import('./offers.js');
+const { mayDelete, mayPut, trackMayPut } = await import('./own-grants.js');
 const { mayOpen, trackServed } = await import('./served.js');
 
 const as = (principal?: string) => ({ ...NO_OFFERS, methods: [ME], ...(principal === undefined ? {} : { principal }) });
@@ -110,5 +111,42 @@ describe('trackMe', () => {
     expect(scena.store.get(SERVED)).toBe(false);
     await settled();
     expect(scena.store.get(SERVED)).toBe(true);
+  });
+});
+
+describe('mayPut and mayDelete', () => {
+  const provider = (root: string, operations = ['list', 'read', 'put', 'delete']) => ({ title: '', root, operations });
+  const subject = { title: '', description: '', operations: ['list', 'put', 'delete'], groups: { read: ['list'], write: ['put', 'delete'] } };
+  const offers = {
+    ...as('user:ana'),
+    providers: { role: provider('role://'), team: provider('team://', ['list', 'read']), policy: provider('policy://') },
+    catalog: { role: subject, team: subject, policy: subject },
+  };
+
+  it('asks for the grant of the record and for a host that takes writes', () => {
+    expect(mayPut(offers, ['role:put'], 'roles')).toBe(true);
+    expect(mayDelete(offers, ['role:put'], 'roles')).toBe(false);
+    expect(mayPut(offers, ['role:read'], 'roles')).toBe(false);
+    expect(mayPut(offers, ['policy:put'], 'policies')).toBe(true);
+    expect(mayDelete(offers, null, 'policies')).toBe(true);
+    // The host takes no writes to its teams, whoever asks.
+    expect(mayPut(offers, null, 'teams')).toBe(false);
+  });
+
+  it('offers a New control once the reader is known to hold its grant, and takes it back', async () => {
+    const MAY = '$/test/may' as Parameters<typeof trackMayPut>[2];
+    const scena = createScena();
+    const path = ahpPaths(windowHost());
+    request.mockResolvedValue({ ...ANA, grants: ['role:write'] });
+    trackMe(scena);
+    trackMayPut(scena, 'roles', MAY);
+    scena.store.set(path.offers, offers);
+    expect(scena.store.get(MAY)).toBe(false);
+    await settled();
+    expect(scena.store.get(MAY)).toBe(true);
+    request.mockResolvedValue({ ...ANA, grants: ['role:read'] });
+    scena.store.set(path.offers, { ...offers });
+    await settled();
+    expect(scena.store.get(MAY)).toBe(false);
   });
 });

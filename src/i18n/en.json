@@ -1224,7 +1224,8 @@
     "notices": {
       "none": "No teams",
       "reading": "Loading teams",
-      "readOnly": "This host doesn't allow changes here."
+      "readOnly": "This host doesn't allow changes here.",
+      "noPermission": "You don't have permission to change this."
     },
     "commands": {
       "new": "New",
@@ -2941,7 +2942,8 @@
       "none": "No policies",
       "reading": "Loading policies",
       "readingLimits": "Loading limits",
-      "readOnly": "This host doesn't allow changes to its policies here."
+      "readOnly": "This host doesn't allow changes to its policies here.",
+      "noPermission": "You don't have permission to change this."
     },
     "commands": {
       "show": "Show policies",

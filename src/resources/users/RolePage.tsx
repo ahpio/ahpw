@@ -4,6 +4,7 @@ import { Alert, Button, Chip, Text } from '@softov/scena/ui';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
+import { mayDelete, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { grantCatalog } from '../../bridges/grants.js';
 import { BUILT_IN_ROLES, PEOPLE, peopleReducer, personUri, putPerson, writesPeople, type PeopleState, type Role } from '../../bridges/people.js';
@@ -29,6 +30,7 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
   const fresh = id === undefined;
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
   const roles = useChannel<PeopleState<Role>>(host, PEOPLE.roles.channel, rolesReducer);
+  const grants = useOwnGrants(host, offers);
   const [draft, setDraft] = useState<{ id: string; grants: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
@@ -49,7 +51,8 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
   const start = { id: id ?? '', grants: (written?.grants ?? builtIn ?? []).join('\n') };
   const shown = draft ?? start;
   const set = (change: Partial<typeof start>): void => setDraft((held) => ({ ...(held ?? start), ...change }));
-  const writes = writesPeople(offers, 'roles');
+  // What the host refuses this reader is not drawn.
+  const writes = mayPut(offers, grants, 'roles');
   const parsed = parseGrants(shown.grants);
   const dirty = draft !== null && JSON.stringify(draft) !== JSON.stringify(start);
   const ready = writes && !busy && parsed.problems.length === 0 && (fresh ? isRecordId(shown.id) : dirty);
@@ -76,7 +79,7 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
   return (
     <div className="web-page web-form">
       <PageTitle emoji={EMOJIcon.roles} initials={fresh ? undefined : id} title={fresh ? t('users/commands/newRole') : id} uri={fresh ? undefined : personUri(offers, 'roles', id)} />
-      {writes ? null : <p className="web-note">{t('users/notices/readOnly')}</p>}
+      {writes ? null : <p className="web-note">{t(writesPeople(offers, 'roles') ? 'users/notices/noPermission' : 'users/notices/readOnly')}</p>}
       {builtIn === undefined ? null : <p className="web-note">{t('users/role/builtInNote')}</p>}
       {replaces ? <p className="web-note">{t('users/role/replacesNote')}</p> : null}
 
@@ -141,7 +144,7 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
         </div>
       ) : null}
 
-      {fresh || !writes || builtIn !== undefined ? null : <DangerZone label={t('users/actions/delete')} onClick={() => void scena.commands.execute('ahp.deleteRole', { host, id })} />}
+      {fresh || !mayDelete(offers, grants, 'roles') || builtIn !== undefined ? null : <DangerZone label={t('users/actions/delete')} onClick={() => void scena.commands.execute('ahp.deleteRole', { host, id })} />}
     </div>
   );
 }

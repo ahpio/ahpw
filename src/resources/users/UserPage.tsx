@@ -3,7 +3,7 @@ import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Button, Text } from '@softov/scena/ui';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
-import { mayDo, useOwnGrants } from '../../bridges/own-grants.js';
+import { mayDelete, mayDo, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import {
   BUILT_IN_ROLES, PEOPLE, peopleReducer, personUri, putPerson, servesPeople, userBody, userFields, writesPeople,
@@ -55,7 +55,7 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
   const shown = draft ?? start;
   const set = (change: Partial<UserFields & { id: string }>): void => setDraft((held) => ({ ...(held ?? start), ...change }));
   // What the host refuses this reader is not drawn.
-  const writes = writesPeople(offers, 'users') && mayDo(grants, 'user:put');
+  const writes = mayPut(offers, grants, 'users');
   const dirty = draft !== null && JSON.stringify(draft) !== JSON.stringify(start);
   const roleIds = [...new Set([...(roles.state?.records.map((one) => one.id) ?? []), ...Object.keys(BUILT_IN_ROLES), ...shown.roles])].sort();
   const ready = writes && !busy && (fresh ? isRecordId(shown.id) : dirty);
@@ -149,7 +149,7 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
         </div>
       ))}
 
-      {fresh || !writesPeople(offers, 'users') || !mayDo(grants, 'user:delete') ? null : <DangerZone label={t('users/actions/delete')} onClick={() => void scena.commands.execute('ahp.deleteUser', { host, id })} />}
+      {fresh || !mayDelete(offers, grants, 'users') ? null : <DangerZone label={t('users/actions/delete')} onClick={() => void scena.commands.execute('ahp.deleteUser', { host, id })} />}
     </div>
   );
 }

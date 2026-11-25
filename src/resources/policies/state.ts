@@ -3,6 +3,9 @@ import type { BindingPath } from '@softov/scena/types';
 /** Whether any host this page connects to lists its policies; the activity bar entry shows while one does. */
 export const POLICIES_SERVED = '$/ahp/policies/served' as BindingPath;
 
+/** Whether the reader may make a policy on any host; a New control for one shows while they may. */
+export const MAY_ADD_POLICY = '$/ahp/policies/mayAdd' as BindingPath;
+
 /** The policy open in `main`, as `{ host, id }`. */
 export const ACTIVE_POLICY = '$/ahp/policies/active' as BindingPath;
 

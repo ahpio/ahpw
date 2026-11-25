@@ -3,6 +3,7 @@ import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Button, DetailList, SchemaForm, Spinner, Text, type JsonSchemaObject } from '@softov/scena/ui';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
+import { mayDelete, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import {
   POLICIES, policiesReducer, policyManifest, policyUri, putPolicy, readLimits, writesPolicies,
@@ -102,6 +103,7 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
   const fresh = id === undefined;
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
   const policies = useChannel<PoliciesState>(host, POLICIES.channel, policiesReducer);
+  const grants = useOwnGrants(host, offers);
   const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
   const [jsonValid, setJsonValid] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -134,7 +136,8 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
   if (!fresh && record === undefined) return <PageAlert tone="warning" message={t('policies/policy/gone')} />;
   if (schema === undefined) return <PageAlert tone="info" message={t('policies/policy/noManifest')} />;
 
-  const writes = writesPolicies(offers);
+  // What the host refuses this reader is not drawn.
+  const writes = mayPut(offers, grants, 'policies');
   const value = draft ?? held;
   const target = fresh ? String(value.id ?? '').trim() : id;
   const changed = fresh ? editable(withoutEmptied(value)) : changedKeys(held, withoutEmptied(value));
@@ -163,10 +166,10 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
   return (
     <div className="web-page web-form web-policy">
       <PageTitle emoji={EMOJIcon.policies} initials={fresh ? undefined : id} title={fresh ? t('policies/commands/new') : id} uri={fresh ? undefined : policyUri(offers, id)} />
-      {writes ? null : <p className="web-note">{t('policies/notices/readOnly')}</p>}
+      {writes ? null : <p className="web-note">{t(writesPolicies(offers) ? 'policies/notices/noPermission' : 'policies/notices/readOnly')}</p>}
       {embedMode() === 'multi' ? <DetailList items={[{ label: t('common/host'), value: <HostTag host={host} />, span: true }]} /> : null}
 
-      {/* A disabled fieldset is how a host that takes no writes shows the row read-only: every control in it is. */}
+      {/* A disabled fieldset shows the row read-only: every control in it is. */}
       <fieldset className="web-policy__form" disabled={!writes}>
         <SchemaForm
           schema={schema}
@@ -196,7 +199,7 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
         </div>
       ) : null}
 
-      {fresh || !writes ? null : <DangerZone label={t('policies/actions/delete')} onClick={() => void scena.commands.execute('ahp.deletePolicy', { host, id })} />}
+      {fresh || !mayDelete(offers, grants, 'policies') ? null : <DangerZone label={t('policies/actions/delete')} onClick={() => void scena.commands.execute('ahp.deletePolicy', { host, id })} />}
     </div>
   );
 }

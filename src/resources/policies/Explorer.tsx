@@ -7,9 +7,10 @@ import { useChannelOnEach } from '../../bridges/channel.js';
 import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import type { Offers } from '../../bridges/offers.js';
 import {
-  comparePolicies, POLICIES, POLICIES_CHANNEL, policiesReducer, policyActive, policyGroup, writesPolicies,
+  comparePolicies, POLICIES, POLICIES_CHANNEL, policiesReducer, policyActive, policyGroup,
   type PoliciesState, type Policy, type PolicyGrouping,
 } from '../../bridges/policies.js';
+import { mayDelete, useOwnGrantsOnEach } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList, type Dot, type Row } from '../../shell/explorer/ExplorerList.js';
@@ -29,6 +30,7 @@ export default function PoliciesExplorer(): ReactElement {
   const shown = useShownHosts();
   const hosts = useServingHosts(shown, POLICIES_CHANNEL);
   const offers = useEach<Offers>(hosts.map((host) => ahpPaths(host).offers));
+  const grants = useOwnGrantsOnEach(hosts, offers);
   const hostName = useHostNames();
   const multi = embedMode() === 'multi';
   const by = useStore<PolicyGrouping | null>(POLICIES_GROUP) ?? 'kind';
@@ -38,9 +40,9 @@ export default function PoliciesExplorer(): ReactElement {
   const rows = useMemo<Row[]>(() => {
     const now = new Date();
     const sorted = hosts
-      .flatMap((host, at) => (policies.states[at]?.records ?? []).map(({ record }) => ({ host, row: record, writes: offers[at] !== undefined && writesPolicies(offers[at]) })))
+      .flatMap((host, at) => (policies.states[at]?.records ?? []).map(({ record }) => ({ host, row: record, deletes: offers[at] !== undefined && mayDelete(offers[at], grants[at] ?? null, 'policies') })))
       .sort((a, b) => comparePolicies(by)(a.row, b.row) || a.host.localeCompare(b.host));
-    return sorted.map(({ host, row, writes }): Row => {
+    return sorted.map(({ host, row, deletes }): Row => {
       const run = (command: string): void => { void scena.commands.execute(command, { host, id: row.id }); };
       const item = (title: string, command: string, extra: Partial<PickerAction> = {}): PickerAction => ({ title, onSelect: (menu) => { menu.closeMenu(); run(command); }, ...extra });
       const group = policyGroup(row, by);
@@ -59,12 +61,12 @@ export default function PoliciesExplorer(): ReactElement {
         ],
         menu: [
           item(t('policies/actions/open'), 'ahp.openPolicy'),
-          ...(writes ? [item(t('policies/actions/delete'), 'ahp.deletePolicy', { group: 'more', color: 'red' })] : []),
+          ...(deletes ? [item(t('policies/actions/delete'), 'ahp.deletePolicy', { group: 'more', color: 'red' })] : []),
         ],
       };
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hosts, offers, policies.states, by, multi, hostName, t]);
+  }, [hosts, offers, grants, policies.states, by, multi, hostName, t]);
 
   const error = multi ? null : policies.errors[0] ?? null;
   const read = multi ? policies.states.some((one) => one !== undefined) : policies.states[0] !== undefined;

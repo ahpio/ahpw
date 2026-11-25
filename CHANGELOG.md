@@ -12,7 +12,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
-- **The Clients, Computers, Connectors, Plugins, Policies, Teams and Tunnels entries show only to a person who may open them**, and a user's page offers only the changes the person may make.
+- **The Clients, Computers, Connectors, Plugins, Policies, Teams and Tunnels entries show only to a person who may open them**. The lists and pages of users, roles, teams, projects and policies offer only the changes the person may make.
 - **A tab's scrollbar shows while the pointer is over it**, on every tab that scrolls and on a chat with a bot, as on a session.
 
 ### Fixed
