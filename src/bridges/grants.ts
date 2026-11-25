@@ -171,6 +171,15 @@ export function heldBy(bound: readonly string[], wanted: string, catalog: GrantC
   return bound.includes(grant(EVERY, operation)) || bound.includes(grant(subject, EVERY));
 }
 
+/**
+ * A set of grants with every operation and group of the catalog it holds
+ * spelled out, so a check of one needs no catalog.
+ */
+export function expandGrants(held: readonly string[], catalog: GrantCatalog): string[] {
+  const each = Object.entries(catalog).flatMap(([subject, info]) => [...info.operations, ...GRANT_GROUPS].map((operation) => grant(subject, operation)));
+  return [...new Set([...held, ...each.filter((one) => heldBy(held, one, catalog))])];
+}
+
 /** The catalog's subjects a bound holds an operation of, in its order, `*` first when the bound names a wildcard subject. */
 export function boundSubjects(bound: readonly string[], catalog: GrantCatalog): string[] {
   const every = bound.some((one) => grantParts(one).subject === EVERY) ? [EVERY] : [];

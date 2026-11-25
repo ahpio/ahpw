@@ -89,7 +89,7 @@ export function registerPlugins(scena: Scena): Disposable {
     scena.components.register({ component: 'Progress', category: 'inline', renderer: { kind: 'react', load: () => import('./ViewProgress.js') } }),
     scena.components.register({ component: 'DateTime', category: 'inline', renderer: { kind: 'react', load: () => import('./DateTime.js') } }),
     scena.components.register({ component: 'KeyValue', category: 'inline', renderer: { kind: 'react', load: () => import('./KeyValue.js') } }),
-    trackServed(scena, PLUGINS.scheme, PLUGINS_SERVED),
+    trackServed(scena, PLUGINS.scheme, PLUGINS_SERVED, []),
     trackServed(scena, (offers) => offers.methods.includes(PLUGINS.apply), PLUGINS_APPLY),
     trackServed(scena, adds, PLUGINS_ADD),
     registerChoice(scena, { resource: 'plugins', name: 'group', slot: GROUP_SLOT, path: PLUGINS_GROUP, values: PLUGIN_GROUPINGS, usual: 'state', key: GROUP_KEY }),

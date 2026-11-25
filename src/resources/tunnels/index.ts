@@ -34,7 +34,7 @@ const servingHosts = (scena: Scena): string[] => shownHosts(scena.store).filter(
 /** The tunnels list, a tunnel's page, and the New button that runs a kind's create. */
 export function registerTunnels(scena: Scena): Disposable {
   return combineDisposables(
-    trackServed(scena, TUNNELS_SCHEME, TUNNELS_SERVED),
+    trackServed(scena, TUNNELS_SCHEME, TUNNELS_SERVED, []),
     scena.components.register({
       component: 'TunnelExplorer',
       category: 'page',

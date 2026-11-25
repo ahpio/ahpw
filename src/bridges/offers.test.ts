@@ -21,6 +21,7 @@ test('the methods, channels and providers ahpd names, as lists', () => {
     channels: ['x-ahpd-computers', 'x-ahpd-bots'],
     channelWords: { 'x-ahpd-computers': { title: 'Computers', description: 'The computers this host keeps.' } },
     providers: { computer: { title: 'Computers', root: 'computer://', operations: ['list', 'read', 'put'], manifest } },
+    channelGrants: { 'x-ahpd-computers': 'computer:read', 'x-ahpd-bots': 'bot:read' },
   });
   expect(allows(offers.providers.computer!, 'write')).toBe(true);
   expect(allows(offers.providers.computer!, 'delete')).toBe(false);

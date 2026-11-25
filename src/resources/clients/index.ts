@@ -30,7 +30,7 @@ const serving = (offers: Offers | undefined): boolean => offers?.channels.includ
 /** The clients list and a client's page. */
 export function registerClients(scena: Scena): Disposable {
   return combineDisposables(
-    trackServed(scena, CLIENTS_SCHEME, CLIENTS_SERVED),
+    trackServed(scena, CLIENTS_SCHEME, CLIENTS_SERVED, []),
     scena.components.register({
       component: 'ClientExplorer',
       category: 'page',

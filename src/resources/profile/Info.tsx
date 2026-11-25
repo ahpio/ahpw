@@ -3,8 +3,9 @@ import { useI18n, useStore } from '@softov/scena/react';
 import { Chip, DetailList, Spinner, Text } from '@softov/scena/ui';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
+import { readMe, type Me } from '../../bridges/me.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
-import { PEOPLE, peopleReducer, readOwnUser, selfId, servesPeople, type ListedUser, type Named, type PeopleState } from '../../bridges/people.js';
+import { PEOPLE, peopleReducer, servesPeople, type Named, type PeopleState } from '../../bridges/people.js';
 import { ownLimits, type PolicyLimits } from '../../bridges/policies.js';
 import { servesUsage, usagePeriods, type UsagePeriods } from '../../bridges/usage.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
@@ -41,25 +42,28 @@ function useRead<T>(ask: (() => Promise<T>) | undefined, deps: readonly unknown[
 }
 
 /**
- * Who the person is on this host, read-only: their roles, teams and projects,
- * sign-in, what they used today, this week and this month, and the limits
+ * Who the connection is on this host, read-only: a person's roles, teams,
+ * projects and sign-in, or the host's grants, what they used today, this week and this month, and the limits
  * that hold them. Each part reads on its own, so one the host refuses does
  * not hide the rest.
  */
 export function Info({ host }: { host: string }): ReactElement {
   const { t } = useI18n();
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
-  const id = selfId(offers);
   // Their titles where the person may list them; ids where not.
   const teams = useChannel<PeopleState<Named>>(host, servesPeople(offers, 'teams') ? PEOPLE.teams.channel : undefined, teamsReducer);
   const projects = useChannel<PeopleState<Named>>(host, servesPeople(offers, 'projects') ? PEOPLE.projects.channel : undefined, projectsReducer);
-  const record = useRead<ListedUser>(() => readOwnUser(host, offers), [host, offers]);
-  const usage = useRead<UsagePeriods>(id !== undefined && servesUsage(offers) ? () => usagePeriods(host, offers, `user:${id}`) : undefined, [host, offers, id]);
+  const record = useRead<Me>(() => readMe(host), [host, offers]);
+  // A person's own pool, and for the host the pools it is charged to.
+  const me = record?.state === 'held' ? record.value : undefined;
+  const pools = me === undefined || !servesUsage(offers) ? [] : me.kind === 'user' ? [me.principal] : me.pools;
+  const usage = useRead<{ pool: string; used: UsagePeriods }[]>(pools.length > 0 ? () => Promise.all(pools.map(async (pool) => ({ pool, used: await usagePeriods(host, offers, pool) }))) : undefined, [host, offers, pools.join('\n')]);
   const limits = useRead<PolicyLimits[] | undefined>(() => ownLimits(host, offers), [host, offers]);
 
   if (record === undefined || record.state === 'reading') return <Spinner label={t('profile/notices/reading')} />;
   if (record.state === 'failed') return <PageAlert tone="danger" title={t('profile/notices/none')} message={record.error} />;
   const user = record.value;
+  const person = user.kind === 'user';
   const teamList = teams.state?.records.map((one) => one.record) ?? [];
   const projectList = projects.state?.records.map((one) => one.record) ?? [];
   const memberships = user.memberships ?? [];
@@ -74,13 +78,22 @@ export function Info({ host }: { host: string }): ReactElement {
 
   return (
     <div className="web-profile__info">
-      {section(EMOJIcon.roles, t('profile/info/roles'), user.roles.length === 0 ? <p className="web-note">{t('profile/info/noRoles')}</p> : (
+      {person ? null : section(EMOJIcon.roles, t('profile/info/grants'), (
         <div className="web-role-pills">
-          {user.roles.map((role) => <RemovableChip key={role} label={role} removeLabel={role} />)}
+          {user.grants.map((grant) => <RemovableChip key={grant} label={grant} removeLabel={grant} />)}
         </div>
       ))}
 
-      {section(EMOJIcon.teams, t('profile/info/memberships'), memberships.length === 0 ? <p className="web-note">{t('profile/info/noMemberships')}</p> : (
+      {!person ? null : section(EMOJIcon.roles, t('profile/info/roles'), user.roles.length === 0 ? <p className="web-note">{t('profile/info/noRoles')}</p> : (
+        <div className="web-role-pills">
+          {user.roles.map((role) => {
+            const label = user.rolesFromSignIn.includes(role) ? t('profile/info/roleFromSignIn', { role }) : role;
+            return <RemovableChip key={role} label={label} removeLabel={label} />;
+          })}
+        </div>
+      ))}
+
+      {!person ? null : section(EMOJIcon.teams, t('profile/info/memberships'), memberships.length === 0 ? <p className="web-note">{t('profile/info/noMemberships')}</p> : (
         <ul className="web-memberships__list">
           {memberships.map((membership) => {
             const { team, project } = membershipParts(membership);
@@ -97,7 +110,7 @@ export function Info({ host }: { host: string }): ReactElement {
         </ul>
       ))}
 
-      {section(EMOJIcon.signIn, t('profile/info/signIn'), (
+      {!person ? null : section(EMOJIcon.signIn, t('profile/info/signIn'), (
         <DetailList
           items={[
             { label: t('profile/info/issuer'), value: user.issuer ?? t('profile/info/issuerDefault') },
@@ -108,7 +121,11 @@ export function Info({ host }: { host: string }): ReactElement {
 
       {usage === undefined ? null : section(EMOJIcon.usage, t('profile/info/usage'), usage.state === 'reading' ? <Spinner label={t('profile/notices/reading')} />
         : usage.state === 'failed' ? <p className="web-note">{t('profile/info/usageFailed', { error: usage.error })}</p> : (
-          <DetailList items={(['day', 'week', 'month'] as const).map((period) => ({ label: t(`usage/period/${period}`), value: totalLine(usage.value[period]) || t('usage/explorer/nothing') }))} />
+          <>
+            {usage.value.map(({ pool, used }) => (
+              <DetailList key={pool} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))' }} items={(['day', 'week', 'month'] as const).map((period) => ({ label: t(`usage/period/${period}`), value: totalLine(used[period]) || t('usage/explorer/nothing') }))} />
+            ))}
+          </>
         ))}
 
       {limits === undefined ? null : section(EMOJIcon.policies, t('profile/info/limits'), limits.state === 'reading' ? <Spinner label={t('profile/notices/reading')} />
@@ -118,7 +135,7 @@ export function Info({ host }: { host: string }): ReactElement {
               {(limits.value ?? []).flatMap((policy) => policy.limits.map((figure, at) => (
                 <li key={`${policy.id}\u{0000}${String(at)}`} className="web-profile__limit">
                   <span className="web-profile__limit-name">{policy.id}</span>
-                  <LimitLine figure={figure} />
+                  <LimitLine figure={figure} hideEmpty />
                 </li>
               )))}
             </ul>

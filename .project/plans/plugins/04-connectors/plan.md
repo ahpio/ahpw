@@ -1,7 +1,7 @@
 ---
 title: Connectors in an explorer, a form to make one, and a page to see and change it
 domain: plugins
-status: active
+status: built
 priority: medium
 created: 2026-10-22
 revalidated: 2026-10-22
@@ -91,7 +91,7 @@ page: head (title, id, state) -> Overview (kind, plugin, owner, capabilities) | 
 | [04 - A connector's page, Settings and Delete](task-04-a-connectors-page.md) | done | 03 |
 | [05 - An empty list for connector:list, and where a connector receives](task-05-kinds-for-a-maker.md) | done | 06 |
 | [06 - Adapters, and the connector grants](task-06-adapters-and-connector-grants.md) | done | 04 |
-| [07 - The host's public root](task-07-the-hosts-public-root.md) | blocked | 05 |
+| [07 - The host's public root](task-07-the-hosts-public-root.md) | dropped | 05 |
 
 ## Risks and tradeoffs
 
@@ -101,12 +101,10 @@ page: head (title, id, state) -> Overview (kind, plugin, owner, capabilities) | 
 
 ## Resume state
 
-- **Done so far:** tasks 01 to 04.
-- **Next action:** [task-07-the-hosts-public-root.md](task-07-the-hosts-public-root.md), once ahpd advertises its public root.
-- **Since:** task 06 moved ahpw to ahpd's adapters and connector grants at main 13b19150.
+- **Done so far:** tasks 01 to 06, on 2026-10-23.
+- **Next action:** none. Task 07 is in [deferred.md](deferred.md).
 - **Open questions:** none.
-- **Blocked:** task 05 waits for ahpd.
-- **Watch out for:** the channel's ids mix kinds (`kind:<name>`) and connectors; a connector id never starts with `kind:`, since it is a slug.
+- **Watch out for:** a connector's URL is the page's own origin, or the daemon the page names.
 
 ## Final verification checklist
 
@@ -115,4 +113,4 @@ page: head (title, id, state) -> Overview (kind, plugin, owner, capabilities) | 
 - [x] By hand: make a webhook connector for a bot, owned by me, and one owned by a team; see each open.
 - [x] By hand: change its settings, keep its secret, and delete it.
 - [x] By hand: a reader without `config:read` sees their own connectors and the form's note.
-- [ ] `plans/index.md` updated.
+- [x] `plans/index.md` updated.

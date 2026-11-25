@@ -1108,7 +1108,8 @@
     "notices": {
       "none": "Sem usuários",
       "reading": "Carregando usuários",
-      "readOnly": "Este host não permite mudanças aqui."
+      "readOnly": "Este host não permite mudanças aqui.",
+      "noPermission": "Você não tem permissão para alterar isto."
     },
     "commands": {
       "new": "Novo",
@@ -3001,6 +3002,8 @@
     "info": {
       "roles": "Papéis",
       "noRoles": "Nenhum papel.",
+      "roleFromSignIn": "{role} · da entrada",
+      "grants": "Permissões",
       "memberships": "Equipes e projetos",
       "noMemberships": "Nenhuma associação.",
       "signIn": "Entrada",
@@ -3017,6 +3020,10 @@
       "reading": "Carregando suas chaves…",
       "none": "Nenhuma chave ainda.",
       "notServed": "Este host não oferece suporte a chaves.",
+      "person": "Pessoa",
+      "pickPerson": "Escolha uma pessoa",
+      "byKey": "Você está conectado com uma chave. Entre com sua conta para gerenciar chaves.",
+      "noPeople": "Nenhuma pessoa neste host.",
       "unnamed": "Chave sem nome",
       "everyGrant": "Todas as suas permissões",
       "everyGrantOf": "Todas as permissões de {id}",
@@ -3061,7 +3068,7 @@
     "notices": {
       "reading": "Carregando seu perfil…",
       "none": "Não foi possível carregar seu perfil",
-      "notPerson": "Esta conexão não entrou como uma pessoa, então não há perfil."
+      "notPerson": "Esta conexão não tem perfil."
     }
   },
   "plugins": {

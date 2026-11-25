@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createScena } from '@softov/scena/core';
 import { ahpPaths, windowHost } from '../bridges/data.js';
+import { ME } from '../bridges/me.js';
 import { NO_OFFERS } from '../bridges/offers.js';
 import { CLIENTS_SERVED } from '../resources/clients/state.js';
 import { TUNNELS_SERVED } from '../resources/tunnels/state.js';
@@ -11,7 +12,7 @@ import { MANAGE_SLOT, profileEntryTitle, registerManage } from './manage.js';
 /** The Manage menu's ids, in its order, as it lists for the principal given. */
 function menuAs(principal: string | undefined, embedded = false): string[] {
   const scena = createScena();
-  scena.store.set(ahpPaths(windowHost()).offers, { ...NO_OFFERS, ...(principal === undefined ? {} : { principal }) });
+  scena.store.set(ahpPaths(windowHost()).offers, { ...NO_OFFERS, methods: [ME], ...(principal === undefined ? {} : { principal }) });
   registerManage(scena, embedded);
   return scena.commands.list({ slot: MANAGE_SLOT, enabled: true }).map((one) => one.id);
 }
@@ -22,8 +23,12 @@ describe('the Manage menu', () => {
     expect(ids.slice(-2)).toEqual([`ahp.manage.profile.${windowHost()}`, 'ahp.manage.signOut']);
   });
 
-  it('has no profile entry for the host itself, or for nobody', () => {
-    expect(menuAs('root:dev').some((id) => id.startsWith('ahp.manage.profile.'))).toBe(false);
+  it('lists the host itself, under its own icon', () => {
+    const ids = menuAs('root:dev');
+    expect(ids.slice(-2)).toEqual([`ahp.manage.hostProfile.${windowHost()}`, 'ahp.manage.signOut']);
+  });
+
+  it('has no profile entry for nobody', () => {
     expect(menuAs(undefined).some((id) => id.startsWith('ahp.manage.profile.'))).toBe(false);
   });
 
@@ -33,7 +38,7 @@ describe('the Manage menu', () => {
 
   it('lists the host pages, then the app choices, then the account, each group parted by a line', () => {
     const scena = createScena();
-    scena.store.set(ahpPaths(windowHost()).offers, { ...NO_OFFERS, principal: 'user:ana' });
+    scena.store.set(ahpPaths(windowHost()).offers, { ...NO_OFFERS, methods: [ME], principal: 'user:ana' });
     registerManage(scena, false);
     const rows = (): { id: string; category: string | undefined }[] => scena.commands.list({ slot: MANAGE_SLOT, enabled: true }).map((one) => ({ id: one.id, category: one.category }));
     expect(rows().map((one) => one.id)).not.toContain('ahp.manage.tunnels');

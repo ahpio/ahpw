@@ -48,7 +48,7 @@ export function registerConnectors(scena: Scena): Disposable {
   };
 
   return combineDisposables(
-    trackServed(scena, CONNECTORS.scheme, CONNECTORS_SERVED),
+    trackServed(scena, CONNECTORS.scheme, CONNECTORS_SERVED, ['connector:all']),
     registerChoice(scena, { resource: 'connectors', name: 'group', slot: GROUP_SLOT, path: CONNECTORS_GROUP, values: CONNECTOR_GROUPINGS, usual: 'adapter', key: GROUP_KEY }),
     scena.components.register({
       component: 'ConnectorsExplorer',

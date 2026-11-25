@@ -1108,7 +1108,8 @@
     "notices": {
       "none": "No users",
       "reading": "Loading users",
-      "readOnly": "This host doesn't allow changes here."
+      "readOnly": "This host doesn't allow changes here.",
+      "noPermission": "You don't have permission to change this."
     },
     "commands": {
       "new": "New",
@@ -3001,6 +3002,8 @@
     "info": {
       "roles": "Roles",
       "noRoles": "No roles.",
+      "roleFromSignIn": "{role} · from sign-in",
+      "grants": "Grants",
       "memberships": "Teams and projects",
       "noMemberships": "No memberships.",
       "signIn": "Sign-in",
@@ -3017,6 +3020,10 @@
       "reading": "Loading your keys…",
       "none": "No keys yet.",
       "notServed": "This host doesn't support keys.",
+      "person": "Person",
+      "pickPerson": "Choose a person",
+      "byKey": "You are connected with a key. Sign in as yourself to manage keys.",
+      "noPeople": "No people on this host.",
       "unnamed": "Unnamed key",
       "everyGrant": "All of your grants",
       "everyGrantOf": "All of {id}'s grants",
@@ -3061,7 +3068,7 @@
     "notices": {
       "reading": "Loading your profile…",
       "none": "Couldn't load your profile",
-      "notPerson": "This connection isn't signed in as a person, so there's no profile."
+      "notPerson": "This connection has no profile."
     }
   },
   "plugins": {

@@ -1108,7 +1108,8 @@
     "notices": {
       "none": "Sin usuarios",
       "reading": "Cargando usuarios",
-      "readOnly": "Este host no permite hacer cambios aquí."
+      "readOnly": "Este host no permite hacer cambios aquí.",
+      "noPermission": "No tienes permiso para cambiar esto."
     },
     "commands": {
       "new": "Nuevo",
@@ -3001,6 +3002,8 @@
     "info": {
       "roles": "Roles",
       "noRoles": "Sin roles.",
+      "roleFromSignIn": "{role} · del inicio de sesión",
+      "grants": "Permisos",
       "memberships": "Equipos y proyectos",
       "noMemberships": "Sin membresías.",
       "signIn": "Inicio de sesión",
@@ -3017,6 +3020,10 @@
       "reading": "Cargando tus claves…",
       "none": "Aún sin claves.",
       "notServed": "Este host no admite claves.",
+      "person": "Persona",
+      "pickPerson": "Elige una persona",
+      "byKey": "Estás conectado con una clave. Inicia sesión con tu cuenta para gestionar claves.",
+      "noPeople": "No hay personas en este host.",
       "unnamed": "Clave sin nombre",
       "everyGrant": "Todos tus permisos",
       "everyGrantOf": "Todos los permisos de {id}",
@@ -3061,7 +3068,7 @@
     "notices": {
       "reading": "Cargando tu perfil…",
       "none": "No se pudo cargar tu perfil",
-      "notPerson": "Esta conexión no inició sesión como una persona, así que no hay perfil."
+      "notPerson": "Esta conexión no tiene perfil."
     }
   },
   "plugins": {

@@ -6,8 +6,10 @@ import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ADAPTERS, adaptersReducer, CONNECTORS, connectorsReducer, putConnector, type AdapterRow, type ConnectorOwner, type ConnectorRow, type ConnectorWanted } from '../../bridges/connectors.js';
 import { ahpPaths } from '../../bridges/data.js';
+import { useMe } from '../../bridges/me.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
-import { PEOPLE, peopleReducer, readOwnUser, servesPeople, type ListedUser, type PeopleState } from '../../bridges/people.js';
+import { useOwnGrants } from '../../bridges/own-grants.js';
+import { PEOPLE, peopleReducer, servesPeople, type ListedUser, type PeopleState } from '../../bridges/people.js';
 import { PLUGINS, pluginsReducer, type PluginRow } from '../../bridges/plugins.js';
 import { hostSaid } from '../../bridges/said.js';
 import { EMOJIcon } from '../emojis.js';
@@ -48,15 +50,10 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
   const users = useChannel<PeopleState<ListedUser>>(host, me === undefined && servesPeople(offers, 'users') ? PEOPLE.users.channel : undefined, usersReducer);
   const teams = useChannel<PeopleState<{ id: string }>>(host, me === undefined && servesPeople(offers, 'teams') ? PEOPLE.teams.channel : undefined, teamsReducer);
 
-  // The person's record names their teams and grants; a root connection has none.
-  const [user, setUser] = useState<ListedUser | undefined>(undefined);
-  const [userRead, setUserRead] = useState(me === undefined);
-  useEffect(() => {
-    if (me === undefined) return undefined;
-    let live = true;
-    readOwnUser(host, offers).then((one) => { if (live) setUser(one); }, () => undefined).finally(() => { if (live) setUserRead(true); });
-    return () => { live = false; };
-  }, [host, offers, me]);
+  // Their teams and grants; a root connection needs neither.
+  const read = useMe(host);
+  const grants = useOwnGrants(host, offers);
+  const userRead = me === undefined || read !== undefined;
 
   const heldTop = useMemo<TopValues>(() => ({
     adapter: connector?.adapter ?? '',
@@ -88,7 +85,7 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
     setSaved(false);
   };
 
-  const owners = ownerChoices(me, user, {
+  const owners = ownerChoices(me, { grants, memberships: read?.memberships }, {
     me: t('connectors/owners/me'),
     team: (team) => t('connectors/owners/team', { team }),
     user: (user) => t('connectors/owners/user', { user }),

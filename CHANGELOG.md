@@ -7,10 +7,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- **The host has a profile.** A connection as the host itself opens one from the Manage menu, with its grants, usage and limits, and the keys of a person it picks. A person's profile also marks the roles their sign-in added.
 - **An agent can run ahpw's commands.** It lists them and runs the ones set to Ask, Notify or Run, in the Tools panel or the Interface settings. Ask shows Allow, Always allow and Deny on the call in the chat. Every command starts Off.
 
 ### Changed
 
+- **The Clients, Computers, Connectors, Plugins, Policies, Teams and Tunnels entries show only to a person who may open them**, and a user's page offers only the changes the person may make.
 - **A tab's scrollbar shows while the pointer is over it**, on every tab that scrolls and on a chat with a bot, as on a session.
 
 ### Fixed

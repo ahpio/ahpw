@@ -66,7 +66,7 @@ export function registerPolicies(scena: Scena): Disposable {
   };
 
   return combineDisposables(
-    trackServed(scena, POLICIES_CHANNEL, POLICIES_SERVED),
+    trackServed(scena, POLICIES_CHANNEL, POLICIES_SERVED, []),
     registerChoice(scena, { resource: 'policies', name: 'group', slot: GROUP_SLOT, path: POLICIES_GROUP, values: POLICY_GROUPINGS, usual: 'kind', key: GROUP_KEY }),
     scena.components.register({
       component: 'PoliciesExplorer',

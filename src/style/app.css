@@ -4782,6 +4782,11 @@
   gap: var(--oo-spacing-md);
 }
 
+/* The tabs' own line is above the first one. */
+.web-profile__info > .web-user__section:first-child {
+  border-top: none;
+}
+
 /* New key above the list; the tab starts as far under the tabs as Info's first section does. */
 .web-profile__keys {
   display: flex;

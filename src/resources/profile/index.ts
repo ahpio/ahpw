@@ -4,8 +4,8 @@ import { PALETTE_SLOT } from '../../shell/CommandPalette.js';
 import { hideOverlaidSidebar } from '../sessions/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { everyHost } from '../../bridges/hosts.js';
+import { profileOf } from '../../bridges/me.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
-import { selfId } from '../../bridges/people.js';
 import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
 import { profileTab } from './state.js';
@@ -18,10 +18,10 @@ export interface ProfileArgs {
   host?: string;
 }
 
-/** The signed-in person's own page, one per host they are a person on. */
+/** The signed-in person's own page, or the host's own, one per host. */
 export function registerProfilePage(scena: Scena): Disposable {
   const offersOf = (host: string): Offers => scena.store.get<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
-  const signedIn = (): string[] => everyHost(scena.store).filter((host) => selfId(offersOf(host)) !== undefined);
+  const signedIn = (): string[] => everyHost(scena.store).filter((host) => profileOf(offersOf(host)) !== undefined);
 
   return combineDisposables(
     scena.components.register({ component: 'ProfilePage', category: 'page', props: { icon: EMOJIcon.users }, renderer: { kind: 'react', load: () => import('./ProfilePage.js') } }),
