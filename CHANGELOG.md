@@ -5,6 +5,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+
+- **A tab's scrollbar shows while the pointer is over it**, on every tab that scrolls and on a chat with a bot, as on a session.
+
+### Fixed
+
+- **A tab shows one scrollbar.** The scrollbar of a tab behind it, such as a long Tools list, was drawn over the shown one.
+
 ## [0.9.0] - 2026-11-20
 
 The web UI for ahpd 0.15.0. It needs `@ahpd/sdk` 0.15. Since 0.8.0 it adds tunnels and clients, plugins added and written from the page, a session's usage, summary, artifacts and pull requests, and the actions docked beside the bots. The three release candidates below list each change.

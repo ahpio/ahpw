@@ -44,6 +44,25 @@
   color: var(--oo-color-muted);
 }
 
+/*
+ * scena keeps a tab not shown laid out over the shown one, and the browser
+ * draws its scrollbar again once anything measures inside it. Opacity hides
+ * the bar with no new layout and keeps the scroll position.
+ */
+.oo-layout__mount[inert] {
+  opacity: 0;
+}
+
+/* A tab's scrollbar shows while the pointer is over the tab; its room is kept, so nothing moves when it does. */
+.oo-layout__mount {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.oo-layout__mount:hover {
+  scrollbar-color: var(--oo-color-border) transparent;
+}
+
 .web-page {
   /* The width of a page's content, and the space each side of it on a wider surface. */
   --web-page-width: 64rem;
@@ -3726,6 +3745,7 @@
   margin-left: auto;
 }
 
+/* The scrollbar shows while the pointer is over the chat, as on a session. */
 .web-botchat__turns {
   flex: 1;
   min-height: 0;
@@ -3733,6 +3753,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--oo-spacing-sm);
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.web-botchat__turns:hover {
+  scrollbar-color: var(--oo-color-border) transparent;
 }
 
 .web-botchat__turns > :not(.web-botchat__head) {
