@@ -1,7 +1,7 @@
 ---
 title: The signed-in person's profile, and a user's roles as pills
 domain: organization
-status: active
+status: built
 priority: medium
 created: 2026-10-20
 revalidated: 2026-10-20
@@ -101,6 +101,10 @@ UserPage Roles: RemovableChip per role (✕ -> draft) + "+ Add a role" -> Contex
 | The host itself, `root:<host>`, has a profile too, read from `x-ahpd/me`, which ahpd will add. | Softov, 2026-10-21: "root need a profile like user. ahpd me will return its info" | 07 |
 | Until `x-ahpd/me` exists, a person's profile reads `user://<id>`; Info moves onto `me` when it ships. | Softov, 2026-10-21: "Keep user:// now, switch later" | 07 |
 | Root's Keys picks a person, then lists, mints and revokes that person's tokens. | Softov, 2026-10-21: "Mint for a person it picks" | 07 |
+| Connectors, Plugins, Clients, Tunnels, Teams, Policies and Computers hide from a reader without the grant; ahpd opens Bots, Users and Usage without theirs. | Softov, 2026-11-25: "ok apply then" | 07 |
+| A limit's meter hides on the profile while nothing is used. | Softov, 2026-11-25: "Hide it while empty" | 07 |
+| A new key is limited by the person's record, so Keys keeps reading `user://<id>`. | (defaulted: ahpd's mint refuses a grant a sign-in added) | 07 |
+| A group grant, such as `*:read`, holds each operation in it. | (defaulted: ahpd's rule) | 07 |
 | A user's page has a Keys section for a writer, managing that person's tokens with `user`. | Softov, 2026-10-21: "Yes, a Keys section" | 06 |
 | The token bridge and `TokenList` take an optional `user`, so one list serves all three places. | (defaulted: the same commands take `user`) | 04 |
 | Sign out's misindented `icon` line is fixed with the Manage change. | (defaulted: a lint fix in a file the task touches) | 03 |
@@ -125,7 +129,7 @@ UserPage Roles: RemovableChip per role (✕ -> draft) + "+ Add a role" -> Contex
 | [04 - A token bridge, and Keys lists and revokes](task-04-keys-lists-and-revokes.md) | done | 02 |
 | [05 - Keys mints a token](task-05-keys-mints-a-token.md) | done | 04 |
 | [06 - A user's page manages their keys](task-06-a-users-page-manages-their-keys.md) | done | 05 |
-| [07 - The host's own profile, on x-ahpd/me](task-07-the-hosts-own-profile-on-me.md) | blocked | 05 |
+| [07 - The host's own profile, on x-ahpd/me](task-07-the-hosts-own-profile-on-me.md) | done | 05 |
 
 ## Risks and tradeoffs
 
@@ -135,11 +139,10 @@ UserPage Roles: RemovableChip per role (✕ -> draft) + "+ Add a role" -> Contex
 
 ## Resume state
 
-- **Done so far:** task 01, on 2026-10-20; tasks 02 to 06, on 2026-10-21.
-- **Next action:** task 07, once ahpd ships `x-ahpd/me`.
+- **Done so far:** task 01, on 2026-10-20; tasks 02 to 06, on 2026-10-21; task 07, on 2026-11-24, as [implemented.md](implemented.md) says.
+- **Next action:** none. Softov validated task 07 on 2026-11-25.
 - **Open questions:** none.
-- **Blocked:** task 07 waits for ahpd's `x-ahpd/me`; the shape ahpw asked for is in the task.
-- **Watch out for:** fetch ahpd and fast-forward `main` before a check; this plan was read at `3a51ae2f`.
+- **Watch out for:** ahpd opens some channels without their grant, so an entry follows a grant only where ahpd opens it to no one else.
 
 ## Final verification checklist
 

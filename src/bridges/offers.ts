@@ -5,6 +5,7 @@
  */
 
 import { ahpdKey } from './ahpd-meta.js';
+import { grantCatalog, type GrantCatalog } from './grants.js';
 
 /** A resource scheme a plugin serves, such as `computer` or `bot`. */
 export interface Provider {
@@ -31,6 +32,10 @@ export interface Offers {
   /** What the host says each channel is, by its scheme; a channel that says nothing is absent. */
   channelWords: Record<string, ChannelWords>;
   providers: Record<string, Provider>;
+  /** The grant each channel's list asks, by its scheme; absent from a host that names none. */
+  channelGrants?: Record<string, string>;
+  /** Every subject a grant may name, with its operations and groups; absent from a host that sends none. */
+  catalog?: GrantCatalog;
   /** Who this connection is, `user:<id>` or `root:<host>`; absent on a host with no users. */
   principal?: string;
   /** `true` when the host serves `vscode/removeSessionArtifact`, as its `vscode.removeSessionArtifact` flag says. */
@@ -88,6 +93,16 @@ function channelWordsOf(value: unknown): Record<string, ChannelWords> {
   return words;
 }
 
+/** Each channel's grant, from a list of `{ scheme, grant }` entries. */
+function channelGrantsOf(value: unknown): Record<string, string> {
+  const grants: Record<string, string> = {};
+  for (const one of Array.isArray(value) ? value : []) {
+    const entry = bag(one);
+    if (typeof entry?.scheme === 'string' && typeof entry.grant === 'string') grants[entry.scheme] = entry.grant;
+  }
+  return grants;
+}
+
 /** The offers in an `initialize` answer's `_meta`. */
 export function offersOf(meta: unknown): Offers {
   const providers: Record<string, Provider> = {};
@@ -96,12 +111,16 @@ export function offersOf(meta: unknown): Offers {
     if (provider !== null) providers[scheme] = provider;
   }
   const principal = ahpdKey(meta, 'principal');
+  const channelGrants = channelGrantsOf(ahpdKey(meta, 'channels'));
+  const catalog = grantCatalog(meta);
   return {
     methods: namesOf(ahpdKey(meta, 'methods'), 'method'),
     described: descriptionsOf(ahpdKey(meta, 'methods')),
     channels: namesOf(ahpdKey(meta, 'channels'), 'scheme'),
     channelWords: channelWordsOf(ahpdKey(meta, 'channels')),
     providers,
+    ...(Object.keys(channelGrants).length === 0 ? {} : { channelGrants }),
+    ...(Object.keys(catalog).length === 0 ? {} : { catalog }),
     ...(typeof principal === 'string' && principal !== '' ? { principal } : {}),
     ...(bag(meta)?.['vscode.removeSessionArtifact'] === true ? { removesArtifacts: true as const } : {}),
   };

@@ -66,7 +66,7 @@ export function registerTeams(scena: Scena): Disposable {
   };
 
   return combineDisposables(
-    trackServed(scena, channelScheme('teams'), TEAMS_SERVED),
+    trackServed(scena, channelScheme('teams'), TEAMS_SERVED, []),
     scena.components.register({
       component: 'TeamsExplorer',
       category: 'page',

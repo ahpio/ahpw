@@ -6,6 +6,7 @@ import { registerThemeController } from '@softov/scena/styles';
 // ahpd's admin, drawn from /api/cli-manifest; off while ahpw is AHP only.
 // import { registerCommands } from '../resources/commands/index.js';
 import { registerConnection } from '../bridges/index.js';
+import { trackMe } from '../bridges/me.js';
 import { registerHosts, sessionCountPaths } from '../bridges/hosts.js';
 import { registerSummary, summaryPaths } from '../bridges/summary.js';
 import { SESSIONS_SECTION, hideOverlaidSidebar, registerSessionFiles, registerSessions, registerSessionTooling } from '../resources/sessions/index.js';
@@ -326,6 +327,7 @@ export function registerShell(scena: Scena): Disposable {
     registerConnection(scena),
     registerSummary(scena),
     registerHosts(scena),
+    trackMe(scena),
     registerSessions(scena),
     registerAgents(scena),
     registerChanges(scena),
