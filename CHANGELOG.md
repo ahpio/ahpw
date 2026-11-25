@@ -5,6 +5,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- **An agent can run ahpw's commands.** It lists them and runs the ones set to Notify or Run, in the Tools panel or the Interface settings. Every command starts Off.
+
 ### Changed
 
 - **A tab's scrollbar shows while the pointer is over it**, on every tab that scrolls and on a chat with a bot, as on a session.
