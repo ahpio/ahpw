@@ -46,6 +46,35 @@ function applyMode(scena: Scena, mode: LayoutMode): void {
   }
 }
 
+async function toggleZone(scena: Scena, zone: (typeof ZONES)[number]): Promise<void> {
+  if (zone.command !== undefined) await scena.commands.execute(zone.command);
+  else scena.layout.setSurface(zone.surface, { ...scena.layout.get().surfaces[zone.surface], visible: !visible(scena, zone.surface) });
+}
+
+/** What the menu offers, by id. */
+export const VIEWS: readonly string[] = MAIN_LAYOUTS.map((one) => one.id);
+export const MODE_IDS: readonly string[] = MODES.map((one) => one.id);
+export const AREAS: readonly string[] = ZONES.map((one) => one.surface);
+
+/** A choice of the menu made without it. */
+export interface LayoutArgs {
+  view?: string;
+  mode?: string;
+  /** An area to show or hide. */
+  area?: string;
+}
+
+/** Applies each choice named, as the menu does; false when none is one it offers. */
+export async function applyLayout(scena: Scena, args: LayoutArgs | undefined): Promise<boolean> {
+  const mode = MODES.find((one) => one.id === args?.mode);
+  const zone = ZONES.find((one) => one.surface === args?.area);
+  const view = VIEWS.find((one) => one === args?.view);
+  if (view !== undefined) await scena.commands.execute('view.setMainLayout', { layout: view });
+  if (mode !== undefined) applyMode(scena, mode);
+  if (zone !== undefined) await toggleZone(scena, zone);
+  return view !== undefined || mode !== undefined || zone !== undefined;
+}
+
 /** The menu as it stands now; a choice applies itself and draws the menu again. */
 export function layoutMenu(scena: Scena): ListSpec {
   const again = (host: HostCtx): void => host.replaceList(layoutMenu(scena));
@@ -77,8 +106,7 @@ export function layoutMenu(scena: Scena): ListSpec {
     group: translate('shell/layout/zones/title'),
     active: visible(scena, zone.surface),
     onSelect: async (host) => {
-      if (zone.command !== undefined) await scena.commands.execute(zone.command);
-      else scena.layout.setSurface(zone.surface, { ...scena.layout.get().surfaces[zone.surface], visible: !visible(scena, zone.surface) });
+      await toggleZone(scena, zone);
       again(host);
     },
   }));

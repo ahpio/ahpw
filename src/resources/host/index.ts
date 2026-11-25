@@ -15,11 +15,15 @@ import { embedMode } from '../../shell/embed/index.js';
 import { keepSettingsTab, openSettingsAt, PLACES, placeItems, settingsHostOf, settingsPlace, type SettingsPlace } from './place.js';
 import { openPalette } from '../../shell/CommandPalette.js';
 import { STRIP_SLOT } from '../../shell/panel/index.js';
+import { serveAsTool } from '../agent-tools/registry.js';
 
 /** Arguments of the commands that open a host's page; the window's host by default. */
 export interface HostArgs {
   host?: string;
 }
+
+serveAsTool({ id: 'ahp.openSettings', order: 9, text: 'Open the settings.', input: () => ({ type: 'object', properties: { host: { type: 'string', description: 'Host id; this session\'s by default' } } }) });
+serveAsTool({ id: 'ahp.openInterfaceSettings', order: 10, text: 'Open the Interface settings.', input: () => ({ type: 'object', properties: { host: { type: 'string', description: 'Host id; this session\'s by default' } } }) });
 
 /** The host a page opens on when none is named: the window's, or with every host the first the filter shows. */
 const pageHost = (store: ReactiveStore): string | undefined => (embedMode() === 'multi' ? shownHosts(store)[0] : windowHost());

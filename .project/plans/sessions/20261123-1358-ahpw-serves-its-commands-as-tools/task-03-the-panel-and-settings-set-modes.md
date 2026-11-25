@@ -1,6 +1,6 @@
 ---
 title: The Tools panel and the settings set the modes
-status: todo
+status: done
 depends:
   - task-01-the-mark-the-modes-and-the-tools.md
 layer: "resources"

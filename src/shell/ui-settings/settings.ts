@@ -24,6 +24,7 @@ import { FILE_SAVE_MODE } from '../../resources/files/save-mode.js';
 import { TEXT_WRAP } from '../../resources/editor/wrap.js';
 import { FILE_COMMENTS } from '../../resources/files/comments-shown.js';
 import { DOCK_SETTINGS } from '../dock/settings.js';
+import { toolSettings } from '../../resources/agent-tools/registry.js';
 import { ARCHIVED_SESSION_OPEN, SESSION_MARKDOWN, SESSION_OPENS, TOOLS_EXPANDED, type ChatChoice } from '../../resources/sessions/view-settings.js';
 
 /** A UI setting's key: `ui.<name>`, flat, as the host's keys are. */
@@ -34,6 +35,9 @@ export interface UiSetting {
   /** The values it takes, in the order the form offers them, and the one a reset goes back to. */
   values: (scena: Scena) => readonly string[];
   usual: () => string;
+  /** The form's title and description; by default `host/settings/ui/<name>/…`. */
+  title?: (scena: Scena) => string;
+  description?: () => string;
   /** What the form calls each value. */
   label: (value: string, scena: Scena) => string;
   read: (scena: Scena) => string;
@@ -141,17 +145,20 @@ export const UI_SETTINGS: readonly UiSetting[] = [
   ...DOCK_SETTINGS,
 ];
 
+/** Every setting: the fixed ones, then one per command the agent can be given. */
+export const uiSettings = (): readonly UiSetting[] => [...UI_SETTINGS, ...toolSettings()];
+
 export const isUiKey = (key: string): key is UiKey => key.startsWith('ui.');
 
 /** Each setting as a form field: a title, a description and its values, translated now. */
 export function uiFields(scena: Scena): Record<UiKey, JsonSchemaField> {
-  return Object.fromEntries(UI_SETTINGS.map((one) => {
+  return Object.fromEntries(uiSettings().map((one) => {
     const values = one.values(scena);
     const name = one.key.slice('ui.'.length);
     return [one.key, {
       type: 'string',
-      title: translate(`host/settings/ui/${name}/title`),
-      description: translate(`host/settings/ui/${name}/description`),
+      title: one.title?.(scena) ?? translate(`host/settings/ui/${name}/title`),
+      description: one.description?.() ?? translate(`host/settings/ui/${name}/description`),
       enum: [...values],
       'x-enumOptions': values.map((value) => ({ value, label: one.label(value, scena) })),
       default: one.usual(),
@@ -161,7 +168,7 @@ export function uiFields(scena: Scena): Record<UiKey, JsonSchemaField> {
 
 /** Every setting's value now, keyed by setting. */
 export function readUi(scena: Scena): Record<UiKey, string> {
-  return Object.fromEntries(UI_SETTINGS.map((one) => [one.key, one.read(scena)]));
+  return Object.fromEntries(uiSettings().map((one) => [one.key, one.read(scena)]));
 }
 
 /**
@@ -170,7 +177,7 @@ export function readUi(scena: Scena): Record<UiKey, string> {
  * resets. A value equal to the current one does nothing.
  */
 export function writeUi(scena: Scena, key: UiKey, value: unknown): void {
-  const setting = UI_SETTINGS.find((one) => one.key === key);
+  const setting = uiSettings().find((one) => one.key === key);
   if (setting === undefined) return;
   const next = typeof value === 'string' && setting.values(scena).includes(value) ? value : setting.usual();
   if (next !== setting.read(scena)) setting.apply(scena, next);
@@ -178,6 +185,6 @@ export function writeUi(scena: Scena, key: UiKey, value: unknown): void {
 
 /** Calls `changed` whenever any setting changes. */
 export function watchUi(scena: Scena, changed: () => void): Disposable {
-  const watches = UI_SETTINGS.map((one) => one.watch(scena, changed));
+  const watches = uiSettings().map((one) => one.watch(scena, changed));
   return { dispose: () => { for (const one of watches) one.dispose(); } };
 }

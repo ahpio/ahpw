@@ -5,7 +5,7 @@ import { KeptTabs } from '../../shell/view/KeptTabs.js';
 import { rootReducer, type RootState, type StateAction } from '@microsoft/agent-host-protocol';
 import { hostBridge, ROOT } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
-import { readUi, uiFields, UI_SETTINGS, watchUi, writeUi } from '../../shell/ui-settings/settings.js';
+import { readUi, uiFields, uiSettings, watchUi, writeUi } from '../../shell/ui-settings/settings.js';
 import { changedKeys } from './config.js';
 import { interfaceGroups, settingsGroups } from './sections.js';
 import { keepSettingsTab, settingsTab, type SettingsPlace } from './place.js';
@@ -124,7 +124,7 @@ function InterfaceSettings(): ReactElement {
   const views = useMemo(() => [fieldsView, jsonView, yamlView, sectionsView(interfaceGroups())], [locale]);
   // A key taken out, by its Reset or the JSON view, goes back to its usual value.
   const change = (next: Record<string, unknown>): void => {
-    for (const one of UI_SETTINGS) writeUi(scena, one.key, next[one.key]);
+    for (const one of uiSettings()) writeUi(scena, one.key, next[one.key]);
   };
   return (
     <div className="web-settings__tab">

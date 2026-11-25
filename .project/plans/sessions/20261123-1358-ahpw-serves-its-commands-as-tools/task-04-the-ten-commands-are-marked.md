@@ -1,6 +1,6 @@
 ---
 title: The ten commands are marked
-status: todo
+status: done
 depends:
   - task-01-the-mark-the-modes-and-the-tools.md
 layer: "resources"

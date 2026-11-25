@@ -12,11 +12,33 @@ import { USERS_SERVED } from '../resources/users/state.js';
 import { TEAMS_SERVED } from '../resources/teams/state.js';
 import { openPalette } from './CommandPalette.js';
 import { localeList, themeList } from './commands.js';
-import { layoutMenu } from './layout-menu.js';
+import { listThemes, THEME_ID_PATH } from '@softov/scena/styles';
+import { serveAsTool } from '../resources/agent-tools/registry.js';
+import { AREAS, applyLayout, layoutMenu, MODE_IDS, VIEWS, type LayoutArgs } from './layout-menu.js';
 import { disablePush, pushOn } from './notify/push.js';
 
 /** The commands the activity bar's Manage gear lists, in its menu's order. */
 export const MANAGE_SLOT = 'ahp:manage';
+
+serveAsTool({
+  id: 'ahp.manage.layout',
+  order: 7,
+  text: 'Set the main view or the layout mode, or show or hide an area.',
+  input: () => ({
+    type: 'object',
+    properties: {
+      view: { type: 'string', enum: VIEWS },
+      mode: { type: 'string', enum: MODE_IDS },
+      area: { type: 'string', description: 'Toggled', enum: AREAS },
+    },
+  }),
+});
+serveAsTool({
+  id: 'ahp.manage.theme',
+  order: 8,
+  text: 'Set the theme.',
+  input: () => ({ type: 'object', properties: { theme: { type: 'string', enum: listThemes().map((one) => one.id) } } }),
+});
 
 /** The menu's groups, which a line parts: the host's pages, then this app's choices, then the account. */
 const HOST_GROUP = 'host';
@@ -114,8 +136,9 @@ export function registerManage(scena: Scena, embedded: boolean): Disposable {
       icon: EMOJIcon.layoutGroups,
       category: APP_GROUP,
       slots: [MANAGE_SLOT],
-      run: (ctx) => {
+      run: async (ctx, args) => {
         ctx.host?.closeMenu();
+        if (await applyLayout(ctx.scena, args as LayoutArgs | undefined)) return;
         openPalette(ctx.scena, layoutMenu(ctx.scena));
       },
     }),
@@ -126,8 +149,13 @@ export function registerManage(scena: Scena, embedded: boolean): Disposable {
       icon: EMOJIcon.theme,
       category: APP_GROUP,
       slots: [MANAGE_SLOT],
-      run: (ctx) => {
+      run: (ctx, args) => {
         ctx.host?.closeMenu();
+        const theme = (args as { theme?: string } | undefined)?.theme;
+        if (theme !== undefined && listThemes().some((one) => one.id === theme)) {
+          ctx.scena.store.set(THEME_ID_PATH, theme);
+          return;
+        }
         openPalette(ctx.scena, themeList(ctx.scena));
       },
     }),

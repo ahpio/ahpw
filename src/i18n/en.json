@@ -2289,6 +2289,16 @@
           "global": "Turn off everywhere"
         }
       }
+    },
+    "agentTools": {
+      "modes": {
+        "off": "Off",
+        "notify": "Notify",
+        "run": "Run"
+      },
+      "ran": "Agent ran: {command}",
+      "browser": "This browser",
+      "on": "{on} of {all} on"
     }
   },
   "host": {
@@ -2425,7 +2435,8 @@
           "bot": "Bot",
           "canvas": "Canvas",
           "agents": "Agents",
-          "actions": "Actions"
+          "actions": "Actions",
+          "agentTools": "Agent tools"
         },
         "theme": {
           "title": "Theme",

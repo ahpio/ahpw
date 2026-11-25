@@ -37,6 +37,7 @@ import { registerHost } from '../resources/host/index.js';
 import { registerView } from './view/index.js';
 import { registerDock } from './dock/index.js';
 import { registerProfile } from './ui-settings/profile.js';
+import { registerAgentTools } from '../resources/agent-tools/registry.js';
 import { registerFiles } from '../resources/files/index.js';
 import { registerChanges } from '../resources/changes/index.js';
 import { registerBrowser } from './browser/index.js';
@@ -330,6 +331,7 @@ export function registerShell(scena: Scena): Disposable {
     registerChanges(scena),
     registerBrowser(scena),
     // Before Files, so a new browser still opens the right sidebar on Files.
+    registerAgentTools(scena),
     registerSessionTooling(scena),
     registerSessionFiles(scena),
     registerAutomations(scena),

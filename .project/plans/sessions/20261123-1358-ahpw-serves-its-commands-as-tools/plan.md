@@ -1,7 +1,7 @@
 ---
 title: ahpw serves its commands as tools for the agent
 domain: sessions
-status: planned
+status: active
 priority: medium
 created: 2026-11-23
 revalidated: 2026-11-23
@@ -94,10 +94,10 @@ agent calls runCommand -> ahpd: inputNeeded toolClientExecution for our client i
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The mark, the modes and the two tools](task-01-the-mark-the-modes-and-the-tools.md) | todo | - |
-| [02 - Each open session gets the tools and runs a call](task-02-open-sessions-get-the-tools.md) | todo | 01 |
-| [03 - The Tools panel and the settings set the modes](task-03-the-panel-and-settings-set-modes.md) | todo | 01 |
-| [04 - The ten commands are marked](task-04-the-ten-commands-are-marked.md) | todo | 01 |
+| [01 - The mark, the modes and the two tools](task-01-the-mark-the-modes-and-the-tools.md) | done | - |
+| [02 - Each open session gets the tools and runs a call](task-02-open-sessions-get-the-tools.md) | done | 01 |
+| [03 - The Tools panel and the settings set the modes](task-03-the-panel-and-settings-set-modes.md) | done | 01 |
+| [04 - The ten commands are marked](task-04-the-ten-commands-are-marked.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -107,8 +107,8 @@ agent calls runCommand -> ahpd: inputNeeded toolClientExecution for our client i
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-the-mark-the-modes-and-the-tools.md](task-01-the-mark-the-modes-and-the-tools.md).
+- **Done so far:** tasks 01 to 04, 2026-11-24, as [implemented.md](implemented.md) says.
+- **Next action:** Softov's review.
 - **Open questions:** none.
 - **Watch out for:** windows share one client id, so every window with the session open sees a call. Only the lock holder runs it.
 

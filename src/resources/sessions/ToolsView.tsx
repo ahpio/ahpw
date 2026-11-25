@@ -3,6 +3,7 @@ import type { ToolDefinition } from '@microsoft/agent-host-protocol';
 import { useI18n } from '@softov/scena/react';
 import { Badge, TextField } from '@softov/scena/ui';
 import { EMOJIcon } from '../emojis.js';
+import { ModesGroup } from '../agent-tools/ModesGroup.js';
 import { useActiveSession } from './active.js';
 import { searchTools, toolGroups, toolHints, toolParams, type ToolGroup } from './tooling.js';
 import './tooling.css';
@@ -71,7 +72,7 @@ const flip = (set: ReadonlySet<string>, key: string): Set<string> => {
   return next;
 };
 
-/** The focused session's tools, by who provides them: the host's, then each client's. Each row opens to its inputs and hints. */
+/** This browser's commands with their modes, then the focused session's tools by who provides them: the host's, then each client's. Each tool's row opens to its inputs and hints. */
 export default function ToolsView(): ReactElement {
   const { t } = useI18n();
   const { summary, session } = useActiveSession();
@@ -89,6 +90,7 @@ export default function ToolsView(): ReactElement {
         <span className="web-tooling__session">{summary.title === '' ? t('sessions/untitled') : summary.title}</span>
       </div>
       <TextField value={query} placeholder={t('sessions/tooling/searchTools')} onChange={setQuery} />
+      <ModesGroup query={query} folded={folded.has('browser')} onFold={() => setFolded((now) => flip(now, 'browser'))} />
       {groups.map((group) => (
         <Group key={group.key} group={group} folded={folded.has(group.key)} onFold={() => setFolded((now) => flip(now, group.key))} open={open} onOpen={(key) => setOpen((now) => flip(now, key))} />
       ))}

@@ -20,6 +20,7 @@ import { EMOJIcon } from '../emojis.js';
 import { mountRight, RIGHT_SIDEBAR, SESSION_VIEWS } from '../../shell/right-sidebar.js';
 import { followFocus, sessionKey } from './focus.js';
 import { SESSION_OPENS } from './view-settings.js';
+import { serveAsTool } from '../agent-tools/registry.js';
 
 /** The display size class the modus backend publishes. */
 const MODUS_CLASS = '$/modus/class' as BindingPath;
@@ -43,6 +44,19 @@ export interface OpenSessionArgs {
   /** `right` opens it in the right sidebar, beside the focused session; by default, where `ui.sessionOpens` says. An open session is focused where it is. */
   place?: 'main' | 'right';
 }
+
+serveAsTool({
+  id: 'ahp.openSession',
+  order: 1,
+  text: 'Open a session.',
+  input: () => ({ type: 'object', properties: { resource: { type: 'string', description: 'Session URI' }, place: { type: 'string', enum: ['main', 'right'] }, host: { type: 'string', description: 'Host id; this session\'s by default' } }, required: ['resource'] }),
+});
+serveAsTool({
+  id: 'ahp.newSession',
+  order: 2,
+  text: 'Open the New session page.',
+  input: () => ({ type: 'object', properties: { provider: { type: 'string', description: 'Agent id' }, place: { type: 'string', enum: ['main', 'right'] }, host: { type: 'string', description: 'Host id; this session\'s by default' } } }),
+});
 
 /** The groupings, one command each: the header's Group menu and the palette's list; the current one is ticked. */
 const GROUPING_SLOT = 'sessions:grouping';

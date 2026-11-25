@@ -1,0 +1,19 @@
+/* A command the agent can be given: its title and text, then its mode. */
+.web-agent-modes__row {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  padding: var(--oo-spacing-sm) 0;
+}
+
+.web-agent-modes__mode {
+  flex: none;
+  width: 76px;
+  padding: 2px var(--oo-spacing-xs);
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-agent-modes__mode[data-on='true'] {
+  border-color: var(--oo-color-accent);
+  color: var(--oo-color-accent);
+}
