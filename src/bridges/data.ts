@@ -44,6 +44,8 @@ export interface AhpPaths {
   server: BindingPath;
   /** What the host's plugins offer beyond AHP, as its last `initialize` answer said, as `Offers`. */
   offers: BindingPath;
+  /** Who this page's connection is on the host, as `HeldMe`. */
+  me: BindingPath;
   /** The host's build, machine and agent settings pages, as its last `initialize` answer's root state said, as `HostAbout`. */
   about: BindingPath;
   /** The host's terminals this page has stopped following; their tabs stay, showing what they last drew. */
@@ -71,6 +73,7 @@ export function ahpPaths(host: string): AhpPaths {
       host: at('host'),
       server: at('server'),
       offers: at('offers'),
+      me: at('me'),
       about: at('about'),
       detached: at('terminals/detached'),
       refused: at('refused'),

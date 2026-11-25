@@ -36,7 +36,7 @@ const serving = (offers: Offers | undefined): boolean => offers?.channels.includ
 /** The computers list, a computer's page, and the form that makes one. */
 export function registerComputers(scena: Scena): Disposable {
   return combineDisposables(
-    trackServed(scena, COMPUTERS_SCHEME, COMPUTERS_SERVED),
+    trackServed(scena, COMPUTERS_SCHEME, COMPUTERS_SERVED, []),
     registerChoice(scena, { resource: 'computers', name: 'group', slot: GROUP_SLOT, path: COMPUTERS_GROUP, values: COMPUTER_GROUPS, usual: 'none', key: CHOICE_KEYS.group, when: (value) => value !== 'host' || embedMode() === 'multi' }),
     registerChoice(scena, { resource: 'computers', name: 'status', slot: FILTER_SLOT, path: COMPUTERS_FILTER, values: COMPUTER_FILTERS, usual: 'all', key: CHOICE_KEYS.filter }),
     scena.components.register({

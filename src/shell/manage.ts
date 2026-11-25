@@ -2,8 +2,8 @@ import { combineDisposables, translate } from '@softov/scena';
 import type { Disposable, Scena } from '@softov/scena/types';
 import { ahpPaths, windowHost } from '../bridges/data.js';
 import { everyHost, HOST_LIST, hostNameOf } from '../bridges/hosts.js';
+import { profileOf } from '../bridges/me.js';
 import { NO_OFFERS, type Offers } from '../bridges/offers.js';
-import { selfId } from '../bridges/people.js';
 import { english } from '../i18n/locales.js';
 import { EMOJIcon } from '../resources/emojis.js';
 import { CLIENTS_SERVED } from '../resources/clients/state.js';
@@ -175,34 +175,41 @@ export function registerManage(scena: Scena, embedded: boolean): Disposable {
   );
 }
 
-/** How a host's profile entry reads: the person's id, and the host's name beside it when there are several. */
+/** A profile entry's id and icon, for a person and for the host itself. */
+const PROFILE_KINDS = [
+  { kind: 'user', id: 'ahp.manage.profile', icon: EMOJIcon.users },
+  { kind: 'root', id: 'ahp.manage.hostProfile', icon: EMOJIcon.host },
+] as const;
+
+/** How a host's profile entry reads: the person's id or the host's, and the host's name beside it when there are several. */
 export function profileEntryTitle(id: string, hostName: string, hosts: number): string {
   return hosts > 1 ? `${id} \u{00B7} ${hostName}` : id;
 }
 
 /**
- * The account group, parted from the rest with a line: the person on each
- * host they are signed in to as a person, then Sign out. The menu lists in
+ * The account group, parted from the rest with a line: the person, or
+ * the host itself, on each host with a profile, then Sign out. The menu lists in
  * registration order, so the group is registered again whenever the hosts
  * change, and a host added later still lands above Sign out.
  */
 function accountGroup(scena: Scena, embedded: boolean): Disposable {
   const offersOf = (host: string): Offers => scena.store.get<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
   const register = (): Disposable => combineDisposables(
-    ...everyHost(scena.store).map((host) => scena.commands.register({
-      id: `ahp.manage.profile.${host}`,
-      title: () => profileEntryTitle(selfId(offersOf(host)) ?? '', hostNameOf(scena.store, host), everyHost(scena.store).length),
+    // One entry per kind, as an entry's icon is fixed when it registers, before the host has said who this is.
+    ...everyHost(scena.store).flatMap((host) => PROFILE_KINDS.map(({ kind, id, icon }) => scena.commands.register({
+      id: `${id}.${host}`,
+      title: () => profileEntryTitle(profileOf(offersOf(host))?.id ?? '', hostNameOf(scena.store, host), everyHost(scena.store).length),
       keywords: [english('profile/title')],
-      icon: EMOJIcon.users,
+      icon,
       category: ACCOUNT_GROUP,
       slots: [MANAGE_SLOT],
       // Read when the menu lists, so it follows the host's handshake.
-      when: () => selfId(offersOf(host)) !== undefined,
+      when: () => profileOf(offersOf(host))?.kind === kind,
       run: (ctx) => {
         ctx.host?.closeMenu();
         void ctx.scena.commands.execute('ahp.openProfile', { host });
       },
-    })),
+    }))),
     // Left out in an embedder, which holds the token.
     ...(embedded ? [] : [scena.commands.register({
       id: 'ahp.manage.signOut',

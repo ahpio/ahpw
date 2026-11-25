@@ -15,13 +15,13 @@ interface Options {
   t: UseI18nResult['t'];
 }
 
-/** A limit's words and its meter; a meter only where the measure is counted. */
-export function LimitLine({ figure, locale = getLocale() }: { figure: LimitFigure; locale?: string }): ReactElement {
+/** A limit's words and its meter; a meter only where the measure is counted, and with `hideEmpty` only once some is used. */
+export function LimitLine({ figure, locale = getLocale(), hideEmpty = false }: { figure: LimitFigure; locale?: string; hideEmpty?: boolean }): ReactElement {
   const words = limitWords(figure, locale);
   return (
     <>
       <span>{limitLine(figure)}</span>
-      {figure.counted ? (
+      {figure.counted && (!hideEmpty || words.fraction > 0 || words.full) ? (
         <Progress value={words.fraction * 100} max={100} color={words.full ? 'red' : 'blue'} height={4} style={{ marginTop: 4 }} />
       ) : null}
     </>

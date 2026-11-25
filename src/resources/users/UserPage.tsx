@@ -3,6 +3,7 @@ import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Button, Text } from '@softov/scena/ui';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
+import { mayDo, useOwnGrants } from '../../bridges/own-grants.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import {
   BUILT_IN_ROLES, PEOPLE, peopleReducer, personUri, putPerson, servesPeople, userBody, userFields, writesPeople,
@@ -15,8 +16,7 @@ import { isRecordId } from './form.js';
 import { personTab } from './state.js';
 import { MembershipList } from './MembershipList.js';
 import { RolePills } from './RolePills.js';
-import { MintForm } from '../profile/MintForm.js';
-import { TokenList } from '../profile/TokenList.js';
+import { KeysOf } from '../profile/Keys.js';
 import { servesTokens } from '../../bridges/tokens.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
@@ -41,13 +41,10 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
   const roles = useChannel<PeopleState<Role>>(host, servesPeople(offers, 'roles') ? PEOPLE.roles.channel : undefined, rolesReducer);
   const teams = useChannel<PeopleState<Named>>(host, servesPeople(offers, 'teams') ? PEOPLE.teams.channel : undefined, teamsReducer);
   const projects = useChannel<PeopleState<Named>>(host, servesPeople(offers, 'projects') ? PEOPLE.projects.channel : undefined, projectsReducer);
+  const grants = useOwnGrants(host, offers);
   const [draft, setDraft] = useState<(UserFields & { id: string }) | null>(null);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
-  // Changed by a mint in the Keys section, so its list reads again.
-  const [keyReads, setKeyReads] = useState(0);
-  // The host refuses a reader without user:write the list and the mint alike; then only its note shows.
-  const [keysRefused, setKeysRefused] = useState(false);
 
   if (users.error !== null) return <PageAlert tone="danger" title={t('users/notices/none')} message={users.error} />;
   if (users.state === undefined) return <PageSpinner label={t('users/notices/reading')} />;
@@ -57,7 +54,8 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
   const start = { id: id ?? '', ...userFields(record) };
   const shown = draft ?? start;
   const set = (change: Partial<UserFields & { id: string }>): void => setDraft((held) => ({ ...(held ?? start), ...change }));
-  const writes = writesPeople(offers, 'users');
+  // What the host refuses this reader is not drawn.
+  const writes = writesPeople(offers, 'users') && mayDo(grants, 'user:put');
   const dirty = draft !== null && JSON.stringify(draft) !== JSON.stringify(start);
   const roleIds = [...new Set([...(roles.state?.records.map((one) => one.id) ?? []), ...Object.keys(BUILT_IN_ROLES), ...shown.roles])].sort();
   const ready = writes && !busy && (fresh ? isRecordId(shown.id) : dirty);
@@ -99,7 +97,7 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
   return (
     <div className="web-page web-form">
       <PageTitle emoji={EMOJIcon.users} initials={fresh ? undefined : id} title={fresh ? t('users/commands/newUser') : id} uri={fresh ? undefined : personUri(offers, 'users', id)} />
-      {writes ? null : <p className="web-note">{t('users/notices/readOnly')}</p>}
+      {writes ? null : <p className="web-note">{t(writesPeople(offers, 'users') ? 'users/notices/noPermission' : 'users/notices/readOnly')}</p>}
 
       {fresh ? (
         <Field label={t('users/user/id')} hint={t('users/user/idHint')}>
@@ -144,15 +142,14 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
       ) : null}
 
       {/* After the actions: a key is made or revoked at once, not on Save. Their own keys are the person's to manage, as on their profile. */}
-      {fresh || !writes || !servesTokens(offers) ? null : section(EMOJIcon.keys, t('users/user/keys'), (
+      {fresh || !(self || mayDo(grants, 'user:write')) || !servesTokens(offers) ? null : section(EMOJIcon.keys, t('users/user/keys'), (
         <div className="web-profile__keys">
           <span className="web-input__hint">{t('users/user/keysHint', { id })}</span>
-          {keysRefused ? null : <MintForm host={host} {...(self ? {} : { user: id })} grants={record?.grants ?? []} onMinted={() => setKeyReads((one) => one + 1)} />}
-          <TokenList host={host} {...(self ? {} : { user: id })} reads={keyReads} onRefused={setKeysRefused} />
+          <KeysOf host={host} {...(self ? {} : { user: id })} grants={record?.grants ?? []} />
         </div>
       ))}
 
-      {fresh || !writes ? null : <DangerZone label={t('users/actions/delete')} onClick={() => void scena.commands.execute('ahp.deleteUser', { host, id })} />}
+      {fresh || !writesPeople(offers, 'users') || !mayDo(grants, 'user:delete') ? null : <DangerZone label={t('users/actions/delete')} onClick={() => void scena.commands.execute('ahp.deleteUser', { host, id })} />}
     </div>
   );
 }

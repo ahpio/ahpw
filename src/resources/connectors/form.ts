@@ -9,7 +9,6 @@
 import type { EnumOption, JsonSchemaObject } from '@softov/scena/ui';
 import { isSecret, isSecretRef, type AdapterRow, type Capability, type ConnectorOwner, type SignInRow } from '../../bridges/connectors.js';
 import { EVERY, grantParts } from '../../bridges/grants.js';
-import type { ListedUser } from '../../bridges/people.js';
 import { membershipParts } from '../users/memberships.js';
 
 type Bag = Record<string, unknown>;
@@ -173,6 +172,12 @@ export const holds = (grants: readonly string[], grant: string): boolean => {
   return [grant, `${EVERY}:${EVERY}`, `${EVERY}:${operation}`, `${subject}:${EVERY}`].some((one) => grants.includes(one));
 };
 
+/** What a person may make and which teams they are on; `null` grants hold nothing back. */
+export interface OwnerRights {
+  grants?: readonly string[] | null | undefined;
+  memberships?: readonly string[] | undefined;
+}
+
 /**
  * Whose a connector may be, by ahpd's owner rule. Every owner takes
  * `connector:put`; then the person's own, each team they are on, and the
@@ -181,19 +186,19 @@ export const holds = (grants: readonly string[], grant: string): boolean => {
  * record and, as ahpd lets it, may make the host's, any user's and any team's. `current` is kept among them, so a
  * connector made by someone else still shows whose it is.
  */
-export function ownerChoices(me: ConnectorOwner | undefined, user: ListedUser | undefined, words: OwnerWords, current?: ConnectorOwner, everyone?: Everyone, subject: 'connector' | 'agent' = 'connector'): EnumOption[] {
-  const grants = user?.grants ?? [];
+export function ownerChoices(me: ConnectorOwner | undefined, user: OwnerRights | undefined, words: OwnerWords, current?: ConnectorOwner, everyone?: Everyone, subject: 'connector' | 'agent' = 'connector'): EnumOption[] {
+  const may = (grant: string): boolean => user?.grants === null || holds(user?.grants ?? [], grant);
   const choices: EnumOption[] = [];
   if (me === undefined) {
     choices.push({ value: 'host', label: words.host });
     for (const id of [...(everyone?.users ?? [])].sort()) choices.push({ value: `user:${id}`, label: words.user(id) });
     for (const team of [...(everyone?.teams ?? [])].sort()) choices.push({ value: `team:${team}`, label: words.team(team) });
   }
-  else if (holds(grants, `${subject}:put`)) {
+  else if (may(`${subject}:put`)) {
     choices.push({ value: me, label: words.me });
     const teams = [...new Set((user?.memberships ?? []).map((one) => membershipParts(one).team))].sort();
     for (const team of teams) choices.push({ value: `team:${team}`, label: words.team(team) });
-    if (holds(grants, `${subject}:host`)) choices.push({ value: 'host', label: words.host });
+    if (may(`${subject}:host`)) choices.push({ value: 'host', label: words.host });
   }
   if (current !== undefined && !choices.some((one) => one.value === current)) {
     choices.push({ value: current, label: current.startsWith('team:') ? words.team(current.slice('team:'.length)) : current === 'host' ? words.host : words.user(current.slice('user:'.length)) });
