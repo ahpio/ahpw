@@ -4,7 +4,8 @@ import { elapsed } from '../../bridges/words.js';
 import { hostSpan, stepDone, stepFailed, stepWaits, summaryPieces, type Group, type Doing, type Step } from './activity-parts.js';
 import { Reasoning, ToolCall, type Send } from './Parts.js';
 import { EMOJIcon } from '../emojis.js';
-import { useSessionHost } from './workspace.js';
+import { useAsks } from '../agent-tools/asks.js';
+import { useChatUri, useSessionHost } from './workspace.js';
 
 /**
  * When this page first saw each step or run running, and first saw it done,
@@ -30,11 +31,11 @@ function spanOf(key: string, now: number): number | undefined {
 }
 
 /** What the run is doing now, from its running step. */
-function doingOf(host: string, step: Step, now: number): Doing {
+function doingOf(host: string, step: Step, waits: boolean, now: number): Doing {
   if (step.kind === 'reasoning') return { what: 'thinking' };
   const name = step.call.displayName || step.call.toolName;
   const long = spanOf(slot(host, step.key), now);
-  return { what: stepWaits(step) ? 'waiting' : 'working', name, ...(long === undefined ? {} : { for: long }) };
+  return { what: waits ? 'waiting' : 'working', name, ...(long === undefined ? {} : { for: long }) };
 }
 
 /**
@@ -64,7 +65,9 @@ export function Activity({ group, send, turnId, hits, opened = false }: { group:
   }, [running?.key]);
 
   // A run holding a call that waits on the person stays open, so its buttons show.
-  const waits = group.live && group.steps.some(stepWaits);
+  const asks = useAsks(host, useChatUri());
+  const waitsOn = (step: Step): boolean => stepWaits(step) || (step.kind === 'tool' && asks.has(step.call.toolCallId));
+  const waits = group.live && group.steps.some(waitsOn);
   const marked = hits !== undefined && group.steps.some((step) => hits.has(step.index));
   const shown = waits || (open ?? (opened || marked));
 
@@ -78,7 +81,7 @@ export function Activity({ group, send, turnId, hits, opened = false }: { group:
     done: count,
     failed: group.steps.filter(stepFailed).length,
     ...(took === undefined ? {} : { took }),
-    ...(running === undefined ? {} : { doing: doingOf(host, running, now) }),
+    ...(running === undefined ? {} : { doing: doingOf(host, running, waitsOn(running), now) }),
   }, elapsed);
 
   return (

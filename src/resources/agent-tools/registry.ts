@@ -1,5 +1,6 @@
 import type { BindingPath, Disposable, Scena } from '@softov/scena/types';
-import { translate } from '@softov/scena';
+import { combineDisposables, translate } from '@softov/scena';
+import { askAt } from './asks.js';
 import { chatChoice, type ChatChoice } from '../sessions/view-settings.js';
 import type { UiKey, UiSetting } from '../../shell/ui-settings/settings.js';
 import type { InputSchema } from './check.js';
@@ -16,9 +17,12 @@ export interface ToolMark {
   input: () => InputSchema;
 }
 
-/** What a call to a marked command does: nothing, run with a toast, or run. */
-export const MODES = ['off', 'notify', 'run'] as const;
+/** What a call to a marked command does: nothing, wait for a person, run with a toast, or run. */
+export const MODES = ['off', 'ask', 'notify', 'run'] as const;
 export type Mode = (typeof MODES)[number];
+
+/** The command that opens a call waiting for a person. */
+export const SHOW_ASK = 'ahp.agentTools.showAsk';
 
 const PREFIX = 'ahpw.agentTools.';
 
@@ -59,7 +63,7 @@ export function watchModes(scena: Scena, changed: () => void): Disposable {
   return { dispose: () => { for (const one of watches) one.dispose(); } };
 }
 
-/** Brings a mode changed in another window of this browser into this one. */
+/** Brings a mode changed in another window of this browser into this one, and registers the command that opens a waiting call. */
 export function registerAgentTools(scena: Scena): Disposable {
   const heard = (event: StorageEvent): void => {
     if (event.key === null) {
@@ -71,7 +75,18 @@ export function registerAgentTools(scena: Scena): Disposable {
     if (one !== undefined) scena.store.set(one.choice.path, event.newValue ?? one.choice.usual);
   };
   window.addEventListener('storage', heard);
-  return { dispose: () => window.removeEventListener('storage', heard) };
+  return combineDisposables(
+    { dispose: () => window.removeEventListener('storage', heard) },
+    scena.commands.register({
+      id: SHOW_ASK,
+      title: SHOW_ASK,
+      run: async (_ctx, args) => {
+        const { host, resource, key } = args as { host: string; resource: string; key: string };
+        await scena.commands.execute('ahp.openSession', { host, resource });
+        askAt(key)?.show();
+      },
+    }),
+  );
 }
 
 /** A command's title, in the page's language. */

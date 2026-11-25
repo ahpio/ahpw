@@ -35,7 +35,7 @@ serveAsTool({
   id: 'ahp.openFile',
   order: 3,
   text: 'Open a file in a tab.',
-  input: () => ({ type: 'object', properties: { uri: { type: 'string', description: 'File URI' }, line: { type: 'integer' }, end: { type: 'integer' }, host: { type: 'string', description: 'Host id; this session\'s by default' } }, required: ['uri'] }),
+  input: () => ({ type: 'object', properties: { uri: { type: 'string', description: 'File URI' }, line: { type: 'integer', description: 'First line to show, from 1' }, end: { type: 'integer', description: 'Last line of the range to select' }, host: { type: 'string', description: 'Host id; this session\'s by default' } }, required: ['uri'] }),
 });
 serveAsTool({
   id: 'ahp.openDiff',

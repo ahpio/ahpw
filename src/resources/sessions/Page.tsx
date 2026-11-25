@@ -411,7 +411,11 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const usage = useMemo(() => sessionUsage(sessionMeta, turnMeta), [sessionMeta, turnMeta]);
 
   const turns = chat.state?.turns.length ?? 0;
-  useAgentTools(host, resource, session.state, summary === undefined || summary.title === '' ? t('sessions/untitled') : summary.title);
+  useAgentTools(host, resource, session.state, summary === undefined || summary.title === '' ? t('sessions/untitled') : summary.title, {
+    chat: chatUri,
+    drawn: () => scroller.current?.checkVisibility({ visibilityProperty: true }) === true,
+    show: setPicked,
+  });
   const open = useOpenQuestions(host, session.state?.inputNeeded, chatUri, chat.state?.activeTurn);
   // Grows with every delta, so the view follows text as it streams, not only new parts.
   const streamed = (chat.state?.activeTurn?.responseParts ?? []).reduce((total, part) => total + 1 + ('content' in part && typeof part.content === 'string' ? part.content.length : 0), 0);

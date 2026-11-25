@@ -1,7 +1,7 @@
 ---
 title: An ahpw tool call asks in the chat before it runs
 domain: sessions
-status: planned
+status: built
 priority: medium
 created: 2026-11-23
 revalidated: 2026-11-23
@@ -52,6 +52,8 @@ runner (plan 1358) -> mode ask -> pending ask for the call -> Allow and Deny on 
 | The chat shows Allow and Deny at the call, as a host confirmation does | Softov, 2026-11-23, "In the chat, at the call" | 01 |
 | A toast says so when the chat is not in view, and opens the chat | Softov, 2026-11-23, "In the chat, at the call" | 01 |
 | ahpw keeps no timer; ahpd ends the call after 10 minutes, and ahpw removes the prompt | Softov, 2026-11-23, brief | 01 |
+| Always allow on the call sets that command to notify in this browser | Softov, 2026-11-25: "Notify" | 01 |
+| `ahp.openFile` describes `line` and `end` to the agent; no columns | Softov, 2026-11-25: "Describe line and end" | 01 |
 | Deny answers with a failed result that says the person denied it | (defaulted: the agent learns why the call did not run) | 01 |
 | The window where the person answers runs the call: the click gives it focus, and focus takes the lock | (defaulted: the lock rule of plan 1358) | 01 |
 
@@ -67,7 +69,7 @@ runner (plan 1358) -> mode ask -> pending ask for the call -> Allow and Deny on 
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - The call asks before it runs](task-01-the-call-asks-before-it-runs.md) | todo | - |
+| [01 - The call asks before it runs](task-01-the-call-asks-before-it-runs.md) | done | - |
 
 ## Risks and tradeoffs
 
@@ -75,14 +77,14 @@ runner (plan 1358) -> mode ask -> pending ask for the call -> Allow and Deny on 
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** build `plans/sessions/20261123-1358-ahpw-serves-its-commands-as-tools` first, then [task-01-the-call-asks-before-it-runs.md](task-01-the-call-asks-before-it-runs.md).
+- **Done so far:** task 01, 2026-11-24, as [implemented.md](implemented.md) says.
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** the call is `running` on the host while it waits; do not show `Confirm`, which sends `chat/toolCallConfirmed`.
 
 ## Final verification checklist
 
-- [ ] A command set to ask runs only after Allow.
-- [ ] Deny gives the agent a failed result that says the person denied it.
-- [ ] With the chat out of view, a toast opens it.
-- [ ] `pnpm typecheck` and `pnpm test` pass.
+- [x] A command set to ask runs only after Allow.
+- [x] Deny gives the agent a failed result that says the person denied it.
+- [x] With the chat out of view, a toast opens it.
+- [x] `pnpm typecheck` and `pnpm test` pass.
