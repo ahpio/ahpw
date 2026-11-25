@@ -24,6 +24,7 @@ import { agentOff } from './agent-off.js';
 import { elapsed } from '../../bridges/words.js';
 import { Part, type Send } from './Parts.js';
 import { RawView } from './RawView.js';
+import { useAgentTools } from '../agent-tools/use-agent-tools.js';
 import { sessionOfChannel } from '../log/wire.js';
 import { subagentCalls } from './header.js';
 import { rawOf } from './raw.js';
@@ -410,6 +411,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const usage = useMemo(() => sessionUsage(sessionMeta, turnMeta), [sessionMeta, turnMeta]);
 
   const turns = chat.state?.turns.length ?? 0;
+  useAgentTools(host, resource, session.state, summary === undefined || summary.title === '' ? t('sessions/untitled') : summary.title);
   const open = useOpenQuestions(host, session.state?.inputNeeded, chatUri, chat.state?.activeTurn);
   // Grows with every delta, so the view follows text as it streams, not only new parts.
   const streamed = (chat.state?.activeTurn?.responseParts ?? []).reduce((total, part) => total + 1 + ('content' in part && typeof part.content === 'string' ? part.content.length : 0), 0);

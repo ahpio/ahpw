@@ -1,5 +1,6 @@
 import { translate } from '@softov/scena';
 import type { JsonSchemaObject, SchemaFormGroup, SchemaFormSection } from '@softov/scena/ui';
+import { toolSettings } from '../agent-tools/registry.js';
 import { DOCK_KEYS } from '../../shell/dock/settings.js';
 
 /** A section as this file names it: its id, which is also its title's key, and its keys. */
@@ -73,5 +74,5 @@ export function settingsGroups(schema: JsonSchemaObject): SchemaFormGroup[] {
 
 /** The Interface tab's sections: one group, the browser's own settings. */
 export function interfaceGroups(): SchemaFormGroup[] {
-  return [{ id: 'ui', title: translate('host/settings/groups/ui'), sections: UI.map(uiSection) }];
+  return [{ id: 'ui', title: translate('host/settings/groups/ui'), sections: [...UI, ['agentTools', toolSettings().map((one) => one.key)] as Named].map(uiSection) }];
 }

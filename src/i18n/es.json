@@ -2289,6 +2289,16 @@
           "global": "Desactivar en todas partes"
         }
       }
+    },
+    "agentTools": {
+      "modes": {
+        "off": "Desactivado",
+        "notify": "Avisar",
+        "run": "Ejecutar"
+      },
+      "ran": "El agente ejecutó: {command}",
+      "browser": "Este navegador",
+      "on": "{on} de {all} activados"
     }
   },
   "host": {
@@ -2425,7 +2435,8 @@
           "bot": "Bot",
           "canvas": "Lienzo",
           "agents": "Agentes",
-          "actions": "Acciones"
+          "actions": "Acciones",
+          "agentTools": "Herramientas del agente"
         },
         "theme": {
           "title": "Tema",

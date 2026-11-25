@@ -11,6 +11,7 @@ import { TERMINAL_ICON } from './rows.js';
 import { clientClaim, newTerminalUri } from './terminal.js';
 import { EMOJIcon } from '../emojis.js';
 import { folderName } from '../../bridges/words.js';
+import { serveAsTool } from '../agent-tools/registry.js';
 
 /** Arguments of the terminal commands; without one, the panel's active tab. */
 export interface TerminalArgs {
@@ -18,6 +19,19 @@ export interface TerminalArgs {
   /** The terminal's host; the window's host by default. */
   host?: string;
 }
+
+serveAsTool({
+  id: 'ahp.openTerminal',
+  order: 5,
+  text: 'Open a terminal.',
+  input: () => ({ type: 'object', properties: { uri: { type: 'string', description: 'Terminal URI' }, host: { type: 'string', description: 'Host id; this session\'s by default' } }, required: ['uri'] }),
+});
+serveAsTool({
+  id: 'ahp.newTerminal',
+  order: 6,
+  text: 'Start a terminal.',
+  input: () => ({ type: 'object', properties: { cwd: { type: 'string', description: 'Folder URI' }, host: { type: 'string', description: 'Host id; this session\'s by default' } } }),
+});
 
 /** A terminal tab: its host and the terminal. */
 interface TerminalTab {

@@ -2289,6 +2289,16 @@
           "global": "Desligar em todo lugar"
         }
       }
+    },
+    "agentTools": {
+      "modes": {
+        "off": "Desligado",
+        "notify": "Avisar",
+        "run": "Executar"
+      },
+      "ran": "O agente executou: {command}",
+      "browser": "Este navegador",
+      "on": "{on} de {all} ligados"
     }
   },
   "host": {
@@ -2425,7 +2435,8 @@
           "bot": "Bot",
           "canvas": "Canvas",
           "agents": "Agentes",
-          "actions": "Ações"
+          "actions": "Ações",
+          "agentTools": "Ferramentas do agente"
         },
         "theme": {
           "title": "Tema",

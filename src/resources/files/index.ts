@@ -4,6 +4,7 @@ import { FILE_KIND, fileTabKey, fileTabOf, MARKDOWN_VIEWER, openAsItems, TEXT_VI
 import { EMOJIcon } from '../emojis.js';
 import { AUDIO, IMAGES, selectorOf, VIDEOS } from './icons.js';
 import { windowHost } from '../../bridges/data.js';
+import { serveAsTool } from '../agent-tools/registry.js';
 
 /** Arguments of `ahp.openFile`. */
 export interface OpenFileArgs {
@@ -29,6 +30,19 @@ export interface OpenDiffArgs {
   /** Whether the changeset takes review marks. */
   review?: boolean;
 }
+
+serveAsTool({
+  id: 'ahp.openFile',
+  order: 3,
+  text: 'Open a file in a tab.',
+  input: () => ({ type: 'object', properties: { uri: { type: 'string', description: 'File URI' }, line: { type: 'integer' }, end: { type: 'integer' }, host: { type: 'string', description: 'Host id; this session\'s by default' } }, required: ['uri'] }),
+});
+serveAsTool({
+  id: 'ahp.openDiff',
+  order: 4,
+  text: 'Open a diff of a file.',
+  input: () => ({ type: 'object', properties: { file: { type: 'string', description: 'File URI' }, before: { type: 'string', description: 'URI of the old content' }, after: { type: 'string', description: 'URI of the new content' }, host: { type: 'string', description: 'Host id; this session\'s by default' } }, required: ['file'] }),
+});
 
 /** The command slot of a tab strip's own buttons. */
 const STRIP_SLOT = 'surface/title';
