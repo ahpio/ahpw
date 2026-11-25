@@ -1,6 +1,6 @@
 ---
 title: A connector's URL starts with the root the host says it is reached at
-status: blocked
+status: dropped
 depends: [task-05-kinds-for-a-maker.md]
 layer: "ahpw connectors"
 refs:
