@@ -1,6 +1,6 @@
 ---
 title: The call asks before it runs
-status: todo
+status: done
 depends: []
 layer: "resources"
 refs:
@@ -15,6 +15,10 @@ A command set to ask waits for Allow or Deny on its call in the chat before it r
 ## Files
 
 - `UPDATE: src/resources/agent-tools/registry.ts` - ask as a fourth mode.
+- `CREATE: src/resources/agent-tools/asks.ts` - the calls of this window that wait for a person.
+- `UPDATE: src/resources/agent-tools/use-agent-tools.ts` - what the runner reads from the session page.
+- `UPDATE: src/resources/sessions/Page.tsx` - gives the chat shown and whether the page is drawn.
+- `UPDATE: src/resources/sessions/Activity.tsx` - a run with a waiting call stays open.
 - `UPDATE: src/resources/agent-tools/runner.ts` - a pending ask per call, answered by Allow or Deny.
 - `CREATE: src/resources/sessions/ClientAsk.tsx` - Allow and Deny on a running call that this client owns and that waits.
 - `UPDATE: src/resources/sessions/Parts.tsx:201` - shows `ClientAsk` on such a call.

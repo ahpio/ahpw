@@ -2293,10 +2293,16 @@
     "agentTools": {
       "modes": {
         "off": "Desligado",
+        "ask": "Perguntar",
         "notify": "Avisar",
         "run": "Executar"
       },
       "ran": "O agente executou: {command}",
+      "asks": "O agente quer executar: {command}",
+      "allow": "Permitir",
+      "alwaysAllow": "Permitir sempre",
+      "alwaysAllowHint": "Executa este comando sem perguntar, neste navegador.",
+      "deny": "Negar",
       "browser": "Este navegador",
       "on": "{on} de {all} ligados"
     }

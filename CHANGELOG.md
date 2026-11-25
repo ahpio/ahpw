@@ -7,7 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
-- **An agent can run ahpw's commands.** It lists them and runs the ones set to Notify or Run, in the Tools panel or the Interface settings. Every command starts Off.
+- **An agent can run ahpw's commands.** It lists them and runs the ones set to Ask, Notify or Run, in the Tools panel or the Interface settings. Ask shows Allow, Always allow and Deny on the call in the chat. Every command starts Off.
 
 ### Changed
 

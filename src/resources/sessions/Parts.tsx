@@ -14,6 +14,8 @@ import { useChatUri, useSessionHost, WorkspaceContext } from './workspace.js';
 import { hostBridge } from '../../bridges/data.js';
 import { failed } from '../../shell/notify/index.js';
 import { CopyButton } from '../../shell/controls/CopyButton.js';
+import { useAsks } from '../agent-tools/asks.js';
+import { ClientAsk } from './ClientAsk.js';
 import { Confirm } from './Confirm.js';
 import { InputRequest } from './Question.js';
 import { durationOf, fileOf, inputText, kindOf, lineOf, MOVE_CALL, movableOf, outcomeOf, outputOf, segmentsOf, type Outcome, type Output, type ToolKind } from './tool.js';
@@ -141,10 +143,11 @@ export function OutputView({ out }: { out: Output }): ReactElement {
 /** One tool call: its line, opened to what went in and came out. */
 export function ToolCall({ call, send, live, turnId }: { call: ToolCallState; send: Send; live: boolean; turnId: string }): ReactElement {
   const outcome = outcomeOf(call);
-  const waiting = live && (outcome === 'approval' || outcome === 'review' || outcome === 'sign-in');
   const scena = useScena();
   const host = useSessionHost();
   const chat = useChatUri();
+  const ask = useAsks(host, chat).get(call.toolCallId);
+  const waiting = live && (outcome === 'approval' || outcome === 'review' || outcome === 'sign-in' || ask !== undefined);
   const [asking, setAsking] = useState(false);
   const [moved, setMoved] = useState(false);
   // The host keeps the flag until the call completes, so a move the host answered is hidden here.
@@ -171,9 +174,9 @@ export function ToolCall({ call, send, live, turnId }: { call: ToolCallState; se
   const risk = call.status === PENDING_CONFIRMATION ? call.riskAssessment : undefined;
   const file = fileOf(call);
   const { t } = useI18n();
-  const mark = t(MARK[outcome].label);
+  const mark = t(MARK[ask === undefined ? outcome : 'approval'].label);
   return (
-    <div className="web-tool" data-outcome={outcome}>
+    <div className="web-tool" data-outcome={ask === undefined ? outcome : 'approval'}>
       <button type="button" className="web-tool__row" aria-expanded={shown} title={mark} onClick={() => setOpen(!open)}>
         <span className="web-tool__mark" aria-label={mark}>{KIND_ICON[kindOf(call)]}</span>
         <ToolLine line={lineOf(call)} file={file} />
@@ -198,6 +201,7 @@ export function ToolCall({ call, send, live, turnId }: { call: ToolCallState; se
               <Button label={t('sessions/tool/runInBackground')} disabled={asking} onClick={() => void moveOn()} />
             </div>
           ) : null}
+          {live && ask !== undefined ? <ClientAsk ask={ask} /> : null}
           {live && call.status === PENDING_CONFIRMATION ? <Confirm call={call} send={send} turnId={turnId} /> : null}
           {live && call.status === PENDING_RESULT_CONFIRMATION ? (
             <div className="web-tool__actions">

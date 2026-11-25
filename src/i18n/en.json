@@ -2293,10 +2293,16 @@
     "agentTools": {
       "modes": {
         "off": "Off",
+        "ask": "Ask",
         "notify": "Notify",
         "run": "Run"
       },
       "ran": "Agent ran: {command}",
+      "asks": "Agent wants to run: {command}",
+      "allow": "Allow",
+      "alwaysAllow": "Always allow",
+      "alwaysAllowHint": "Runs this command without asking, in this browser.",
+      "deny": "Deny",
       "browser": "This browser",
       "on": "{on} of {all} on"
     }
