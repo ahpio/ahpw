@@ -53,7 +53,7 @@ What exists today: [00-plugins.md](plugins/00-plugins.md).
 | [01 - Computers and bots](plugins/01-computers-and-bots/plan.md) | built | - |
 | [02 - Bot chat and bood life](plugins/02-bot-chat-and-bood-life/plan.md) | built | - |
 | [03 - The host's plugins, in an explorer and a page](plugins/03-plugins-explorer-and-page/plan.md) | built | - |
-| [04 - Connectors in an explorer, a form and a page](plugins/04-connectors/plan.md) | active | task 07, waiting for ahpd's public root |
+| [04 - Connectors in an explorer, a form and a page](plugins/04-connectors/plan.md) | built | what waits is in its [deferred.md](plugins/04-connectors/deferred.md) |
 | [05 - A plugin's and an adapter's own icon](plugins/05-plugin-and-adapter-icons/plan.md) | built | - |
 | [06 - Live plugin commands](plugins/06-live-plugin-commands/plan.md) | built | - |
 | [07 - A working connector shows as ready](plugins/07-a-working-connector-is-ready/plan.md) | active | task 01 implemented; live check against ahpd plugin 62 |
