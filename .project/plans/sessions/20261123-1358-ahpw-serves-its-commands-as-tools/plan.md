@@ -1,7 +1,7 @@
 ---
 title: ahpw serves its commands as tools for the agent
 domain: sessions
-status: active
+status: built
 priority: medium
 created: 2026-11-23
 revalidated: 2026-11-23
@@ -108,15 +108,15 @@ agent calls runCommand -> ahpd: inputNeeded toolClientExecution for our client i
 ## Resume state
 
 - **Done so far:** tasks 01 to 04, 2026-11-24, as [implemented.md](implemented.md) says.
-- **Next action:** Softov's review.
+- **Next action:** none.
 - **Open questions:** none.
 - **Watch out for:** windows share one client id, so every window with the session open sees a call. Only the lock holder runs it.
 
 ## Final verification checklist
 
-- [ ] With every mode off, a session shows no ahpw client and no ahpw tools.
-- [ ] A command set to notify is in `listCommands`, runs from `runCommand`, and shows a toast.
-- [ ] A call with a wrong argument gets an error result that names the field, and runs nothing.
-- [ ] With two windows on one session, only the focused one runs a call.
-- [ ] The Tools panel and the Interface tab show the same mode for each command.
-- [ ] `pnpm typecheck` and `pnpm test` pass.
+- [x] With every mode off, a session shows no ahpw client and no ahpw tools.
+- [x] A command set to notify is in `listCommands`, runs from `runCommand`, and shows a toast.
+- [x] A call with a wrong argument gets an error result that names the field, and runs nothing.
+- [x] With two windows on one session, only the focused one runs a call.
+- [x] The Tools panel and the Interface tab show the same mode for each command.
+- [x] `pnpm typecheck` and `pnpm test` pass.
