@@ -6,12 +6,13 @@ import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { HOST_FILTER_ACTION, shownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { channelScheme, PEOPLE, removePerson, servesPeople } from '../../bridges/people.js';
+import { mayPut, ownGrantsOf, trackMayPut } from '../../bridges/own-grants.js';
 import { trackServed } from '../../bridges/served.js';
 import { confirm, failed } from '../../shell/notify/index.js';
 import { readLastHost, startHost } from '../sessions/last-host.js';
 import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
-import { ACTIVE_PERSON, personTab, USERS_SERVED } from './state.js';
+import { ACTIVE_PERSON, personTab, MAY_ADD_USER, MAY_ADD_ROLE, USERS_SERVED } from './state.js';
 
 /** The display size class the modus backend publishes. */
 const MODUS_CLASS = '$/modus/class' as BindingPath;
@@ -43,7 +44,7 @@ export function registerUsers(scena: Scena): Disposable {
 
   const opener = (kind: Kind) => (_ctx: unknown, args: unknown): void => {
     const target = (args ?? {}) as PersonArgs;
-    const host = target.host ?? startHost(servingHosts(), readLastHost());
+    const host = target.host ?? startHost(servingHosts().filter((one) => target.id !== undefined || mayPut(offersOf(one), ownGrantsOf(scena, one), kind)), readLastHost());
     if (host === undefined) return;
     if (target.id !== undefined) scena.store.set(ACTIVE_PERSON, { host, domain: kind, id: target.id });
     const title = target.id ?? bound(kind === 'users' ? 'users/commands/newUser' : 'users/commands/newRole');
@@ -68,6 +69,8 @@ export function registerUsers(scena: Scena): Disposable {
 
   return combineDisposables(
     trackServed(scena, channelScheme('users'), USERS_SERVED),
+    trackMayPut(scena, 'users', MAY_ADD_USER),
+    trackMayPut(scena, 'roles', MAY_ADD_ROLE),
     scena.components.register({
       component: 'UsersExplorer',
       category: 'page',
@@ -75,7 +78,7 @@ export function registerUsers(scena: Scena): Disposable {
       props: {
         title: { t: 'users/explorer/title' },
         actions: [
-          { command: 'users.new', menu: NEW_SLOT, icon: '+', label: { t: 'users/commands/new' } },
+          { command: 'users.new', menu: NEW_SLOT, icon: '+', label: { t: 'users/commands/new' }, when: `${MAY_ADD_USER} == true || ${MAY_ADD_ROLE} == true` },
           { command: 'users.reload', icon: EMOJIcon.reload, label: { t: 'common/reload' } },
           HOST_FILTER_ACTION,
         ],
@@ -93,15 +96,15 @@ export function registerUsers(scena: Scena): Disposable {
       },
     }),
     // The + menu's two rows; no category, so the menu has no heading over them.
-    scena.commands.register({ id: 'users.new.user', title: () => translate('users/commands/newUser'), slots: [NEW_SLOT], run: (ctx) => ctx.commands.execute('ahp.newUser') }),
-    scena.commands.register({ id: 'users.new.role', title: () => translate('users/commands/newRole'), slots: [NEW_SLOT], run: (ctx) => ctx.commands.execute('ahp.newRole') }),
+    scena.commands.register({ id: 'users.new.user', title: () => translate('users/commands/newUser'), slots: [NEW_SLOT], when: () => scena.store.get<boolean>(MAY_ADD_USER) === true, run: (ctx) => ctx.commands.execute('ahp.newUser') }),
+    scena.commands.register({ id: 'users.new.role', title: () => translate('users/commands/newRole'), slots: [NEW_SLOT], when: () => scena.store.get<boolean>(MAY_ADD_ROLE) === true, run: (ctx) => ctx.commands.execute('ahp.newRole') }),
     scena.commands.register({
       id: 'ahp.newUser',
       title: () => translate('users/commands/newUser'),
       keywords: [english('users/commands/newUser')],
       category: 'Users',
       slots: [PALETTE_SLOT],
-      when: () => scena.store.get<boolean>(USERS_SERVED) === true,
+      when: () => scena.store.get<boolean>(MAY_ADD_USER) === true,
       run: (ctx, args) => opener('users')(ctx, { host: (args as PersonArgs | undefined)?.host }),
     }),
     scena.commands.register({
@@ -110,7 +113,7 @@ export function registerUsers(scena: Scena): Disposable {
       keywords: [english('users/commands/newRole')],
       category: 'Users',
       slots: [PALETTE_SLOT],
-      when: () => scena.store.get<boolean>(USERS_SERVED) === true,
+      when: () => scena.store.get<boolean>(MAY_ADD_ROLE) === true,
       run: (ctx, args) => opener('roles')(ctx, { host: (args as PersonArgs | undefined)?.host }),
     }),
     scena.commands.register({

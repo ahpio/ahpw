@@ -6,13 +6,14 @@ import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { HOST_FILTER_ACTION, shownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { POLICIES, POLICIES_CHANNEL, POLICY_GROUPINGS, removePolicy, servesPolicies } from '../../bridges/policies.js';
+import { mayPut, ownGrantsOf, trackMayPut } from '../../bridges/own-grants.js';
 import { trackServed } from '../../bridges/served.js';
 import { registerChoice } from '../../shell/explorer/choice.js';
 import { confirm, failed } from '../../shell/notify/index.js';
 import { readLastHost, startHost } from '../sessions/last-host.js';
 import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
-import { ACTIVE_POLICY, GROUP_KEY, policyTab, POLICIES_GROUP, POLICIES_SERVED } from './state.js';
+import { ACTIVE_POLICY, GROUP_KEY, MAY_ADD_POLICY, policyTab, POLICIES_GROUP, POLICIES_SERVED } from './state.js';
 
 /** The display size class the modus backend publishes. */
 const MODUS_CLASS = '$/modus/class' as BindingPath;
@@ -37,7 +38,7 @@ export function registerPolicies(scena: Scena): Disposable {
 
   const open = (_ctx: unknown, args: unknown): void => {
     const target = (args ?? {}) as PolicyArgs;
-    const host = target.host ?? startHost(servingHosts(), readLastHost());
+    const host = target.host ?? startHost(servingHosts().filter((one) => target.id !== undefined || mayPut(offersOf(one), ownGrantsOf(scena, one), 'policies')), readLastHost());
     if (host === undefined) return;
     if (target.id !== undefined) scena.store.set(ACTIVE_POLICY, { host, id: target.id });
     // `policy`, not `id`: the page's row id, which scena's own `id` would shadow.
@@ -67,6 +68,7 @@ export function registerPolicies(scena: Scena): Disposable {
 
   return combineDisposables(
     trackServed(scena, POLICIES_CHANNEL, POLICIES_SERVED, []),
+    trackMayPut(scena, 'policies', MAY_ADD_POLICY),
     registerChoice(scena, { resource: 'policies', name: 'group', slot: GROUP_SLOT, path: POLICIES_GROUP, values: POLICY_GROUPINGS, usual: 'kind', key: GROUP_KEY }),
     scena.components.register({
       component: 'PoliciesExplorer',
@@ -75,7 +77,7 @@ export function registerPolicies(scena: Scena): Disposable {
       props: {
         title: { t: 'policies/explorer/title' },
         actions: [
-          { command: 'ahp.newPolicy', icon: '+', label: { t: 'policies/commands/new' } },
+          { command: 'ahp.newPolicy', icon: '+', label: { t: 'policies/commands/new' }, when: `${MAY_ADD_POLICY} == true` },
           { command: 'policies.reload', icon: EMOJIcon.reload, label: { t: 'common/reload' } },
           { command: 'policies.group', menu: GROUP_SLOT, icon: EMOJIcon.group, label: { t: 'policies/explorer/group' }, active: `${POLICIES_GROUP} != null` },
           HOST_FILTER_ACTION,
@@ -103,7 +105,7 @@ export function registerPolicies(scena: Scena): Disposable {
       keywords: [english('policies/commands/new')],
       category: 'Policies',
       slots: [PALETTE_SLOT],
-      when: served,
+      when: () => scena.store.get<boolean>(MAY_ADD_POLICY) === true,
       run: (ctx, args) => open(ctx, { host: (args as PolicyArgs | undefined)?.host }),
     }),
     scena.commands.register({ id: 'ahp.openPolicy', title: () => translate('policies/commands/open'), run: open }),

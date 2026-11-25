@@ -37,25 +37,30 @@ export function mayOpen(offers: Offers, me: HeldMe, scheme: string, also: readon
  * host opens to no one else: a few, as bots, open for a reader's own records.
  */
 export function trackServed(scena: Scena, scheme: Served, path: BindingPath, also?: readonly string[]): Disposable {
-  const serving = new Set<string>();
+  return trackHosts(scena, path, (offers, me) => serves(offers, scheme)
+    && (also === undefined || typeof scheme !== 'string' || offers === undefined || mayOpen(offers, me, scheme, also)));
+}
+
+/** Keeps `path` true while any host this page connects to passes the test, and false otherwise. */
+export function trackHosts(scena: Scena, path: BindingPath, test: (offers: Offers | undefined, me: HeldMe) => boolean): Disposable {
+  const passing = new Set<string>();
   const publish = (): void => {
-    const now = serving.size > 0;
+    const now = passing.size > 0;
     if (scena.store.get<boolean>(path) !== now) scena.store.set(path, now);
   };
   const watching = onEachHost(scena, (host) => {
+    const { offers, me } = ahpPaths(host);
     const check = (): void => {
-      const offers = scena.store.get<Offers>(ahpPaths(host).offers);
-      const open = also === undefined || typeof scheme !== 'string' || offers === undefined || mayOpen(offers, scena.store.get<HeldMe>(ahpPaths(host).me), scheme, also);
-      if (serves(offers, scheme) && open) serving.add(host);
-      else serving.delete(host);
+      if (test(scena.store.get<Offers>(offers), scena.store.get<HeldMe>(me))) passing.add(host);
+      else passing.delete(host);
       publish();
     };
     check();
-    const stops = [scena.store.subscribe(ahpPaths(host).offers, check), ...(also === undefined ? [] : [scena.store.subscribe(ahpPaths(host).me, check)])];
+    const stops = [offers, me].map((one) => scena.store.subscribe(one, check));
     return {
       dispose: () => {
         for (const stop of stops) stop.dispose();
-        serving.delete(host);
+        passing.delete(host);
         publish();
       },
     };

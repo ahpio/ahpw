@@ -1224,7 +1224,8 @@
     "notices": {
       "none": "Sem equipes",
       "reading": "Carregando equipes",
-      "readOnly": "Este host não permite mudanças aqui."
+      "readOnly": "Este host não permite mudanças aqui.",
+      "noPermission": "Você não tem permissão para alterar isto."
     },
     "commands": {
       "new": "Novo",
@@ -2941,7 +2942,8 @@
       "none": "Sem políticas",
       "reading": "Carregando políticas",
       "readingLimits": "Carregando limites",
-      "readOnly": "Este host não permite mudanças nas políticas por aqui."
+      "readOnly": "Este host não permite mudanças nas políticas por aqui.",
+      "noPermission": "Você não tem permissão para alterar isto."
     },
     "commands": {
       "show": "Mostrar políticas",

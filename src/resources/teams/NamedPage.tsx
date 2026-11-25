@@ -3,6 +3,7 @@ import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Button, Spinner, Text } from '@softov/scena/ui';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
+import { mayDelete, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import {
   membersOf, PEOPLE, peopleReducer, personUri, putPerson, servesPeople, userBody, userFields, writesPeople,
@@ -43,6 +44,7 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
   // A team's members are named with its projects, and a project's with the teams they reach it through.
   const other: Kind = domain === 'teams' ? 'projects' : 'teams';
   const others = useChannel<PeopleState<Named>>(host, fresh ? undefined : PEOPLE[other].channel, reducers[other]);
+  const grants = useOwnGrants(host, offers);
   const [draft, setDraft] = useState<{ id: string; title: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
@@ -55,8 +57,9 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
   const start = { id: id ?? '', title: record?.title ?? '' };
   const shown = draft ?? start;
   const set = (change: Partial<typeof start>): void => setDraft((held) => ({ ...(held ?? start), ...change }));
-  const writes = writesPeople(offers, domain);
-  const writesUsers = writesPeople(offers, 'users');
+  // What the host refuses this reader is not drawn.
+  const writes = mayPut(offers, grants, domain);
+  const writesUsers = mayPut(offers, grants, 'users');
   const dirty = draft !== null && JSON.stringify(draft) !== JSON.stringify(start);
   const ready = writes && !busy && (fresh ? isRecordId(shown.id) : dirty);
   const tab = teamTab(domain, host, id);
@@ -114,7 +117,7 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
         title={fresh ? t(domain === 'teams' ? 'teams/commands/newTeam' : 'teams/commands/newProject') : (record?.title || id)}
         uri={fresh ? undefined : personUri(offers, domain, id)}
       />
-      {writes ? null : <p className="web-note">{t('teams/notices/readOnly')}</p>}
+      {writes ? null : <p className="web-note">{t(writesPeople(offers, domain) ? 'teams/notices/noPermission' : 'teams/notices/readOnly')}</p>}
 
       {fresh ? (
         <Field label={t('teams/named/id')} hint={t(`teams/${word}/idHint`)}>
@@ -181,7 +184,7 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
         </section>
       )}
 
-      {fresh || !writes ? null : <DangerZone label={t('teams/actions/delete')} onClick={() => void scena.commands.execute(domain === 'teams' ? 'ahp.deleteTeam' : 'ahp.deleteProject', { host, id })} />}
+      {fresh || !mayDelete(offers, grants, domain) ? null : <DangerZone label={t('teams/actions/delete')} onClick={() => void scena.commands.execute(domain === 'teams' ? 'ahp.deleteTeam' : 'ahp.deleteProject', { host, id })} />}
     </div>
   );
 }

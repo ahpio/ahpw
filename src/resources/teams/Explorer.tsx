@@ -2,9 +2,12 @@ import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Spinner } from '@softov/scena/ui';
 import type { PickerAction } from '@softov/scena/types';
+import { ahpPaths } from '../../bridges/data.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
-import { refKey, refOf, useHostNames, useShownHosts } from '../../bridges/hosts.js';
+import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { channelScheme, membersOf, PEOPLE, peopleReducer, type ListedUser, type Named, type PeopleState } from '../../bridges/people.js';
+import type { Offers } from '../../bridges/offers.js';
+import { mayDelete, useOwnGrantsOnEach } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList, type Row } from '../../shell/explorer/ExplorerList.js';
@@ -26,6 +29,8 @@ export default function TeamsExplorer(): ReactElement {
   const teamHosts = useServingHosts(shown, channelScheme('teams'));
   const projectHosts = useServingHosts(shown, channelScheme('projects'));
   const userHosts = useServingHosts(shown, channelScheme('users'));
+  const offers = useEach<Offers>(shown.map((host) => ahpPaths(host).offers));
+  const grants = useOwnGrantsOnEach(shown, offers);
   const hostName = useHostNames();
   const multi = embedMode() === 'multi';
   const teams = useChannelOnEach<PeopleState<Named>>(teamHosts, PEOPLE.teams.channel, teamsReducer);
@@ -34,6 +39,11 @@ export default function TeamsExplorer(): ReactElement {
   const active = useStore<{ host: string; domain: Kind; id: string }>(ACTIVE_TEAM);
 
   const rows = useMemo<Row[]>(() => {
+    const deletes = (kind: Kind, host: string): boolean => {
+      const at = shown.indexOf(host);
+      const offered = offers[at];
+      return offered !== undefined && mayDelete(offered, grants[at] ?? null, kind);
+    };
     const usersOf = (host: string): ListedUser[] => users.states[userHosts.indexOf(host)]?.records.map((one) => one.record) ?? [];
     const row = (kind: Kind, host: string, named: Named): Row => {
       const key = rowKey(kind, host, named.id);
@@ -52,7 +62,7 @@ export default function TeamsExplorer(): ReactElement {
           .filter((bit) => bit !== undefined).join(' \u{00B7} ')],
         menu: [
           item(t('teams/actions/open'), kind === 'teams' ? 'ahp.openTeam' : 'ahp.openProject'),
-          item(t('teams/actions/delete'), kind === 'teams' ? 'ahp.deleteTeam' : 'ahp.deleteProject', { group: 'more', color: 'red' }),
+          ...(deletes(kind, host) ? [item(t('teams/actions/delete'), kind === 'teams' ? 'ahp.deleteTeam' : 'ahp.deleteProject', { group: 'more', color: 'red' })] : []),
         ],
       };
     };
@@ -62,7 +72,7 @@ export default function TeamsExplorer(): ReactElement {
       .map(({ host, named }) => row(kind, host, named));
     return [...listed('teams', teamHosts, teams.states), ...listed('projects', projectHosts, projects.states)];
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamHosts, projectHosts, userHosts, teams.states, projects.states, users.states, hostName, t]);
+  }, [shown, offers, grants, teamHosts, projectHosts, userHosts, teams.states, projects.states, users.states, hostName, t]);
 
   const error = multi ? null : teams.errors[0] ?? null;
   const read = multi ? teams.states.some((one) => one !== undefined) : teams.states[0] !== undefined;
