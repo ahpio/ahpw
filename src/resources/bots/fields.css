@@ -1,0 +1,16 @@
+/* A connector of a bot: its alias, the connector, and its remove button on one line. */
+.web-bot-connector {
+  display: flex;
+  gap: var(--oo-spacing-sm);
+  align-items: center;
+}
+
+.web-bot-connector__alias {
+  flex: 0 0 150px;
+  max-width: 150px;
+}
+
+.web-bot-connector > select {
+  flex: 1 1 auto;
+  min-width: 0;
+}

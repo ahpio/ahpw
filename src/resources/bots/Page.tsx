@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import type { AgentInfo } from '@microsoft/agent-host-protocol';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
@@ -24,6 +25,7 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
   const { state, error } = useChannel<BotsState>(host, BOTS, botsReducer);
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
   const grants = useOwnGrants(host, offers);
+  const agents = useStore<AgentInfo[]>(ahpPaths(host).agents) ?? [];
   const key = refKey(host, slug ?? '');
   const opening = useStore<string | null>(BOT_CHAT_OPENING) === key;
   const [editing, setEditing] = useState(false);
@@ -42,11 +44,13 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
   if (bot === undefined) return <PageAlert tone="warning" message={t('bots/notices/gone')} />;
   if (editing) return <BotForm host={host} slug={bot.id} onDone={() => setEditing(false)} />;
 
+  // A bot's preset is the agent it starts from, in place of its provider.
+  const agent = bot.preset ?? bot.provider;
   const facts: DetailItem[] = [
     ...(embedMode() === 'multi' ? [{ label: t('common/host'), value: <HostTag host={host} /> }] : []),
     ...(bot.labels.length === 0 ? [] : [{ label: t('bots/facts/labels'), value: bot.labels.join(', ') }]),
     { label: t('bots/facts/owner'), value: bot.owner },
-    ...(bot.harness === undefined ? [] : [{ label: t('bots/facts/agent'), value: bot.harness }]),
+    ...(agent === undefined ? [] : [{ label: t('bots/facts/agent'), value: agents.find((one) => one.provider === agent)?.displayName ?? agent }]),
     ...(bot.model === undefined ? [] : [{ label: t('bots/facts/model'), value: bot.model }]),
     ...(bot.computer === undefined ? [] : [{ label: t('bots/facts/computer'), value: bot.computer }]),
     { label: t('bots/facts/workspace'), value: <span className="web-method">{bot.workspace}</span> },

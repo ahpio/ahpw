@@ -40,6 +40,8 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 | One Agent list that writes `provider`, and a Model list. No Preset field. A change of agent clears `preset`, and a bot with a preset shows it as its agent | Softov, 2026-11-25, chose "One Agent list, plus Model" | 02 |
 | A mockup before the form | (defaulted: a redesign gets one first) | 01 |
 | The five states of the mockup are the form | Softov, 2026-11-25: "mockup is right, plan it and build the form" | 02 |
+| A new bot shows Template on every host, under "Can use" | Softov, 2026-11-25, chose "Show it on every new bot" | 02 |
+| "Runs on" and "Can use" come after Instructions | Softov, 2026-11-25, chose "After Instructions, as built" | 02 |
 | A field shows only where the host serves its list | (defaulted: a client draws only what the host sends) | 02 |
 | Template and folder show on a new bot only. The folder is read-only on an edit | (defaulted: the host keeps both) | 02 |
 | An untouched field is left out of a write, and an emptied one is sent blank | (defaulted: a host before the ahpd plan keeps the value of a blank) | 02 |
@@ -49,7 +51,7 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 | Task | Status | Depends on |
 | --- | --- | --- |
 | [01 - A mockup of the form](task-01-a-mockup-of-the-form.md) | done | - |
-| [02 - The form sets every field](task-02-the-form-sets-every-field.md) | doing | 01 |
+| [02 - The form sets every field](task-02-the-form-sets-every-field.md) | done | 01 |
 
 ## Risks and tradeoffs
 
@@ -57,13 +59,13 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 
 ## Resume state
 
-- **Done so far:** Softov accepted the mockup on 2026-11-25.
-- **Next action:** build task 02.
+- **Done so far:** both tasks are done, and [implemented.md](implemented.md) says what was built.
+- **Next action:** Softov reviews the form and says built.
 - **Open questions:** none.
 - **Watch out for:** nothing about a plugin or a key is written by name except the fields of a bot record.
 
 ## Final verification checklist
 
-- [ ] Each state of the mockup matches the form on a test daemon.
+- [x] Each state of the mockup matches the form on a test daemon.
 - [ ] A bot that names an agent keeps it after an edit of its name.
-- [ ] `pnpm typecheck` and the ahpw suite pass.
+- [x] `pnpm typecheck` and the ahpw suite pass.
