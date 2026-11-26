@@ -18,6 +18,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- **The shells pill opens its list over the composer**, as the PR and artifacts pills do, and `/session.shells` opens it too.
+- A new bot offers only the hosts where the person may make one.
 - **A tab shows one scrollbar.** The scrollbar of a tab behind it, such as a long Tools list, was drawn over the shown one.
 
 ## [0.9.0] - 2026-11-20

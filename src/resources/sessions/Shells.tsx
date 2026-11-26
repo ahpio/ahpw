@@ -1,15 +1,13 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
-import { useI18n, useScena } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { useEffect, useRef, type ReactElement } from 'react';
+import { translate } from '@softov/scena';
+import { useI18n } from '@softov/scena/react';
 import type { TerminalState } from '@microsoft/agent-host-protocol';
 import { hostBridge } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
-import { elapsed } from '../../bridges/words.js';
 import { plural } from '../../i18n/locales.js';
 import { done, failed } from '../../shell/notify/index.js';
 import { foldTerminal, joinParts } from '../terminals/terminal.js';
 import { EMOJIcon } from '../emojis.js';
-import { useNow } from './clock.js';
 import { Block } from './Parts.js';
 import { Pill } from './pills.js';
 import { statusOf, type Shell } from './shell-list.js';
@@ -17,9 +15,9 @@ import { stripAnsi } from './tool.js';
 import { when } from './turn.js';
 
 /** The composer pill that counts a chat's background shells and opens their list. */
-export function ShellsPill({ count, onToggle }: { count: number; onToggle: () => void }): ReactElement {
+export function ShellsPill({ count, onOpen }: { count: number; onOpen: () => void }): ReactElement {
   const { t } = useI18n();
-  return <Pill label={`${EMOJIcon.terminal} ${plural('sessions/shells/count', count)}`} title={t('sessions/shells/hint')} onOpen={onToggle} />;
+  return <Pill label={`${EMOJIcon.terminal} ${plural('sessions/shells/count', count)}`} title={t('sessions/shells/hint')} onOpen={onOpen} />;
 }
 
 /** How close to the end, in pixels, the output counts as followed. */
@@ -49,9 +47,8 @@ function ShellOutput({ title, text }: { title: string; text: string }): ReactEle
   );
 }
 
-/** The command, status, output and actions of one open shell. */
-function ShellDetails({ host, shell, stopping, onStop }: { host: string; shell: Shell; stopping: boolean; onStop: () => void }): ReactElement {
-  const scena = useScena();
+/** The command, status and output of one shell, live, as the head of its picker list. */
+export function ShellCard({ host, shell }: { host: string; shell: Shell }): ReactElement {
   const { t } = useI18n();
   const { state } = useChannel<TerminalState>(host, shell.terminal, foldTerminal);
   const status = statusOf(state);
@@ -79,65 +76,16 @@ function ShellDetails({ host, shell, stopping, onStop }: { host: string; shell: 
         )}
       </dl>
       {output === undefined || output === '' ? null : <ShellOutput title={t('sessions/shells/output')} text={output} />}
-      {shell.terminal === undefined && !shell.canStop ? null : (
-        <div className="web-shells__actions">
-          {shell.terminal === undefined ? null : (
-            <button type="button" className="web-link" onClick={() => void scena.commands.execute('ahp.openTerminal', { uri: shell.terminal })}>
-              {t('sessions/shells/openTerminal')}
-            </button>
-          )}
-          {shell.canStop ? <Button label={`${EMOJIcon.stop} ${t('sessions/shells/stop')}`} variant="danger" size="sm" disabled={stopping} onClick={onStop} /> : null}
-        </div>
-      )}
     </div>
   );
 }
 
-/**
- * The list of a chat's background shells, above the composer box.
- *
- * One entry is open at a time. A stopped shell keeps its button off until the
- * host removes its row; a stop that fails turns the button on again.
- */
-export function ShellsList({ host, chatUri, shells }: { host: string; chatUri: string; shells: readonly Shell[] }): ReactElement {
-  const { t } = useI18n();
-  const now = useNow(true);
-  const [opened, setOpened] = useState<string | undefined>(undefined);
-  const [stopping, setStopping] = useState<ReadonlySet<string>>(() => new Set());
-
-  const stop = async (shell: Shell): Promise<void> => {
-    setStopping((held) => new Set(held).add(shell.id));
-    try {
-      const answer = await hostBridge(host).request('vscode/stopBackgroundWork' as never, { chat: chatUri, id: shell.id } as never) as { stopped?: unknown } | undefined;
-      done(answer?.stopped === true ? t('sessions/shells/stopped', { name: shell.name }) : t('sessions/shells/finished', { name: shell.name }));
-    } catch (error) {
-      failed(t('sessions/shells/stopFailed', { name: shell.name }), error);
-      setStopping((held) => {
-        const next = new Set(held);
-        next.delete(shell.id);
-        return next;
-      });
-    }
-  };
-
-  return (
-    <section className="web-shells" aria-label={t('sessions/shells/title')}>
-      <h4 className="web-shells__title">{t('sessions/shells/title')}</h4>
-      <ul className="web-shells__list">
-        {shells.map((shell) => {
-          const open = opened === shell.id;
-          return (
-            <li key={shell.id} className="web-shells__entry">
-              <button type="button" className="web-shells__row" aria-expanded={open} onClick={() => setOpened(open ? undefined : shell.id)}>
-                <span aria-hidden="true">{open ? EMOJIcon.caretDown : EMOJIcon.caretRight}</span>
-                <span className="web-shells__name">{shell.name}</span>
-                {shell.startedAt === undefined ? null : <span className="web-shells__time">{elapsed(now - shell.startedAt)}</span>}
-              </button>
-              {open ? <ShellDetails host={host} shell={shell} stopping={stopping.has(shell.id)} onStop={() => void stop(shell)} /> : null}
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
+/** Asks the host to stop a shell of the chat `chatUri`; a toast says how it went. */
+export async function stopShell(host: string, chatUri: string, shell: Shell): Promise<void> {
+  try {
+    const answer = await hostBridge(host).request('vscode/stopBackgroundWork' as never, { chat: chatUri, id: shell.id } as never) as { stopped?: unknown } | undefined;
+    done(answer?.stopped === true ? translate('sessions/shells/stopped', { name: shell.name }) : translate('sessions/shells/finished', { name: shell.name }));
+  } catch (error) {
+    failed(translate('sessions/shells/stopFailed', { name: shell.name }), error);
+  }
 }

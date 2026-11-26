@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MessageAttachment } from '@microsoft/agent-host-protocol';
 import type { PickerAction } from '@softov/scena/types';
-import { artifactItems, artifactRows, contextItems, pullRequestItems, pullRequestRows, showsPill, typeTrigger, valueWords, type ChangedFile, type ComposerApi } from './composer-commands.js';
+import { artifactItems, artifactRows, contextItems, pullRequestItems, pullRequestRows, shellItems, shellRows, showsPill, typeTrigger, valueWords, type ChangedFile, type ComposerApi } from './composer-commands.js';
 
 describe('valueWords', () => {
   it('reads plain values, lists and objects', () => {
@@ -85,6 +85,37 @@ describe('pullRequestItems', () => {
     const last = items[2];
     if (last !== undefined && 'onSelect' in last) void last.onSelect(host);
     expect(removed).toEqual(['a1']);
+  });
+});
+
+describe('shellItems and shellRows', () => {
+  const bare = { id: 's1', name: 'Dev server', command: 'pnpm dev', startedAt: Date.parse('2026-11-26T06:00:00Z'), canStop: true };
+  const shell = { ...bare, terminal: 'ahp-terminal:/1' };
+  const titles = (items: PickerAction[]): string[] => items.map((one) => ('title' in one ? one.title : one.commandId));
+  const host = { closeMenu: () => undefined } as unknown as Parameters<Extract<PickerAction, { onSelect: unknown }>['onSelect']>[0];
+
+  it('offers the terminal and Stop only where the shell has them', () => {
+    const none = (): void => undefined;
+    expect(titles(shellItems(shell, none, none))).toHaveLength(2);
+    expect(titles(shellItems(bare, none, none))).toHaveLength(1);
+    expect(titles(shellItems({ ...bare, canStop: false }, none, none))).toEqual([]);
+  });
+
+  it('opens the shell\'s terminal and stops it', () => {
+    const opened: string[] = [];
+    let stopped = 0;
+    for (const item of shellItems(shell, (uri) => opened.push(uri), () => { stopped += 1; })) if ('onSelect' in item) void item.onSelect(host);
+    expect(opened).toEqual(['ahp-terminal:/1']);
+    expect(stopped).toBe(1);
+  });
+
+  it('names each shell with its command, and opens the one picked', () => {
+    const picked: string[] = [];
+    const [row] = shellRows([shell], shell.startedAt + 5000, (_host, one) => picked.push(one.id));
+    expect(row !== undefined && 'title' in row ? row.title : undefined).toBe('Dev server');
+    expect(row !== undefined && 'description' in row ? row.description : '').toContain('pnpm dev');
+    if (row !== undefined && 'onSelect' in row) void row.onSelect(host);
+    expect(picked).toEqual(['s1']);
   });
 });
 

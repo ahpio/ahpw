@@ -28,6 +28,7 @@ import {
   CUSTOM_AGENT_COMMAND,
   ARTIFACTS_COMMAND,
   PULL_REQUESTS_COMMAND,
+  SHELLS_COMMAND,
   REFERENCES_COMMAND,
   composerPath,
   optionCommandId,
@@ -54,7 +55,7 @@ import { failed, warn } from '../../shell/notify/index.js';
 import { COMPOSER_FOCUS, hostCommands, registerHostCommands, type HostCommand } from './host-commands.js';
 import { useAgentIconSrc } from '../agents/icons.js';
 import { shellsOf } from './shell-list.js';
-import { ShellsList, ShellsPill } from './Shells.js';
+import { ShellsPill } from './Shells.js';
 import { allMerged, closeMerged, pullRequestsOf, readMergedClosed } from './pull-requests.js';
 import { MergedBanner, PullRequestPill } from './PullRequests.js';
 import { ArtifactsPill } from './ArtifactsPill.js';
@@ -161,7 +162,6 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   const active = activeId === undefined ? undefined : { id: activeId, startedAt: activeStart ?? '' };
   const queued = held ?? [];
   const shells = useMemo(() => shellsOf(backgroundWork), [backgroundWork]);
-  const [shellsOpen, setShellsOpen] = useState(false);
   const pullRequests = useMemo(() => pullRequestsOf(summary._meta), [summary._meta]);
   const { artifacts, references } = useMemo(() => artifactPills(summary._meta), [summary._meta]);
   const removesArtifacts = (useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS).removesArtifacts === true;
@@ -335,6 +335,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     upload: () => files.current?.click(),
     changed: () => changed,
     ...(onInfo === undefined ? {} : { toggleInfo: onInfo }),
+    chat: () => chatUri,
+    shells: () => shells,
     pullRequests: () => pullRequests,
     artifacts: () => artifacts,
     references: () => references,
@@ -361,6 +363,8 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
     upload: () => api.current?.upload(),
     changed: () => api.current?.changed() ?? [],
     ...(onInfo === undefined ? {} : { toggleInfo: () => api.current?.toggleInfo?.() }),
+    chat: () => api.current?.chat?.() ?? chatUri,
+    shells: () => api.current?.shells?.() ?? [],
     pullRequests: () => api.current?.pullRequests?.() ?? [],
     artifacts: () => api.current?.artifacts?.() ?? [],
     references: () => api.current?.references?.() ?? [],
@@ -497,12 +501,10 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         </ul>
       )}
 
-      {shellsOpen && shells.length > 0 ? <ShellsList host={host} chatUri={chatUri} shells={shells} /> : null}
-
       <div className="web-composer__where">
         {folder === undefined ? null : <Pill label={`${EMOJIcon.folder} ${folderLabel(folder)}`} title={t('sessions/composer/folderHint')} />}
         <Pill label={agentImage === undefined ? `${EMOJIcon.agents} ${agent?.displayName ?? summary.provider}` : agent?.displayName ?? summary.provider} image={agentImage} title={agent?.description ?? t('sessions/composer/agentHint')} />
-        {shells.length === 0 ? null : <ShellsPill count={shells.length} onToggle={() => setShellsOpen((was) => !was)} />}
+        {shells.length === 0 ? null : <ShellsPill count={shells.length} onOpen={() => openCommand(SHELLS_COMMAND)} />}
         {pullRequests.length === 0 ? null : <PullRequestPill pullRequests={pullRequests} onOpen={() => openCommand(PULL_REQUESTS_COMMAND)} />}
         {artifacts.length === 0 ? null : <ArtifactsPill kind="artifacts" count={artifacts.length} onOpen={() => openCommand(ARTIFACTS_COMMAND)} />}
         {references.length === 0 ? null : <ArtifactsPill kind="references" count={references.length} onOpen={() => openCommand(REFERENCES_COMMAND)} />}

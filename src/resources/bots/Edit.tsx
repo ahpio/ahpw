@@ -1,10 +1,11 @@
-import { useRef, useState, type ReactElement } from 'react';
+import { useMemo, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Alert, Button, Text } from '@softov/scena/ui';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
-import { useHostNames, useShownHosts } from '../../bridges/hosts.js';
+import { useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
+import { useOwnGrantsOnEach } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { Field } from '../../shell/view/Field.js';
@@ -14,7 +15,7 @@ import { useMe } from '../../bridges/me.js';
 import { membershipParts } from '../users/memberships.js';
 import { BotFields } from './BotFields.js';
 import { Bood } from './Bood.js';
-import { BOT_PROVIDER, BOTS, BOTS_SCHEME, botsIn, botsReducer, editBot, makeBot, type BotRecord, type BotsState } from './catalogue.js';
+import { BOT_PROVIDER, BOTS, BOTS_SCHEME, botsIn, botsReducer, editBot, makeBot, mayChangeBots, type BotRecord, type BotsState } from './catalogue.js';
 import { connectorsValid, draftOf, recordBody, renamedFor, type BotDraft } from './draft.js';
 import { BOT_BODIES, COLOR_HEX, knowsBody, slugOf } from './look.js';
 import { PageSpinner } from '../../shell/view/PageSpinner.js';
@@ -62,7 +63,14 @@ export type BotFormDone = (saved?: { slug: string; name: string }) => void;
 export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: string; onDone: BotFormDone }): ReactElement {
   const { t } = useI18n();
   const fresh = slug === undefined;
-  const hosts = useServingHosts(useShownHosts(), BOTS_SCHEME);
+  const serving = useServingHosts(useShownHosts(), BOTS_SCHEME);
+  const servingOffers = useEach<Offers>(serving.map((one) => ahpPaths(one).offers));
+  const servingGrants = useOwnGrantsOnEach(serving, servingOffers);
+  // A new bot goes only to a host where the reader may make one.
+  const hosts = useMemo(
+    () => serving.filter((one, at) => mayChangeBots(servingOffers[at] ?? NO_OFFERS, servingGrants[at] ?? null, 'put')),
+    [serving, servingOffers, servingGrants],
+  );
   const hostName = useHostNames();
   const [host, setHost] = useState(opened);
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;

@@ -11,6 +11,9 @@ import type { CustomAgent } from './custom-agents.js';
 import { kindOf, pullRequestFacts, pullRequestName, type PullRequest } from './pull-requests.js';
 import { pullRequestIconSrc } from './pull-request-icons.js';
 import { PullRequestCard } from './PullRequests.js';
+import { ShellCard, stopShell } from './Shells.js';
+import type { Shell } from './shell-list.js';
+import { elapsed } from '../../bridges/words.js';
 import { ARTIFACT_ICON, ARTIFACT_TYPES, artifactName, copyOf, openOf, relativeOf, type Artifact } from './artifact-list.js';
 import { downloadFile } from '../folders/actions.js';
 import { failed } from '../../shell/notify/index.js';
@@ -64,6 +67,10 @@ export interface ComposerApi {
   changed(): ChangedFile[];
   /** Shows the session's info in place of its chat, or the chat again; absent where the page has no info. */
   toggleInfo?(): void;
+  /** The chat this composer writes to. */
+  chat?(): string;
+  /** The chat's background shells, which `/session.shells` lists; absent before a session exists. */
+  shells?(): Shell[];
   /** The session's GitHub pull requests, which `/session.pr` lists; absent before a session exists. */
   pullRequests?(): PullRequest[];
   /** The session's artifacts, which `/session.artifacts` lists, newest first; absent before a session exists. */
@@ -292,6 +299,29 @@ export function pullRequestItems(pullRequest: PullRequest, removes: boolean, rem
   ];
 }
 
+/** The command behind the shells pill and `/session.shells`: a shell's command, status and output, and its terminal or Stop. */
+export const SHELLS_COMMAND = 'ahp.composer.shells';
+
+/** One row per shell: its name, its command, and how long it has run. */
+export function shellRows(shells: readonly Shell[], now: number, open: (host: HostCtx, shell: Shell) => void): PickerAction[] {
+  return shells.map((shell) => ({
+    title: shell.name,
+    description: [shell.command, shell.startedAt === undefined ? undefined : elapsed(now - shell.startedAt)].filter((bit) => bit !== undefined && bit !== '').join(' \u{00B7} '),
+    icon: EMOJIcon.terminal,
+    onSelect: (host: HostCtx) => open(host, shell),
+  }));
+}
+
+/** The picker entries of one shell: open its terminal, and stop it where the host lets. */
+export function shellItems(shell: Shell, openTerminal: (uri: string) => void, stop: () => void): PickerAction[] {
+  const close = (host: HostCtx): void => host.closeMenu();
+  const terminal = shell.terminal;
+  return [
+    ...(terminal === undefined ? [] : [{ title: translate('sessions/shells/openTerminal'), onSelect: (host: HostCtx) => { close(host); openTerminal(terminal); } }]),
+    ...(shell.canStop ? [{ title: `${EMOJIcon.stop} ${translate('sessions/shells/stop')}`, onSelect: (host: HostCtx) => { close(host); stop(); } }] : []),
+  ];
+}
+
 /** The commands behind the Artifacts and References pills, and `/session.artifacts` and `/session.references`. */
 export const ARTIFACTS_COMMAND = 'ahp.composer.artifacts';
 export const REFERENCES_COMMAND = 'ahp.composer.references';
@@ -513,6 +543,39 @@ export function registerComposerCommands(scena: Scena): Disposable {
           title: translate('sessions/pullRequests/title'),
           sentinel: '/session.pr',
           items: pullRequestRows(pullRequests, (host, pullRequest) => host.pushList(listOf(pullRequest))),
+        });
+      },
+    }),
+    share(scena, {
+      id: SHELLS_COMMAND,
+      title: () => translate('sessions/shells/title'),
+      description: () => translate('sessions/shells/hint'),
+      category: 'Session',
+      shortcut: '/session.shells',
+      slots: [COMPOSER_SLOT],
+      disabled: (ctx) => (apiOf(ctx)?.shells?.().length ?? 0) === 0,
+      run: (ctx) => {
+        const api = apiOf(ctx);
+        if (api === undefined) return;
+        const host = api.host();
+        const chat = api.chat?.() ?? '';
+        const shells = api.shells?.() ?? [];
+        const listOf = (shell: Shell): ListSpec => ({
+          title: shell.name,
+          sentinel: '/session.shells',
+          layout: 'header-list',
+          header: () => createElement(ShellCard, { host, shell }),
+          items: shellItems(shell, (uri) => void ctx.scena.commands.execute('ahp.openTerminal', { uri }), () => void stopShell(host, chat, shell)),
+        });
+        const [only] = shells;
+        if (shells.length === 1 && only !== undefined) {
+          ctx.host?.pushList(listOf(only));
+          return;
+        }
+        ctx.host?.pushList({
+          title: translate('sessions/shells/title'),
+          sentinel: '/session.shells',
+          items: shellRows(shells, Date.now(), (picker, shell) => picker.pushList(listOf(shell))),
         });
       },
     }),
