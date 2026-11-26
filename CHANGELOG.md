@@ -15,10 +15,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - **The Clients, Computers, Connectors, Plugins, Policies, Teams and Tunnels entries show only to a person who may open them**. The lists and pages of users, roles, teams, projects, policies, bots, computers, tunnels and clients offer only the changes the person may make.
 - **A tab's scrollbar shows while the pointer is over it**, on every tab that scrolls and on a chat with a bot, as on a session.
+- **A new session opens where its New session page is.** Moved to the right sidebar, the page is replaced there by the session it starts. The page itself opens where Interface > Session says, as a session does; the dock's menu still offers both places.
 
 ### Fixed
 
 - **A tab shows one scrollbar.** The scrollbar of a tab behind it, such as a long Tools list, was drawn over the shown one.
+- **Escape closes the floating settings** when nothing has the focus, as after switching a tab inside them. It closed them only while a control inside had the focus.
 
 ## [0.9.0] - 2026-11-20
 

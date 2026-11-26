@@ -20,6 +20,7 @@ import { EMOJIcon } from '../emojis.js';
 import { mountRight, RIGHT_SIDEBAR, SESSION_VIEWS } from '../../shell/right-sidebar.js';
 import { followFocus, sessionKey } from './focus.js';
 import { SESSION_OPENS } from './view-settings.js';
+import { surfaceOf } from './beside.js';
 import { serveAsTool } from '../agent-tools/registry.js';
 
 /** The display size class the modus backend publishes. */
@@ -257,9 +258,12 @@ export function registerSessions(scena: Scena): Disposable {
       // A browser keeps Ctrl+N for a new window, so Alt+N is there too.
       keys: ['ctrl+n', 'alt+n'],
       run: (ctx, args) => {
-        const { provider, host, place = 'main' } = (args as { provider?: string; host?: string; place?: 'main' | 'right' } | undefined) ?? {};
+        const { provider, host, place: asked } = (args as { provider?: string; host?: string; place?: 'main' | 'right' } | undefined) ?? {};
+        // Not asked for a place: where the page is open already, wherever a person moved it, else where `ui.sessionOpens` says.
+        const at = surfaceOf(ctx.scena, 'session:new');
         // A page already open keeps its own choices, so one asked for an agent or a host starts afresh.
         if (provider !== undefined || host !== undefined) ctx.scena.surfaces.close('session:new');
+        const place = asked ?? (at !== undefined ? (at === RIGHT_SIDEBAR ? 'right' : 'main') : SESSION_OPENS.read(ctx.store) === 'right' ? 'right' : 'main');
         // One New session page: opening it in one place takes it from the other.
         const other = place === 'main' ? RIGHT_SIDEBAR : 'main';
         if (ctx.surfaces.listAt(other).some((mount) => mount.key === 'session:new')) ctx.surfaces.close('session:new');

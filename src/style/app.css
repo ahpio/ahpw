@@ -268,7 +268,7 @@
 .web-chat__to-end-button {
   position: absolute;
   z-index: 2;
-  right: var(--web-composer-gutter);
+  right: var(--web-chat-gutter);
   bottom: var(--oo-spacing-md);
   display: inline-flex;
   align-items: center;
