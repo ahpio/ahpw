@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- **A long chat stays at its newest turn.** A session opens at its end and stays there as turns grow, even ones drawn late or in a hidden tab. Scrolled up, a round button with a down arrow goes back to the end.
 - **The host has a profile.** A connection as the host itself opens one from the Manage menu, with its grants, usage and limits, and the keys of a person it picks. A person's profile also marks the roles their sign-in added.
 - **An agent can run ahpw's commands.** It lists them and runs the ones set to Ask, Notify or Run, in the Tools panel or the Interface settings. Ask shows Allow, Always allow and Deny on the call in the chat. Every command starts Off.
 

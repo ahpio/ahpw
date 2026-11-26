@@ -1962,6 +1962,7 @@
       "gone": "Esta sessão não existe mais.",
       "starting": "Iniciando a sessão",
       "notStarted": "Não foi possível iniciar a sessão",
+      "toEnd": "Ir para o turno mais recente",
       "noReason": "Nenhum motivo informado.",
       "sessionUnreadable": "Não foi possível carregar a sessão",
       "chatUnreadable": "Não foi possível carregar o chat",

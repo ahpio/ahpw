@@ -66,6 +66,7 @@ export const EMOJIcon = {
   pause: mono('⏸'),
   stop: mono('⏹'),
   send: '↑',
+  toEnd: '↓',
   trash: mono('🗑'),
   clear: '⊘',
   close: '✕',
