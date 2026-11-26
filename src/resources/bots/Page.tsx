@@ -2,12 +2,15 @@ import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import { Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
 import { useChannel } from '../../bridges/channel.js';
+import { ahpPaths } from '../../bridges/data.js';
+import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
+import { useOwnGrants } from '../../bridges/own-grants.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { timeOf } from '../automations/words.js';
 import { Bood } from './Bood.js';
-import { BOTS, botsIn, botsReducer, type BotsState } from './catalogue.js';
+import { BOTS, botsIn, botsReducer, mayChangeBots, type BotsState } from './catalogue.js';
 import { refKey } from '../../bridges/hosts.js';
 import { BOT_CHAT_OPENING, BOT_EDIT_ASKED } from './state.js';
 import { BotForm } from './Edit.js';
@@ -19,16 +22,20 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
   const scena = useScena();
   const { t } = useI18n();
   const { state, error } = useChannel<BotsState>(host, BOTS, botsReducer);
+  const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
+  const grants = useOwnGrants(host, offers);
   const key = refKey(host, slug ?? '');
   const opening = useStore<string | null>(BOT_CHAT_OPENING) === key;
   const [editing, setEditing] = useState(false);
   // `ahp.editBot` from the bots list or the floating bot opens this page and asks it for the form.
   const asked = useStore<string | null>(BOT_EDIT_ASKED) === key;
+  const edits = mayChangeBots(offers, grants, 'put');
   useEffect(() => {
-    if (!asked) return;
+    // An ask waits while the reader's grants are read, so it is not lost before they arrive.
+    if (!asked || !edits) return;
     setEditing(true);
     scena.store.set(BOT_EDIT_ASKED, null);
-  }, [asked]);
+  }, [asked, edits]);
   if (error !== null) return <PageAlert tone="danger" title={t('bots/notices/none')} message={error} />;
   if (state === undefined) return <PageSpinner label={t('bots/notices/reading')} />;
   const bot = botsIn(state).find((one) => one.id === slug);
@@ -57,7 +64,7 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
           {(bot.description ?? '').trim() === '' ? null : <p className="web-bot__description">{bot.description}</p>}
           <div className="web-page__actions">
             <Button label={t(opening ? 'bots/chat/opening' : 'bots/actions/chat')} variant="primary" disabled={opening} onClick={() => run('ahp.chatWithBot')} />
-            <Button label={t('bots/actions/edit')} onClick={() => setEditing(true)} />
+            {edits ? <Button label={t('bots/actions/edit')} onClick={() => setEditing(true)} /> : null}
           </div>
         </div>
       </div>
@@ -68,7 +75,7 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
           <p className="web-bot__instructions">{bot.instructions}</p>
         </>
       )}
-      <DangerZone label={t('bots/actions/delete')} onClick={() => run('ahp.deleteBot')} />
+      {mayChangeBots(offers, grants, 'delete') ? <DangerZone label={t('bots/actions/delete')} onClick={() => run('ahp.deleteBot')} /> : null}
     </div>
   );
 }

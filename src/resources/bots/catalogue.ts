@@ -7,7 +7,8 @@
 
 import { AhpErrorCodes } from '@microsoft/agent-host-protocol';
 import { hostBridge } from '../../bridges/data.js';
-import type { Offers } from '../../bridges/offers.js';
+import { allows, type Offers } from '../../bridges/offers.js';
+import { mayDo, type OwnGrants } from '../../bridges/own-grants.js';
 import { newId } from '../../bridges/words.js';
 
 export const BOTS_SCHEME = 'x-ahpd-bots';
@@ -104,6 +105,16 @@ export const BOT_REMOVE = 'x-ahpd/bots/remove';
 
 /** The root of the host's bots, as its provider says; `bot://` when it does not. */
 export const botsRoot = (offers: Offers): string => offers.providers[BOT_PROVIDER]?.root ?? `${BOT_PROVIDER}://`;
+
+/**
+ * Whether the host takes this change to its bots, by command or resource write,
+ * and the reader holds `bot:put` or `bot:delete` for it.
+ */
+export function mayChangeBots(offers: Offers, grants: OwnGrants, change: 'put' | 'delete'): boolean {
+  const provider = offers.providers[BOT_PROVIDER];
+  const takes = offers.methods.includes(change === 'put' ? BOT_PUT : BOT_REMOVE) || (provider !== undefined && allows(provider, change === 'put' ? 'write' : 'delete'));
+  return takes && mayDo(grants, `bot:${change}`);
+}
 
 /** A bot's resource: its provider's root and its slug. */
 export const botUri = (root: string, slug: string): string => `${root.endsWith('/') ? root : `${root}/`}${slug}`;

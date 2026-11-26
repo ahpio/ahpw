@@ -5,7 +5,9 @@ import { Alert, Spinner } from '@softov/scena/ui';
 import { useChannelOnEach } from '../../bridges/channel.js';
 import { ahpPaths, type HostFacts } from '../../bridges/data.js';
 import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
+import type { Offers } from '../../bridges/offers.js';
 import { rowOperations } from '../../bridges/operations.js';
+import { runnableBy, useOwnGrantsOnEach } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { copyText } from '../../shell/controls/CopyButton.js';
 import { embedMode } from '../../shell/embed/index.js';
@@ -25,6 +27,8 @@ export default function ClientExplorer(): ReactElement {
   const multi = embedMode() === 'multi';
   const { states, errors } = useChannelOnEach<ClientsState>(hosts, CLIENTS, clientsReducer);
   const connections = useEach<HostFacts | null>(hosts.map((host) => ahpPaths(host).host));
+  const offers = useEach<Offers>(hosts.map((host) => ahpPaths(host).offers));
+  const grants = useOwnGrantsOnEach(hosts, offers);
   const active = useStore<{ host: string; id: string }>(ACTIVE_CLIENT);
   // Read in 5-second steps, the host's own tick, so the list is not drawn again each second.
   const now = Math.floor(useNow(hosts.length > 0) / 5000) * 5000;
@@ -51,14 +55,14 @@ export default function ClientExplorer(): ReactElement {
         lines: [[multi ? hostName(host) : undefined, own ? t('clients/explorer/thisApp') : undefined, lineOf(facts, t('clients/facts/hostToken'))].filter((bit) => bit !== undefined && bit !== '').join(' \u{00B7} ')],
         menu: [
           item(t('clients/actions/open'), () => open(refKey(host, id))),
-          ...operationItems(scena, place, rowOperations(state, record)),
+          ...operationItems(scena, place, runnableBy(rowOperations(state, record), grants[at] ?? null)),
           item(t('clients/actions/copyClientId'), () => void copyText(facts.clientId), { group: 'more' }),
         ],
       };
     });
   }),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [hosts, states, connections, hostName, multi, now, t]);
+  [hosts, states, connections, grants, hostName, multi, now, t]);
 
   const error = multi ? null : errors[0] ?? null;
   const state = multi ? states.find((one) => one !== undefined) : states[0];

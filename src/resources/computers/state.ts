@@ -6,6 +6,9 @@ export const ACTIVE_COMPUTER = '$/ahp/activeComputer' as BindingPath;
 /** Whether any host this page connects to serves computers; their activity bar entry shows while it does. */
 export const COMPUTERS_SERVED = '$/ahp/computers/served' as BindingPath;
 
+/** Whether the reader may make a computer on any host this page connects to; the list's + shows while they may. */
+export const MAY_ADD_COMPUTER = '$/ahp/computers/mayAdd' as BindingPath;
+
 /** The list's grouping and state filter; a header button is pressed while its choice is not the usual one. */
 export const COMPUTERS_GROUP = '$/ahp/computers/group' as BindingPath;
 export const COMPUTERS_FILTER = '$/ahp/computers/filter' as BindingPath;

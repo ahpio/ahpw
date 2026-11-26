@@ -37,9 +37,22 @@ export const mayDelete = (offers: Offers, grants: OwnGrants, domain: EditedDomai
 export const ownGrantsOf = (scena: Scena, host: string): OwnGrants =>
   grantsHeld(scena.store.get<Offers>(ahpPaths(host).offers), scena.store.get<HeldMe>(ahpPaths(host).me));
 
+/**
+ * Keeps `path` true while the test passes for the reader on any host this page
+ * connects to. It runs again when a path `also` names for the host changes.
+ */
+export function trackMay(
+  scena: Scena,
+  path: BindingPath,
+  test: (offers: Offers, grants: OwnGrants, host: string) => boolean,
+  also?: (host: string) => readonly BindingPath[],
+): Disposable {
+  return trackHosts(scena, path, (offers, me, host) => offers !== undefined && test(offers, grantsHeld(offers, me), host), also);
+}
+
 /** Keeps `path` true while the reader may make these records on any host this page connects to. */
 export function trackMayPut(scena: Scena, domain: EditedDomain, path: BindingPath): Disposable {
-  return trackHosts(scena, path, (offers, me) => offers !== undefined && mayPut(offers, grantsHeld(offers, me), domain));
+  return trackMay(scena, path, (offers, grants) => mayPut(offers, grants, domain));
 }
 
 /** The reader's grants on each host, in the order given, as `grantsHeld` says. */

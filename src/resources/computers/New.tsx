@@ -4,13 +4,14 @@ import { Alert, Button, SchemaForm, Text, type JsonSchemaObject } from '@softov/
 import { ahpPaths } from '../../bridges/data.js';
 import { useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
+import { useOwnGrants } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import { writeLastHost } from '../sessions/last-host.js';
-import { may } from './actions.js';
+import { may, writable } from './actions.js';
 import { COMPUTER_PROVIDER, COMPUTERS_SCHEME, createComputer } from './machines.js';
 import { formSchema, manifestBody, nameProblem } from './manifest.js';
 import { EMOJIcon } from '../emojis.js';
@@ -26,6 +27,7 @@ export default function NewComputerPage({ host: opened }: { host: string }): Rea
   const hostName = useHostNames();
   const [host, setHost] = useState(opened);
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
+  const grants = useOwnGrants(host, offers);
   const manifest = offers.providers[COMPUTER_PROVIDER]?.manifest;
   const picking = embedMode() === 'multi' && hosts.length > 1;
   // The host and the name, in a form of their own: neither is sent in the body, so neither shows in its json or yaml.
@@ -53,7 +55,8 @@ export default function NewComputerPage({ host: opened }: { host: string }): Rea
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
 
-  if (!may(offers, 'write')) return <PageAlert tone="warning" message={t('computers/new/noCreate')} />;
+  if (!writable(offers)) return <PageAlert tone="warning" message={t('computers/new/noCreate')} />;
+  if (!may(offers, grants, 'write')) return <PageAlert tone="warning" message={t('computers/new/noPermission')} />;
   const problem = nameProblem(name);
   const create = (): void => {
     setBusy(true);

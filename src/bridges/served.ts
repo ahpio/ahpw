@@ -41,8 +41,17 @@ export function trackServed(scena: Scena, scheme: Served, path: BindingPath, als
     && (also === undefined || typeof scheme !== 'string' || offers === undefined || mayOpen(offers, me, scheme, also)));
 }
 
-/** Keeps `path` true while any host this page connects to passes the test, and false otherwise. */
-export function trackHosts(scena: Scena, path: BindingPath, test: (offers: Offers | undefined, me: HeldMe) => boolean): Disposable {
+/**
+ * Keeps `path` true while any host this page connects to passes the test, and
+ * false otherwise. The test runs again when the host's offers, its `me`, or a
+ * path `also` names for it changes.
+ */
+export function trackHosts(
+  scena: Scena,
+  path: BindingPath,
+  test: (offers: Offers | undefined, me: HeldMe, host: string) => boolean,
+  also: (host: string) => readonly BindingPath[] = () => [],
+): Disposable {
   const passing = new Set<string>();
   const publish = (): void => {
     const now = passing.size > 0;
@@ -51,12 +60,12 @@ export function trackHosts(scena: Scena, path: BindingPath, test: (offers: Offer
   const watching = onEachHost(scena, (host) => {
     const { offers, me } = ahpPaths(host);
     const check = (): void => {
-      if (test(scena.store.get<Offers>(offers), scena.store.get<HeldMe>(me))) passing.add(host);
+      if (test(scena.store.get<Offers>(offers), scena.store.get<HeldMe>(me), host)) passing.add(host);
       else passing.delete(host);
       publish();
     };
     check();
-    const stops = [offers, me].map((one) => scena.store.subscribe(one, check));
+    const stops = [offers, me, ...also(host)].map((one) => scena.store.subscribe(one, check));
     return {
       dispose: () => {
         for (const stop of stops) stop.dispose();

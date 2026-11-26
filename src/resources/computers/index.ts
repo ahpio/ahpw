@@ -5,6 +5,7 @@ import { hideOverlaidSidebar } from '../sessions/index.js';
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { HOST_FILTER_ACTION, shownHosts } from '../../bridges/hosts.js';
 import type { Offers } from '../../bridges/offers.js';
+import { ownGrantsOf, trackMay, type OwnGrants } from '../../bridges/own-grants.js';
 import { trackServed } from '../../bridges/served.js';
 import { registerChoice } from '../../shell/explorer/choice.js';
 import { embedMode } from '../../shell/embed/index.js';
@@ -12,8 +13,9 @@ import { readLastHost, startHost } from '../sessions/last-host.js';
 import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
 import { CHOICE_KEYS, COMPUTER_FILTERS, COMPUTER_GROUPS } from './arrange.js';
+import { may } from './actions.js';
 import { COMPUTERS, COMPUTERS_SCHEME } from './machines.js';
-import { ACTIVE_COMPUTER, COMPUTERS_FILTER, COMPUTERS_GROUP, COMPUTERS_SERVED } from './state.js';
+import { ACTIVE_COMPUTER, COMPUTERS_FILTER, COMPUTERS_GROUP, COMPUTERS_SERVED, MAY_ADD_COMPUTER } from './state.js';
 
 /** The display size class the modus backend publishes. */
 const MODUS_CLASS = '$/modus/class' as BindingPath;
@@ -33,10 +35,14 @@ export interface ComputerArgs {
 
 const serving = (offers: Offers | undefined): boolean => offers?.channels.includes(COMPUTERS_SCHEME) ?? false;
 
+/** Whether the reader may make a computer on this host. */
+const mayAdd = (offers: Offers, grants: OwnGrants): boolean => serving(offers) && may(offers, grants, 'write');
+
 /** The computers list, a computer's page, and the form that makes one. */
 export function registerComputers(scena: Scena): Disposable {
   return combineDisposables(
     trackServed(scena, COMPUTERS_SCHEME, COMPUTERS_SERVED, []),
+    trackMay(scena, MAY_ADD_COMPUTER, mayAdd),
     registerChoice(scena, { resource: 'computers', name: 'group', slot: GROUP_SLOT, path: COMPUTERS_GROUP, values: COMPUTER_GROUPS, usual: 'none', key: CHOICE_KEYS.group, when: (value) => value !== 'host' || embedMode() === 'multi' }),
     registerChoice(scena, { resource: 'computers', name: 'status', slot: FILTER_SLOT, path: COMPUTERS_FILTER, values: COMPUTER_FILTERS, usual: 'all', key: CHOICE_KEYS.filter }),
     scena.components.register({
@@ -46,7 +52,7 @@ export function registerComputers(scena: Scena): Disposable {
       props: {
         title: { t: 'computers/explorer/title' },
         actions: [
-          { command: 'ahp.newComputer', icon: '+', label: { t: 'computers/commands/new' } },
+          { command: 'ahp.newComputer', icon: '+', label: { t: 'computers/commands/new' }, when: `${MAY_ADD_COMPUTER} == true` },
           { command: 'computers.reload', icon: EMOJIcon.reload, label: { t: 'common/reload' } },
           { command: 'computers.status', menu: FILTER_SLOT, icon: EMOJIcon.filter, label: { t: 'computers/explorer/status' }, active: `${COMPUTERS_FILTER} != null` },
           { command: 'computers.group', menu: GROUP_SLOT, icon: EMOJIcon.group, label: { t: 'computers/explorer/group' }, active: `${COMPUTERS_GROUP} != null` },
@@ -88,11 +94,11 @@ export function registerComputers(scena: Scena): Disposable {
       keywords: [english('computers/commands/new')],
       category: 'Computers',
       slots: [PALETTE_SLOT],
-      when: () => scena.store.get<boolean>(COMPUTERS_SERVED) === true,
+      when: () => scena.store.get<boolean>(MAY_ADD_COMPUTER) === true,
       run: (ctx, args) => {
         // The last host used, when it serves computers; the page lets a person change it.
         const given = (args as { host?: string } | undefined)?.host;
-        const hosts = shownHosts(ctx.store).filter((host) => serving(ctx.store.get<Offers>(ahpPaths(host).offers)));
+        const hosts = shownHosts(ctx.store).filter((host) => { const offers = ctx.store.get<Offers>(ahpPaths(host).offers); return offers !== undefined && mayAdd(offers, ownGrantsOf(scena, host)); });
         const host = given ?? startHost(hosts, readLastHost());
         if (host === undefined) return;
         ctx.surfaces.open({ surface: 'main', key: 'computer:new', resource: { component: 'NewComputerPage', host }, props: { title: bound('computers/commands/new') } });

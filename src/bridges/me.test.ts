@@ -9,7 +9,7 @@ vi.mock('./data.js', async (original) => ({ ...await original<typeof import('./d
 const { ahpPaths, windowHost } = await import('./data.js');
 const { ME, grantsHeld, profileOf, readMe, trackMe } = await import('./me.js');
 const { NO_OFFERS } = await import('./offers.js');
-const { mayDelete, mayPut, trackMayPut } = await import('./own-grants.js');
+const { mayDelete, mayPut, trackMay, trackMayPut } = await import('./own-grants.js');
 const { mayOpen, trackServed } = await import('./served.js');
 
 const as = (principal?: string) => ({ ...NO_OFFERS, methods: [ME], ...(principal === undefined ? {} : { principal }) });
@@ -148,5 +148,22 @@ describe('mayPut and mayDelete', () => {
     scena.store.set(path.offers, { ...offers });
     await settled();
     expect(scena.store.get(MAY)).toBe(false);
+  });
+});
+
+describe('trackMay', () => {
+  it('tests again when a path it names for the host changes', async () => {
+    const MAY = '$/test/mayRun' as Parameters<typeof trackMay>[1];
+    const LISTED = '$/test/listed' as Parameters<typeof trackMay>[1];
+    const scena = createScena();
+    request.mockResolvedValue({ ...ANA, grants: ['tunnel:put'] });
+    trackMe(scena);
+    trackMay(scena, MAY, (_offers, grants) => scena.store.get<boolean>(LISTED) === true && grants !== null && grants.includes('tunnel:put'), () => [LISTED]);
+    scena.store.set(ahpPaths(windowHost()).offers, as('user:ana'));
+    await settled();
+    expect(scena.store.get(MAY)).toBe(false);
+    scena.store.set(LISTED, true);
+    await settled();
+    expect(scena.store.get(MAY)).toBe(true);
   });
 });

@@ -7,9 +7,11 @@ import { canonicalShortcut, ContextMenu } from '@softov/scena/ui';
 import { useChannelOnEach } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { refKey, refOf, useEach, useShownHosts } from '../../bridges/hosts.js';
+import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
+import { ownGrantsOf } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { Bood } from '../../resources/bots/Bood.js';
-import { BOTS, BOTS_SCHEME, botsIn, botsReducer, type BotRecord, type BotsState } from '../../resources/bots/catalogue.js';
+import { BOTS, BOTS_SCHEME, botsIn, botsReducer, mayChangeBots, type BotRecord, type BotsState } from '../../resources/bots/catalogue.js';
 import { BotPopover } from '../../resources/bots/layer/BotPopover.js';
 import { botsInShownChats, shownMountKeys } from '../../resources/bots/layer/shown.js';
 import { done } from '../notify/say.js';
@@ -582,7 +584,11 @@ export default function DockLayer(): ReactElement | null {
               ['ahp.openBot', 'bots/commands/open'],
               ['ahp.editBot', 'bots/actions/edit'],
               ['ahp.deleteBot', 'bots/actions/delete'],
-            ] as const).map(([command, word, place]) => ({
+            ] as const).filter(([command]) => {
+              if (command !== 'ahp.editBot' && command !== 'ahp.deleteBot') return true;
+              const { host } = refOf(menu.key);
+              return mayChangeBots(scena.store.get<Offers>(ahpPaths(host).offers) ?? NO_OFFERS, ownGrantsOf(scena, host), command === 'ahp.editBot' ? 'put' : 'delete');
+            }).map(([command, word, place]) => ({
               title: t(word),
               // The group's label heads the menu, so it says which bot it is for.
               group: menuBot.name,

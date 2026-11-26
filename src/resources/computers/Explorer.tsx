@@ -5,6 +5,7 @@ import { ahpPaths } from '../../bridges/data.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
 import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
+import { useOwnGrantsOnEach } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList, type Dot, type Row } from '../../shell/explorer/ExplorerList.js';
@@ -27,6 +28,7 @@ export default function ComputerExplorer(): ReactElement {
   const multi = embedMode() === 'multi';
   const { states, errors } = useChannelOnEach<ComputersState>(hosts, COMPUTERS, computersReducer);
   const offers = useEach<Offers>(hosts.map((host) => ahpPaths(host).offers));
+  const grants = useOwnGrantsOnEach(hosts, offers);
   const active = useStore<{ host: string; id: string }>(ACTIVE_COMPUTER);
   const grouping = useStore<ComputerGroup | null>(COMPUTERS_GROUP) ?? 'none';
   const filter = useStore<ComputerFilter | null>(COMPUTERS_FILTER) ?? 'all';
@@ -38,11 +40,11 @@ export default function ComputerExplorer(): ReactElement {
   const rows = useMemo<Row[]>(() => {
     const listed = hosts.flatMap((host, at) => (states[at]?.records ?? []).map(({ id, record }) => {
       const facts = factsOf(record);
-      return { host, id, facts, offers: offers[at] ?? NO_OFFERS, item: { host, hostName: hostName(host), standing: standingOf(facts) } };
+      return { host, id, facts, offers: offers[at] ?? NO_OFFERS, grants: grants[at] ?? null, item: { host, hostName: hostName(host), standing: standingOf(facts) } };
     }))
       .filter((one) => keeps(one.item, filter))
       .sort((a, b) => a.id.localeCompare(b.id));
-    return arrange(listed, (one) => groupOf(one.item, grouping)).map(({ host, id, facts, offers: held, item }) => {
+    return arrange(listed, (one) => groupOf(one.item, grouping)).map(({ host, id, facts, offers: held, grants: mine, item }) => {
       const inGroup = groupOf(item, grouping);
       const running = item.standing === 'running';
       return {
@@ -54,15 +56,15 @@ export default function ComputerExplorer(): ReactElement {
           [multi && grouping !== 'host' ? hostName(host) : undefined, facts.image ?? facts.destination, t(`computers/standing/${item.standing}`)]
             .filter((bit) => bit !== undefined).join(' \u{00B7} '),
         ],
-        menu: menuOf(host, held, id, item.standing, facts.controlled, () => open(refKey(host, id))),
-        ...(facts.controlled && may(held, 'write')
+        menu: menuOf(host, held, mine, id, item.standing, facts.controlled, () => open(refKey(host, id))),
+        ...(facts.controlled && may(held, mine, 'write')
           ? { action: { icon: running ? EMOJIcon.stop : EMOJIcon.run, label: t(running ? 'computers/actions/stop' : 'computers/actions/start'), run: () => void act(host, held, id, running ? 'stop' : 'start') } }
           : {}),
         ...(inGroup === undefined ? {} : { group: inGroup }),
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hosts, states, offers, hostName, grouping, filter, t]);
+  }, [hosts, states, offers, grants, hostName, grouping, filter, t]);
 
   // One host's notice in mono; in multi a host that is down says so in its own place.
   const error = multi ? null : errors[0] ?? null;
