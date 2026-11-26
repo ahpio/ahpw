@@ -1937,6 +1937,7 @@
       "gone": "This session no longer exists.",
       "starting": "Starting the session",
       "notStarted": "The session couldn't start",
+      "toEnd": "Go to the newest turn",
       "noReason": "No reason given.",
       "sessionUnreadable": "Couldn't load the session",
       "chatUnreadable": "Couldn't load the chat",

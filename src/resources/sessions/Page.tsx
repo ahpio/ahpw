@@ -313,6 +313,8 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const end = useRef<HTMLDivElement>(null);
   // Following the newest turn, until a person scrolls up to read an older one.
   const following = useRef(true);
+  // Whether the chat has more below what shows, which offers the button that goes to its end.
+  const [below, setBelow] = useState(false);
   // The session's info, shown in place of the chat, and where the chat was scrolled when it opened.
   const [infoOpen, setInfoOpen] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
@@ -419,9 +421,37 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const open = useOpenQuestions(host, session.state?.inputNeeded, chatUri, chat.state?.activeTurn);
   // Grows with every delta, so the view follows text as it streams, not only new parts.
   const streamed = (chat.state?.activeTurn?.responseParts ?? []).reduce((total, part) => total + 1 + ('content' in part && typeof part.content === 'string' ? part.content.length : 0), 0);
+  // Another session or chat opens at its newest turn, wherever the last one was read.
+  useEffect(() => {
+    following.current = true;
+    setBelow(false);
+  }, [resource, chatUri]);
   useEffect(() => {
     if (following.current && !infoOpen && active?.highlight !== true) end.current?.scrollIntoView({ block: 'end' });
   }, [turns, streamed, infoOpen, active]);
+  // Read by the watcher below, which outlives a render.
+  const pinned = useRef(false);
+  pinned.current = !infoOpen && active?.highlight !== true;
+  // A tab drawn while hidden cannot scroll, and a turn can grow after it is drawn (code, images, a part that opens);
+  // the box is drawn once the summary is read, and from then on, when it or anything in it changes size, a reader following the chat stays at its newest turn.
+  useEffect(() => {
+    const box = scroller.current;
+    if (box === null || typeof ResizeObserver === 'undefined') return;
+    const follow = (): void => {
+      if (following.current && pinned.current) end.current?.scrollIntoView({ block: 'end' });
+    };
+    const sizes = new ResizeObserver(follow);
+    sizes.observe(box);
+    for (const child of box.children) sizes.observe(child);
+    const added = new MutationObserver((changes) => {
+      for (const change of changes) for (const node of change.addedNodes) if (node instanceof Element) sizes.observe(node);
+    });
+    added.observe(box, { childList: true });
+    return () => {
+      added.disconnect();
+      sizes.disconnect();
+    };
+  }, [summary === undefined]);
 
   // Opening a session reads it, and so does a turn that ends while it is open; a Mark unread holds until then.
   const unread = !beside && summary !== undefined && !isRead(summary.status);
@@ -531,6 +561,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           if (infoOpen || active !== null) return;
           const box = event.currentTarget;
           following.current = box.scrollHeight - box.scrollTop - box.clientHeight < 48;
+          setBelow(!following.current);
         }}
       >
         {/* Inside the scroll, so the turns pass under its faded bottom edge. */}
@@ -580,6 +611,21 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
         )}
         <div ref={end} />
       </div>
+      {below && !infoOpen && active === null ? (
+        <div className="web-chat__to-end">
+          <button
+            type="button"
+            className="web-chat__to-end-button"
+            aria-label={t('sessions/chat/toEnd')}
+            title={t('sessions/chat/toEnd')}
+            onClick={() => {
+              following.current = true;
+              setBelow(false);
+              end.current?.scrollIntoView({ block: 'end' });
+            }}
+          >{EMOJIcon.toEnd}</button>
+        </div>
+      ) : null}
 
       {chat.state === undefined || chatUri === undefined ? null : (
         <Composer

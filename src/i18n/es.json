@@ -1937,6 +1937,7 @@
       "gone": "Esta sesión ya no existe.",
       "starting": "Iniciando la sesión",
       "notStarted": "No se pudo iniciar la sesión",
+      "toEnd": "Ir al turno más reciente",
       "noReason": "No se indicó el motivo.",
       "sessionUnreadable": "No se pudo cargar la sesión",
       "chatUnreadable": "No se pudo cargar el chat",

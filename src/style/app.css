@@ -257,6 +257,38 @@
   margin-inline: var(--web-chat-gutter);
 }
 
+/* Holds no room between the scroll and the composer; its button floats over the end of the turns. */
+.web-chat__to-end {
+  position: relative;
+  flex: none;
+  height: 0;
+}
+
+/* In the canvas's color with a border, so it does not read as a second send button. */
+.web-chat__to-end-button {
+  position: absolute;
+  z-index: 2;
+  right: var(--web-composer-gutter);
+  bottom: var(--oo-spacing-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 50%;
+  background: var(--oo-color-canvas);
+  color: var(--oo-color-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.web-chat__to-end-button:hover {
+  border-color: var(--oo-color-primary);
+  color: var(--oo-color-primary);
+}
+
 .web-turn {
   display: flex;
   flex-direction: column;
