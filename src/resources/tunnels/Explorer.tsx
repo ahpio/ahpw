@@ -3,7 +3,10 @@ import { useI18n, useScena, useStore } from '@softov/scena/react';
 import type { PickerAction } from '@softov/scena/types';
 import { Alert, Spinner } from '@softov/scena/ui';
 import { useChannelOnEach } from '../../bridges/channel.js';
-import { refKey, refOf, useHostNames, useShownHosts } from '../../bridges/hosts.js';
+import { ahpPaths } from '../../bridges/data.js';
+import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
+import type { Offers } from '../../bridges/offers.js';
+import { runnableBy, useOwnGrantsOnEach } from '../../bridges/own-grants.js';
 import { rowOperations } from '../../bridges/operations.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { copyText } from '../../shell/controls/CopyButton.js';
@@ -22,6 +25,8 @@ export default function TunnelExplorer(): ReactElement {
   const hostName = useHostNames();
   const multi = embedMode() === 'multi';
   const { states, errors } = useChannelOnEach<TunnelsState>(hosts, TUNNELS, tunnelsReducer);
+  const offers = useEach<Offers>(hosts.map((host) => ahpPaths(host).offers));
+  const grants = useOwnGrantsOnEach(hosts, offers);
   const active = useStore<{ host: string; id: string }>(ACTIVE_TUNNEL);
   const open = (key: string): void => {
     const { host, id } = refOf(key);
@@ -29,9 +34,9 @@ export default function TunnelExplorer(): ReactElement {
   };
 
   const rows = useMemo<Row[]>(() => hosts
-    .flatMap((host, at) => (states[at]?.records ?? []).map(({ id, record }) => ({ host, id, record, state: states[at] })))
+    .flatMap((host, at) => (states[at]?.records ?? []).map(({ id, record }) => ({ host, id, record, state: states[at], mine: grants[at] ?? null })))
     .sort((a, b) => a.id.localeCompare(b.id))
-    .map(({ host, id, record, state }) => {
+    .map(({ host, id, record, state, mine }) => {
       const facts = factsOf(record);
       const word = t(`tunnels/status/${statusKey(facts)}`);
       const place = { host, channel: TUNNELS, target: id, held: facts.settings };
@@ -39,7 +44,7 @@ export default function TunnelExplorer(): ReactElement {
       const menu: PickerAction[] = [
         item(t('tunnels/actions/open'), () => open(refKey(host, id))),
         ...(facts.url === undefined ? [] : [item(t('tunnels/actions/copyUrl'), () => void copyText(facts.url!))]),
-        ...operationItems(scena, place, rowOperations(state, record)),
+        ...operationItems(scena, place, runnableBy(rowOperations(state, record), mine)),
         item(t('tunnels/actions/copyId'), () => void copyText(id), { group: 'more' }),
       ];
       return {
@@ -52,7 +57,7 @@ export default function TunnelExplorer(): ReactElement {
       };
     }),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [hosts, states, hostName, multi, t]);
+  [hosts, states, grants, hostName, multi, t]);
 
   const error = multi ? null : errors[0] ?? null;
   const state = multi ? states.find((one) => one !== undefined) : states[0];

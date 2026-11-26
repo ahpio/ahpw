@@ -6,6 +6,9 @@ export const ACTIVE_BOT = '$/ahp/activeBot' as BindingPath;
 /** Whether any host this page connects to serves bots; their activity bar entry and layer show while it does. */
 export const BOTS_SERVED = '$/ahp/bots/served' as BindingPath;
 
+/** Whether the reader may make a bot on any host this page connects to; the list's + shows while they may. */
+export const MAY_ADD_BOT = '$/ahp/bots/mayAdd' as BindingPath;
+
 /** The bot whose chat is being opened, as `refKey(host, slug)`, or null. */
 export const BOT_CHAT_OPENING = '$/ahp/bots/chatOpening' as BindingPath;
 

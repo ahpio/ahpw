@@ -1,6 +1,7 @@
 import { translate } from '@softov/scena';
 import type { PickerAction } from '@softov/scena/types';
 import { allows, type Offers } from '../../bridges/offers.js';
+import { mayDo, type OwnGrants } from '../../bridges/own-grants.js';
 import { confirm, failed } from '../../shell/notify/index.js';
 import { copyText } from '../../shell/controls/CopyButton.js';
 import { actOn, COMPUTER_PROVIDER, type ComputerAction, type Standing } from './machines.js';
@@ -18,23 +19,29 @@ export async function act(host: string, offers: Offers, id: string, action: Comp
   await actOn(host, offers, id, action).catch(say);
 }
 
-/** Whether the host lets this client write or delete its computers. */
-export function may(offers: Offers, operation: 'write' | 'delete'): boolean {
+/** Whether the host lets this client write or delete its computers, and the reader holds the grant for it. */
+export function may(offers: Offers, grants: OwnGrants, operation: 'write' | 'delete'): boolean {
   const provider = offers.providers[COMPUTER_PROVIDER];
-  return provider !== undefined && allows(provider, operation);
+  return provider !== undefined && allows(provider, operation) && mayDo(grants, operation === 'write' ? 'computer:put' : 'computer:delete');
 }
 
-/** What a computer's menu offers, as far as the host lets this client write or delete. */
-export function menuOf(host: string, offers: Offers, id: string, standing: Standing, controlled: boolean, open: () => void): PickerAction[] {
+/** Whether the host takes writes to its computers, whoever asks. */
+export function writable(offers: Offers): boolean {
+  const provider = offers.providers[COMPUTER_PROVIDER];
+  return provider !== undefined && allows(provider, 'write');
+}
+
+/** What a computer's menu offers, as far as the host and the reader's grants let them write or delete. */
+export function menuOf(host: string, offers: Offers, grants: OwnGrants, id: string, standing: Standing, controlled: boolean, open: () => void): PickerAction[] {
   const item = (title: string, run: () => void, extra: Partial<PickerAction> = {}): PickerAction => ({ title, onSelect: (menu) => { menu.closeMenu(); run(); }, ...extra });
   const items: PickerAction[] = [item(translate('computers/actions/open'), open)];
-  if (controlled && may(offers, 'write')) {
+  if (controlled && may(offers, grants, 'write')) {
     items.push(standing === 'running'
       ? item(translate('computers/actions/stop'), () => void act(host, offers, id, 'stop'))
       : item(translate('computers/actions/start'), () => void act(host, offers, id, 'start')));
     if (standing === 'running') items.push(item(translate('computers/actions/restart'), () => void act(host, offers, id, 'restart')));
   }
   items.push(item(translate('computers/actions/copyName'), () => void copyText(id), { group: 'more' }));
-  if (controlled && may(offers, 'delete')) items.push(item(translate('computers/actions/remove'), () => void act(host, offers, id, 'remove'), { group: 'more', color: 'red' }));
+  if (controlled && may(offers, grants, 'delete')) items.push(item(translate('computers/actions/remove'), () => void act(host, offers, id, 'remove'), { group: 'more', color: 'red' }));
   return items;
 }

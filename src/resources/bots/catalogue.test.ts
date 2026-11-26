@@ -7,9 +7,10 @@ const writeText = vi.fn();
 const deleteResource = vi.fn();
 vi.mock('../../bridges/data.js', () => ({ hostBridge: () => ({ readText, request, writeResource, writeText, deleteResource }) }));
 
-const { botsIn, botsReducer, deleteBot, editBot, makeBot, openBotChat, readBotChat, sendsTalks, servesBotChats } = await import('./catalogue.js');
+const { botsIn, botsReducer, deleteBot, editBot, makeBot, mayChangeBots, openBotChat, readBotChat, sendsTalks, servesBotChats } = await import('./catalogue.js');
 import type { BotRecord, BotsState } from './catalogue.js';
 import { draftOf, freshLook, parseLabels, recordBody } from './draft.js';
+import { NO_OFFERS } from '../../bridges/offers.js';
 
 const bot = (id: string, extra: Partial<BotRecord> = {}): BotRecord => ({
   id, name: id, labels: [], body: 'robot', color: 'blue', workspace: `/bots/${id}`, owner: 'user:me',
@@ -127,5 +128,21 @@ describe('bot chats', () => {
       expect(made).toMatch(/^ahp-session:\//);
       expect(request).toHaveBeenCalledWith('createSession', { channel: made, provider: 'bot-chat', config: { bot: 'telly' } });
     });
+  });
+});
+
+describe('mayChangeBots', () => {
+  const commands = { ...NO_OFFERS, methods: ['x-ahpd/bots/put', 'x-ahpd/bots/remove'] };
+  const writes = { ...NO_OFFERS, providers: { bot: { title: '', root: 'bot://', operations: ['list', 'read', 'write'] } } };
+
+  it('asks for a host that takes the change and for its grant', () => {
+    expect(mayChangeBots(commands, ['bot:put'], 'put')).toBe(true);
+    expect(mayChangeBots(commands, ['bot:put'], 'delete')).toBe(false);
+    expect(mayChangeBots(commands, ['bot:read'], 'put')).toBe(false);
+    expect(mayChangeBots(commands, null, 'delete')).toBe(true);
+    // A host without the commands takes what its provider writes.
+    expect(mayChangeBots(writes, null, 'put')).toBe(true);
+    expect(mayChangeBots(writes, null, 'delete')).toBe(false);
+    expect(mayChangeBots(NO_OFFERS, null, 'put')).toBe(false);
   });
 });

@@ -6,8 +6,9 @@ import { useChannel } from '../../bridges/channel.js';
 import type { ChatSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths, channelPath, titlePath, type HostFacts } from '../../bridges/data.js';
 import { useEach } from '../../bridges/hosts.js';
-import type { Offers } from '../../bridges/offers.js';
+import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { rowOperations } from '../../bridges/operations.js';
+import { runnableBy, useOwnGrants } from '../../bridges/own-grants.js';
 import { elapsed } from '../../bridges/words.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
@@ -185,6 +186,7 @@ export default function ClientPage({ host, client: id }: { host: string; client?
   const { t } = useI18n();
   const { state, error } = useChannel<ClientsState>(host, CLIENTS, clientsReducer);
   const mine = useStore<HostFacts | null>(ahpPaths(host).host)?.clientId;
+  const grants = useOwnGrants(host, useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS);
   const entry = state?.records.find((one) => one.id === id);
   const facts = entry === undefined ? undefined : factsOf(entry.record);
   const now = useNow(facts !== undefined);
@@ -195,7 +197,7 @@ export default function ClientPage({ host, client: id }: { host: string; client?
   if (entry === undefined || facts === undefined || id === undefined) return <PageAlert tone="warning" message={t('clients/notices/gone')} />;
 
   const own = mine !== undefined && facts.clientId === mine;
-  const operations = rowOperations(state, entry.record);
+  const operations = runnableBy(rowOperations(state, entry.record), grants);
   const place = { host, channel: CLIENTS, target: id };
   const traffic = trafficList(facts, rate, now);
   // Its own connection is never idle while this page draws it, so the two badges never meet.

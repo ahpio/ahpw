@@ -6,12 +6,13 @@ import { ahpPaths, channelPath, hostBridge } from '../../bridges/data.js';
 import { HOST_FILTER_ACTION, hostNameOf, shownHosts } from '../../bridges/hosts.js';
 import { listOperations } from '../../bridges/operations.js';
 import type { Offers } from '../../bridges/offers.js';
+import { ownGrantsOf, runnableBy, trackMay } from '../../bridges/own-grants.js';
 import { trackServed } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { EMOJIcon } from '../emojis.js';
 import { english } from '../../i18n/locales.js';
 import { listChoices, runOperation } from '../operations/run.js';
-import { ACTIVE_TUNNEL, TUNNELS_SERVED } from './state.js';
+import { ACTIVE_TUNNEL, MAY_ADD_TUNNEL, TUNNELS_SERVED } from './state.js';
 import { TUNNELS, TUNNELS_SCHEME, type TunnelsState } from './tunnels.js';
 
 /** The display size class the modus backend publishes. */
@@ -35,6 +36,12 @@ const servingHosts = (scena: Scena): string[] => shownHosts(scena.store).filter(
 export function registerTunnels(scena: Scena): Disposable {
   return combineDisposables(
     trackServed(scena, TUNNELS_SCHEME, TUNNELS_SERVED, []),
+    trackMay(
+      scena,
+      MAY_ADD_TUNNEL,
+      (offers, grants, host) => serving(offers) && runnableBy(listOperations(scena.store.get<TunnelsState>(channelPath(host, TUNNELS))), grants).length > 0,
+      (host) => [channelPath(host, TUNNELS)],
+    ),
     scena.components.register({
       component: 'TunnelExplorer',
       category: 'page',
@@ -42,7 +49,7 @@ export function registerTunnels(scena: Scena): Disposable {
       props: {
         title: { t: 'tunnels/explorer/title' },
         actions: [
-          { command: 'tunnels.new', icon: '+', label: { t: 'tunnels/commands/new' } },
+          { command: 'tunnels.new', icon: '+', label: { t: 'tunnels/commands/new' }, when: `${MAY_ADD_TUNNEL} == true` },
           { command: 'tunnels.reload', icon: EMOJIcon.reload, label: { t: 'common/reload' } },
           HOST_FILTER_ACTION,
         ],
@@ -65,12 +72,12 @@ export function registerTunnels(scena: Scena): Disposable {
       keywords: [english('tunnels/commands/new')],
       category: 'Tunnels',
       slots: [PALETTE_SLOT],
-      when: () => scena.store.get<boolean>(TUNNELS_SERVED) === true,
+      when: () => scena.store.get<boolean>(MAY_ADD_TUNNEL) === true,
       run: (ctx) => {
         const multi = embedMode() === 'multi';
         // Every kind's create, on every shown host that lists its tunnels.
         const choices = servingHosts(ctx.scena).flatMap((host) =>
-          listOperations(ctx.store.get<TunnelsState>(channelPath(host, TUNNELS))).map((operation) => ({
+          runnableBy(listOperations(ctx.store.get<TunnelsState>(channelPath(host, TUNNELS))), ownGrantsOf(ctx.scena, host)).map((operation) => ({
             place: { host, channel: TUNNELS, opens: 'ahp.openTunnel' },
             operation,
             ...(multi ? { hostName: hostNameOf(ctx.store, host) } : {}),

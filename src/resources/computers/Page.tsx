@@ -5,6 +5,7 @@ import { Badge, Button, DetailList, Progress, Text, type DetailItem } from '@sof
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
+import { useOwnGrants } from '../../bridges/own-grants.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
@@ -73,6 +74,7 @@ export default function ComputerPage({ host, machine: id }: { host: string; mach
   const { t } = useI18n();
   const { state, error } = useChannel<ComputersState>(host, COMPUTERS, computersReducer);
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
+  const grants = useOwnGrants(host, offers);
   const entry = state?.records.find((one) => one.id === id);
   const running = entry === undefined ? false : factsOf(entry.record).running;
   const [usage, setUsage] = useState<Usage | null>(null);
@@ -101,7 +103,7 @@ export default function ComputerPage({ host, machine: id }: { host: string; mach
 
   const facts = factsOf(entry.record);
   const standing = standingOf(facts);
-  const writable = facts.controlled && may(offers, 'write');
+  const writable = facts.controlled && may(offers, grants, 'write');
 
   return (
     <div className="web-page">
@@ -154,7 +156,7 @@ export default function ComputerPage({ host, machine: id }: { host: string; mach
         <pre>{JSON.stringify(entry.record.status, null, 2)}</pre>
       </details>
 
-      {facts.controlled && may(offers, 'delete') ? <DangerZone label={t('computers/actions/remove')} onClick={() => void act(host, offers, id, 'remove')} /> : null}
+      {facts.controlled && may(offers, grants, 'delete') ? <DangerZone label={t('computers/actions/remove')} onClick={() => void act(host, offers, id, 'remove')} /> : null}
     </div>
   );
 }

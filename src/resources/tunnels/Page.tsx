@@ -1,10 +1,13 @@
 import type { ReactElement } from 'react';
 import { translate } from '@softov/scena';
-import { useI18n } from '@softov/scena/react';
+import { useI18n, useStore } from '@softov/scena/react';
 import { Alert, Badge, DetailList, Text, type DetailItem } from '@softov/scena/ui';
 import { useChannel } from '../../bridges/channel.js';
 import { isSecretRef } from '../../bridges/connectors.js';
+import { ahpPaths } from '../../bridges/data.js';
+import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { rowOperations } from '../../bridges/operations.js';
+import { runnableBy, useOwnGrants } from '../../bridges/own-grants.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { PageTitle } from '../../shell/HostIcon.js';
@@ -50,6 +53,7 @@ export default function TunnelPage({ host, tunnel: id }: { host: string; tunnel?
   const { t } = useI18n();
   const { state, error } = useChannel<TunnelsState>(host, TUNNELS, tunnelsReducer);
   const entry = state?.records.find((one) => one.id === id);
+  const grants = useOwnGrants(host, useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS);
 
   if (error !== null) return <PageAlert tone="danger" title={t('tunnels/notices/none')} message={error} />;
   if (state === undefined) return <PageSpinner label={t('tunnels/notices/reading')} />;
@@ -57,7 +61,7 @@ export default function TunnelPage({ host, tunnel: id }: { host: string; tunnel?
 
   const facts = factsOf(entry.record);
   const key = statusKey(facts);
-  const operations = rowOperations(state, entry.record);
+  const operations = runnableBy(rowOperations(state, entry.record), grants);
   const place = { host, channel: TUNNELS, target: id, held: facts.settings };
   const settings = settingsList(kindSchema(state, facts.kind), facts);
   const failedOperation = facts.operation?.status === 'error' ? facts.operation : undefined;

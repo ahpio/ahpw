@@ -6,13 +6,14 @@ import { hideOverlaidSidebar } from '../sessions/index.js';
 import { ahpPaths, channelPath, hostBridge } from '../../bridges/data.js';
 import { HOST_FILTER_ACTION, refKey, shownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
+import { ownGrantsOf, trackMay } from '../../bridges/own-grants.js';
 import { trackServed } from '../../bridges/served.js';
 import { choose, confirm, failed, warn } from '../../shell/notify/index.js';
 import { readLastHost, startHost } from '../sessions/last-host.js';
 import { EMOJIcon } from '../emojis.js';
 import { bound, english } from '../../i18n/locales.js';
-import { BOTS, BOTS_SCHEME, botsIn, deleteBot, openBotChat, sendsTalks, servesBotChats, type BotsState } from './catalogue.js';
-import { ACTIVE_BOT, BOT_CHAT_OPENING, BOT_EDIT_ASKED, BOTS_SERVED } from './state.js';
+import { BOTS, BOTS_SCHEME, botsIn, deleteBot, mayChangeBots, openBotChat, sendsTalks, servesBotChats, type BotsState } from './catalogue.js';
+import { ACTIVE_BOT, BOT_CHAT_OPENING, BOT_EDIT_ASKED, BOTS_SERVED, MAY_ADD_BOT } from './state.js';
 import { BOT_CHAT_OPENS, type ChatPlace } from './sidebar.js';
 
 /** The display size class the modus backend publishes. */
@@ -62,6 +63,7 @@ export function registerBots(scena: Scena): Disposable {
   };
   return combineDisposables(
     trackServed(scena, BOTS_SCHEME, BOTS_SERVED),
+    trackMay(scena, MAY_ADD_BOT, (offers, grants) => serving(offers) && mayChangeBots(offers, grants, 'put')),
     scena.components.register({
       component: 'BotExplorer',
       category: 'page',
@@ -69,7 +71,7 @@ export function registerBots(scena: Scena): Disposable {
       props: {
         title: { t: 'bots/explorer/title' },
         actions: [
-          { command: 'ahp.newBot', icon: '+', label: { t: 'bots/commands/new' } },
+          { command: 'ahp.newBot', icon: '+', label: { t: 'bots/commands/new' }, when: `${MAY_ADD_BOT} == true` },
           { command: 'bots.reload', icon: EMOJIcon.reload, label: { t: 'common/reload' } },
           HOST_FILTER_ACTION,
         ],
@@ -99,10 +101,13 @@ export function registerBots(scena: Scena): Disposable {
       keywords: [english('bots/commands/new')],
       category: 'Bots',
       slots: [PALETTE_SLOT],
-      when: () => scena.store.get<boolean>(BOTS_SERVED) === true,
+      when: () => scena.store.get<boolean>(MAY_ADD_BOT) === true,
       run: (ctx, args) => {
         const given = (args as { host?: string } | undefined)?.host;
-        const hosts = shownHosts(ctx.store).filter((host) => serving(ctx.store.get<Offers>(ahpPaths(host).offers)));
+        const hosts = shownHosts(ctx.store).filter((host) => {
+          const offers = ctx.store.get<Offers>(ahpPaths(host).offers);
+          return serving(offers) && offers !== undefined && mayChangeBots(offers, ownGrantsOf(scena, host), 'put');
+        });
         const host = given ?? startHost(hosts, readLastHost());
         if (host !== undefined) open('bot:new', { component: 'BotEditPage', host }, bound('bots/commands/new'));
       },

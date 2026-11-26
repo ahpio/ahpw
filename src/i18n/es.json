@@ -979,6 +979,7 @@
       "nameSlash": "Los nombres no pueden contener / \\ ni ?.",
       "nameDots": "Los nombres no pueden ser . ni ..",
       "noCreate": "Este host no permite crear computadoras.",
+      "noPermission": "No tienes permiso para crear computadoras.",
       "create": "Crear",
       "cancel": "Cancelar"
     }
