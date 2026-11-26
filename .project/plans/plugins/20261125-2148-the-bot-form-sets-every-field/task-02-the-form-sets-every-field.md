@@ -1,6 +1,6 @@
 ---
 title: The form sets every field
-status: todo
+status: doing
 depends:
   - task-01-a-mockup-of-the-form.md
 layer: "bots"
@@ -36,7 +36,7 @@ The bot form sets each field as the mockup draws it, and the bot page shows the 
 
 ## Validation
 
-- `draft.test.ts`: each field is written and read back, an untouched one is absent, and an emptied one is blank.
+- `draft.test.ts`: each field reads back as written. An untouched field is absent. An emptied field is blank.
 - `pnpm typecheck` and the ahpw suite pass.
 - By hand on a test daemon: the five states, at two sizes.
 

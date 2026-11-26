@@ -1,6 +1,6 @@
 ---
 title: A mockup of the form
-status: doing
+status: done
 depends: []
 layer: "bots"
 refs:
@@ -26,4 +26,4 @@ Softov accepts a mockup of the form before the form code.
 
 ## Resume
 
-Drawn on 2026-11-25. The wait is for Softov.
+Drawn and accepted on 2026-11-25.
