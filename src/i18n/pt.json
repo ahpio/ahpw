@@ -2551,7 +2551,7 @@
         },
         "sessionOpens": {
           "title": "Sessão",
-          "description": "Onde uma sessão abre na primeira vez. Uma sessão aberta é mostrada onde está.",
+          "description": "Onde uma sessão e a página Nova sessão abrem na primeira vez. Uma sessão aberta é mostrada onde está, e uma sessão nova abre onde estava sua página Nova sessão.",
           "main": "Área principal",
           "right": "Barra lateral direita"
         },

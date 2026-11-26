@@ -64,7 +64,19 @@ export default function SettingsWindow({ host }: { host: string }): ReactElement
     self.current?.focus();
     const refit = (): void => setBox((current) => clamp(current));
     window.addEventListener('resize', refit);
-    return () => window.removeEventListener('resize', refit);
+    // Escape closes the window from inside it, and when nothing has the focus: a tab
+    // switched inside takes the focused control away, and the focus falls to the page.
+    // A menu inside closes on its own Escape and marks it used.
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      const at = event.target;
+      if (at === document.body || at === document.documentElement || (at instanceof Node && self.current?.contains(at) === true)) close();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('resize', refit);
+      window.removeEventListener('keydown', onKey);
+    };
   }, []);
 
   /** Follow the pointer from a press on the title bar or the corner, and keep the box where it is let go. */
@@ -105,10 +117,6 @@ export default function SettingsWindow({ host }: { host: string }): ReactElement
       role="dialog"
       aria-label={title}
       tabIndex={-1}
-      onKeyDown={(event) => {
-        // A menu inside closes on its own Escape and marks it used.
-        if (event.key === 'Escape' && !event.defaultPrevented) close();
-      }}
     >
       <div
         className="web-settings-window__bar"

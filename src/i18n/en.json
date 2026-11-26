@@ -2551,7 +2551,7 @@
         },
         "sessionOpens": {
           "title": "Session",
-          "description": "Where a session opens the first time. An open session is shown where it is.",
+          "description": "Where a session and the New session page open the first time. An open session is shown where it is, and a new session opens where its New session page was.",
           "main": "Main area",
           "right": "Right sidebar"
         },

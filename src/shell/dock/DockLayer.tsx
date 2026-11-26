@@ -392,7 +392,7 @@ export default function DockLayer(): ReactElement | null {
     const name = t(`shell/dock/${one.id}`);
     const own: PickerAction[] = one.id === 'newSession'
       ? [
-          { title: t('shell/dock/newSession'), icon: '+', keys: keysOf(one), group: name, onSelect: (host) => { host.closeMenu(); void scena.commands.execute('ahp.newSession'); } },
+          { title: t('shell/dock/newSession'), icon: '+', keys: keysOf(one), group: name, onSelect: (host) => { host.closeMenu(); void scena.commands.execute('ahp.newSession', { place: 'main' }); } },
           { title: t('shell/dock/newSessionRight'), icon: '▣', group: name, onSelect: (host) => { host.closeMenu(); void scena.commands.execute('ahp.newSession', { place: 'right' }); } },
         ]
       : [

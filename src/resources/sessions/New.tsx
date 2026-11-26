@@ -10,6 +10,8 @@ import { askTrust } from '../../bridges/trust-ask.js';
 import { HOST_LIST, hostLabel, useEach, useHostNames, type HostName } from '../../bridges/hosts.js';
 import { embedder, embedMode } from '../../shell/embed/index.js';
 import { readLastHost, startHost, writeLastHost } from './last-host.js';
+import { surfaceOf } from './beside.js';
+import { RIGHT_SIDEBAR } from '../../shell/right-sidebar.js';
 import { folderLabel, folderUri, newId } from '../../bridges/words.js';
 import { fitToText, messageOf } from './Composer.js';
 import { AddButton, Attached } from './Attached.js';
@@ -529,7 +531,9 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
       } as never);
       writeLastHost(host);
       writeLastChoice(host, provider, model, config);
-      await scena.commands.execute('ahp.openSession', { host, resource });
+      // The session takes the page's place: on the right sidebar if the page is there, else on `main`.
+      const place = surfaceOf(scena, 'session:new') === RIGHT_SIDEBAR ? 'right' : 'main';
+      await scena.commands.execute('ahp.openSession', { host, resource, place });
       scena.surfaces.close('session:new');
       if (said !== '' || attachments.length > 0) {
         const state = await hostBridge(host).readOnce<SessionState>(resource);
