@@ -1,6 +1,6 @@
 ---
 title: The form sets every field
-status: doing
+status: done
 depends:
   - task-01-a-mockup-of-the-form.md
 layer: "bots"
@@ -41,3 +41,5 @@ The bot form sets each field as the mockup draws it, and the bot page shows the 
 - By hand on a test daemon: the five states, at two sizes.
 
 ## Resume
+
+Built on 2026-11-25, as [implemented.md](implemented.md) says.

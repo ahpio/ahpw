@@ -10,9 +10,12 @@ import { embedMode } from '../../shell/embed/index.js';
 import { Field } from '../../shell/view/Field.js';
 import { PageAlert } from '../../shell/view/PageAlert.js';
 import { writeLastHost } from '../sessions/last-host.js';
+import { useMe } from '../../bridges/me.js';
+import { membershipParts } from '../users/memberships.js';
+import { BotFields } from './BotFields.js';
 import { Bood } from './Bood.js';
-import { BOT_PROVIDER, BOTS, BOTS_SCHEME, botsIn, botsReducer, editBot, makeBot, type BotsState } from './catalogue.js';
-import { draftOf, recordBody, renamedFor, type BotDraft } from './draft.js';
+import { BOT_PROVIDER, BOTS, BOTS_SCHEME, botsIn, botsReducer, editBot, makeBot, type BotRecord, type BotsState } from './catalogue.js';
+import { connectorsValid, draftOf, recordBody, renamedFor, type BotDraft } from './draft.js';
 import { BOT_BODIES, COLOR_HEX, knowsBody, slugOf } from './look.js';
 import { PageSpinner } from '../../shell/view/PageSpinner.js';
 
@@ -26,6 +29,32 @@ function hostOwnerOf(offers: Offers): string | undefined {
   return typeof root?.const === 'string' ? root.const : undefined;
 }
 
+/** The owners a person may give a new bot: themselves, each team and project they belong to, and the host where it offers itself. */
+function ownerChoices(memberships: readonly string[], hostOwner: string | undefined, words: { me: string; host: string; team: (team: string) => string; project: (team: string, project: string) => string }): { value: string; label: string }[] {
+  const held = [...new Set(memberships)].sort().map((one) => {
+    const { team, project } = membershipParts(one);
+    return project === null ? { value: `team:${team}`, label: words.team(team) } : { value: `project:${team}:${project}`, label: words.project(team, project) };
+  });
+  return [{ value: '', label: words.me }, ...held, ...(hostOwner === undefined ? [] : [{ value: hostOwner, label: words.host }])];
+}
+
+/** How an owner reads: `root:` is this host, a team or project by its name, anyone else as the host says it. */
+function ownerLabel(owner: string, words: { host: string; team: (team: string) => string; project: (team: string, project: string) => string }): string {
+  if (owner.startsWith('root:')) return words.host;
+  if (owner.startsWith('team:')) return words.team(owner.slice('team:'.length));
+  if (owner.startsWith('project:')) {
+    const { team, project } = membershipParts(owner.slice('project:'.length));
+    return project === null ? words.team(team) : words.project(team, project);
+  }
+  return owner;
+}
+
+/** Where a new bot's folder goes when it names none: beside the host's other bots, as their folders show it. */
+function folderBeside(bots: readonly BotRecord[], slug: string): string {
+  const own = bots.find((one) => one.workspace.endsWith(`/${one.id}`) || one.workspace.endsWith(`\\${one.id}`));
+  return own === undefined ? '' : `${own.workspace.slice(0, own.workspace.length - own.id.length)}${slug}`;
+}
+
 /** What a form that ended says: the bot it saved, or nothing when it was cancelled. */
 export type BotFormDone = (saved?: { slug: string; name: string }) => void;
 
@@ -37,6 +66,7 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
   const hostName = useHostNames();
   const [host, setHost] = useState(opened);
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
+  const me = useMe(host);
   const { state, error } = useChannel<BotsState>(host, BOTS, botsReducer);
   const [draft, setDraft] = useState<BotDraft | null>(null);
   // The form's start, drawn once: a new bot's look is random.
@@ -54,15 +84,22 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
   const start = first.current;
   const set = (change: Partial<BotDraft>): void => setDraft((held) => ({ ...(held ?? start), ...change }));
   const hostOwner = hostOwnerOf(offers);
-  const ready = !busy && shown.name.trim() !== '' && shown.body.trim() !== '';
+  const ready = !busy && shown.name.trim() !== '' && shown.body.trim() !== '' && connectorsValid(shown.connectors);
+  const ownerWords = {
+    me: t('bots/edit/ownerMe'),
+    host: t('bots/edit/ownerHost'),
+    team: (team: string) => t('bots/edit/ownerTeam', { team }),
+    project: (team: string, project: string) => t('bots/edit/ownerProject', { team, project }),
+  };
+  const owners = ownerChoices(me?.memberships ?? [], hostOwner, ownerWords);
+  const taken = botsIn(state).map((one) => one.id);
 
   const save = (): void => {
     setBusy(true);
     setFailure(null);
-    const body = recordBody(shown, fresh);
+    const body = recordBody(shown, fresh, start);
     const written = bot === undefined
       ? (() => {
-        const taken = botsIn(state).map((one) => one.id);
         const slugs: string[] = [];
         for (let n = 0; n < SLUG_TRIES; n += 1) slugs.push(slugOf(shown.name, [...taken, ...slugs]));
         return makeBot(host, offers, slugs, body);
@@ -120,22 +157,35 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
         </Field>
       ) : null}
 
-      <Field label={t('bots/edit/name')}>
-        <input className="web-field" value={shown.name} autoFocus={fresh} onChange={(event) => set({ name: event.target.value })} />
-      </Field>
-
-      {fresh ? (
-        hostOwner === undefined ? null : (
-          <Field label={t('bots/edit/owner')} hint={t('bots/edit/ownerHint')}>
-            <select className="web-field" value={shown.owner} onChange={(event) => set({ owner: event.target.value })}>
-              <option value="">{t('bots/edit/ownerMe')}</option>
-              <option value={hostOwner}>{t('bots/edit/ownerHost')}</option>
-            </select>
+      <div className="web-form__row">
+        {fresh ? (
+          <Field label={t('bots/edit/name')}>
+            <input className="web-field" value={shown.name} autoFocus onChange={(event) => set({ name: event.target.value })} />
           </Field>
-        )
-      ) : (
-        <Field label={t('bots/edit/owner')} hint={t('bots/edit/ownerKept')}>
-          <input className="web-field" value={shown.owner} readOnly />
+        ) : null}
+        {fresh ? (
+          owners.length < 2 ? null : (
+            <Field label={t('bots/edit/owner')} hint={t('bots/edit/ownerHint')}>
+              <select className="web-field" value={shown.owner} onChange={(event) => set({ owner: event.target.value })}>
+                {owners.map((one) => <option key={one.value} value={one.value}>{one.label}</option>)}
+              </select>
+            </Field>
+          )
+        ) : (
+          <>
+            <Field label={t('bots/edit/owner')} hint={t('bots/edit/ownerKept')}>
+              <input className="web-field" value={ownerLabel(shown.owner, ownerWords)} readOnly />
+            </Field>
+            <Field label={t('bots/edit/folder')} hint={t('bots/edit/folderKept')}>
+              <input className="web-field" value={shown.workspace} readOnly />
+            </Field>
+          </>
+        )}
+      </div>
+
+      {fresh ? null : (
+        <Field label={t('bots/edit/name')}>
+          <input className="web-field" value={shown.name} onChange={(event) => set({ name: event.target.value })} />
         </Field>
       )}
 
@@ -150,6 +200,8 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
       <Field label={t('bots/edit/instructions')} hint={t(fresh ? 'bots/edit/instructionsHint' : 'bots/edit/instructionsLater')}>
         <textarea className="web-field web-form__message" rows={5} value={shown.instructions} onChange={(event) => set({ instructions: event.target.value })} />
       </Field>
+
+      <BotFields host={host} offers={offers} fresh={fresh} draft={shown} folderPlaceholder={folderBeside(botsIn(state), slugOf(shown.name, taken))} set={set} />
 
       {failure === null ? null : <Alert tone="danger" message={failure} />}
       <div className="web-page__actions">

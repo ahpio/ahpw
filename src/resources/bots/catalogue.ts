@@ -28,11 +28,17 @@ export interface BotRecord {
   color: string;
   instructions?: string;
   template?: string;
-  harness?: string;
+  /** The agent provider a session of it runs on; absent is the host's default agent. */
+  provider?: string;
   model?: string;
+  /** The agent it starts from in place of `provider`, where it names one. */
   preset?: string;
   workspace: string;
   computer?: string;
+  /** The connectors its sessions may use: an alias, and the `connectors://<adapter>/<id>` it stands for. */
+  connectors?: Record<string, string>;
+  /** `unavailable` when the host serves no agent its `preset` or `provider` names. */
+  state?: 'unavailable';
   /** The bot's own session on a host that does not run bot chats yet; on one that does, a read's answer: the reader's own talk. */
   session?: string;
   /** `user:<id>`, `team:<team>`, `project:<team>:<project>` or `root:<host>`. */
@@ -119,8 +125,10 @@ export function mayChangeBots(offers: Offers, grants: OwnGrants, change: 'put' |
 /** A bot's resource: its provider's root and its slug. */
 export const botUri = (root: string, slug: string): string => `${root.endsWith('/') ? root : `${root}/`}${slug}`;
 
-/** What a write sends: the fields a person sets; the host fills the rest. */
-export type BotBody = Partial<Pick<BotRecord, 'name' | 'labels' | 'description' | 'body' | 'color' | 'instructions' | 'owner'>>;
+/** What a write sends: the fields a person sets; the host fills the rest. A blank string clears a field. */
+export type BotBody = Partial<Pick<BotRecord,
+  'name' | 'labels' | 'description' | 'body' | 'color' | 'instructions' | 'owner'
+  | 'template' | 'provider' | 'model' | 'preset' | 'workspace' | 'computer' | 'connectors'>>;
 
 const isTaken = (error: unknown): boolean => typeof error === 'object' && error !== null && (error as { code?: unknown }).code === AhpErrorCodes.AlreadyExists;
 
