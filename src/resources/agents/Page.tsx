@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, type BadgeTone } from '@softov/scena/ui';
-import { KeptTabs } from '../../shell/view/KeptTabs.js';
+import { Alert, Badge, type BadgeTone, Blocks, Button, DangerZone, Page, PageActions, PageHead } from '../../ui/index.js';
+import { KeptTabs } from '../../ui/navigation/KeptTabs.js';
 import type { AgentInfo } from '@microsoft/agent-host-protocol';
 import { ENGINES, AGENTS, enginesReducer, agentsReducer, servesEngines, servesAgents, type EngineRow, type AgentRow } from '../../bridges/agents.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -9,7 +9,7 @@ import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import type { PeopleState } from '../../bridges/people.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
 import { agentModes, checkOne, isAgentOff, deleteAgent, setMode } from './actions.js';
 import { useOwnGrants } from '../../bridges/own-grants.js';
@@ -25,7 +25,6 @@ import { AGENT_SECTION, agentTab, agentTabKey, keepAgentTabKey, type SectionAsk 
 import { signInOf } from './words.js';
 import { KindPanel } from './Customizations.js';
 import { customizationKinds, kindTabKey, kindTabTitle } from './kinds.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
 
 /** A status badge's tone: a served record as a ready connector, a standby one by its state. */
 const toneOf = (agent: MergedAgent): BadgeTone => {
@@ -96,16 +95,16 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
       key: 'settings',
       title: t('agents/page/settings'),
       child: (
-        <div className="web-agent__settings">
+        <Blocks>
           {operations !== undefined || isAgentOff(record) ? null : <Check host={host} record={record} />}
           <AgentForm host={host} record={record} />
           {operations !== undefined && place !== undefined ? <DangerOperations place={place} operations={operations} /> : (
             <DangerZone
               label={t('agents/actions/remove')}
-              onClick={() => void deleteAgent(host, record).then((gone) => { if (gone) scena.surfaces.close(agentTab(host, provider)); })}
+              onConfirm={() => void deleteAgent(host, record).then((gone) => { if (gone) scena.surfaces.close(agentTab(host, provider)); })}
             />
           )}
-        </div>
+        </Blocks>
       ),
     }]),
   ];
@@ -114,8 +113,8 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
   const opens = chosen === 'customizations' && first !== undefined ? kindTabKey(first.kind) : chosen;
 
   return (
-    <div className="web-page web-agent">
-      <div className="web-page__head">
+    <Page>
+      <PageHead>
         <PageTitle
           icons={icons}
           emoji={EMOJIcon.agents}
@@ -129,14 +128,14 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
           )}
         />
         {operations !== undefined && place !== undefined ? <OperationButtons place={place} operations={operations}>{newSession}</OperationButtons> : (
-          <div className="web-page__actions">
+          <PageActions>
             {record === undefined ? null : agentModes(offers, record, grants).map((mode) => (
               <Button key={mode} label={t(`agents/actions/${mode}`)} {...said(offers.described[AGENTS[mode]])} onClick={() => void setMode(host, record, mode)} />
             ))}
             {newSession}
-          </div>
+          </PageActions>
         )}
-      </div>
+      </PageHead>
       {agent.status !== 'standby' || record === undefined || record.state === 'failed' ? null : (
         <Alert tone={record.state === 'disabled' ? 'info' : record.state === 'unavailable' ? 'danger' : 'warning'} message={t(`agents/page/standby/${record.state}`, { engine: record.engine })} />
       )}
@@ -148,6 +147,6 @@ export default function AgentPage({ host, provider }: { host: string; provider?:
           onChange={keepAgentTabKey}
         />
       )}
-    </div>
+    </Page>
   );
 }

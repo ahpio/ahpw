@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, ContextMenu } from '@softov/scena/ui';
+import { Button, ContextMenu, Page, PageActions, PageHead } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
@@ -8,16 +8,15 @@ import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import type { PeopleState } from '../../bridges/people.js';
 import { availablePlugins, pluginDetails, PLUGINS, pluginsReducer, type ListedPlugin, type PluginDetails, type PluginRow } from '../../bridges/plugins.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { KeptTabs } from '../../shell/view/KeptTabs.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { KeptTabs } from '../../ui/navigation/KeptTabs.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
 import { installListed, mayInstall, saidOf, versionsInstall } from './actions.js';
 import { listTabs } from './ListTabs.js';
 import PluginPage from './PluginPage.js';
 import { installedHere, listName } from './rows.js';
 import { ACTIVE_LISTED, INSTALLING, installKey, LISTED_AS, listedTab, pluginTab } from './state.js';
-import './ListedPluginPage.css';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 /** A button's tooltip, when the host says what its command does. */
 const said = (text: string | undefined): { title?: string } => (text === undefined ? {} : { title: text });
@@ -98,8 +97,8 @@ export default function ListedPluginPage({ host, plugin: id, marketplace }: { ho
   }));
 
   return (
-    <div className="web-page web-listed">
-      <div className="web-page__head">
+    <Page>
+      <PageHead>
         <PageTitle
           icons={entry.icons}
           emoji={EMOJIcon.hostPlugins}
@@ -108,7 +107,7 @@ export default function ListedPluginPage({ host, plugin: id, marketplace }: { ho
         />
         {entry.description === undefined ? null : <p className="web-listed__description">{entry.description}</p>}
         {mayInstall(offers) ? (
-          <div className="web-page__actions">
+          <PageActions>
             <Button
               size="sm"
               variant="primary"
@@ -118,25 +117,18 @@ export default function ListedPluginPage({ host, plugin: id, marketplace }: { ho
               onClick={() => install()}
             />
             {versionsInstall(entry) && versions.length > 0 ? (
-              <button
-                type="button"
-                className="web-listed__versions"
-                title={t('plugins/listed/versions')}
-                aria-label={t('plugins/listed/versions')}
-                disabled={installing}
-                onClick={(event) => {
+              <Button variant="tool" title={t('plugins/listed/versions')} ariaLabel={t('plugins/listed/versions')} disabled={installing} onClick={(event) => {
                   const box = event.currentTarget.getBoundingClientRect();
                   setMenu({ x: box.left, y: box.bottom });
-                }}
-              >
+                }}>
                 {EMOJIcon.settings}
-              </button>
+              </Button>
             ) : null}
-          </div>
+          </PageActions>
         ) : null}
-      </div>
+      </PageHead>
       <KeptTabs tabs={listTabs(host, entry, details, t)} />
       {menu === null ? null : <ContextMenu spec={{ items }} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
-    </div>
+    </Page>
   );
 }

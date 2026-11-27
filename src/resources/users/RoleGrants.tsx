@@ -1,6 +1,6 @@
 import { useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, Chip, type ChipState } from '@softov/scena/ui';
+import { Button, Chip, type ChipState, Note, RowButton } from '../../ui/index.js';
 import { ContextMenu } from '@softov/scena/ui/menu';
 import {
   boundInfo, boundSubjects, dropSubject, EVERY, GRANT_GROUPS, groupOf, heldBy, operationState, reached, splittable, subjectInfo, subjectsOf, toggleGroup, toggleOperation,
@@ -68,8 +68,7 @@ function SubjectCard({ subject, info: whole, known, grants, onChange, onDrop, re
   return (
     <section className="web-grant" aria-label={every ? t('users/role/everySubject') : info.title}>
       <header className="web-grant__head">
-        <button type="button" className="web-grant__fold" aria-expanded={open} onClick={() => setOpen(!open)}>
-          <span aria-hidden="true">{open ? '\u{25BE}' : '\u{25B8}'}</span>
+        <RowButton expanded={open} onClick={() => setOpen(!open)}>
           <span className="web-grant__subject">{subject}</span>
           <span className="web-grant__title">
             {every
@@ -78,7 +77,7 @@ function SubjectCard({ subject, info: whole, known, grants, onChange, onDrop, re
                 ? `${info.title} \u{00B7} ${t('users/role/reached', { n: reached(grants, subject, info), of: info.operations.length })}`
                 : t('users/role/unknownSubject')}
           </span>
-        </button>
+        </RowButton>
         <span className="web-grant__groups">
           {([...GRANT_GROUPS, '*'] as const).map((group) => {
             const { state, by } = groupState(grants, subject, group);
@@ -104,7 +103,7 @@ function SubjectCard({ subject, info: whole, known, grants, onChange, onDrop, re
       </header>
       {open ? (
         <div className="web-grant__body">
-          {every ? <p className="web-note">{t('users/role/everySubjectHint')}</p> : info.description === '' ? null : <p className="web-note">{info.description}</p>}
+          {every ? <Note>{t('users/role/everySubjectHint')}</Note> : info.description === '' ? null : <Note>{info.description}</Note>}
           {every ? null : rows.map(({ label, operations }) => (
             <div key={label} className="web-grant__row">
               <span className="web-grant__label">{label}</span>
@@ -150,7 +149,7 @@ export function RoleGrants({ grants, catalog, shown, onChange, onShow, readOnly,
           <span key={state} className="oo-chip" data-state={state}>{t(`users/role/legend/${state}`)}</span>
         ))}
       </div>
-      {subjects.length === 0 ? <p className="web-note">{emptyNote ?? t('users/role/noGrants')}</p> : null}
+      {subjects.length === 0 ? <Note>{emptyNote ?? t('users/role/noGrants')}</Note> : null}
       {subjects.map((subject) => (
         <SubjectCard
           key={subject}
@@ -178,7 +177,7 @@ export function RoleGrants({ grants, catalog, shown, onChange, onShow, readOnly,
               setMenu(menu === null && box !== undefined ? { x: box.left, y: box.bottom + 2 } : null);
             }}
           />
-          {addHint === undefined ? null : <span className="web-note">{addHint}</span>}
+          {addHint === undefined ? null : <Note inline>{addHint}</Note>}
         </div>
       )}
       {menu === null ? null : (

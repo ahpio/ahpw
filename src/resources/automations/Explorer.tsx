@@ -1,7 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import { automationReducer, type AutomationState as Catalogue } from '@microsoft/agent-host-protocol';
 import { AUTOMATIONS } from '../../bridges/data.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
@@ -102,7 +102,7 @@ export default function AutomationExplorer(): ReactElement {
     ? <Alert tone="danger" title={t('automations/notices/none')} message={error} />
     : state === undefined
       ? <Spinner label={t('automations/notices/reading')} />
-      : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('automations/explorer/empty')}</p> : null;
+      : rows.length === 0 ? <Note inset>{t('automations/explorer/empty')}</Note> : null;
 
   return (
     <ExplorerList

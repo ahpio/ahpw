@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Text } from '@softov/scena/ui';
+import { Alert, Text } from '../../ui/index.js';
 import type { HostAlert } from '../../bridges/plugins.js';
 import { plural } from '../../i18n/locales.js';
 import { when } from '../../resources/sessions/turn.js';

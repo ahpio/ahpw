@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Button, DangerZone, type DetailItem, DetailList, Page, PageActions, Text } from '../../ui/index.js';
 import type { AgentInfo } from '@microsoft/agent-host-protocol';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
@@ -8,15 +8,14 @@ import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { useOwnGrants } from '../../bridges/own-grants.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { timeOf } from '../automations/words.js';
 import { Bood } from './Bood.js';
 import { BOTS, botsIn, botsReducer, mayChangeBots, type BotsState } from './catalogue.js';
 import { refKey } from '../../bridges/hosts.js';
 import { BOT_CHAT_OPENING, BOT_EDIT_ASKED } from './state.js';
 import { BotForm } from './Edit.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 /** One bot: its figure, what it is for, whose it is, and its chat; Edit swaps the page for its form. */
 export default function BotPage({ host, slug }: { host: string; slug?: string }): ReactElement {
@@ -60,16 +59,16 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
   const run = (command: string): void => void scena.commands.execute(command, { host, slug: bot.id });
 
   return (
-    <div className="web-page">
+    <Page>
       <div className="web-bot">
         <Bood body={bot.body} color={bot.color} width={120} />
         <div className="web-bot__words">
           <Text variant="h2" text={bot.name} />
           {(bot.description ?? '').trim() === '' ? null : <p className="web-bot__description">{bot.description}</p>}
-          <div className="web-page__actions">
+          <PageActions>
             <Button label={t(opening ? 'bots/chat/opening' : 'bots/actions/chat')} variant="primary" disabled={opening} onClick={() => run('ahp.chatWithBot')} />
             {edits ? <Button label={t('bots/actions/edit')} onClick={() => setEditing(true)} /> : null}
-          </div>
+          </PageActions>
         </div>
       </div>
       <DetailList items={facts} columns={2} />
@@ -79,7 +78,7 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
           <p className="web-bot__instructions">{bot.instructions}</p>
         </>
       )}
-      {mayChangeBots(offers, grants, 'delete') ? <DangerZone label={t('bots/actions/delete')} onClick={() => run('ahp.deleteBot')} /> : null}
-    </div>
+      {mayChangeBots(offers, grants, 'delete') ? <DangerZone label={t('bots/actions/delete')} onConfirm={() => run('ahp.deleteBot')} /> : null}
+    </Page>
   );
 }

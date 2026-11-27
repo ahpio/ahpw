@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { ExplorerList, type Row } from '../../shell/explorer/ExplorerList.js';
 import { ACTIVE_ITEM, runPath, type Run } from '../manifest/data.js';
@@ -95,8 +95,8 @@ export default function ItemExplorer({ manifest, title, list, commands }: {
   const notice = failure !== null ? <Alert tone="danger" message={failure} />
     : run === undefined || (run.state === 'running' && rows.length === 0) ? <Spinner label={t('commands/readingList')} />
     : run.state === 'failed' ? <Alert tone="danger" message={run.message} />
-    : run.state === 'done' && rowsOf(run.data) === undefined ? <p className="web-note web-explorer__empty">{t('commands/items/badShape')}</p>
-    : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('commands/items/empty')}</p>
+    : run.state === 'done' && rowsOf(run.data) === undefined ? <Note inset>{t('commands/items/badShape')}</Note>
+    : rows.length === 0 ? <Note inset>{t('commands/items/empty')}</Note>
     : null;
 
   return (

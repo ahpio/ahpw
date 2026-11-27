@@ -4,6 +4,7 @@ import { hostBridge } from '../../bridges/data.js';
 import { folderUri } from '../../bridges/words.js';
 import { childFolders, expandHome, parentPath, splitPath } from './folder-path.js';
 import { FOLDER_REQUEST, settleFolder, type FolderRequest } from './pick.js';
+import { Button, Modal, TextField } from '../../ui/index.js';
 
 /** The open folder question, at the top of the page as VS Code's "Add Folder to Workspace". */
 export function FolderPicker(): ReactElement | null {
@@ -104,42 +105,39 @@ function PickerCard({ request }: { request: FolderRequest }): ReactElement {
     ?? (listing?.state === 'missing' ? t('folders/pick/missingHint') : null);
 
   return (
-    <div className="web-pick" onClick={() => settleFolder(null)}>
-      <div className="web-pick__card" role="dialog" aria-modal="true" aria-labelledby="web-pick-title" onClick={(event) => event.stopPropagation()}>
-        <h2 id="web-pick-title" className="web-pick__title">{request.title}</h2>
-        <div className="web-pick__row">
-          <input
-            ref={box}
-            className="web-pick__input"
-            value={value}
-            spellCheck={false}
-            aria-label={t('folders/pick/path')}
-            aria-controls="web-pick-list"
-            aria-activedescendant={picked >= 0 ? `web-pick-${picked}` : undefined}
-            onChange={(event) => type(event.currentTarget.value)}
-            onKeyDown={onKey}
-          />
-          <button type="button" className="web-pick__add" onClick={() => void add()}>{t('folders/pick/add')}</button>
-        </div>
-        {message === null ? null : <p className="web-pick__message">{message}</p>}
-        <ul ref={list} id="web-pick-list" className="web-pick__list" role="listbox" aria-label={t('folders/pick/folders')}>
-          {lines.map((line, index) => (
-            <li
-              key={line}
-              id={`web-pick-${index}`}
-              role="option"
-              aria-selected={index === picked}
-              className="web-pick__item"
-              onMouseEnter={() => setPicked(index)}
-              onClick={() => enter(line)}
-            >
-              {line}
-            </li>
-          ))}
-          {listing?.state === 'loading' ? <li className="web-pick__note">{t('folders/pick/reading')}</li> : null}
-          {listing?.state === 'ok' && names.length === 0 && part !== '' ? <li className="web-pick__note">{t('folders/pick/noMatch', { part })}</li> : null}
-        </ul>
+    <Modal open title={request.title} onClose={() => settleFolder(null)}>
+      <div className="web-pick__row">
+        <TextField
+          inputRef={box}
+          compact
+          value={value}
+          spellCheck={false}
+          ariaLabel={t('folders/pick/path')}
+          ariaControls="web-pick-list"
+          ariaActiveDescendant={picked >= 0 ? `web-pick-${picked}` : undefined}
+          onChange={type}
+          onKeyDown={onKey}
+        />
+        <Button variant="primary" onClick={() => void add()}>{t('folders/pick/add')}</Button>
       </div>
-    </div>
+      {message === null ? null : <p className="web-pick__message">{message}</p>}
+      <ul ref={list} id="web-pick-list" className="web-pick__list" role="listbox" aria-label={t('folders/pick/folders')}>
+        {lines.map((line, index) => (
+          <li
+            key={line}
+            id={`web-pick-${index}`}
+            role="option"
+            aria-selected={index === picked}
+            className="web-pick__item"
+            onMouseEnter={() => setPicked(index)}
+            onClick={() => enter(line)}
+          >
+            {line}
+          </li>
+        ))}
+        {listing?.state === 'loading' ? <li className="web-pick__note">{t('folders/pick/reading')}</li> : null}
+        {listing?.state === 'ok' && names.length === 0 && part !== '' ? <li className="web-pick__note">{t('folders/pick/noMatch', { part })}</li> : null}
+      </ul>
+    </Modal>
   );
 }

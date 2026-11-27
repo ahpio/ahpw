@@ -18,7 +18,7 @@
   padding-bottom: 4px;
 }
 
-.web-adapter-picker__list > .web-note {
+.web-adapter-picker__list > .oo-note {
   margin: 0;
   padding: 12px;
 }
@@ -32,7 +32,6 @@
   text-transform: uppercase;
 }
 
-.web-adapter-picker__row,
 .web-adapter-picker__picked {
   display: flex;
   align-items: center;
@@ -45,14 +44,6 @@
   color: inherit;
   font: inherit;
   text-align: left;
-}
-
-.web-adapter-picker__row {
-  cursor: pointer;
-}
-
-.web-adapter-picker__row[data-focus='true'] {
-  background: color-mix(in srgb, var(--oo-color-accent) 14%, transparent);
 }
 
 .web-adapter-picker__picked {

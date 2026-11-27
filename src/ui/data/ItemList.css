@@ -1,0 +1,15 @@
+.oo-item-list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.oo-item-list[data-boxed='true'] {
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-color-surface);
+}
+
+.oo-item-list[data-boxed='true'] > .oo-item-row > .oo-item-row__head {
+  padding-inline: var(--oo-spacing-md);
+}

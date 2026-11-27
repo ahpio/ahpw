@@ -1,11 +1,11 @@
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import { hostBridge } from '../../bridges/data.js';
 import { readFailure } from './save.js';
 import { mediaTypeOf } from './icons.js';
 import { FileHead } from './text.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 
 /** Past this size a file is not read, because it arrives whole over the connection. */
 export const MAX_BYTES = 64 * 1024 * 1024;
@@ -96,7 +96,7 @@ export function MediaFrame({ host, uri, children }: { host: string; uri: string 
   if (state === null) return <div className="web-file">{head}<Spinner label={t('files/reading')} /></div>;
   if ('error' in state) return <div className="web-file">{head}<Alert tone="danger" title={t('files/notReadable')} message={state.error} /></div>;
   if ('size' in state) {
-    return <div className="web-file">{head}<p className="web-note web-media__note">{t('files/tooLarge', { size: megabytes(state.size), max: megabytes(MAX_BYTES) })}</p></div>;
+    return <div className="web-file">{head}<Note inset>{t('files/tooLarge', { size: megabytes(state.size), max: megabytes(MAX_BYTES) })}</Note></div>;
   }
   return <div className="web-file">{head}<div className="web-file__body web-media">{children(state.url)}</div></div>;
 }

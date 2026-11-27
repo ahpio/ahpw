@@ -1,6 +1,6 @@
 import { useSyncExternalStore, type ReactElement, type ReactNode } from 'react';
 import { useStore } from '@softov/scena/react';
-import { Text } from '@softov/scena/ui';
+import { Row, RowButton, Text } from '../ui/index.js';
 import { resolveThemeMode, THEME_MODE_PATH, type ThemeModeChoice } from '@softov/scena/styles';
 import { pickIcon, type Icon } from '../bridges/icons.js';
 import { NameMark } from './NameMark.js';
@@ -82,13 +82,13 @@ export function PageTitle({ icons, emoji, initials, title, onTitle, titleHint, u
           : <span className="web-page-title__mark" aria-hidden="true">{emoji}</span>}
       <div className="web-page-title__lines">
         {onTitle === undefined ? heading : (
-          <button type="button" className="web-page-title__open" {...(titleHint === undefined ? {} : { title: titleHint })} onClick={onTitle}>{heading}</button>
+          <RowButton fit {...(titleHint === undefined ? {} : { title: titleHint })} onClick={onTitle}>{heading}</RowButton>
         )}
         {uri === undefined && state === undefined ? null : (
-          <div className="web-page-title__meta">
+          <Row align="center" wrap gap="var(--oo-spacing-sm)">
             {uri === undefined ? null : <span className="web-role__uri" {...(uriHint === undefined ? {} : { title: uriHint })}>{uri}</span>}
             {state}
-          </div>
+          </Row>
         )}
       </div>
     </div>

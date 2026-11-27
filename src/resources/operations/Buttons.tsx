@@ -1,8 +1,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useScena } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button, DangerZone, PageActions } from '../../ui/index.js';
 import { labelOf, type Operation } from '../../bridges/operations.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
 import { runOperation, running, type OperationPlace } from './run.js';
 
 /** A record's operations as the page's buttons, then the page's own `children`; one that asks first is left to `DangerOperations`. */
@@ -11,7 +10,7 @@ export function OperationButtons({ place, operations, children }: { place: Opera
   const plain = operations.filter((one) => one.confirmation === undefined);
   if (plain.length === 0 && (children === undefined || children === null || children === false)) return null;
   return (
-    <div className="web-page__actions">
+    <PageActions>
       {plain.map((operation) => (
         <Button
           key={operation.id}
@@ -22,7 +21,7 @@ export function OperationButtons({ place, operations, children }: { place: Opera
         />
       ))}
       {children}
-    </div>
+    </PageActions>
   );
 }
 
@@ -38,7 +37,7 @@ export function DangerOperations({ place, operations }: { place: OperationPlace;
           key={operation.id}
           label={labelOf(operation)}
           {...(operation.description === undefined ? {} : { note: operation.description })}
-          onClick={() => void runOperation(scena, place, operation)}
+          onConfirm={() => void runOperation(scena, place, operation)}
         />
       ))}
     </>

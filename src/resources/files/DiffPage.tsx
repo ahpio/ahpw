@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Alert, Button, Spinner } from '@softov/scena/ui';
+import { Alert, Button, CheckBox, Note, Spinner } from '../../ui/index.js';
 import { hostBridge } from '../../bridges/data.js';
 import { readFailure } from './save.js';
 import { folderLabel } from '../../bridges/words.js';
@@ -54,10 +54,7 @@ export default function DiffPage({ host, file, before, after, changeset, change,
       ) : null}
       <span className="web-file__actions">
         {review === true && current !== undefined ? (
-          <label className="web-file__viewed">
-            <input type="checkbox" checked={current.reviewed} onChange={(event) => changes.review([current], event.target.checked)} />
-            {t('files/diff/viewed')}
-          </label>
+          <CheckBox label={t('files/diff/viewed')} value={current.reviewed} onChange={(next) => changes.review([current], next)} />
         ) : null}
         {current === undefined ? null : fileOps.map((operation) => (
           <Button
@@ -78,8 +75,8 @@ export default function DiffPage({ host, file, before, after, changeset, change,
 
   if (sides === null) return <div className="web-file">{head}{said}<Spinner label={t('files/diff/reading')} /></div>;
   if ('error' in sides) return <div className="web-file">{head}{said}<Alert tone="danger" title={t('files/notReadable')} message={sides.error} /></div>;
-  if (sides.before === null || sides.after === null) return <div className="web-file">{head}{said}<p className="web-note">{t('files/notText')}</p></div>;
-  if (hunks.length === 0) return <div className="web-file">{head}{said}<p className="web-note">{t('files/diff/none')}</p></div>;
+  if (sides.before === null || sides.after === null) return <div className="web-file">{head}{said}<Note>{t('files/notText')}</Note></div>;
+  if (hunks.length === 0) return <div className="web-file">{head}{said}<Note>{t('files/diff/none')}</Note></div>;
 
   return (
     <div className="web-file">

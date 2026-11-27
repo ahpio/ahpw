@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button } from '../../ui/index.js';
 import type { Ask } from '../agent-tools/asks.js';
 
 /** Allow, Always allow and Deny on a call this browser runs, which waits for a person. */

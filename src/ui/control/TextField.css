@@ -1,0 +1,21 @@
+/* ahpw extension: a field in the monospace font. */
+.oo-input[data-mono='true'],
+.oo-textarea[data-mono='true'] {
+  font-family: var(--oo-font-mono, monospace);
+  font-size: var(--oo-font-size-sm);
+}
+
+/* ahpw extension: a compact field, for a bar or a popup. */
+.oo-input[data-compact='true'],
+.oo-textarea[data-compact='true'] {
+  --input-padding-y: 3px;
+  --input-padding-x: 8px;
+  --textarea-padding-y: 4px;
+  --textarea-padding-x: 8px;
+  font-size: var(--oo-font-size-sm);
+}
+
+/* ahpw extension: a refused value. */
+.oo-input[aria-invalid='true'] {
+  border-color: var(--oo-color-danger);
+}

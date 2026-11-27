@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, Popup, Spinner } from '@softov/scena/ui';
+import { Button, Note, Popup, RowButton, Spinner, TextField } from '../../../ui/index.js';
 import { chatReducer, sessionReducer, type AgentInfo, type ChatState, type SessionState, type StateAction } from '@microsoft/agent-host-protocol';
 import { ahpPaths, channelPath, hostBridge } from '../../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../../bridges/offers.js';
@@ -68,27 +68,20 @@ export function BotPopover({ host, bot, x, y, onClose }: { host: string; bot: Bo
   return (
     <Popup x={x} y={y} onClose={onClose} className="web-bot-popover">
       <div className="web-bot-popover__head">
-        <button type="button" className="web-bot-popover__name" title={t('bots/commands/open')} onClick={() => run('ahp.openBot')}>{bot.name}</button>
+        <RowButton fit title={t('bots/commands/open')} onClick={() => run('ahp.openBot')}><strong>{bot.name}</strong></RowButton>
         {bot.labels.length === 0 ? null : <span className="web-bot-popover__labels">{bot.labels.join(', ')}</span>}
         {!canChat ? null : (
-          <button type="button" className="web-bot-popover__chat" title={t('bots/actions/chat')} aria-label={t('bots/actions/chat')} onClick={() => run('ahp.chatWithBot')}>
+          <Button variant="subtle" size="xs" tone="accent" title={t('bots/actions/chat')} ariaLabel={t('bots/actions/chat')} onClick={() => run('ahp.chatWithBot')}>
             {EMOJIcon.sessions}
-          </button>
+          </Button>
         )}
       </div>
       {bot.description === undefined ? null : <p className="web-bot-popover__description">{bot.description}</p>}
       {failure !== null ? <p className="web-bot-popover__failure">{failure}</p>
         : chatSession === undefined ? <Spinner label={t('bots/chat/opening')} />
-          : !canChat ? <p className="web-note">{t('bots/chat/noHost')}</p> : (
+          : !canChat ? <Note>{t('bots/chat/noHost')}</Note> : (
         <form className="web-bot-popover__say" onSubmit={(event) => { event.preventDefault(); void send(); }}>
-          <input
-            className="web-field"
-            value={text}
-            autoFocus
-            placeholder={t('bots/layer/say', { name: bot.name })}
-            aria-label={t('bots/layer/say', { name: bot.name })}
-            onChange={(event) => setText(event.target.value)}
-          />
+          <TextField value={text} autoFocus placeholder={t('bots/layer/say', { name: bot.name })} ariaLabel={t('bots/layer/say', { name: bot.name })} onChange={(next) => setText(next)} />
           <Button label={t('bots/layer/send')} variant="primary" disabled={text.trim() === '' || busy || (chatSession !== null && chatUri === undefined)} onClick={() => void send()} />
         </form>
       )}

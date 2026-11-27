@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import type { BindingPath, Command, CommandContext, Disposable, HostCtx, ListSpec, PickerAction, Scena } from '@softov/scena/types';
 import { combineDisposables, translate } from '@softov/scena';
-import { getActiveToken } from '@softov/scena/ui';
+import { getActiveToken } from '../../ui/index.js';
 import type { MessageAttachment, SessionConfigPropertySchema, SessionSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths } from '../../bridges/data.js';
 import { plural } from '../../i18n/locales.js';
@@ -17,7 +17,7 @@ import { elapsed } from '../../bridges/words.js';
 import { ARTIFACT_ICON, ARTIFACT_TYPES, artifactName, copyOf, openOf, relativeOf, type Artifact } from './artifact-list.js';
 import { downloadFile } from '../folders/actions.js';
 import { failed } from '../../shell/notify/index.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 
 /** The slot the composer's `/` commands are offered in. */
 export const COMPOSER_SLOT = 'ahp:input/';

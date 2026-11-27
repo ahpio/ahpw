@@ -1,7 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
 import type { PickerAction } from '@softov/scena/types';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
 import { ahpPaths, type HostFacts } from '../../bridges/data.js';
 import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
@@ -9,7 +9,7 @@ import type { Offers } from '../../bridges/offers.js';
 import { rowOperations } from '../../bridges/operations.js';
 import { runnableBy, useOwnGrantsOnEach } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { ExplorerList, type Row } from '../../shell/explorer/ExplorerList.js';
 import { operationItems } from '../operations/run.js';
@@ -67,12 +67,12 @@ export default function ClientExplorer(): ReactElement {
   const error = multi ? null : errors[0] ?? null;
   const state = multi ? states.find((one) => one !== undefined) : states[0];
   const notice = hosts.length === 0
-    ? <p className="web-note web-explorer__empty">{t('clients/explorer/notServed')}</p>
+    ? <Note inset>{t('clients/explorer/notServed')}</Note>
     : error !== null
       ? <Alert tone="danger" title={t('clients/notices/none')} message={error} />
       : state === undefined
         ? <Spinner label={t('clients/notices/reading')} />
-        : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('clients/explorer/empty')}</p> : null;
+        : rows.length === 0 ? <Note inset>{t('clients/explorer/empty')}</Note> : null;
 
   return (
     <ExplorerList

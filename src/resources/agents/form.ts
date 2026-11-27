@@ -7,7 +7,7 @@
  * other shows empty. Either one sent as `""` keeps the secret.
  */
 
-import type { EnumOption, JsonSchemaObject } from '@softov/scena/ui';
+import type { EnumOption, JsonSchemaObject } from '../../ui/index.js';
 import type { EngineRow, AgentOwner, AgentRow, AgentWanted } from '../../bridges/agents.js';
 import { isSecret, isSecretRef } from '../../bridges/connectors.js';
 import type { Icon } from '../../bridges/icons.js';

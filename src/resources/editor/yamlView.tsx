@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { EditorState } from '@codemirror/state';
-import { fieldsView, jsonView, type SchemaFormView, type SchemaFormViewProps } from '@softov/scena/ui';
+import { fieldsView, jsonView, type SchemaFormView, type SchemaFormViewProps } from '../../ui/index.js';
 import { parse, stringify } from 'yaml';
 import CodeEditor from './CodeEditor.js';
 import { yamlCompletions } from './yaml-hints.js';

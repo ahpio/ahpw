@@ -1,11 +1,10 @@
 import { useMemo, type ReactElement } from 'react';
 import type { ChatState, SessionState, SessionSummary } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { DetailList } from '@softov/scena/ui';
+import { DetailList, RowButton } from '../../ui/index.js';
 import { ahpPaths, type HostFacts } from '../../bridges/data.js';
 import { elapsed } from '../../bridges/words.js';
 import { plural } from '../../i18n/locales.js';
-import { EMOJIcon } from '../emojis.js';
 import { sessionFacts } from './facts.js';
 import { figuresOf } from './figures.js';
 import { Summary } from './Summary.js';
@@ -24,13 +23,12 @@ export function HeaderLine({ summary, chat, open, onToggle }: { summary: Session
   const figures = useMemo(() => figuresOf(turns ?? [], active), [turns, active]);
   const more = chat?.turnsNextCursor !== undefined;
   return (
-    <button type="button" className="web-head-info__line" aria-expanded={open} title={t(open ? 'sessions/info/hide' : 'sessions/info/show')} onClick={onToggle}>
-      <span className="web-head-info__caret" aria-hidden="true">{open ? EMOJIcon.caretDown : EMOJIcon.caretRight}</span>
+    <RowButton fit faint small center expanded={open} title={t(open ? 'sessions/info/hide' : 'sessions/info/show')} onClick={onToggle}>
       <span>{`${plural('sessions/info/turnCount', figures.turns)}${more ? '+' : ''}`}</span>
       <span>{t('sessions/info/workingFor', { time: elapsed(figures.working) })}</span>
       <span>{t('sessions/info/tokenCount', { count: tokens(figures.input + figures.output + figures.cached) })}</span>
       <span>{when(summary.createdAt)}</span>
-    </button>
+    </RowButton>
   );
 }
 

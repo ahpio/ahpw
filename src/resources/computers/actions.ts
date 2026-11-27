@@ -3,7 +3,7 @@ import type { PickerAction } from '@softov/scena/types';
 import { allows, type Offers } from '../../bridges/offers.js';
 import { mayDo, type OwnGrants } from '../../bridges/own-grants.js';
 import { confirm, failed } from '../../shell/notify/index.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 import { actOn, COMPUTER_PROVIDER, type ComputerAction, type Standing } from './machines.js';
 
 const say = (error: unknown): void => failed(translate('computers/actions/failed'), error);

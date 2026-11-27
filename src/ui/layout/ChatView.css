@@ -1,0 +1,63 @@
+.oo-chat-view {
+  /* The content keeps a readable width; the scroll and the composer span the page. */
+  --oo-chat-gutter: max(var(--oo-spacing-lg), calc((100% - 72rem) / 2));
+  /* The composer sits narrower than the turns above it. */
+  --oo-chat-composer-gutter: max(calc(var(--oo-spacing-lg) * 2), calc((100% - 56rem) / 2));
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.oo-chat-view__turns {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-lg);
+  /* Room for the composer's faded top edge, so the last turn ends above it. */
+  padding-bottom: 32px;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.oo-chat-view__turns:hover {
+  scrollbar-color: var(--oo-color-border) transparent;
+}
+
+.oo-chat-view__turns > :not(.oo-chat-view__head) {
+  margin-inline: var(--oo-chat-gutter);
+}
+
+.oo-chat-view__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+  padding: var(--oo-spacing-lg) var(--oo-chat-gutter) 32px;
+  margin-bottom: calc(-1 * var(--oo-spacing-lg));
+  background: linear-gradient(to bottom, var(--oo-color-canvas) 0%, var(--oo-color-canvas) 70%, transparent 90%);
+}
+
+/* Compact: closer turns and a shorter head. */
+.oo-chat-view[data-compact='true'] > .oo-chat-view__turns {
+  gap: var(--oo-spacing-sm);
+  padding-bottom: 0;
+}
+
+.oo-chat-view[data-compact='true'] .oo-chat-view__head {
+  padding-top: var(--oo-spacing-md);
+  margin-bottom: calc(-1 * var(--oo-spacing-sm));
+}
+
+/* On a phone a compact chat's gutters close, so its turns keep their room. */
+@media (max-width: 600px) {
+  .oo-chat-view[data-compact='true'] {
+    --oo-chat-gutter: var(--oo-spacing-sm);
+    --oo-chat-composer-gutter: var(--oo-spacing-sm);
+  }
+}

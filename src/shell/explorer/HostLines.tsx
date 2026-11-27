@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button } from '../../ui/index.js';
 import { ahpPaths, type Connection } from '../../bridges/data.js';
 import { fixHost, hostFix, hostState } from '../../bridges/host-state.js';
 import { useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';

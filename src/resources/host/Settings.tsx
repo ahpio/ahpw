@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Button, SchemaForm, Spinner, fieldsView, jsonView, sectionsView, type JsonSchemaObject } from '@softov/scena/ui';
-import { KeptTabs } from '../../shell/view/KeptTabs.js';
+import { Button, fieldsView, type JsonSchemaObject, jsonView, Note, Page, PageActions, SchemaForm, sectionsView, Spinner } from '../../ui/index.js';
+import { KeptTabs } from '../../ui/navigation/KeptTabs.js';
 import { rootReducer, type RootState, type StateAction } from '@microsoft/agent-host-protocol';
 import { hostBridge, ROOT } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -9,7 +9,7 @@ import { readUi, uiFields, uiSettings, watchUi, writeUi } from '../../shell/ui-s
 import { changedKeys } from './config.js';
 import { interfaceGroups, settingsGroups } from './sections.js';
 import { keepSettingsTab, settingsTab, type SettingsPlace } from './place.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { yamlView } from '../editor/yamlView.js';
 
@@ -96,11 +96,11 @@ function HostSettings({ host }: { host: string }): ReactElement {
         onViewChange={(id) => chosenViews.set(host, id)}
         fieldActions
       />
-      <div className="web-page__actions">
+      <PageActions>
         <Button label={t('host/settings/save')} variant="primary" disabled={!dirty || !jsonValid} {...(jsonValid ? {} : { title: t('host/settings/fixJson') })} onClick={save} />
         <Button label={t('host/settings/reset')} disabled={!dirty} onClick={reset} />
-        {saved && !dirty ? <span className="web-note">{t('host/settings/saved')}</span> : null}
-      </div>
+        {saved && !dirty ? <Note inline>{t('host/settings/saved')}</Note> : null}
+      </PageActions>
     </div>
   );
 }
@@ -139,9 +139,9 @@ function InterfaceSettings(): ReactElement {
         onViewChange={(id) => chosenViews.set('ui', id)}
         fieldActions
       />
-      <div className="web-page__actions">
-        <span className="web-note">{t('host/settings/ui/atOnce')}</span>
-      </div>
+      <PageActions>
+        <Note inline>{t('host/settings/ui/atOnce')}</Note>
+      </PageActions>
     </div>
   );
 }
@@ -154,7 +154,7 @@ function InterfaceSettings(): ReactElement {
 export default function SettingsPage({ host, place = 'main' }: { host: string; place?: SettingsPlace }): ReactElement {
   const { t } = useI18n();
   return (
-    <div className="web-page web-settings" data-place={place}>
+    <Page>
       <KeptTabs
         tabs={[
           { key: 'host', title: t('host/settings/tabs/host'), child: <HostSettings host={host} /> },
@@ -163,6 +163,6 @@ export default function SettingsPage({ host, place = 'main' }: { host: string; p
         defaultValue={settingsTab()}
         onChange={keepSettingsTab}
       />
-    </div>
+    </Page>
   );
 }

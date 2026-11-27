@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Modal, SchemaForm } from '@softov/scena/ui';
+import { Alert, Button, Modal, Note, SchemaForm } from '../../ui/index.js';
 import { askFirst, invokeOperation, labelOf, startingInput } from '../../bridges/operations.js';
 import { hostSaid } from '../../bridges/said.js';
 import { adapterSchema, configForForm, configForPut } from '../connectors/form.js';
@@ -48,7 +48,7 @@ function OperationForm({ open, onClose }: { open: OpenDialog; onClose: () => voi
   return (
     <Modal open title={label} onClose={onClose}>
       <div className="web-changeset-form">
-        {open.operation.description === undefined ? null : <p className="web-note">{open.operation.description}</p>}
+        {open.operation.description === undefined ? null : <Note>{open.operation.description}</Note>}
         <SchemaForm schema={schema} value={value} onChange={setValue} views={SETTINGS_VIEWS} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} />
         {failure === null ? null : <Alert tone="danger" title={refusedTitle(open.operation)} message={failure} />}
         <div className="web-changeset-form__actions">

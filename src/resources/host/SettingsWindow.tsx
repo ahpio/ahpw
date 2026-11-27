@@ -6,6 +6,7 @@ import { EMOJIcon } from '../emojis.js';
 import SettingsPage from './Settings.js';
 import { OpenIn } from './OpenIn.js';
 import { settingsKey } from './place.js';
+import { Button } from '../../ui/index.js';
 
 /** Where the window sits and how big it is, in CSS pixels. */
 interface Box {
@@ -131,16 +132,16 @@ export default function SettingsWindow({ host }: { host: string }): ReactElement
         <span className="web-settings-window__icon" aria-hidden="true">{EMOJIcon.settings}</span>
         <span className="web-settings-window__title">{title}</span>
         <OpenIn host={host} />
-        <button type="button" className="web-settings-window__button" title={t(max ? 'host/settings/restore' : 'host/settings/maximize')} aria-label={t(max ? 'host/settings/restore' : 'host/settings/maximize')} onClick={() => setMax(!max)}>
+        <Button variant="subtle" shape="icon" size="md" title={t(max ? 'host/settings/restore' : 'host/settings/maximize')} ariaLabel={t(max ? 'host/settings/restore' : 'host/settings/maximize')} onClick={() => setMax(!max)}>
           {max ? (
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="1.5" y="3.5" width="7" height="7" /><path d="M3.5 3.5V1.5h7v7h-2" /></svg>
           ) : (
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" /></svg>
           )}
-        </button>
-        <button type="button" className="web-settings-window__button" title={t('host/settings/close')} aria-label={t('host/settings/close')} onClick={close}>
+        </Button>
+        <Button variant="subtle" shape="icon" size="md" title={t('host/settings/close')} ariaLabel={t('host/settings/close')} onClick={close}>
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" /></svg>
-        </button>
+        </Button>
       </div>
       <div className="web-settings-window__body">
         <SettingsPage host={host} place="overlay" />

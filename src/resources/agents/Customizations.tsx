@@ -1,9 +1,9 @@
 import { useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Button, Spinner, StatusDot, TextField } from '@softov/scena/ui';
+import { Badge, Button, DetailList, ItemRow, Note, Section, Spinner, StatusDot, TextField } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import { EMOJIcon } from '../emojis.js';
-import { CopyButton } from '../../shell/controls/CopyButton.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
 import { linkClicks } from '../files/clicks.js';
 import { useFileText } from '../files/text.js';
 import { extOf } from '../files/viewers.js';
@@ -30,7 +30,7 @@ function FileBody({ host, uri }: { host: string; uri: string }): ReactElement {
   const { t } = useI18n();
   const state = useFileText(host, uri);
   if (state === null) return <Spinner label={t('agents/customizations/readingFile')} />;
-  if ('error' in state || state.text === null) return <p className="web-note">{t('agents/customizations/unreadable')}</p>;
+  if ('error' in state || state.text === null) return <Note>{t('agents/customizations/unreadable')}</Note>;
   const front = frontmatterOf(state.text);
   return (
     <>
@@ -50,7 +50,7 @@ function ItemPane({ host, item, back, onBack, onEdit }: { host: string; item: Ki
   const markdown = open !== undefined && (extOf(open.uri) === 'md' || extOf(open.uri) === 'markdown');
   return (
     <div className="web-custom-item">
-      <button type="button" className="web-custom-item__back" onClick={onBack}>‹ {back}</button>
+      <Button variant="link" onClick={onBack}>‹ {back}</Button>
       <div className="web-custom-item__head">
         <h3 className="web-custom-item__name">{item.label}</h3>
         <CopyButton text={item.label} label={t('agents/customizations/copyName')} />
@@ -72,20 +72,21 @@ function ItemPane({ host, item, back, onBack, onEdit }: { host: string; item: Ki
 }
 
 /** One item in a kind's list: its name, its plugin as a tag, its flags, its state and the first line of its description; dimmed when it is off. Expanded, it shows the whole description and its path. */
-function ItemRow({ item, selected, expanded, onSelect }: { item: KindItem; selected: boolean; expanded?: boolean; onSelect: () => void }): ReactElement {
-  const text = expanded === true && item.description !== '' ? item.description : item.line;
+function KindRow({ item, selected, expanded, onSelect }: { item: KindItem; selected: boolean; expanded?: boolean; onSelect: () => void }): ReactElement {
+  const open = expanded === true;
+  const text = open && item.description !== '' ? item.description : item.line;
   return (
-    <button type="button" className="web-custom-row" data-enabled={item.enabled ? 'true' : 'false'} aria-current={selected ? 'true' : undefined} aria-expanded={expanded} onClick={onSelect}>
-      <span className="web-custom-row__head">
-        {expanded === undefined ? null : <span className="web-custom-row__caret" aria-hidden="true">{expanded ? '\u{25BE}' : '\u{25B8}'}</span>}
-        <span className="web-custom-row__name">{item.label}</span>
-        {item.plugin === undefined ? null : <span className="web-custom-row__tag">{item.plugin}</span>}
-        {item.flags.map((flag) => <span key={flag} className="web-custom-row__tag">{flag}</span>)}
-        {stateMark(item.state)}
-      </span>
-      {text === '' ? null : <span className="web-custom-row__line">{text}</span>}
-      {expanded === true && item.mcp === undefined ? <span className="web-custom-row__path">{item.plugin === undefined ? item.path : `${item.plugin} · ${item.path}`}</span> : null}
-    </button>
+    <ItemRow
+      off={!item.enabled}
+      title={item.label}
+      meta={<>{item.plugin === undefined ? null : <Badge text={item.plugin} />}{item.flags.map((flag) => <Badge key={flag} text={flag} />)}</>}
+      trail={stateMark(item.state)}
+      {...(open ? { text } : { line: text })}
+      {...(open && item.mcp === undefined ? { line: item.plugin === undefined ? item.path : `${item.plugin} · ${item.path}` } : {})}
+      current={selected}
+      {...(expanded === undefined ? {} : { expanded })}
+      onClick={onSelect}
+    />
   );
 }
 
@@ -93,7 +94,7 @@ function ItemRow({ item, selected, expanded, onSelect }: { item: KindItem; selec
 function McpDetails({ facts }: { facts: McpFacts }): ReactElement {
   const { t } = useI18n();
   return (
-    <dl className="web-custom-mcp">
+    <DetailList inline>
       <dt>{t('agents/mcp/state')}</dt>
       <dd>{facts.state}{facts.errorType === undefined ? null : <span className="web-custom-mcp__type">{facts.errorType}</span>}</dd>
       <dt>{t('agents/mcp/declared')}</dt>
@@ -102,7 +103,7 @@ function McpDetails({ facts }: { facts: McpFacts }): ReactElement {
       <dd>{t(facts.onInSession ? 'agents/mcp/onByDefault' : 'agents/mcp/offByDefault')}</dd>
       <dt>{t('agents/mcp/id')}</dt>
       <dd><code>{facts.id}</code> <CopyButton text={facts.id} label={t('agents/mcp/copyId')} /></dd>
-    </dl>
+    </DetailList>
   );
 }
 
@@ -148,18 +149,18 @@ export function KindPanel({ host, tab }: { host: string; tab: KindTab }): ReactE
         </div>
         {groups.map((group) => (
           <section key={group.key} className="web-custom-kinds__group">
-            {group.title === '' ? null : <h4 className="web-custom-kinds__heading"><span>{group.title}</span><span>{group.items.length}</span></h4>}
+            {group.title === '' ? null : <Section title={group.title} count={String(group.items.length)} small />}
             {group.items.map((one) => expands
               ? (
                 <div key={one.key} className="web-custom-kinds__item">
-                  <ItemRow item={one} selected={false} expanded={expanded.has(one.key)} onSelect={() => toggle(one.key)} />
+                  <KindRow item={one} selected={false} expanded={expanded.has(one.key)} onSelect={() => toggle(one.key)} />
                   {expanded.has(one.key) && one.mcp !== undefined ? <McpDetails facts={one.mcp} /> : null}
                 </div>
               )
-              : <ItemRow key={one.key} item={one} selected={one.key === selected} onSelect={() => { scrolled.current = list.current?.scrollTop ?? 0; setSelected(one.key); }} />)}
+              : <KindRow key={one.key} item={one} selected={one.key === selected} onSelect={() => { scrolled.current = list.current?.scrollTop ?? 0; setSelected(one.key); }} />)}
           </section>
         ))}
-        {groups.length === 0 ? <p className="web-note">{t('agents/customizations/noMatch')}</p> : null}
+        {groups.length === 0 ? <Note>{t('agents/customizations/noMatch')}</Note> : null}
       </div>
       {item === undefined ? null : (
         <div className="web-custom-kinds__pane">

@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert } from '@softov/scena/ui';
+import { Alert, Button } from '../../ui/index.js';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
@@ -123,7 +123,7 @@ export default function TerminalPage({ host, uri }: { host: string; uri?: string
       {detached ? (
         <div className="web-terminal__note">
           {t('terminals/disconnected')}
-          <button type="button" className="web-tool__copy" onClick={() => void scena.commands.execute('ahp.connectTerminal', { uri })}>{t('terminals/connect')}</button>
+          <Button variant="link" onClick={() => void scena.commands.execute('ahp.connectTerminal', { uri })}>{t('terminals/connect')}</Button>
         </div>
       ) : state === null || typing ? null : (
         <div className="web-terminal__note">
@@ -132,7 +132,7 @@ export default function TerminalPage({ host, uri }: { host: string; uri?: string
               ? t('terminals/note/exitedWith', { code: (state.lifecycle as { exitCode: number }).exitCode })
               : t('terminals/note/exited')
             : t(owner?.kind === 'session' ? 'terminals/note/session' : 'terminals/note/another')}
-          {exited || clientId === null ? null : <button type="button" className="web-tool__copy" onClick={takeOver}>{t('terminals/takeOver')}</button>}
+          {exited || clientId === null ? null : <Button variant="link" onClick={takeOver}>{t('terminals/takeOver')}</Button>}
         </div>
       )}
       <div className="web-terminal__screen" ref={holder} />

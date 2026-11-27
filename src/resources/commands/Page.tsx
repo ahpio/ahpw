@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, SchemaForm, Spinner, Text } from '@softov/scena/ui';
+import { Alert, Badge, Button, Page, PageActions, PageHead, SchemaForm, Spinner, Text } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import { MANIFEST, runPath, type Run } from '../manifest/data.js';
 import { fieldsOf, schemaOf } from '../manifest/input.js';
 import { canRunWith, removalQuestion, runsOnOpening } from '../manifest/roles.js';
 import type { ProgramManifest } from '../manifest/types.js';
 import Result from './Result.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { dateFormat } from '../../i18n/locales.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 /** What a command's effect looks like on its badge. */
 const EFFECT_TONE: Record<string, 'info' | 'success' | 'warning' | 'danger'> = { read: 'info', add: 'success', change: 'warning', remove: 'danger' };
@@ -48,8 +48,8 @@ export default function CommandPage({ commandId, initial }: { commandId?: string
   const reads = command.effect === undefined ? command.http.method === 'GET' : command.effect === 'read';
   const removes = command.effect === 'remove';
   return (
-    <div className="web-page">
-      <header className="web-page__head">
+    <Page>
+      <PageHead>
         <Text variant="h2" text={command.summary} />
         <div className="web-page__route">
           {command.effect === undefined
@@ -58,13 +58,13 @@ export default function CommandPage({ commandId, initial }: { commandId?: string
           <code>{command.pattern.join(' ')}</code>
         </div>
         {command.description === undefined ? null : <Markdown text={command.description} />}
-      </header>
+      </PageHead>
 
       {hasFields && schema !== undefined ? (
         <SchemaForm key={command.id} schema={schema} value={values} onChange={setValues} jsonTextRoot={false} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} />
       ) : null}
 
-      <div className="web-page__actions">
+      <PageActions>
         {asking ? (
           <span className="web-result__ask">
             {removalQuestion(command, values)}
@@ -82,7 +82,7 @@ export default function CommandPage({ commandId, initial }: { commandId?: string
         {run !== undefined && run.state !== 'running' ? (
           <Text muted variant="caption" text={t('commands/page/lastRun', { time: clock.format(run.at) })} />
         ) : null}
-      </div>
+      </PageActions>
 
       {run === undefined ? null
         : run.state === 'running' ? <Spinner label={t('commands/page/running')} />
@@ -91,6 +91,6 @@ export default function CommandPage({ commandId, initial }: { commandId?: string
         ) : (
           <Result value={run.data} />
         )}
-    </div>
+    </Page>
   );
 }

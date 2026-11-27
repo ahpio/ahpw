@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Button, ChatView, Note, Row, Spinner, Text } from '../../../ui/index.js';
 import { Markdown } from '../../../shell/markdown/Markdown.js';
 import type { ChatState, SessionState, SessionSummary } from '@microsoft/agent-host-protocol';
 import { hostBridge } from '../../../bridges/data.js';
@@ -26,10 +26,10 @@ function FileRow({ host, file }: { host: string; file: ChatFile }): ReactElement
   };
   return (
     <>
-      <button type="button" className="web-botchat__file" title={t('bots/chat/download', { name: file.name })} onClick={download}>
+      <Button title={t('bots/chat/download', { name: file.name })} onClick={download}>
         <span aria-hidden="true">{EMOJIcon.download}</span>
         <span className="web-botchat__file-name">{file.name}</span>
-      </button>
+      </Button>
       {failure === null ? null : <p className="web-botchat__failure">{failure}</p>}
     </>
   );
@@ -108,43 +108,30 @@ export function BotChat({ host, mark, summary, session, chat, chatUri, send, too
   const doing = chat.state?.activity ?? summary.activity;
 
   return (
-    <div className="web-chat web-botchat">
-      <div
-        ref={box}
-        className="web-botchat__turns"
-        onScroll={(event) => {
-          const box = event.currentTarget;
-          following.current = box.scrollHeight - box.scrollTop - box.clientHeight < 48;
-        }}
-      >
-        {/* Inside the scroll, so the turns pass under its faded bottom edge. */}
-        <header className="web-botchat__head">
-          <Bood body={mark.body} color={mark.color} width={36} />
-          <h2 className="web-botchat__title">{mark.name}</h2>
+    <ChatView
+      compact
+      scrollRef={box}
+      onScroll={(event) => {
+        const box = event.currentTarget;
+        following.current = box.scrollHeight - box.scrollTop - box.clientHeight < 48;
+      }}
+      head={(
+        <Row justify="spaceBetween" align="center" gap="var(--oo-spacing-sm)">
+          <Row align="center" gap="var(--oo-spacing-sm)">
+            <Bood body={mark.body} color={mark.color} width={36} />
+            <Text variant="h2" text={mark.name} />
+          </Row>
           {tools}
-        </header>
-        {session.error === null ? null : <Alert tone="danger" message={session.error} />}
-        {chat.error === null ? null : <Alert tone="danger" message={chat.error} />}
-        {chatUri !== undefined && chat.state === undefined && chat.error === null ? <Spinner label={t('bots/chat/reading')} /> : null}
-        {rawView ?? (
-          <>
-            {turns.map((turn) => chatItems(turn, false).map((item, at) => <Item key={`${turn.id}:${at}`} host={host} mark={mark} item={item} send={send} live={false} turnId={turn.id} />))}
-            {active === undefined ? null : chatItems(active, true).map((item, at) => <Item key={`${active.id}:${at}`} host={host} mark={mark} item={item} send={send} live turnId={active.id} />)}
-          </>
-        )}
-        {chat.state !== undefined && turns.length === 0 && active === undefined ? <p className="web-botchat__notice" data-tone="quiet">{t('bots/chat/empty', { name: mark.name })}</p> : null}
-        <div ref={end} />
-      </div>
-
-      {working ? (
+        </Row>
+      )}
+      below={working ? (
         <p className="web-botchat__status">
           <span className="web-botchat__pulse" aria-hidden="true" />
           {t('bots/chat/working', { name: mark.name })}
-          {doing === undefined || doing === null || doing === '' ? null : <span className="web-note">{` \u{00B7} ${doing}`}</span>}
+          {doing === undefined || doing === null || doing === '' ? null : <Note inline>{` \u{00B7} ${doing}`}</Note>}
         </p>
       ) : null}
-
-      {chat.state === undefined || chatUri === undefined ? null : (
+      composer={chat.state === undefined || chatUri === undefined ? null : (
         <Composer
           host={host}
           chatUri={chatUri}
@@ -164,6 +151,18 @@ export function BotChat({ host, mark, summary, session, chat, chatUri, send, too
           steers
         />
       )}
-    </div>
+    >
+      {session.error === null ? null : <Alert tone="danger" message={session.error} />}
+      {chat.error === null ? null : <Alert tone="danger" message={chat.error} />}
+      {chatUri !== undefined && chat.state === undefined && chat.error === null ? <Spinner label={t('bots/chat/reading')} /> : null}
+      {rawView ?? (
+        <>
+          {turns.map((turn) => chatItems(turn, false).map((item, at) => <Item key={`${turn.id}:${at}`} host={host} mark={mark} item={item} send={send} live={false} turnId={turn.id} />))}
+          {active === undefined ? null : chatItems(active, true).map((item, at) => <Item key={`${active.id}:${at}`} host={host} mark={mark} item={item} send={send} live turnId={active.id} />)}
+        </>
+      )}
+      {chat.state !== undefined && turns.length === 0 && active === undefined ? <p className="web-botchat__notice" data-tone="quiet">{t('bots/chat/empty', { name: mark.name })}</p> : null}
+      <div ref={end} />
+    </ChatView>
   );
 }

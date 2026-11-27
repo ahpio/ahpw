@@ -7,6 +7,7 @@ import { serverLabel, type ServerInfo } from './server-info.js';
 import { elapsed } from './words.js';
 import { EMOJIcon } from '../resources/emojis.js';
 import { plural, dateFormat } from '../i18n/locales.js';
+import { Button } from '../ui/index.js';
 
 /** The connection's state, as its word under `bridges/state`. */
 const WORDS: Record<Connection['status'], string> = {
@@ -74,7 +75,7 @@ function OneHostStatus(): ReactElement {
       <span>{word}</span>
       {since === null ? null : <span className="web-connection__uptime">{elapsed(now - since)}</span>}
       {reconnects === 0 ? null : <span className="web-connection__uptime">{`${EMOJIcon.reload} ${reconnects}`}</span>}
-      {down ? <button type="button" className="web-connection__retry" onClick={() => void hostBridge(windowHost()).reconnect()}>{t('bridges/reconnectNow')}</button> : null}
+      {down ? <Button variant="link" onClick={() => void hostBridge(windowHost()).reconnect()}>{t('bridges/reconnectNow')}</Button> : null}
     </span>
   );
 }
@@ -100,7 +101,7 @@ function EveryHostStatus(): ReactElement {
     <span className="web-connection" data-status={worst} title={tip === '' ? undefined : tip}>
       <span className="web-connection__dot" aria-hidden="true" />
       <span>{t('bridges/hostsUp', { up, total: hosts.length })}</span>
-      {down ? <button type="button" className="web-connection__retry" onClick={() => void Promise.all(hosts.filter((_, at) => states[at] !== 'connected').map((host) => hostBridge(host).reconnect()))}>{t('bridges/reconnectNow')}</button> : null}
+      {down ? <Button variant="link" onClick={() => void Promise.all(hosts.filter((_, at) => states[at] !== 'connected').map((host) => hostBridge(host).reconnect()))}>{t('bridges/reconnectNow')}</Button> : null}
     </span>
   );
 }

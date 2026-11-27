@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, SchemaForm, Spinner, type JsonSchemaObject } from '@softov/scena/ui';
+import { Alert, Blocks, Button, type JsonSchemaObject, Note, PageActions, SchemaForm, Spinner } from '../../ui/index.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -13,7 +13,7 @@ import { PEOPLE, peopleReducer, servesPeople, type ListedUser, type PeopleState 
 import { PLUGINS, pluginsReducer, type PluginRow } from '../../bridges/plugins.js';
 import { hostSaid } from '../../bridges/said.js';
 import { EMOJIcon } from '../emojis.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { meOn } from './actions.js';
 import { AdapterPicker } from './AdapterPicker.js';
 import { adapterSchema, configForForm, configForPut, configForSignIn, ID_PATTERN, idFor, ownerChoices, signInFills, topSchema, type TopValues } from './form.js';
@@ -117,8 +117,8 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
   if (adaptersRead.error !== null && !editing) return <PageAlert tone="warning" title={t('connectors/form/noAdapters')} message={adaptersRead.error} />;
   if (adaptersRead.state === undefined && adaptersRead.error === null) return <Spinner label={t('connectors/notices/reading')} />;
   if (!userRead) return <Spinner label={t('connectors/notices/reading')} />;
-  if (!editing && adapters.length === 0) return <p className="web-note">{t('connectors/form/noAdapters')}</p>;
-  if (!editing && owners.length === 0) return <p className="web-note">{t('connectors/form/noPut')}</p>;
+  if (!editing && adapters.length === 0) return <Note>{t('connectors/form/noAdapters')}</Note>;
+  if (!editing && owners.length === 0) return <Note>{t('connectors/form/noPut')}</Note>;
 
   const dirty = JSON.stringify(top) !== JSON.stringify(heldTop) || JSON.stringify(config) !== JSON.stringify(heldConfig);
   const ready = adapter !== undefined && ID_PATTERN.test(top.id) && top.owner !== '';
@@ -146,9 +146,9 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
   };
 
   return (
-    <div className="web-connector-form">
+    <Blocks>
       {editing && adapter === undefined ? (
-        <p className="web-note">{connector.adapter === undefined ? t('connectors/page/noAdapter') : t('connectors/page/unknownAdapter', { adapter: connector.adapter })}</p>
+        <Note>{connector.adapter === undefined ? t('connectors/page/noAdapter') : t('connectors/page/unknownAdapter', { adapter: connector.adapter })}</Note>
       ) : null}
       {/* A new form has nothing to go back to; a made one goes back to what the host holds. */}
       <div className="web-connector-form__pick">
@@ -178,11 +178,11 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
         </section>
       )}
       {failure === null ? null : <Alert tone="danger" title={t('connectors/form/failed')} message={failure} />}
-      <div className="web-page__actions">
+      <PageActions>
         <Button label={t(editing ? 'connectors/form/save' : 'connectors/form/create')} variant="primary" disabled={!ready || busy || !jsonValid || (editing && !dirty)} {...(jsonValid ? {} : { title: t('host/settings/fixJson') })} onClick={save} />
         {editing ? <Button label={t('connectors/form/reset')} disabled={!dirty || busy} onClick={() => { setTop(heldTop); setConfig(heldConfig); setFailure(null); }} /> : null}
-        {saved && !dirty ? <span className="web-note">{t('connectors/form/saved')}</span> : null}
-      </div>
-    </div>
+        {saved && !dirty ? <Note inline>{t('connectors/form/saved')}</Note> : null}
+      </PageActions>
+    </Blocks>
   );
 }

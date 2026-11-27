@@ -7,7 +7,8 @@ import { ahpPaths, type HostFacts } from '../../bridges/data.js';
 import { everyHost } from '../../bridges/hosts.js';
 import { clock, filterLog, LOG_LEVELS, LOG_SCOPES, lineText, logText, piecesOf, useLog, type LogEntry, type LogLevel, type LogScope } from './log.js';
 import { EMOJIcon } from '../emojis.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
+import { Button, Link, Note, Pill, TextField } from '../../ui/index.js';
 
 const MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 const FOLLOW_KEY = MAC ? 'log/follow/mac' : 'log/follow/other';
@@ -49,12 +50,12 @@ const Row = memo(function Row({ entry, open, onToggle }: { entry: LogEntry; open
     if (piece.kind === 'text') return <span key={index}>{piece.text}</span>;
     const follow = followOf(scena, piece.text);
     if (follow === null) return <span key={index}>{piece.text}</span>;
-    const onClick = (event: MouseEvent): void => {
+    const onClick = (event: MouseEvent<HTMLAnchorElement>): void => {
       if (!event.ctrlKey && !event.metaKey) return;
       event.stopPropagation();
       follow.run();
     };
-    return <a key={index} className="web-log__link" title={t('log/follow/link', { tip: follow.tip, how: t(FOLLOW_KEY) })} onClick={onClick}>{piece.text}</a>;
+    return <Link key={index} title={t('log/follow/link', { tip: follow.tip, how: t(FOLLOW_KEY) })} onClick={onClick}>{piece.text}</Link>;
   });
   return (
     <div className="web-log__row" data-open={open || undefined} data-level={entry.level}>
@@ -64,7 +65,7 @@ const Row = memo(function Row({ entry, open, onToggle }: { entry: LogEntry; open
         <span className="web-log__level">{entry.level.toUpperCase()}</span>
         <span className="web-log__scope" data-scope={entry.scope}><span>{t(`log/scopes/${entry.scope}`)}</span></span>
         <span className="web-log__text">{words}</span>
-        {open ? <button type="button" className="web-log__icon" title={t('log/copyLine')} onClick={(event) => { event.stopPropagation(); copy(lineText(entry)); }}>{EMOJIcon.copy}</button> : null}
+        {open ? <Button variant="quiet" size="xs" title={t('log/copyLine')} onClick={(event) => { event.stopPropagation(); copy(lineText(entry)); }}>{EMOJIcon.copy}</Button> : null}
       </div>
       {open && entry.detail !== undefined ? <pre className="web-log__detail">{detailText(entry.detail)}</pre> : null}
     </div>
@@ -118,21 +119,17 @@ export default function LogPage(): ReactElement {
   return (
     <div className="web-log">
       <div className="web-log__bar">
-        <button type="button" className="web-log__chip" data-on={scopes.length === 0 || undefined} onClick={() => setScopes([])}>{t('log/all')}</button>
+        <Pill label={t('log/all')} on={scopes.length === 0} onClick={() => setScopes([])} />
         {LOG_SCOPES.map((scope) => (
-          <button key={scope} type="button" className="web-log__chip" data-on={scopes.includes(scope) || undefined} onClick={() => pick(scope)}>
-            <span className="web-log__dot" data-scope={scope} />{t(`log/scopes/${scope}`)}
-          </button>
+          <Pill key={scope} label={t(`log/scopes/${scope}`)} lead={<span className="web-log__dot" data-scope={scope} />} on={scopes.includes(scope)} onClick={() => pick(scope)} />
         ))}
         <span className="web-log__rule" />
-        <button type="button" className="web-log__chip" title={t('log/levelTip')} disabled={scopes.includes('traffic')} onClick={nextLevel}>
-          {t('log/minLevel', { level: scopes.includes('traffic') ? 'debug' : minLevel })}
-        </button>
-        <input className="web-log__search" type="search" placeholder={t('log/filter')} value={query} onChange={(event) => setQuery(event.target.value)} />
-        <button type="button" className="web-log__icon" title={t('log/copyShown')} onClick={() => copy(logText(shown))}>{EMOJIcon.copy}</button>
+        <Pill label={t('log/minLevel', { level: scopes.includes('traffic') ? 'debug' : minLevel })} title={t('log/levelTip')} disabled={scopes.includes('traffic')} onClick={nextLevel} />
+        <TextField type="search" weight={1} placeholder={t('log/filter')} value={query} onChange={setQuery} />
+        <Button variant="quiet" size="xs" title={t('log/copyShown')} onClick={() => copy(logText(shown))}>{EMOJIcon.copy}</Button>
       </div>
       <div className="web-log__list" ref={list}>
-        {shown.length === 0 ? <p className="web-note">{t(all.length === 0 ? 'log/empty' : 'log/noMatch')}</p> : null}
+        {shown.length === 0 ? <Note>{t(all.length === 0 ? 'log/empty' : 'log/noMatch')}</Note> : null}
         {shown.map((entry) => <Row key={entry.id} entry={entry} open={opened.has(entry.id)} onToggle={toggle} />)}
       </div>
     </div>

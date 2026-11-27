@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { droppedAt, endedOutside, openInWindow } from '@softov/scena';
 import { endOpenDrag, startOpenDrag, useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import type { AgentInfo, SessionSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths, titlePath, type Connection } from '../../bridges/data.js';
@@ -156,7 +156,7 @@ export default function SessionExplorer(): ReactElement {
     ? <Alert tone="danger" title={t('sessions/explorer/notConnected')} message={connection.error ?? t('sessions/explorer/refused')} />
     : connection?.status !== 'connected' && sessions === undefined
       ? <Spinner label={t('sessions/explorer/connecting')} />
-      : rows.length === 0 ? <p className="web-note">{show !== 'all' || agent !== null ? t('sessions/explorer/noneShown') : archived ? t('sessions/explorer/none') : t('sessions/explorer/noneYet')}</p> : null;
+      : rows.length === 0 ? <Note>{show !== 'all' || agent !== null ? t('sessions/explorer/noneShown') : archived ? t('sessions/explorer/none') : t('sessions/explorer/noneYet')}</Note> : null;
 
   return (
     <ExplorerList

@@ -1,7 +1,7 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react';
 import { isBeside, useMountSurface } from './beside.js';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, Spinner, Text } from '@softov/scena/ui';
+import { Alert, Badge, Button, ChatView, Note, Pill, Row, RowButton, Spinner, Text } from '../../ui/index.js';
 import {
   chatReducer,
   sessionReducer,
@@ -29,7 +29,7 @@ import { sessionOfChannel } from '../log/wire.js';
 import { subagentCalls } from './header.js';
 import { rawOf } from './raw.js';
 import { EMPTY_FILTER, filtering, matchTurn, STEP_TYPES, useKeptFilter, type StepFilter, type TurnMatch } from './filter.js';
-import { FilterBar } from '../../shell/view/FilterBar.js';
+import { FilterBar } from '../../ui/data/FilterBar.js';
 import './turn-kept.css';
 import { SessionHeaderTools } from './SessionHeader.js';
 import { answeredHere, InputRequest } from './Question.js';
@@ -47,8 +47,8 @@ import { factsOf, replyText, tokens, when, type TurnFacts } from './turn.js';
 import { attachmentIcon, attachmentLabel, hasPreview, previewOf, type AttachmentPreviewOf } from './attachments.js';
 import { AttachmentPreview } from './Attached.js';
 import { EMOJIcon } from '../emojis.js';
-import { CopyButton } from '../../shell/controls/CopyButton.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { BotChat } from '../bots/chat/BotChat.js';
 import { sessionKey } from './focus.js';
 import { botMarkOf } from '../bots/chat/mark.js';
@@ -92,10 +92,9 @@ function Notice({ line, text }: { line: string; text: string }): ReactElement {
   return (
     <div className="web-turn__notice">
       {more ? (
-        <button type="button" className="web-activity__line" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <RowButton fit faint small caret="end" expanded={open} onClick={() => setOpen(!open)}>
           {body}
-          <span className="web-activity__chev" aria-hidden="true">{open ? EMOJIcon.caretDown : EMOJIcon.caretRight}</span>
-        </button>
+        </RowButton>
       ) : <span className="web-turn__notice-line">{body}</span>}
       {open ? <div className="web-turn__notice-text">{text}</div> : null}
     </div>
@@ -103,6 +102,9 @@ function Notice({ line, text }: { line: string; text: string }): ReactElement {
 }
 
 /** The words of a source's chip, and the hint of its click. */
+/** The chip over a message from elsewhere sits at the message's end, just over it. */
+const FROM_PLACE: CSSProperties = { alignSelf: 'flex-end', marginBottom: 'calc(-1 * var(--oo-spacing-xs))' };
+
 const FROM_WORDS: Record<Source['scope'], { label: string; open: string }> = {
   chat: { label: 'sessions/turn/fromChat', open: 'sessions/turn/openSource' },
   session: { label: 'sessions/turn/fromSession', open: 'sessions/turn/openSource' },
@@ -114,10 +116,14 @@ const FROM_WORDS: Record<Source['scope'], { label: string; open: string }> = {
 function FromChip({ from, onSource }: { from: Source; onSource: (from: Source) => void }): ReactElement {
   const { t } = useI18n();
   const words = FROM_WORDS[from.scope];
-  const body = <><span aria-hidden="true">{EMOJIcon.forward}</span>{t(words.label)}</>;
-  return opens(from)
-    ? <button type="button" className="web-chip web-turn__from" title={t(words.open)} onClick={() => onSource(from)}>{body}</button>
-    : <span className="web-chip web-turn__from">{body}</span>;
+  return (
+    <Pill
+      label={t(words.label)}
+      lead={<span aria-hidden="true">{EMOJIcon.forward}</span>}
+      style={FROM_PLACE}
+      {...(opens(from) ? { title: t(words.open), onClick: () => onSource(from) } : {})}
+    />
+  );
 }
 
 /** What a message carried along with its text: a file opens where it is one, what the message holds opens a preview. */
@@ -131,11 +137,11 @@ function SentAttachments({ attachments }: { attachments: readonly MessageAttachm
         const held = attachment as { uri?: unknown; displayKind?: unknown };
         const uri = typeof held.uri === 'string' && held.displayKind !== 'directory' ? held.uri : undefined;
         const label = attachmentLabel(attachment);
-        const body = <><span className="web-attachment__icon">{attachmentIcon(attachment)}</span><span className="web-attachment__label">{label}</span></>;
-        if (hasPreview(attachment)) return <button key={index} type="button" className="web-attachment" title={t('sessions/attachments/see', { name: label })} onClick={() => setPreview(previewOf(attachment))}>{body}</button>;
+        const lead = <span aria-hidden="true">{attachmentIcon(attachment)}</span>;
+        if (hasPreview(attachment)) return <Pill key={index} label={label} lead={lead} title={t('sessions/attachments/see', { name: label })} onClick={() => setPreview(previewOf(attachment))} />;
         return uri === undefined
-          ? <span key={index} className="web-attachment" title={label}>{body}</span>
-          : <button key={index} type="button" className="web-attachment" title={t('sessions/attachments/open', { name: label })} onClick={() => void scena.commands.execute('ahp.openFile', { uri })}>{body}</button>;
+          ? <Pill key={index} label={label} lead={lead} />
+          : <Pill key={index} label={label} lead={lead} title={t('sessions/attachments/open', { name: label })} onClick={() => void scena.commands.execute('ahp.openFile', { uri })} />;
       })}
       {preview === null ? null : <AttachmentPreview preview={preview} onClose={() => setPreview(null)} />}
     </div>
@@ -228,8 +234,8 @@ function OlderTurns({ host, chatUri, cursor, note }: { host: string; chatUri: st
   return (
     <div className="web-chat__older">
       <Button label={busy ? t('sessions/chat/loading') : t('sessions/chat/older')} disabled={busy} onClick={load} />
-      {note === undefined ? null : <span className="web-note">{note}</span>}
-      {error === null ? null : <span className="web-note">{error}</span>}
+      {note === undefined ? null : <Note inline>{note}</Note>}
+      {error === null ? null : <Note inline>{error}</Note>}
     </div>
   );
 }
@@ -552,82 +558,51 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
   const doing = chat.state?.activity ?? summary.activity;
 
   return (
-    <div className="web-chat">
-      <div
-        ref={scroller}
-        className="web-chat__turns"
-        onScroll={(event) => {
-          // Scrolling the info says nothing of where the chat is read.
-          if (infoOpen || active !== null) return;
-          const box = event.currentTarget;
-          following.current = box.scrollHeight - box.scrollTop - box.clientHeight < 48;
-          setBelow(!following.current);
-        }}
-      >
-        {/* Inside the scroll, so the turns pass under its faded bottom edge. */}
-        <header className="web-chat__head">
-          <div className="web-chat__head-row">
-            <div className="web-chat__title">
+    <ChatView
+      scrollRef={scroller}
+      onScroll={(event) => {
+        // Scrolling the info says nothing of where the chat is read.
+        if (infoOpen || active !== null) return;
+        const box = event.currentTarget;
+        following.current = box.scrollHeight - box.scrollTop - box.clientHeight < 48;
+        setBelow(!following.current);
+      }}
+      head={(
+        <>
+          <Row justify="spaceBetween" align="center" wrap gap="var(--oo-spacing-sm)">
+            <Row align="center" wrap gap="var(--oo-spacing-sm)">
               <Text variant="h2" text={summary.title === '' ? t('sessions/untitled') : summary.title} />
               <Badge tone={ACTIVITY_TONE[activity]} text={activityLabel(activity)} />
-            </div>
+            </Row>
             {tools}
-          </div>
+          </Row>
           <HeaderLine summary={summary} chat={chat.state} open={infoOpen} onToggle={() => toggleInfo(!infoOpen)} />
           {filterBar}
-          {doing === undefined || doing === '' ? null : <span className="web-note web-chat__doing">{doing}</span>}
-        </header>
-        {lifecycle === 'creating' ? <Spinner label={t('sessions/chat/starting')} /> : null}
-        {lifecycle === 'failed' ? <Alert tone="danger" title={t('sessions/chat/notStarted')} message={session.state?.creationError?.message ?? t('sessions/chat/noReason')} /> : null}
-        {session.error === null ? null : <Alert tone="danger" title={t('sessions/chat/sessionUnreadable')} message={session.error} />}
-        {chat.error === null ? null : <Alert tone="danger" title={t('sessions/chat/chatUnreadable')} message={chat.error} />}
-        {chatUri !== undefined && chat.state === undefined && chat.error === null ? <Spinner label={t('sessions/chat/reading')} /> : null}
-        {infoOpen ? <SessionInfo host={host} summary={summary} session={session.state} chat={chat.state} chatUri={chatUri} onTool={showTool} /> : (
-          <>
-            {chatUri === undefined || chat.state?.turnsNextCursor === undefined ? null : (
-              <OlderTurns host={host} chatUri={chatUri} cursor={chat.state.turnsNextCursor} {...(active === null ? {} : { note: t('sessions/filter/older') })} />
-            )}
-            <SessionHostContext.Provider value={host}>
-              <ChatContext.Provider value={chatUri ?? null}>
-                <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
-                  {rawView ?? (
-                    <>
-                      {chat.state?.turns.map((turn, at) => {
-                        const match = matches?.[at];
-                        if (match !== undefined && !active!.highlight && match.count === 0) return null;
-                        return <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} origins={origins} onSource={openSource} hideCalls={callsHidden} {...(match === undefined ? {} : { match, only: !active!.highlight, number: at + 1 })} />;
-                      })}
-                      {chat.state?.activeTurn === undefined || (activeMatch !== undefined && !active!.highlight && activeMatch.count === 0) ? null : (
-                        <TurnView turn={chat.state.activeTurn} live send={send} session={resource} origins={origins} onSource={openSource} open={open} hideCalls={callsHidden} {...(activeMatch === undefined ? {} : { match: activeMatch, only: !active!.highlight, number: turns + 1 })} />
-                      )}
-                      {active !== null && !active.highlight && kept === 0 ? <p className="web-note">{t('sessions/filter/none')}</p> : null}
-                    </>
-                  )}
-                </WorkspaceContext.Provider>
-              </ChatContext.Provider>
-            </SessionHostContext.Provider>
-            {chat.state !== undefined && turns === 0 && chat.state.activeTurn === undefined ? <p className="web-note">{t('sessions/chat/empty')}</p> : null}
-          </>
-        )}
-        <div ref={end} />
-      </div>
-      {below && !infoOpen && active === null ? (
-        <div className="web-chat__to-end">
-          <button
-            type="button"
-            className="web-chat__to-end-button"
-            aria-label={t('sessions/chat/toEnd')}
-            title={t('sessions/chat/toEnd')}
-            onClick={() => {
-              following.current = true;
-              setBelow(false);
-              end.current?.scrollIntoView({ block: 'end' });
-            }}
-          >{EMOJIcon.toEnd}</button>
-        </div>
-      ) : null}
-
-      {chat.state === undefined || chatUri === undefined ? null : (
+          {doing === undefined || doing === '' ? null : <Note inline>{doing}</Note>}
+        </>
+      )}
+      below={(
+        <>
+          {below && !infoOpen && active === null ? (
+            <div className="web-chat__to-end">
+              <Button
+                variant="tool"
+                shape="round"
+                size="md"
+                ariaLabel={t('sessions/chat/toEnd')}
+                title={t('sessions/chat/toEnd')}
+                onClick={() => {
+                  following.current = true;
+                  setBelow(false);
+                  end.current?.scrollIntoView({ block: 'end' });
+                }}
+              >{EMOJIcon.toEnd}</Button>
+            </div>
+          ) : null}
+          {usageOpen ? <UsageDialog usage={usage} onClose={() => setUsageOpen(false)} /> : null}
+        </>
+      )}
+      composer={chat.state === undefined || chatUri === undefined ? null : (
         <Composer
           host={host}
           chatUri={chatUri}
@@ -653,7 +628,7 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
               <Alert className="web-composer__notice" tone={off === 'paused' ? 'warning' : 'info'}>
                 {t(`sessions/agentOff/${off}`, { name: rows.find((one) => one.id === provider)?.name || provider })}
                 {' '}
-                <button type="button" className="web-link" onClick={() => void scena.commands.execute('ahp.openAgent', { host, provider })}>{t('sessions/agentOff/open')}</button>
+                <Button variant="link" onClick={() => void scena.commands.execute('ahp.openAgent', { host, provider })}>{t('sessions/agentOff/open')}</Button>
               </Alert>
             ),
           })}
@@ -661,7 +636,40 @@ function SessionView({ host, resource, beside }: { host: string; resource?: stri
           onInfo={flipInfo}
         />
       )}
-      {usageOpen ? <UsageDialog usage={usage} onClose={() => setUsageOpen(false)} /> : null}
-    </div>
+    >
+      {lifecycle === 'creating' ? <Spinner label={t('sessions/chat/starting')} /> : null}
+      {lifecycle === 'failed' ? <Alert tone="danger" title={t('sessions/chat/notStarted')} message={session.state?.creationError?.message ?? t('sessions/chat/noReason')} /> : null}
+      {session.error === null ? null : <Alert tone="danger" title={t('sessions/chat/sessionUnreadable')} message={session.error} />}
+      {chat.error === null ? null : <Alert tone="danger" title={t('sessions/chat/chatUnreadable')} message={chat.error} />}
+      {chatUri !== undefined && chat.state === undefined && chat.error === null ? <Spinner label={t('sessions/chat/reading')} /> : null}
+      {infoOpen ? <SessionInfo host={host} summary={summary} session={session.state} chat={chat.state} chatUri={chatUri} onTool={showTool} /> : (
+        <>
+          {chatUri === undefined || chat.state?.turnsNextCursor === undefined ? null : (
+            <OlderTurns host={host} chatUri={chatUri} cursor={chat.state.turnsNextCursor} {...(active === null ? {} : { note: t('sessions/filter/older') })} />
+          )}
+          <SessionHostContext.Provider value={host}>
+            <ChatContext.Provider value={chatUri ?? null}>
+              <WorkspaceContext.Provider value={summary.workingDirectories?.[0] ?? null}>
+                {rawView ?? (
+                  <>
+                    {chat.state?.turns.map((turn, at) => {
+                      const match = matches?.[at];
+                      if (match !== undefined && !active!.highlight && match.count === 0) return null;
+                      return <TurnView key={turn.id} turn={turn} live={false} send={send} session={resource} origins={origins} onSource={openSource} hideCalls={callsHidden} {...(match === undefined ? {} : { match, only: !active!.highlight, number: at + 1 })} />;
+                    })}
+                    {chat.state?.activeTurn === undefined || (activeMatch !== undefined && !active!.highlight && activeMatch.count === 0) ? null : (
+                      <TurnView turn={chat.state.activeTurn} live send={send} session={resource} origins={origins} onSource={openSource} open={open} hideCalls={callsHidden} {...(activeMatch === undefined ? {} : { match: activeMatch, only: !active!.highlight, number: turns + 1 })} />
+                    )}
+                    {active !== null && !active.highlight && kept === 0 ? <Note>{t('sessions/filter/none')}</Note> : null}
+                  </>
+                )}
+              </WorkspaceContext.Provider>
+            </ChatContext.Provider>
+          </SessionHostContext.Provider>
+          {chat.state !== undefined && turns === 0 && chat.state.activeTurn === undefined ? <Note>{t('sessions/chat/empty')}</Note> : null}
+        </>
+      )}
+      <div ref={end} />
+    </ChatView>
   );
 }

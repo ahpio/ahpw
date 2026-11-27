@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button, Modal } from '@softov/scena/ui';
+import { Alert, Button, Modal } from '../../ui/index.js';
 import FilePage from '../files/FilePage.js';
 import type { FileSpot } from './words.js';
 

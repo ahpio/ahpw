@@ -1,7 +1,6 @@
 import { useRef, useState, type ReactElement, type ReactNode } from 'react';
-import { ContextMenu } from '@softov/scena/ui';
+import { ContextMenu, Pill } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
-import { Pill } from '../sessions/pills.js';
 
 /** One choice of a pill's menu. */
 export interface PillChoice {
@@ -39,7 +38,8 @@ export function MenuPill({ label, short, icon, image, lead, title, choices }: {
         image={image}
         lead={lead}
         {...(title === undefined ? {} : { title })}
-        onOpen={() => {
+        menu
+        onClick={() => {
           const box = anchor.current?.getBoundingClientRect();
           if (box !== undefined) setMenu({ x: box.left, y: box.bottom });
         }}

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Pill } from './pills.js';
+import { Pill } from '../../ui/index.js';
 import type { CustomAgent } from './custom-agents.js';
 
 /**
@@ -12,5 +12,5 @@ export function AgentPicker({ agents, chosen, open }: { agents: readonly CustomA
   const { t } = useI18n();
   if (agents.length === 0) return null;
   const name = agents.find((one) => one.uri === chosen)?.name ?? t('sessions/commands/agent');
-  return <Pill label={name} title={t('sessions/commands/agentHint')} onOpen={open} />;
+  return <Pill label={name} title={t('sessions/commands/agentHint')} menu onClick={open} />;
 }

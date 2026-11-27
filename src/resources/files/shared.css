@@ -5,30 +5,13 @@
 
 .web-file__people,
 .web-file__state,
-.web-file__mode,
-.web-file__head .web-icon-button {
+.web-file__mode {
   flex: none;
 }
 
 .web-file__people {
   display: inline-flex;
   align-items: center;
-}
-
-.web-file__person {
-  position: relative;
-  display: inline-flex;
-  margin-left: -6px;
-  padding: 0;
-  border: 2px solid var(--oo-color-surface);
-  border-radius: 50%;
-  background: none;
-  cursor: pointer;
-}
-
-.web-file__person:disabled {
-  opacity: 1;
-  cursor: default;
 }
 
 /* What the person is, at the circle's foot, and a pencil at its top while they edit. */
@@ -58,10 +41,6 @@
   color: var(--oo-color-primary);
 }
 
-.web-file__person:first-child {
-  margin-left: 0;
-}
-
 .web-file__state {
   color: var(--oo-color-muted);
 }
@@ -73,56 +52,29 @@
   overflow: hidden;
 }
 
-.web-icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  width: 26px;
-  height: 24px;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: var(--oo-spacing-sm);
-  background: none;
-  color: var(--oo-color-text);
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.web-icon-button:hover:not(:disabled) {
-  border-color: var(--oo-color-border);
-}
-
-.web-icon-button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.web-icon-button--primary,
-.web-file__mode .web-icon-button[aria-pressed="true"] {
-  background: var(--oo-color-primary);
-  color: var(--oo-color-on-primary, #fff);
-}
-
-.web-file__mode .web-icon-button {
-  border: 0;
-  border-radius: 0;
-}
-
 /* The header's items sit on its middle, the copy button with them, though the path may wrap. */
 .web-file__head > * {
   align-self: center;
-}
-
-.web-file__head .web-copy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
 }
 
 .web-file__state {
   display: inline-flex;
   align-items: center;
   line-height: 1;
+}
+
+/* The people on the file, each a round button over the last one's edge. */
+.web-file__people > .oo-btn {
+  position: relative;
+  margin-left: -6px;
+  border: 2px solid var(--oo-color-surface);
+}
+
+.web-file__people > .oo-btn:first-child {
+  margin-left: 0;
+}
+
+.web-file__people > .oo-btn:disabled {
+  opacity: 1;
+  cursor: default;
 }

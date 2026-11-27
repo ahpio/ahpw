@@ -1,0 +1,73 @@
+.oo-page {
+  /* The width of a page's content, and the space each side of it on a wider surface. */
+  --oo-page-width: 64rem;
+  --oo-page-gutter: max(var(--oo-spacing-lg), calc((100% - var(--oo-page-width)) / 2));
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  padding: var(--oo-spacing-lg) 0;
+  overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/*
+ * The page spans the surface, so its scroll bar is on the surface's edge, and
+ * each part centres its content in the gutter. Tabs span the surface too: the
+ * strip is the band under the head, and the panel scrolls with its content
+ * centred.
+ */
+.oo-page > :not(.oo-tabs) {
+  margin-inline: var(--oo-page-gutter);
+}
+
+/* A table's full width is the page's less both gutters, or its margins push it past the edge. */
+.oo-page > table {
+  width: calc(100% - 2 * var(--oo-page-gutter));
+}
+
+.oo-page > .oo-tabs > .oo-tabs__strip {
+  padding-inline: var(--oo-page-gutter);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.oo-page > .oo-tabs > .oo-tabs__strip > .oo-tabs__tab {
+  flex: none;
+  white-space: nowrap;
+}
+
+.oo-page > .oo-tabs > [role="tabpanel"] {
+  padding: var(--oo-spacing-sm) var(--oo-page-gutter) var(--oo-spacing-lg);
+}
+
+.oo-page:has(> .oo-tabs) {
+  padding-bottom: 0;
+}
+
+.oo-page__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+}
+
+.oo-page__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-md);
+}
+
+.oo-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  padding-top: var(--oo-spacing-md);
+}
+
+.oo-blocks .oo-blocks {
+  padding-top: 0;
+}
+
+.oo-blocks > .oo-section:not(:first-child) {
+  margin-top: var(--oo-spacing-sm);
+}

@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
 import type { EngineRow } from '../../bridges/agents.js';
 import { AdapterPicker } from '../connectors/AdapterPicker.js';
+import { ChoiceCards, Section } from '../../ui/index.js';
 
 /**
  * The engine of a new agent, picked as a connector's adapter is but always by
@@ -26,24 +27,18 @@ export function EnginePicker({ engines, value, template, labelOf, fixed, onPick,
     <>
       <AdapterPicker adapters={engines} value={value} labelOf={labelOf} fixed={fixed} onPick={onPick} words={{ label: t('agents/form/engine'), search: t('agents/form/searchEngines'), none: t('agents/form/noEngineMatch') }} grouping="plugin" />
       {fixed || engine === undefined || templates.length === 0 ? null : (
-        <div className="web-kind-templates" role="radiogroup" aria-label={t('agents/form/startFrom')}>
-          <span className="web-connector-form__label">{t('agents/form/startFrom')}</span>
-          {templates.map((one, at) => (
-            <label key={`${at}:${one.name}`} className="web-kind-templates__choice">
-              <input type="radio" name="agent-template" checked={template === at} onChange={() => onTemplate(at)} />
-              <span className="web-kind-templates__text">
-                <span className="web-kind-templates__title">{one.name}</span>
-                {one.description === undefined || one.description === '' ? null : <span className="web-kind-templates__description">{one.description}</span>}
-              </span>
-            </label>
-          ))}
-          <label className="web-kind-templates__choice">
-            <input type="radio" name="agent-template" checked={template === -1} onChange={() => onTemplate(-1)} />
-            <span className="web-kind-templates__text">
-              <span className="web-kind-templates__title">{t('agents/form/blank')}</span>
-            </span>
-          </label>
-        </div>
+        <>
+          <Section title={t('agents/form/startFrom')} small />
+          <ChoiceCards
+            options={[
+              ...templates.map((one, at) => ({ id: String(at), label: one.name, ...(one.description === undefined || one.description === '' ? {} : { hint: one.description }) })),
+              { id: '-1', label: t('agents/form/blank') },
+            ]}
+            picked={[String(template)]}
+            many={false}
+            onPick={(id) => onTemplate(Number(id))}
+          />
+        </>
       )}
     </>
   );

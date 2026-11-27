@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { ContextMenu } from '@softov/scena/ui';
+import { Button, ContextMenu, Link, Note, TextField } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { EMOJIcon } from '../../resources/emojis.js';
-import { copyText } from '../controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 import { embedder, type EmbedBounds, type EmbedNavigation } from '../embed/index.js';
 import { addressOf } from './address.js';
 import { SANDBOX } from './sandbox.js';
@@ -186,9 +186,9 @@ export default function BrowserView(): ReactElement {
   const shareLabel = copied ? t('shell/browser/copied') : t('shell/browser/share');
 
   const button = (icon: string, label: string, run: (event: MouseEvent<HTMLButtonElement>) => void, disabled = false): ReactElement => (
-    <button type="button" className="web-explorer__action" title={label} aria-label={label} disabled={disabled} onClick={run}>
-      <span className="web-explorer__icon">{icon}</span>
-    </button>
+    <Button variant="subtle" shape="icon" title={label} ariaLabel={label} disabled={disabled} onClick={run}>
+      {icon}
+    </Button>
   );
 
   return (
@@ -200,17 +200,17 @@ export default function BrowserView(): ReactElement {
           {button(EMOJIcon.reload, t('common/reload'), reload, shown === undefined)}
         </span>
         <form className="web-browser__address" onSubmit={submit}>
-          <input
-            type="text"
+          <TextField
+            compact
             inputMode="url"
             enterKeyHint="go"
             spellCheck={false}
             autoComplete="off"
             value={typed}
             placeholder={t('shell/browser/addressHint')}
-            aria-label={t('shell/browser/address')}
-            aria-invalid={refused}
-            onChange={(event) => { setTyped(event.target.value); setRefused(false); }}
+            ariaLabel={t('shell/browser/address')}
+            invalid={refused}
+            onChange={(next) => { setTyped(next); setRefused(false); }}
             onKeyDown={escape}
             onFocus={(event) => event.currentTarget.select()}
           />
@@ -221,18 +221,18 @@ export default function BrowserView(): ReactElement {
           {shown === undefined ? (
             button(EMOJIcon.external, t('shell/browser/openOutside'), () => undefined, true)
           ) : (
-            <a className="web-explorer__action" href={shown} target="_blank" rel="noopener noreferrer" title={t('shell/browser/openOutside')} aria-label={t('shell/browser/openOutside')}>
-              <span className="web-explorer__icon">{EMOJIcon.external}</span>
-            </a>
+            <Link href={shown} external icon title={t('shell/browser/openOutside')} ariaLabel={t('shell/browser/openOutside')}>
+              {EMOJIcon.external}
+            </Link>
           )}
         </span>
       </div>
-      {refused ? <p className="web-note web-browser__refused" role="alert">{t('shell/browser/refused')}</p> : null}
+      {refused ? <Note tone="danger" role="alert">{t('shell/browser/refused')}</Note> : null}
       <div className="web-browser__page" ref={box}>
         {shown === undefined ? (
           <div className="web-browser__empty">
             <p className="web-browser__emptyTitle">{t('shell/browser/empty')}</p>
-            <p className="web-note">{t('shell/browser/emptyBody')}</p>
+            <Note>{t('shell/browser/emptyBody')}</Note>
           </div>
         ) : browser === undefined ? (
           <iframe key={`${loads}:${shown}`} className="web-browser__frame" src={shown} title={shown} sandbox={SANDBOX} referrerPolicy="strict-origin-when-cross-origin" />

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useI18n, useScena } from '@softov/scena/react';
 import { livePreview } from '../editor/livePreview.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { openHref } from './clicks.js';
 import { HostImage, imagesFrom } from './HostImage.js';
 import { FileUrls } from './media.js';

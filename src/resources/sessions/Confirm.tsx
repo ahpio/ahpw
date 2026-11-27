@@ -2,7 +2,7 @@ import { useRef, useState, type ReactElement } from 'react';
 import type { StateAction, ToolCallState } from '@microsoft/agent-host-protocol';
 import type { PickerAction } from '@softov/scena/types';
 import { useI18n } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import { ContextMenu } from '@softov/scena/ui/menu';
 import { textOf } from '../../bridges/words.js';

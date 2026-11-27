@@ -1,0 +1,126 @@
+/* Copied from scena `ui/control/Button.css`. */
+.oo-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--oo-spacing-xs);
+}
+
+/* ahpw extension: a button that reads as a link, in the text around it. */
+button.oo-btn[data-variant='link'] {
+  --button-border-width: 0;
+  --button-color: var(--oo-color-accent);
+  --button-color-hover: var(--oo-color-accent);
+  --button-background-hover: none;
+  --button-background-active: none;
+  justify-content: flex-start;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+button.oo-btn[data-variant='link']:hover {
+  text-decoration: underline;
+}
+
+/* ahpw extension: a muted button with no border or fill, such as copy or close; its label darkens on hover. */
+button.oo-btn[data-variant='quiet'] {
+  --button-border-width: 0;
+  --button-color: var(--oo-color-muted);
+  --button-color-hover: var(--oo-color-text);
+  --button-background-hover: none;
+  --button-background-active: none;
+}
+
+/* ahpw extension: a button with no border that tints on hover, such as a row's or a toolbar's action. */
+button.oo-btn[data-variant='subtle'] {
+  --button-border-width: 0;
+  --button-color: inherit;
+  --button-color-hover: inherit;
+}
+
+button.oo-btn[data-variant='subtle'][data-active='true'],
+button.oo-btn[data-variant='quiet'][data-active='true'] {
+  color: var(--oo-color-accent);
+}
+
+/* ahpw extension: a bordered, muted button in a bar of tools; on, it shows in the accent. */
+button.oo-btn[data-variant='tool'] {
+  --button-color: var(--oo-color-muted);
+  --button-color-hover: var(--oo-color-text);
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--oo-radius-sm);
+  font-size: var(--oo-font-size-sm);
+  line-height: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+button.oo-btn[data-variant='tool'][data-active='true'] {
+  --button-border: var(--oo-color-accent);
+  background: var(--oo-color-selected);
+  color: var(--oo-color-text);
+}
+
+/* ahpw extension: filled with the primary colour, for the main action of a control, such as send. */
+button.oo-btn[data-variant='filled'] {
+  --button-border-width: 0;
+  --button-background: var(--oo-color-primary);
+  --button-color: var(--oo-color-surface);
+  --button-color-hover: var(--oo-color-surface);
+  --button-background-hover: rgb(from var(--oo-color-primary) r g b / 0.85);
+  --button-background-active: rgb(from var(--oo-color-primary) r g b / 0.76);
+}
+
+/* ahpw extension: the label's colour. */
+.oo-btn[data-tone='accent'] {
+  --button-color: var(--oo-color-accent);
+}
+
+.oo-btn[data-tone='blue'] {
+  --button-color: rgb(var(--oo-rgb-blue));
+}
+
+.oo-btn[data-tone='yellow'] {
+  --button-color: rgb(var(--oo-rgb-yellow));
+}
+
+.oo-btn[data-tone='red'] {
+  --button-color: var(--oo-color-danger);
+}
+
+.oo-btn[data-tone='green'] {
+  --button-color: var(--oo-color-success);
+}
+
+/* ahpw extension: work the button started is running. */
+.oo-btn[aria-busy='true'] {
+  cursor: progress;
+}
+
+/* ahpw extension: an icon button is a square or a circle as tall as its size. */
+button.oo-btn[data-shape][data-variant] {
+  flex: none;
+  width: var(--button-box);
+  height: var(--button-box);
+  padding: 0;
+  line-height: 1;
+}
+
+button.oo-btn[data-shape='round'][data-variant] {
+  border-radius: 50%;
+}
+
+/* ahpw extension: a quiet button at the end of a tree row, such as Close, shows while the row is hovered or selected. */
+.oo-tree__trailing > button.oo-btn[data-variant='quiet'] {
+  visibility: hidden;
+}
+
+.oo-tree__row:hover .oo-tree__trailing > button.oo-btn[data-variant='quiet'],
+.oo-tree__row[aria-selected='true'] .oo-tree__trailing > button.oo-btn[data-variant='quiet'],
+.oo-tree__trailing > button.oo-btn[data-variant='quiet']:focus-visible {
+  visibility: visible;
+}

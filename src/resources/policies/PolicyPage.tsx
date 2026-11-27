@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, DetailList, SchemaForm, Spinner, Text, type JsonSchemaObject } from '@softov/scena/ui';
+import { Alert, Button, DangerZone, DetailList, type JsonSchemaObject, Note, Page, PageActions, SchemaForm, Spinner, Text } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { mayDelete, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
@@ -11,7 +11,7 @@ import {
 } from '../../bridges/policies.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { timeOf } from '../automations/words.js';
 import { changedKeys } from '../host/config.js';
 import { isRecordId } from '../users/form.js';
@@ -21,8 +21,7 @@ import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { policyTab } from './state.js';
 import { limitWord, usedWord } from './words.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 /** What a new row starts as: everybody, allowed every model; the person names it and narrows it. */
 const FRESH: Record<string, unknown> = { id: '', scope: 'all', kind: 'model', effect: 'allow', match: {} };
@@ -66,7 +65,7 @@ type Limits = { figures: PolicyLimits } | { error: string } | null;
 function LimitsList({ limits }: { limits: Limits }): ReactElement {
   const { t } = useI18n();
   if (limits === null) return <Spinner label={t('policies/notices/readingLimits')} />;
-  if ('error' in limits) return <p className="web-note">{t('policies/limit/unread', { why: limits.error })}</p>;
+  if ('error' in limits) return <Note>{t('policies/limit/unread', { why: limits.error })}</Note>;
   return (
     <DetailList
       columns={1}
@@ -164,9 +163,9 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
   };
 
   return (
-    <div className="web-page web-form web-policy">
+    <Page>
       <PageTitle emoji={EMOJIcon.policies} initials={fresh ? undefined : id} title={fresh ? t('policies/commands/new') : id} uri={fresh ? undefined : policyUri(offers, id)} />
-      {writes ? null : <p className="web-note">{t(writesPolicies(offers) ? 'policies/notices/noPermission' : 'policies/notices/readOnly')}</p>}
+      {writes ? null : <Note>{t(writesPolicies(offers) ? 'policies/notices/noPermission' : 'policies/notices/readOnly')}</Note>}
       {embedMode() === 'multi' ? <DetailList items={[{ label: t('common/host'), value: <HostTag host={host} />, span: true }]} /> : null}
 
       {/* A disabled fieldset shows the row read-only: every control in it is. */}
@@ -192,14 +191,14 @@ export default function PolicyPage({ host, policy: id }: { host: string; policy?
 
       {failure === null ? null : <Alert tone="danger" message={failure} />}
       {writes ? (
-        <div className="web-page__actions">
+        <PageActions>
           <Button label={t(fresh ? 'policies/policy/create' : 'policies/policy/save')} variant="primary" disabled={!ready} {...(jsonValid ? {} : { title: t('host/settings/fixJson') })} onClick={() => void save()} />
           {fresh ? <Button label={t('policies/actions/cancel')} onClick={() => scena.surfaces.close(tab)} /> : null}
           {!fresh && dirty ? <Button label={t('policies/actions/discard')} onClick={() => setDraft(null)} /> : null}
-        </div>
+        </PageActions>
       ) : null}
 
-      {fresh || !mayDelete(offers, grants, 'policies') ? null : <DangerZone label={t('policies/actions/delete')} onClick={() => void scena.commands.execute('ahp.deletePolicy', { host, id })} />}
-    </div>
+      {fresh || !mayDelete(offers, grants, 'policies') ? null : <DangerZone label={t('policies/actions/delete')} onConfirm={() => void scena.commands.execute('ahp.deletePolicy', { host, id })} />}
+    </Page>
   );
 }

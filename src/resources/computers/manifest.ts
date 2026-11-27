@@ -4,7 +4,7 @@
  * scena's form reads as `x-enumOptions`.
  */
 
-import type { JsonSchemaObject } from '@softov/scena/ui';
+import type { JsonSchemaObject } from '../../ui/index.js';
 
 function bag(value: unknown): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : null;

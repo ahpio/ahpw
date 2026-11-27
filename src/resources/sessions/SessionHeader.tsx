@@ -1,6 +1,6 @@
 import { useEffect, useState, type MouseEvent, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { ContextMenu } from '@softov/scena/ui';
+import { Button, ContextMenu } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import type { ChatState, SessionState, SessionSummary, TerminalState } from '@microsoft/agent-host-protocol';
 import { ahpPaths, hostBridge, type HostFacts } from '../../bridges/data.js';
@@ -144,73 +144,60 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
   return (
     <div className="web-chat__tools">
       {changes?.files === undefined || changes.files === 0 ? null : (
-        <button type="button" className="web-chat__tool" title={plural('sessions/header/files', changes.files)} onClick={() => run('ahp.showRight.changes:explorer')}>
+        <Button variant="tool" title={plural('sessions/header/files', changes.files)} onClick={() => run('ahp.showRight.changes:explorer')}>
           <span>{`${EMOJIcon.file} ${String(changes.files)}`}</span>
           <span className="web-diff--add">+{changes.additions ?? 0}</span>
           <span className="web-diff--remove">{'\u{2212}'}{changes.deletions ?? 0}</span>
-        </button>
+        </Button>
       )}
       {others.length === 0 || info === undefined ? null : (
-        <button type="button" className="web-chat__tool" data-on={info.open ? 'true' : undefined} title={plural('sessions/clients/others', others.length)} onClick={info.onToggle}>
+        <Button variant="tool" active={info.open} title={plural('sessions/clients/others', others.length)} onClick={info.onToggle}>
           {`${EMOJIcon.clients} ${String(others.length)}`}
-        </button>
+        </Button>
       )}
       {terminals.length === 0 ? null : (
-        <button
-          type="button"
-          className="web-chat__tool"
-          title={plural('sessions/header/terminals', terminals.length)}
-          onClick={() => (terminals.length === 1 ? run('ahp.openTerminal', { uri: terminals[0] }) : run('ahp.showRight.session:details'))}
-        >
+        <Button variant="tool" title={plural('sessions/header/terminals', terminals.length)} onClick={() => (terminals.length === 1 ? run('ahp.openTerminal', { uri: terminals[0] }) : run('ahp.showRight.session:details'))}>
           {`${EMOJIcon.terminal} ${String(terminals.length)}`}
-        </button>
+        </Button>
       )}
       {subagents.length === 0 ? null : (
-        <button
-          type="button"
-          className="web-chat__tool"
-          data-live={running > 0 ? 'true' : undefined}
-          data-on={inSubagent ? 'true' : undefined}
-          title={running > 0 ? t('sessions/header/subagentsRunning', { running, total: subagents.length }) : plural('sessions/header/subagents', subagents.length)}
-          aria-haspopup="menu"
-          onClick={subagentMenu}
-        >
+        <Button variant="tool" tone={running > 0 ? 'accent' : undefined} active={inSubagent} title={running > 0 ? t('sessions/header/subagentsRunning', { running, total: subagents.length }) : plural('sessions/header/subagents', subagents.length)} hasPopup="menu" onClick={subagentMenu}>
           {`${EMOJIcon.subagent} ${running > 0 ? `${String(running)}/${String(subagents.length)}` : String(subagents.length)}`}
-        </button>
+        </Button>
       )}
       {canvases.length === 0 ? null : (
-        <button type="button" className="web-chat__tool" title={plural('sessions/header/canvases', canvases.length)} aria-haspopup="menu" onClick={canvasMenu}>
+        <Button variant="tool" title={plural('sessions/header/canvases', canvases.length)} hasPopup="menu" onClick={canvasMenu}>
           {`${EMOJIcon.canvas} ${String(canvases.length)}`}
-        </button>
+        </Button>
       )}
       {inSubagent && own[0] !== undefined ? (
-        <button type="button" className="web-chat__tool" title={t('sessions/header/backToChat')} onClick={() => onChat(session?.defaultChat ?? own[0]!.resource)}>
+        <Button variant="tool" title={t('sessions/header/backToChat')} onClick={() => onChat(session?.defaultChat ?? own[0]!.resource)}>
           {'\u{21A9}'}
-        </button>
+        </Button>
       ) : null}
       {own.length < 2 ? null : (
-        <button type="button" className="web-chat__tool" title={t('sessions/header/chats')} aria-haspopup="menu" onClick={ownMenu}>
+        <Button variant="tool" title={t('sessions/header/chats')} hasPopup="menu" onClick={ownMenu}>
           {`${ownAt < 0 ? '\u{2013}' : String(ownAt + 1)}/${String(own.length)} \u{25BE}`}
-        </button>
+        </Button>
       )}
       {calls?.hidden === true ? (
-        <button type="button" className="web-chat__tool" data-on="true" title={t('sessions/header/showCalls')} onClick={() => calls.onHidden(false)}>
+        <Button variant="tool" active title={t('sessions/header/showCalls')} onClick={() => calls.onHidden(false)}>
           {EMOJIcon.callsHidden}
-        </button>
+        </Button>
       ) : null}
       {raw ? (
-        <button type="button" className="web-chat__tool" data-on="true" title={t('sessions/raw/back')} onClick={() => onRaw(false)}>
+        <Button variant="tool" active title={t('sessions/raw/back')} onClick={() => onRaw(false)}>
           {EMOJIcon.data}
-        </button>
+        </Button>
       ) : null}
       {filter === undefined ? null : (
-        <button type="button" className="web-chat__tool" data-on={filter.open ? 'true' : undefined} aria-pressed={filter.open} title={t(filter.open ? 'sessions/filter/close' : 'sessions/filter/open')} onClick={filter.onToggle}>
+        <Button variant="tool" active={filter.open} pressed={filter.open} title={t(filter.open ? 'sessions/filter/close' : 'sessions/filter/open')} onClick={filter.onToggle}>
           {EMOJIcon.filter}
-        </button>
+        </Button>
       )}
-      <button type="button" className="web-chat__tool" title={t('sessions/header/view')} aria-haspopup="menu" onClick={viewMenu}>
+      <Button variant="tool" title={t('sessions/header/view')} hasPopup="menu" onClick={viewMenu}>
         {EMOJIcon.more}
-      </button>
+      </Button>
       {menu === null ? null : <ContextMenu spec={{ items: menu.items }} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
     </div>
   );

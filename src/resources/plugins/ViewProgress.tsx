@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
-import { Progress } from '@softov/scena/ui';
+import { Note, Progress } from '../../ui/index.js';
 import { textOf } from './KeyValue.js';
 import './viewprogress.css';
 
@@ -26,7 +26,7 @@ export default function ViewProgress({ label, value, max, display, child }: {
         {...(textOf(label) === '' ? {} : { label: textOf(label) })}
         {...(measured && typeof display === 'string' ? { display } : {})}
       />
-      {child === undefined || child === null ? null : <div className="web-note">{child}</div>}
+      {child === undefined || child === null ? null : <Note>{child}</Note>}
     </div>
   );
 }

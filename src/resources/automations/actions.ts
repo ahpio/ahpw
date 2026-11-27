@@ -5,7 +5,7 @@ import { AUTOMATIONS, hostBridge } from '../../bridges/data.js';
 import { newId } from '../../bridges/words.js';
 import { titleOf } from './words.js';
 import { confirm, failed } from '../../shell/notify/index.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 
 /** Run an automation now, outside its schedule. */
 export function runNow(host: string, entry: AutomationEntry): Promise<unknown> {

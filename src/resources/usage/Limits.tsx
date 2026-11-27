@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { getLocale } from '@softov/scena';
 import type { UseI18nResult } from '@softov/scena/react';
-import { Progress } from '@softov/scena/ui';
+import { Progress } from '../../ui/index.js';
 import { limitWords, type LimitFigure, type PolicyLimits } from '../../bridges/policies.js';
 import type { Row } from '../../shell/explorer/ExplorerList.js';
 import { limitLine } from './words.js';

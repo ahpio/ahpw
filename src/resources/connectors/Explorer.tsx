@@ -1,6 +1,6 @@
 import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
@@ -93,12 +93,12 @@ export default function ConnectorsExplorer(): ReactElement {
   const error = multi ? null : errors[0] ?? null;
   const state = multi ? states.find((one) => one !== undefined) : states[0];
   const notice = hosts.length === 0
-    ? <p className="web-note web-explorer__empty">{t('connectors/explorer/notServed')}</p>
+    ? <Note inset>{t('connectors/explorer/notServed')}</Note>
     : error !== null
       ? <Alert tone="danger" title={t('connectors/notices/none')} message={error} />
       : state === undefined
         ? <Spinner label={t('connectors/notices/reading')} />
-        : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('connectors/explorer/empty')}</p> : null;
+        : rows.length === 0 ? <Note inset>{t('connectors/explorer/empty')}</Note> : null;
   const selected = active === undefined ? null : refKey(active.host, active.id);
 
   return (

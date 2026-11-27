@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Alert, Badge, DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, Badge, type DetailItem, DetailList, Link, Page, PageHead, Text } from '../../ui/index.js';
 import { useChannel } from '../../bridges/channel.js';
 import { isSecretRef } from '../../bridges/connectors.js';
 import { ahpPaths } from '../../bridges/data.js';
@@ -11,12 +11,12 @@ import { runnableBy, useOwnGrants } from '../../bridges/own-grants.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
-import { CopyButton } from '../../shell/controls/CopyButton.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
 import { EMOJIcon } from '../emojis.js';
 import { DangerOperations, OperationButtons } from '../operations/Buttons.js';
 import { factsOf, kindSchema, settingRows, statusKey, TUNNELS, tunnelsReducer, type TunnelFacts, type TunnelsState } from './tunnels.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 const TONE: Record<ReturnType<typeof statusKey>, Tone> = { busy: 'info', running: 'success', error: 'danger', stopped: 'default', disabled: 'default' };
@@ -67,18 +67,18 @@ export default function TunnelPage({ host, tunnel: id }: { host: string; tunnel?
   const failedOperation = facts.operation?.status === 'error' ? facts.operation : undefined;
 
   return (
-    <div className="web-page">
-      <div className="web-page__head">
+    <Page>
+      <PageHead>
         <PageTitle emoji={EMOJIcon.tunnels} title={id} uri={`${TUNNELS}${id}`} state={<Badge tone={TONE[key]} text={t(`tunnels/status/${key}`)} />} />
         <OperationButtons place={place} operations={operations} />
-      </div>
+      </PageHead>
 
       {facts.error === undefined ? null : <Alert tone="danger" title={t('tunnels/notices/error')} message={facts.error} />}
       {failedOperation === undefined ? null : <Alert tone="danger" title={t('operations/failed', { label: failedOperation.id })} message={failedOperation.error ?? ''} />}
 
       {facts.url === undefined ? null : (
         <div className="web-tunnel__url">
-          <a href={facts.url} target="_blank" rel="noopener noreferrer">{facts.url}</a>
+          <Link href={facts.url} external>{facts.url}</Link>
           <CopyButton text={facts.url} />
         </div>
       )}
@@ -93,6 +93,6 @@ export default function TunnelPage({ host, tunnel: id }: { host: string; tunnel?
       )}
 
       <DangerOperations place={place} operations={operations} />
-    </div>
+    </Page>
   );
 }

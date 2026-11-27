@@ -1,14 +1,15 @@
 import { Fragment, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
 import { elapsed } from '../../bridges/words.js';
-import { CopyButton } from '../../shell/controls/CopyButton.js';
-import { JsonTree } from '../../shell/view/JsonTree.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
+import { JsonTree } from '../../ui/data/JsonTree.js';
 import { EMOJIcon } from '../emojis.js';
 import { Block, KIND_ICON, MARK, OutputView, ToolLine } from './Parts.js';
 import { stepMatches, type StepFilter } from './filter.js';
 import type { RawStep, RawTurn, StepKind } from './raw.js';
 import { durationOf, fileOf, inputText, kindOf, outcomeOf, outputOf, startedOf } from './tool.js';
 import { tokens, when } from './turn.js';
+import { Button, DetailList, Note, RowButton, Segments } from '../../ui/index.js';
 
 /** The icon of each step that is not a tool call; a call takes its kind's. */
 const STEP_ICON: Record<Exclude<StepKind, 'tool'>, string> = {
@@ -49,15 +50,8 @@ function turnLine(turn: RawTurn, t: (key: string, values?: Record<string, unknow
 function ViewToggle({ view, setView, source }: { view: StepView; setView: (view: StepView) => void; source: unknown }): ReactElement {
   const { t } = useI18n();
   return (
-    <div className="web-raw__views" role="radiogroup" aria-label={t('sessions/raw/view')}>
-      {(['formatted', 'raw', 'json'] as const).map((one, at) => (
-        <span key={one} className="web-raw__view-item">
-          {at === 0 ? null : <span className="web-raw__view-gap" aria-hidden="true">/</span>}
-          <button type="button" role="radio" aria-checked={view === one} className="web-raw__view" data-on={view === one ? 'true' : undefined} onClick={() => setView(one)}>
-            {t(`sessions/raw/views/${one}`)}
-          </button>
-        </span>
-      ))}
+    <div className="web-raw__views">
+      <Segments label={t('sessions/raw/view')} options={(['formatted', 'raw', 'json'] as const).map((one) => ({ id: one, label: t(`sessions/raw/views/${one}`) }))} value={view} onChange={setView} />
       <CopyButton text={json(source)} />
     </div>
   );
@@ -74,7 +68,7 @@ const STATE_WORDS: Record<string, string> = { complete: 'sessions/raw/states/com
 /** What a fact reads when the host sent no value for it. */
 function NotSent(): ReactElement {
   const { t } = useI18n();
-  return <span className="web-note">{t('sessions/raw/notSent')}</span>;
+  return <Note inline>{t('sessions/raw/notSent')}</Note>;
 }
 
 /** The message a step holds, as its origin and `_meta` read it. */
@@ -109,15 +103,15 @@ function TurnHead({ turn, view, setView }: { turn: RawTurn; view: StepView; setV
   const { startedAt, duration, model, input, output, cacheRead, tools } = turn.facts;
   return (
     <>
-      <button type="button" className="web-raw__turn-head" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <RowButton caret="end" expanded={open} onClick={() => setOpen(!open)}>
         <span className="web-raw__turn-title">{t('sessions/raw/turn', { n: turn.index })}</span>
-        <span className="web-note">{turnLine(turn, t)}</span>
-      </button>
+        <Note inline>{turnLine(turn, t)}</Note>
+      </RowButton>
       {open ? (
         <div className="web-raw__body">
           <ViewToggle view={view} setView={setView} source={turn.source} />
           {view !== 'formatted' ? <SourceView view={view} source={turn.source} /> : (
-            <dl className="web-tool__facts">
+            <DetailList inline>
               <dt>{t('sessions/raw/state')}</dt><dd>{turn.state === undefined ? t('sessions/raw/live') : STATE_WORDS[turn.state] === undefined ? <code>{turn.state}</code> : t(STATE_WORDS[turn.state]!)}</dd>
               {startedAt === undefined ? null : <><dt>{t('sessions/raw/started')}</dt><dd>{when(startedAt)}</dd></>}
               {duration === undefined ? null : <><dt>{t('sessions/raw/took')}</dt><dd>{elapsed(duration)}</dd></>}
@@ -126,7 +120,7 @@ function TurnHead({ turn, view, setView }: { turn: RawTurn; view: StepView; setV
               <dt>{t('sessions/raw/cacheRead')}</dt><dd>{cacheRead === undefined ? <NotSent /> : tokens(cacheRead)}</dd>
               <dt>{t('sessions/raw/stepCount')}</dt><dd>{turn.steps.length}</dd>
               <dt>{t('sessions/raw/toolCount')}</dt><dd>{tools}</dd>
-            </dl>
+            </DetailList>
           )}
         </div>
       ) : null}
@@ -161,19 +155,19 @@ function StepRow({ step, turn, subagent, onOpenChat, view, setView, hit = false 
   const line = step.text.replace(/\s+/g, ' ').trim();
   return (
     <li className={hit ? 'web-raw__step web-hit' : 'web-raw__step'} data-kind={step.kind} {...(outcome === undefined ? {} : { 'data-outcome': outcome })}>
-      <button type="button" className="web-raw__row" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <RowButton small caret="end" expanded={open} onClick={() => setOpen(!open)}>
         <span className="web-raw__n">{step.step}</span>
         <span className="web-raw__icon" aria-hidden="true">{icon}</span>
         {call === undefined ? <span className="web-raw__line">{line === '' ? t(`sessions/raw/kind/${step.kind}`) : line}</span> : <ToolLine line={step.text} file={fileOf(call)} />}
         {outcome === undefined ? null : <span className="web-raw__state" title={t(MARK[outcome].label)}>{MARK[outcome].glyph}</span>}
         {duration === undefined ? null : <span className="web-raw__time">{elapsed(duration)}</span>}
-      </button>
+      </RowButton>
       {open ? (
         <div className="web-raw__body">
           <ViewToggle view={view} setView={setView} source={step.source} />
           {view !== 'formatted' ? <SourceView view={view} source={step.source} /> : (
             <>
-              <dl className="web-tool__facts">
+              <DetailList inline>
                 <dt>{t('sessions/raw/kindLabel')}</dt><dd>{t(`sessions/raw/kind/${step.kind}`)}</dd>
                 {step.kind === 'message' ? <OriginFact message={step.source} /> : null}
                 <dt>{t('sessions/raw/place')}</dt><dd>{t('sessions/raw/placeValue', { turn: turn.index, step: step.step })}</dd>
@@ -186,7 +180,7 @@ function StepRow({ step, turn, subagent, onOpenChat, view, setView, hit = false 
                     {duration === undefined ? null : <><dt>{t('sessions/raw/took')}</dt><dd>{elapsed(duration)}</dd></>}
                   </>
                 )}
-              </dl>
+              </DetailList>
               {call === undefined ? (step.text === '' ? null : <Block title={t(`sessions/raw/kind/${step.kind}`)} text={step.text} />) : (
                 <>
                   {input === '' ? null : <Block title={t('sessions/tool/arguments')} text={input} />}
@@ -194,7 +188,7 @@ function StepRow({ step, turn, subagent, onOpenChat, view, setView, hit = false 
                 </>
               )}
               {subagent === undefined ? null : (
-                <button type="button" className="web-link" onClick={() => onOpenChat(subagent)}>{t('sessions/raw/openSubagent')}</button>
+                <Button variant="link" onClick={() => onOpenChat(subagent)}>{t('sessions/raw/openSubagent')}</Button>
               )}
             </>
           )}
@@ -224,7 +218,7 @@ export function RawView({ turns, filter, spawned, onOpenChat }: {
   }).filter((one) => one.steps.length > 0);
   return (
     <div className="web-raw">
-      {shown.length === 0 ? <p className="web-note">{t('sessions/raw/none')}</p> : shown.map(({ turn, steps, hits }) => (
+      {shown.length === 0 ? <Note>{t('sessions/raw/none')}</Note> : shown.map(({ turn, steps, hits }) => (
         <section key={turn.id} className="web-raw__turn">
           <TurnHead turn={turn} view={view} setView={setView} />
           <ol className="web-raw__steps">

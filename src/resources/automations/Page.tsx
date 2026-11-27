@@ -2,9 +2,9 @@ import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { oneTimeOf, targetOf } from './next.js';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, Badge, Blocks, Button, DangerZone, type DetailItem, DetailList, Listable, Note, Page, PageActions, PageHead, Row, Section, Text } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
-import { KeptTabs } from '../../shell/view/KeptTabs.js';
+import { KeptTabs } from '../../ui/navigation/KeptTabs.js';
 import { automationReducer, type AgentInfo, type AutomationCapabilities, type AutomationEntry, type AutomationState as Catalogue } from '@microsoft/agent-host-protocol';
 import { ahpPaths, AUTOMATIONS, hostBridge } from '../../bridges/data.js';
 import { embedMode } from '../../shell/embed/index.js';
@@ -14,19 +14,17 @@ import { elapsed, folderLabel } from '../../bridges/words.js';
 import { tokens } from '../sessions/turn.js';
 import { cancelRun, remove, runNow, setEnabled } from './actions.js';
 import { cronWords, runFacts, runsByTime, stateOf, timeOf, titleOf, type AutomationState } from './words.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { plural } from '../../i18n/locales.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { EMOJIcon } from '../emojis.js';
 import { AutomationForm } from './Edit.js';
-import { Section } from '../../shell/view/Section.js';
 import { useAgentIconSrc } from '../agents/icons.js';
 import type { Option } from '../sessions/composer-commands.js';
 import { settingLabels } from '../sessions/pill-labels.js';
 import { useSessionSettings } from './session-settings.js';
 import { AUTOMATION_SECTION, automationTabKey, keepAutomationTabKey, type AutomationAsk } from './state.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -109,19 +107,19 @@ function scheduleFacts(entry: AutomationEntry): DetailItem[] {
     if ('schedule' in trigger) continue;
     items.push({ label: translate('automations/facts/event'), value: `${trigger.title}${trigger.events.length === 0 ? '' : `: ${trigger.events.map((one) => one.title).join(', ')}`}` });
   }
-  if (onces.length === 0) items.push({ label: translate('automations/facts/turnsOff'), value: stops.length === 0 ? <span className="web-note">{translate('automations/facts/never')}</span> : lines(stops) });
+  if (onces.length === 0) items.push({ label: translate('automations/facts/turnsOff'), value: stops.length === 0 ? <Note inline>{translate('automations/facts/never')}</Note> : lines(stops) });
   const target = targetOf(definition as Parameters<typeof targetOf>[0]);
   if (target.kind !== 'newSession') items.push({ label: translate('automations/facts/eachRun'), value: translate(`automations/edit/targets/${target.kind}`) });
   if (onces.length > 0) {
     items.push({
       label: translate('automations/facts/nextRun'),
-      value: ran ? <span className="web-note">{translate('automations/facts/ran')}</span> : entry.nextRunAt === undefined ? '' : timeOf(entry.nextRunAt),
+      value: ran ? <Note inline>{translate('automations/facts/ran')}</Note> : entry.nextRunAt === undefined ? '' : timeOf(entry.nextRunAt),
     });
   }
   if (schedules.length > 0) {
     items.push({
       label: translate('automations/facts/nextRun'),
-      value: !definition.enabled ? <span className="web-note">{translate('automations/state/off')}</span> : entry.nextRunAt === undefined ? '' : timeOf(entry.nextRunAt),
+      value: !definition.enabled ? <Note inline>{translate('automations/state/off')}</Note> : entry.nextRunAt === undefined ? '' : timeOf(entry.nextRunAt),
     });
   }
   return items;
@@ -155,7 +153,7 @@ function Overview({ host, entry, onFailure }: { host: string; entry: AutomationE
   };
   const runs = runsByTime(entry);
   return (
-    <div className="web-automation__overview">
+    <Blocks>
       <Section icon={EMOJIcon.agents} title={t('automations/page/sections/agent')} />
       <DetailList items={agentFacts(host, entry, words)} columns={2} />
 
@@ -166,42 +164,51 @@ function Overview({ host, entry, onFailure }: { host: string; entry: AutomationE
       <div className="web-automation__message"><Markdown text={entry.definition.message.text} /></div>
 
       <Section icon={EMOJIcon.run} title={t('automations/page/runs')} count={entry.runCount ?? entry.runs.length} />
-      {runs.length === 0 ? <p className="web-note">{t('automations/page/noRuns')}</p> : (
-        <table className="web-runs">
-          <thead>
-            <tr>
-              <th>{t('automations/page/columns/status')}</th>
-              <th>{t('automations/page/columns/how')}</th>
-              <th>{t('automations/page/columns/started')}</th>
-              <th>{t('automations/page/columns/took')}</th>
-              <th>{t('automations/page/columns/tokens')}</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {runs.map((run) => {
-              const facts = runFacts(run);
-              const tone = RUN[facts.status];
-              const shown = tone === undefined ? { tone: 'default' as Tone, text: facts.status } : { tone, text: t(`automations/run/${facts.status}`) };
-              const live = facts.status === 'running' || facts.status === 'pending';
-              return (
-                <tr key={run.resource}>
-                  <td><Badge tone={shown.tone} text={shown.text} />{facts.error === undefined ? null : <div className="web-note">{facts.error}</div>}</td>
-                  <td>{originOf(run.origin)}</td>
-                  <td>{timeOf(facts.at)}</td>
-                  <td>{facts.took === undefined ? '' : elapsed(facts.took)}</td>
-                  <td>{facts.input === undefined && facts.output === undefined ? '' : `\u{2191}${tokens(facts.input ?? 0)} \u{2193}${tokens(facts.output ?? 0)}`}</td>
-                  <td className="web-runs__actions">
+      {runs.length === 0 ? <Note>{t('automations/page/noRuns')}</Note> : (
+        <Listable<(typeof runs)[number]>
+          items={runs}
+          getKey={(run) => run.resource}
+          columns={[
+            {
+              key: 'status',
+              label: t('automations/page/columns/status'),
+              render: (run) => {
+                const facts = runFacts(run);
+                const tone = RUN[facts.status];
+                const shown = tone === undefined ? { tone: 'default' as Tone, text: facts.status } : { tone, text: t(`automations/run/${facts.status}`) };
+                return <><Badge tone={shown.tone} text={shown.text} />{facts.error === undefined ? null : <Note>{facts.error}</Note>}</>;
+              },
+            },
+            { key: 'how', label: t('automations/page/columns/how'), render: (run) => originOf(run.origin) },
+            { key: 'started', label: t('automations/page/columns/started'), render: (run) => timeOf(runFacts(run).at) },
+            { key: 'took', label: t('automations/page/columns/took'), render: (run) => { const took = runFacts(run).took; return took === undefined ? '' : elapsed(took); } },
+            {
+              key: 'tokens',
+              label: t('automations/page/columns/tokens'),
+              render: (run) => {
+                const facts = runFacts(run);
+                return facts.input === undefined && facts.output === undefined ? '' : `\u{2191}${tokens(facts.input ?? 0)} \u{2193}${tokens(facts.output ?? 0)}`;
+              },
+            },
+            {
+              key: 'actions',
+              label: '',
+              align: 'right',
+              render: (run) => {
+                const facts = runFacts(run);
+                const live = facts.status === 'running' || facts.status === 'pending';
+                return (
+                  <Row gap="var(--oo-spacing-xs)" justify="end">
                     {run.primarySession === undefined ? null : (
                       <Button label={t('automations/page/openSession')} size="sm" onClick={() => void scena.commands.execute('ahp.openSession', { host, resource: run.primarySession })} />
                     )}
                     {live && caps?.runCancellation !== undefined ? <Button label={t('automations/page/stop')} size="sm" onClick={() => cancelRun(host, run.resource)} /> : null}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                  </Row>
+                );
+              },
+            },
+          ]}
+        />
       )}
       {entry.runsNextCursor === undefined ? null : (
         <Button
@@ -212,7 +219,7 @@ function Overview({ host, entry, onFailure }: { host: string; entry: AutomationE
 
       <Section icon={EMOJIcon.info} title={t('automations/page/sections/details')} />
       <DetailList items={detailFacts(entry)} columns={2} />
-    </div>
+    </Blocks>
   );
 }
 
@@ -234,14 +241,14 @@ export default function AutomationPage({ host, resource }: { host: string; resou
   const settings = can('update') || can('remove');
 
   return (
-    <div className="web-page web-automation">
-      <div className="web-page__head">
+    <Page>
+      <PageHead>
         <PageTitle emoji={EMOJIcon.automations} title={titleOf(entry)} uri={entry.resource} state={<Badge tone={STATE[now]} text={t(`automations/state/${now}`)} />} />
-        <div className="web-page__actions">
+        <PageActions>
           {can('run') ? <Button label={t('automations/actions/runNow')} variant="primary" onClick={() => void runNow(host, entry).catch(say)} /> : null}
           {can('update') ? <Button label={t(entry.definition.enabled ? 'automations/actions/turnOff' : 'automations/actions/turnOn')} onClick={() => setEnabled(host, entry, !entry.definition.enabled)} /> : null}
-        </div>
-      </div>
+        </PageActions>
+      </PageHead>
       {failure === null ? null : <Alert tone="danger" message={failure} />}
       {!settings ? overview : (
         <KeptTabs
@@ -252,7 +259,7 @@ export default function AutomationPage({ host, resource }: { host: string; resou
               <>
                 {/* Shown read-only where the host refuses an update, so the fields still say what it does. */}
                 <AutomationForm host={host} entry={entry} />
-                {can('remove') ? <DangerZone label={t('automations/actions/delete')} onClick={() => void remove(host, entry)} /> : null}
+                {can('remove') ? <DangerZone label={t('automations/actions/delete')} onConfirm={() => void remove(host, entry)} /> : null}
               </>
             ) },
           ]}
@@ -260,6 +267,6 @@ export default function AutomationPage({ host, resource }: { host: string; resou
           onChange={keepAutomationTabKey}
         />
       )}
-    </div>
+    </Page>
   );
 }

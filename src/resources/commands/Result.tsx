@@ -1,6 +1,6 @@
 import { useState, type ReactElement, type ReactNode } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, DataTable, DetailList, Text, type DataColumn, type DataRow } from '@softov/scena/ui';
+import { Alert, type DataColumn, type DataRow, DataTable, DetailList, Segments, Text } from '../../ui/index.js';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -60,8 +60,7 @@ export default function Result({ value }: { value: unknown }): ReactElement {
   return (
     <section className="web-result">
       <div className="web-result__bar">
-        <button type="button" data-active={!raw} onClick={() => setRaw(false)}>{t('commands/result/view')}</button>
-        <button type="button" data-active={raw} onClick={() => setRaw(true)}>json</button>
+        <Segments label={t('commands/result/view')} options={[{ id: 'view', label: t('commands/result/view') }, { id: 'json', label: 'json' }] as const} value={raw ? 'json' : 'view'} onChange={(next) => setRaw(next === 'json')} />
       </div>
       {raw ? <pre className="web-result__json">{JSON.stringify(value, null, 2)}</pre> : <ShapeOf value={value} />}
     </section>

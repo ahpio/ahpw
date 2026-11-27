@@ -9,7 +9,7 @@ import { done, failed } from '../../shell/notify/index.js';
 import { foldTerminal, joinParts } from '../terminals/terminal.js';
 import { EMOJIcon } from '../emojis.js';
 import { Block } from './Parts.js';
-import { Pill } from './pills.js';
+import { DetailList, Pill } from '../../ui/index.js';
 import { statusOf, type Shell } from './shell-list.js';
 import { stripAnsi } from './tool.js';
 import { when } from './turn.js';
@@ -17,7 +17,7 @@ import { when } from './turn.js';
 /** The composer pill that counts a chat's background shells and opens their list. */
 export function ShellsPill({ count, onOpen }: { count: number; onOpen: () => void }): ReactElement {
   const { t } = useI18n();
-  return <Pill label={`${EMOJIcon.terminal} ${plural('sessions/shells/count', count)}`} title={t('sessions/shells/hint')} onOpen={onOpen} />;
+  return <Pill label={`${EMOJIcon.terminal} ${plural('sessions/shells/count', count)}`} title={t('sessions/shells/hint')} menu onClick={onOpen} />;
 }
 
 /** How close to the end, in pixels, the output counts as followed. */
@@ -55,7 +55,7 @@ export function ShellCard({ host, shell }: { host: string; shell: Shell }): Reac
   const output = state === undefined ? undefined : stripAnsi(joinParts(state.content));
   return (
     <div className="web-shells__details">
-      <dl className="web-tool__facts">
+      <DetailList inline>
         <dt>{t('sessions/shells/command')}</dt>
         <dd><code>{shell.command}</code></dd>
         {status === undefined ? null : (
@@ -74,7 +74,7 @@ export function ShellCard({ host, shell }: { host: string; shell: Shell }): Reac
             <dd>{when(shell.startedAt)}</dd>
           </>
         )}
-      </dl>
+      </DetailList>
       {output === undefined || output === '' ? null : <ShellOutput title={t('sessions/shells/output')} text={output} />}
     </div>
   );

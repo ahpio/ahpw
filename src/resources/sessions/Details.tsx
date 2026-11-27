@@ -5,6 +5,7 @@ import { ahpPaths, summaryPath, type HostFacts } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ACTIVE_SESSION, type ActiveSession } from './state.js';
 import { sessionFacts } from './facts.js';
+import { DetailList, Note, Panel } from '../../ui/index.js';
 
 /** The open session's facts, for the right sidebar. */
 export default function SessionDetails(): ReactElement {
@@ -17,16 +18,11 @@ export default function SessionDetails(): ReactElement {
   const summary = useStore<SessionSummary>(resource === undefined ? undefined : summaryPath(at, resource));
   const session = useChannel<SessionState>(at, summary === undefined ? undefined : resource, sessionReducer);
   const chat = useChannel<ChatState>(at, session.state?.defaultChat ?? summary?.defaultChat, chatReducer);
-  if (summary === undefined) return <p className="web-note web-details__empty">{t('sessions/details/empty')}</p>;
+  if (summary === undefined) return <Note inset>{t('sessions/details/empty')}</Note>;
   const facts = sessionFacts(scena, t, { host: at, summary, session: session.state, chat: chat.state, chatUri: undefined, hostFacts, title: true, figures: true });
   return (
-    <dl className="web-details">
-      {facts.map((fact, index) => (
-        <div key={index}>
-          <dt>{fact.label}</dt>
-          <dd>{fact.value}</dd>
-        </div>
-      ))}
-    </dl>
+    <Panel padded>
+      <DetailList inline items={facts.map((fact) => ({ label: fact.label, value: fact.value }))} />
+    </Panel>
   );
 }

@@ -11,7 +11,7 @@ import { customAgents } from '../sessions/custom-agents.js';
 import { footerSide } from '../sessions/footer.js';
 import { readTrayOpen, writeTrayOpen } from '../sessions/new-tray.js';
 import { isApprovals, modelLabels, settingLabels } from '../sessions/pill-labels.js';
-import { Pill, TextPill } from '../sessions/pills.js';
+import { Button, MessageBox, MessageText, Note, Pill, TextPill } from '../../ui/index.js';
 import { whereLabel, wheresOf } from '../sessions/where.js';
 import { MenuPill, type PillChoice } from './MenuPill.js';
 import type { SessionSettings } from './session-settings.js';
@@ -133,40 +133,29 @@ export function SettingsBox({ host, agents, draft, settings, set }: {
           {settings.options.filter((option) => footerSide(option) === 'left' && !isApprovals(option)).map(settingPill)}
           {settings.reading && draft.provider !== '' ? <Pill label={t('sessions/new/readingSettings')} /> : null}
           <MenuPill label={agentName} image={iconSrcOf(host, draft.provider)} title={t('sessions/new/harnessHint')} choices={agentChoices} />
-          <button type="button" className="web-new__tray-fold" aria-expanded={true} aria-label={t('sessions/new/fold')} title={t('sessions/new/fold')} onClick={() => fold(false)}>
+          <Button variant="quiet" size="xs" expanded={true} ariaLabel={t('sessions/new/fold')} title={t('sessions/new/fold')} onClick={() => fold(false)}>
             {'<'}
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="web-composer__where web-new__tray">
-          <button type="button" className="web-chip web-new__tray-head" aria-expanded={false} title={t('sessions/new/unfold')} onClick={() => fold(true)}>
-            {agentName}
-            {folderName === '' ? null : ` · ${folderName}`}
-          </button>
-          <button type="button" className="web-new__tray-fold" aria-expanded={false} aria-label={t('sessions/new/unfold')} title={t('sessions/new/unfold')} onClick={() => fold(true)}>
+          <Pill label={`${agentName}${folderName === '' ? '' : ` · ${folderName}`}`} title={t('sessions/new/unfold')} expanded={false} onClick={() => fold(true)} />
+          <Button variant="quiet" size="xs" expanded={false} ariaLabel={t('sessions/new/unfold')} title={t('sessions/new/unfold')} onClick={() => fold(true)}>
             {'>'}
-          </button>
+          </Button>
         </div>
       )}
-      <div className="web-composer__box">
-        <div className="web-composer__bar">
-          <textarea
-            className="web-composer__text web-automation__text"
-            rows={4}
-            value={draft.message}
-            aria-label={t('automations/page/instructions')}
-            placeholder={t('automations/edit/instructionsPlaceholder')}
-            onChange={(event) => set({ message: event.currentTarget.value })}
-          />
-        </div>
-        <div className="web-composer__foot">
-          <div className="web-composer__chips web-composer__chips--left">
+      <MessageBox
+        left={(
+          <>
             {custom.length === 0 ? null : (
               <MenuPill label={custom.find((one) => one.uri === draft.agent)?.name ?? t('sessions/commands/agent')} title={t('sessions/commands/agentHint')} choices={customChoices} />
             )}
             {settings.options.filter((option) => footerSide(option) === 'left' && isApprovals(option)).map(settingPill)}
-          </div>
-          <div className="web-composer__chips web-composer__chips--right">
+          </>
+        )}
+        right={(
+          <>
             <MenuPill
               label={offered ? model.label : t('automations/edit/notOfferedPill', { model: draft.model })}
               short={offered ? model.short : t('automations/edit/notOfferedPill', { model: draft.model })}
@@ -176,10 +165,18 @@ export function SettingsBox({ host, agents, draft, settings, set }: {
               choices={modelChoices}
             />
             {settings.options.filter((option) => footerSide(option) === 'right').map(settingPill)}
-          </div>
-        </div>
-      </div>
-      <p className="web-note">{t('automations/edit/messageHint')}</p>
+          </>
+        )}
+      >
+        <MessageText
+          rows={4}
+          value={draft.message}
+          aria-label={t('automations/page/instructions')}
+          placeholder={t('automations/edit/instructionsPlaceholder')}
+          onChange={(event) => set({ message: event.currentTarget.value })}
+        />
+      </MessageBox>
+      <Note>{t('automations/edit/messageHint')}</Note>
       {offered ? null : <p className="web-automation__warning">{t('automations/edit/notOfferedNote', { agent: agentName, model: draft.model })}</p>}
     </div>
   );

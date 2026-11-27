@@ -1,13 +1,13 @@
 import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, Text, type BadgeTone } from '@softov/scena/ui';
-import { KeptTabs } from '../../shell/view/KeptTabs.js';
+import { Alert, Badge, type BadgeTone, Button, DangerZone, Page, PageActions, PageHead, Text } from '../../ui/index.js';
+import { KeptTabs } from '../../ui/navigation/KeptTabs.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ADAPTERS, adaptersReducer, CONNECTORS, connectorsReducer, type AdapterRow, type ConnectorRow, type ConnectorState } from '../../bridges/connectors.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import type { PeopleState } from '../../bridges/people.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
 import { connectorOff, deleteConnector, mayTurn, turnConnector, turnMethod } from './actions.js';
 import { useOwnGrants } from '../../bridges/own-grants.js';
@@ -19,8 +19,7 @@ import { Models } from './Models.js';
 import { Overview } from './Overview.js';
 import { connectorTab, connectorTabKey, keepConnectorTabKey } from './state.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 const TONE: Record<ConnectorState, BadgeTone> = {
   ready: 'success',
@@ -58,8 +57,8 @@ export default function ConnectorPage({ host, connector: id }: { host: string; c
   const place = { host, channel: CONNECTORS.channel, target: row.id, held: row as unknown as Record<string, unknown> };
 
   return (
-    <div className="web-page web-connector">
-      <div className="web-page__head">
+    <Page>
+      <PageHead>
         <PageTitle
           icons={adapter?.icons}
           emoji={EMOJIcon.connectors}
@@ -68,15 +67,15 @@ export default function ConnectorPage({ host, connector: id }: { host: string; c
           state={<Badge tone={TONE[row.state]} text={t(`connectors/states/${row.state}`)} />}
         />
         {operations !== undefined ? <OperationButtons place={place} operations={operations} /> : mayTurn(offers, row, grants) ? (
-          <div className="web-page__actions">
+          <PageActions>
             <Button
               label={t(connectorOff(row) ? 'connectors/actions/enable' : 'connectors/actions/disable')}
               {...said(offers.described[turnMethod(row)])}
               onClick={() => void turnConnector(host, row)}
             />
-          </div>
+          </PageActions>
         ) : null}
-      </div>
+      </PageHead>
       {row.state === 'ready' || row.state === 'failed' ? null : (
         <Alert tone={row.state === 'disabled' ? 'info' : row.state === 'unavailable' ? 'danger' : 'warning'} message={row.adapter === undefined ? t('connectors/page/noAdapter') : t(`connectors/stateNotes/${row.state}`, { adapter: row.adapter })} />
       )}
@@ -90,7 +89,7 @@ export default function ConnectorPage({ host, connector: id }: { host: string; c
               {operations !== undefined ? <DangerOperations place={place} operations={operations} /> : (
                 <DangerZone
                   label={t('connectors/actions/delete')}
-                  onClick={() => void deleteConnector(host, row).then((gone) => { if (gone) scena.surfaces.close(connectorTab(host, id)); })}
+                  onConfirm={() => void deleteConnector(host, row).then((gone) => { if (gone) scena.surfaces.close(connectorTab(host, id)); })}
                 />
               )}
             </>
@@ -99,6 +98,6 @@ export default function ConnectorPage({ host, connector: id }: { host: string; c
         defaultValue={chosen === 'models' && !servesModels ? 'overview' : chosen}
         onChange={keepConnectorTabKey}
       />
-    </div>
+    </Page>
   );
 }

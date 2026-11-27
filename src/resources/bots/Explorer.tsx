@@ -1,6 +1,6 @@
 import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { useChannelOnEach } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
@@ -61,12 +61,12 @@ export default function BotExplorer(): ReactElement {
   const error = multi ? null : errors[0] ?? null;
   const state = multi ? states.find((one) => one !== undefined) : states[0];
   const notice = hosts.length === 0
-    ? <p className="web-note web-explorer__empty">{t('bots/explorer/notServed')}</p>
+    ? <Note inset>{t('bots/explorer/notServed')}</Note>
     : error !== null
       ? <Alert tone="danger" title={t('bots/notices/none')} message={error} />
       : state === undefined
         ? <Spinner label={t('bots/notices/reading')} />
-        : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('bots/explorer/empty')}</p> : null;
+        : rows.length === 0 ? <Note inset>{t('bots/explorer/empty')}</Note> : null;
 
   return (
     <ExplorerList

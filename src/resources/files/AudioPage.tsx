@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
 import { EMOJIcon } from '../emojis.js';
 import { MediaFrame } from './media.js';
+import { Button, Note } from '../../ui/index.js';
 
 const BARS = 64;
 
@@ -48,12 +49,12 @@ function Player({ url }: { url: string }): ReactElement {
     setRate(next);
   };
 
-  if (failed) return <p className="web-note web-media__note">{t('files/audio/cannotPlay')}</p>;
+  if (failed) return <Note inset>{t('files/audio/cannotPlay')}</Note>;
   return (
     <div className="web-audio">
-      <button type="button" className="web-audio__play" onClick={toggle} title={playing ? t('files/audio/pause') : t('files/audio/play')}>
+      <Button variant="filled" shape="round" size="lg" onClick={toggle} title={playing ? t('files/audio/pause') : t('files/audio/play')}>
         {playing ? EMOJIcon.pause : EMOJIcon.run}
-      </button>
+      </Button>
       <div className="web-audio__track">
         <div
           className="web-audio__bars"
@@ -71,7 +72,7 @@ function Player({ url }: { url: string }): ReactElement {
           <span>{clock(duration)}</span>
         </div>
       </div>
-      <button type="button" className="web-audio__rate" onClick={faster} title={t('files/audio/speed')}>{rate}x</button>
+      <Button variant="tool" size="xs" onClick={faster} title={t('files/audio/speed')}>{rate}x</Button>
       <audio
         ref={audio}
         src={url}

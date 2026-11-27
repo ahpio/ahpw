@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, CheckBox, Modal, Spinner, TextField } from '@softov/scena/ui';
+import { Button, CheckBox, Modal, Note, Spinner, TextField } from '../../ui/index.js';
 import { plural } from '../../i18n/locales.js';
 import { textOf } from '../../bridges/words.js';
 import type { ChangesetForm } from './changeset.js';
@@ -23,8 +23,8 @@ function CommitForm({ form, files, onCommit, onClose }: { form: Extract<Changese
     <Modal open title={form.operation.label} onClose={onClose}>
       <div className="web-changeset-form">
         <TextField label={t('changes/commit/message')} multiline rows={4} value={message} placeholder={t('changes/commit/placeholder')} onChange={setMessage} />
-        <p className="web-note">{takes(files)}</p>
-        {question === '' ? null : <p className="web-note">{question}</p>}
+        <Note>{takes(files)}</Note>
+        {question === '' ? null : <Note>{question}</Note>}
         <div className="web-changeset-form__actions">
           <Button label={t('changes/cancel')} variant="ghost" onClick={onClose} />
           <Button label={form.operation.label} variant="primary" disabled={!ready} onClick={() => onCommit(message.trim())} />
@@ -51,16 +51,16 @@ function PullRequestForm({ form, onCreate, onClose }: { form: Extract<ChangesetF
       <div className="web-changeset-form">
         {form.preparing ? <Spinner label={t('changes/pr/preparing')} /> : null}
         {form.draft.repository === null && branches === null ? null : (
-          <p className="web-note">{[form.draft.repository, branches].filter((one) => one !== null).join(' \u{00B7} ')}</p>
+          <Note>{[form.draft.repository, branches].filter((one) => one !== null).join(' \u{00B7} ')}</Note>
         )}
         <TextField label={t('changes/pr/titleLabel')} value={title} placeholder={t('changes/pr/titlePlaceholder')} disabled={form.preparing} onChange={setTitle} />
         <TextField label={t('changes/pr/description')} multiline rows={8} value={description} placeholder={t('changes/pr/descriptionPlaceholder')} disabled={form.preparing} onChange={setDescription} />
         <CheckBox label={t('changes/pr/draft')} value={isDraft} onChange={setIsDraft} />
-        <p className="web-note">
+        <Note>
           {form.create === null
             ? t('changes/pr/cannotCreate')
             : t('changes/pr/explain')}
-        </p>
+        </Note>
         <div className="web-changeset-form__actions">
           <Button label={t('changes/cancel')} variant="ghost" onClick={onClose} />
           {form.create === null ? null : (

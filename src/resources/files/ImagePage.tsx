@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState, type PointerEvent, type ReactElement, type WheelEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent, type ReactElement, type WheelEvent, type CSSProperties } from 'react';
 import { useI18n } from '@softov/scena/react';
 import { MediaFrame } from './media.js';
 import { percentOf } from './zoom.js';
+import { Button } from '../../ui/index.js';
+
+/** The zoom as a percentage, as wide for 5% as for 400%, so the buttons beside it stay put. */
+const PERCENT: CSSProperties = { minWidth: '3.5em', fontVariantNumeric: 'tabular-nums' };
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 20;
@@ -70,9 +74,9 @@ function Zoomable({ url, alt }: { url: string; alt: string }): ReactElement {
   return (
     <div className="web-image__view">
       <div className="web-image__bar" role="toolbar" aria-label={t('files/image/zoom')}>
-        <button type="button" className="web-image__step" title={t('files/image/zoomOut')} aria-label={t('files/image/zoomOut')} disabled={!zoomed} onClick={() => zoomTo(scale / STEP)}>−</button>
-        <button type="button" className="web-image__step web-image__percent" title={t('files/image/fit')} aria-label={t('files/image/fit')} disabled={!zoomed} onClick={reset}>{percentOf(scale, size.fitted, size.natural)}%</button>
-        <button type="button" className="web-image__step" title={t('files/image/zoomIn')} aria-label={t('files/image/zoomIn')} disabled={scale >= MAX_SCALE} onClick={() => zoomTo(scale * STEP)}>+</button>
+        <Button variant="subtle" size="xs" title={t('files/image/zoomOut')} ariaLabel={t('files/image/zoomOut')} disabled={!zoomed} onClick={() => zoomTo(scale / STEP)}>−</Button>
+        <Button variant="subtle" size="xs" style={PERCENT} title={t('files/image/fit')} ariaLabel={t('files/image/fit')} disabled={!zoomed} onClick={reset}>{percentOf(scale, size.fitted, size.natural)}%</Button>
+        <Button variant="subtle" size="xs" title={t('files/image/zoomIn')} ariaLabel={t('files/image/zoomIn')} disabled={scale >= MAX_SCALE} onClick={() => zoomTo(scale * STEP)}>+</Button>
       </div>
       <div
         ref={frame}

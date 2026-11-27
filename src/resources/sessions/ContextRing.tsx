@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, Donut } from '@softov/scena/ui';
+import { Button, Donut } from '../../ui/index.js';
 import { ringColor } from './footer.js';
 
 /**

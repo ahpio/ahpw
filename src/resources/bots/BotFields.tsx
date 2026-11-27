@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button, ChoicePicker, Field, FormRow, Section, TextField } from '../../ui/index.js';
 import { rootReducer, type AgentInfo, type RootState } from '@microsoft/agent-host-protocol';
 import { useChannel } from '../../bridges/channel.js';
 import { ADAPTERS, adaptersReducer, CONNECTORS, connectorsReducer, servesAdapters, servesConnectors, type AdapterRow, type ConnectorRow } from '../../bridges/connectors.js';
@@ -8,8 +8,6 @@ import { ahpPaths, ROOT } from '../../bridges/data.js';
 import type { Offers } from '../../bridges/offers.js';
 import type { OperationsState } from '../../bridges/operations-state.js';
 import type { PeopleState } from '../../bridges/people.js';
-import { Field } from '../../shell/view/Field.js';
-import { Section } from '../../shell/view/Section.js';
 import { useSessionSettings } from '../automations/session-settings.js';
 import { COMPUTERS, COMPUTERS_SCHEME, computersReducer, type ComputersState } from '../computers/machines.js';
 import { EMOJIcon } from '../emojis.js';
@@ -36,11 +34,7 @@ function keepHeld(choices: Choice[], held: string, known: boolean, missing: (val
 /** A list field that keeps a value the host no longer lists, marked, until a person picks another. */
 function Pick({ label, hint, value, choices, onPick }: { label: string; hint?: string; value: string; choices: Choice[]; onPick: (value: string) => void }): ReactElement {
   return (
-    <Field label={label} {...(hint === undefined ? {} : { hint })}>
-      <select className="web-field" value={value} onChange={(event) => onPick(event.target.value)}>
-        {choices.map((one) => <option key={one.value} value={one.value}>{one.label}</option>)}
-      </select>
-    </Field>
+    <ChoicePicker label={label} {...(hint === undefined ? {} : { hint })} options={choices.map((one) => ({ value: one.value, label: one.label }))} value={value} onChange={(next) => onPick(next)} />
   );
 }
 
@@ -118,48 +112,40 @@ export function BotFields({ host, offers, fresh, draft, folderPlaceholder, set }
     : fresh ? (draft.agent === '' ? t('bots/edit/agentDefaultHint') : undefined) : t('bots/edit/agentChangeHint');
 
   const folder = fresh ? (
-    <Field label={t('bots/edit/folder')} hint={t('bots/edit/folderHint')}>
-      <input className="web-field" value={draft.workspace} placeholder={folderPlaceholder} onChange={(event) => set({ workspace: event.target.value })} />
-    </Field>
+    <TextField label={t('bots/edit/folder')} hint={t('bots/edit/folderHint')} value={draft.workspace} placeholder={folderPlaceholder} onChange={(next) => set({ workspace: next })} />
   ) : null;
 
   return (
     <>
       <Section icon={EMOJIcon.agents} title={t('bots/edit/runsOn')} />
-      <div className="web-form__row">
+      <FormRow>
         <Pick label={t('bots/edit/agent')} {...(agentHint === undefined ? {} : { hint: agentHint })} value={draft.agent} choices={agentList.choices} onPick={(value) => set(withAgent(draft, value))} />
         <Pick label={t('bots/edit/model')} value={draft.model} choices={modelList.choices} onPick={(model) => set({ model })} />
-      </div>
+      </FormRow>
       {computerList === undefined ? folder : (
-        <div className="web-form__row">
+        <FormRow>
           <Pick label={t('bots/edit/computer')} {...(fresh ? { hint: t('bots/edit/computerHint') } : {})} value={draft.computer} choices={computerList.choices} onPick={(computer) => set({ computer })} />
           {folder}
-        </div>
+        </FormRow>
       )}
 
       {!showsConnectors && !fresh ? null : (
         <Section icon={EMOJIcon.connectors} title={t('bots/edit/canUse')} />
       )}
       {!showsConnectors ? null : (
-        <div className="web-form__field">
-          <span className="web-input__label">{t('bots/edit/connectors')}</span>
+        <Field name="connectors" label={t('bots/edit/connectors')} hint={t('bots/edit/connectorsHint')}>
           {draft.connectors.map((one, at) => (
             <div key={at} className="web-bot-connector">
-              <input className="web-field web-bot-connector__alias" value={one.alias} aria-label={t('bots/edit/connectorAlias')} onChange={(event) => setConnector(at, { alias: event.target.value })} />
-              <select className="web-field" value={one.target} aria-label={t('bots/edit/connectors')} onChange={(event) => setConnector(at, { target: event.target.value })}>
-                {keepHeld(connectorChoices, one.target, true, missing).choices.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
-              </select>
+              <TextField value={one.alias} ariaLabel={t('bots/edit/connectorAlias')} onChange={(next) => setConnector(at, { alias: next })} />
+              <ChoicePicker options={keepHeld(connectorChoices, one.target, true, missing).choices.map((choice) => ({ value: choice.value, label: choice.label }))} value={one.target} ariaLabel={t('bots/edit/connectors')} onChange={(next) => setConnector(at, { target: next })} />
               <Button label={t('bots/edit/connectorRemove')} onClick={() => set({ connectors: draft.connectors.filter((_, index) => index !== at) })} />
             </div>
           ))}
           {connectorChoices.length === 0 ? null : <div><Button label={t('bots/edit/connectorAdd')} onClick={addConnector} /></div>}
-          <span className="web-input__hint">{t('bots/edit/connectorsHint')}</span>
-        </div>
+        </Field>
       )}
       {fresh ? (
-        <Field label={t('bots/edit/template')} hint={t('bots/edit/templateHint')}>
-          <input className="web-field" value={draft.template} placeholder={t('bots/edit/templateDefault')} onChange={(event) => set({ template: event.target.value })} />
-        </Field>
+        <TextField label={t('bots/edit/template')} hint={t('bots/edit/templateHint')} value={draft.template} placeholder={t('bots/edit/templateDefault')} onChange={(next) => set({ template: next })} />
       ) : null}
     </>
   );

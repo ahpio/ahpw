@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Text } from '@softov/scena/ui';
+import { Alert, Button, ChoicePicker, FormRow, Note, Page, PageActions, Swatches, Text, TextField } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
@@ -8,8 +8,7 @@ import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { useOwnGrantsOnEach } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
-import { Field } from '../../shell/view/Field.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { writeLastHost } from '../sessions/last-host.js';
 import { useMe } from '../../bridges/me.js';
 import { membershipParts } from '../users/memberships.js';
@@ -18,7 +17,7 @@ import { Bood } from './Bood.js';
 import { BOT_PROVIDER, BOTS, BOTS_SCHEME, botsIn, botsReducer, editBot, makeBot, mayChangeBots, type BotRecord, type BotsState } from './catalogue.js';
 import { connectorsValid, draftOf, recordBody, renamedFor, type BotDraft } from './draft.js';
 import { BOT_BODIES, COLOR_HEX, knowsBody, slugOf } from './look.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 /** How many slugs a new bot tries, since a host never gives a deleted bot's slug again. */
 const SLUG_TRIES = 5;
@@ -123,100 +122,68 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
   };
 
   return (
-    <div className="web-page web-form">
+    <Page>
       <Text variant="h2" text={fresh ? t('bots/commands/new') : t('bots/editTitle', { name: bot!.name })} />
 
       <div className="web-bot-look">
         <Bood body={shown.body} color={shown.color} width={120} />
         <div className="web-bot-look__pickers">
-          <div className="web-bot-look__colors" role="radiogroup" aria-label={t('bots/edit/color')}>
-            {Object.entries(COLOR_HEX).map(([name, hex]) => (
-              <button
-                key={name}
-                type="button"
-                role="radio"
-                aria-checked={shown.color === hex}
-                aria-label={t(`bots/colors/${name}`)}
-                title={t(`bots/colors/${name}`)}
-                className="web-bot-look__color"
-                style={{ background: hex }}
-                onClick={() => set({ color: hex })}
-              />
-            ))}
-          </div>
-          <div className="web-bot-look__bodies" role="radiogroup" aria-label={t('bots/edit/body')}>
-            {BOT_BODIES.map((body) => (
-              <button key={body} type="button" role="radio" aria-checked={shown.body === body} aria-label={body} title={body} className="web-bot-look__body" onClick={() => set({ body, name: renamedFor(shown.name, shown.body, body) })}>
-                <Bood body={body} color={shown.color} width={30} still />
-              </button>
-            ))}
-          </div>
+          <Swatches
+            label={t('bots/edit/color')}
+            options={Object.entries(COLOR_HEX).map(([name, hex]) => ({ id: hex, label: t(`bots/colors/${name}`), color: hex }))}
+            value={shown.color}
+            onChange={(hex) => set({ color: hex })}
+          />
+          <Swatches
+            label={t('bots/edit/body')}
+            options={BOT_BODIES.map((body) => ({ id: body, label: body, content: <Bood body={body} color={shown.color} width={30} still /> }))}
+            value={shown.body}
+            onChange={(body) => set({ body, name: renamedFor(shown.name, shown.body, body) })}
+          />
           {/* A host keeps any word as a body; the buttons above are the ones bood draws. */}
-          <input className="web-field web-bot-look__name" value={shown.body} aria-label={t('bots/edit/bodyName')} placeholder={t('bots/edit/bodyName')} onChange={(event) => set({ body: event.target.value, name: renamedFor(shown.name, shown.body, event.target.value) })} />
-          {shown.body.trim() === '' || knowsBody(shown.body) ? null : <p className="web-note">{t('bots/edit/bodyUnknown')}</p>}
+          <TextField value={shown.body} ariaLabel={t('bots/edit/bodyName')} placeholder={t('bots/edit/bodyName')} onChange={(next) => set({ body: next, name: renamedFor(shown.name, shown.body, next) })} />
+          {shown.body.trim() === '' || knowsBody(shown.body) ? null : <Note>{t('bots/edit/bodyUnknown')}</Note>}
         </div>
       </div>
 
       {fresh && embedMode() === 'multi' && hosts.length > 1 ? (
-        <Field label={t('bots/edit/host')}>
-          <select className="web-field" value={host} onChange={(event) => { setHost(event.target.value); writeLastHost(event.target.value); set({ owner: '' }); }}>
-            {hosts.map((one) => <option key={one} value={one}>{hostName(one)}</option>)}
-          </select>
-        </Field>
+        <ChoicePicker label={t('bots/edit/host')} options={hosts.map((one) => ({ value: one, label: hostName(one) }))} value={host} onChange={(next) => { setHost(next); writeLastHost(next); set({ owner: '' }); }} />
       ) : null}
 
-      <div className="web-form__row">
+      <FormRow>
         {fresh ? (
-          <Field label={t('bots/edit/name')}>
-            <input className="web-field" value={shown.name} autoFocus onChange={(event) => set({ name: event.target.value })} />
-          </Field>
+          <TextField label={t('bots/edit/name')} value={shown.name} autoFocus onChange={(next) => set({ name: next })} />
         ) : null}
         {fresh ? (
           owners.length < 2 ? null : (
-            <Field label={t('bots/edit/owner')} hint={t('bots/edit/ownerHint')}>
-              <select className="web-field" value={shown.owner} onChange={(event) => set({ owner: event.target.value })}>
-                {owners.map((one) => <option key={one.value} value={one.value}>{one.label}</option>)}
-              </select>
-            </Field>
+            <ChoicePicker label={t('bots/edit/owner')} hint={t('bots/edit/ownerHint')} options={owners.map((one) => ({ value: one.value, label: one.label }))} value={shown.owner} onChange={(next) => set({ owner: next })} />
           )
         ) : (
           <>
-            <Field label={t('bots/edit/owner')} hint={t('bots/edit/ownerKept')}>
-              <input className="web-field" value={ownerLabel(shown.owner, ownerWords)} readOnly />
-            </Field>
-            <Field label={t('bots/edit/folder')} hint={t('bots/edit/folderKept')}>
-              <input className="web-field" value={shown.workspace} readOnly />
-            </Field>
+            <TextField label={t('bots/edit/owner')} hint={t('bots/edit/ownerKept')} value={ownerLabel(shown.owner, ownerWords)} readOnly />
+            <TextField label={t('bots/edit/folder')} hint={t('bots/edit/folderKept')} value={shown.workspace} readOnly />
           </>
         )}
-      </div>
+      </FormRow>
 
       {fresh ? null : (
-        <Field label={t('bots/edit/name')}>
-          <input className="web-field" value={shown.name} onChange={(event) => set({ name: event.target.value })} />
-        </Field>
+        <TextField label={t('bots/edit/name')} value={shown.name} onChange={(next) => set({ name: next })} />
       )}
 
-      <Field label={t('bots/edit/labels')} hint={t('bots/edit/labelsHint')}>
-        <input className="web-field" value={shown.labels} onChange={(event) => set({ labels: event.target.value })} />
-      </Field>
+      <TextField label={t('bots/edit/labels')} hint={t('bots/edit/labelsHint')} value={shown.labels} onChange={(next) => set({ labels: next })} />
 
-      <Field label={t('bots/edit/description')}>
-        <textarea className="web-field" rows={2} value={shown.description} onChange={(event) => set({ description: event.target.value })} />
-      </Field>
+      <TextField label={t('bots/edit/description')} multiline rows={2} value={shown.description} onChange={(next) => set({ description: next })} />
 
-      <Field label={t('bots/edit/instructions')} hint={t(fresh ? 'bots/edit/instructionsHint' : 'bots/edit/instructionsLater')}>
-        <textarea className="web-field web-form__message" rows={5} value={shown.instructions} onChange={(event) => set({ instructions: event.target.value })} />
-      </Field>
+      <TextField label={t('bots/edit/instructions')} hint={t(fresh ? 'bots/edit/instructionsHint' : 'bots/edit/instructionsLater')} multiline rows={5} value={shown.instructions} onChange={(next) => set({ instructions: next })} />
 
       <BotFields host={host} offers={offers} fresh={fresh} draft={shown} folderPlaceholder={folderBeside(botsIn(state), slugOf(shown.name, taken))} set={set} />
 
       {failure === null ? null : <Alert tone="danger" message={failure} />}
-      <div className="web-page__actions">
+      <PageActions>
         <Button label={t(fresh ? 'bots/edit/create' : 'bots/edit/save')} variant="primary" disabled={!ready} onClick={save} />
         <Button label={t('bots/edit/cancel')} onClick={() => onDone()} />
-      </div>
-    </div>
+      </PageActions>
+    </Page>
   );
 }
 

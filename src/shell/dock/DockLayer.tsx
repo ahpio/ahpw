@@ -3,7 +3,7 @@ import { useI18n, useScena, useStore } from '@softov/scena/react';
 import type { HostCtx, PickerAction, ScenaLayout } from '@softov/scena/types';
 import type { SessionSummary } from '@microsoft/agent-host-protocol';
 import { randomTransit, type BoodTransit } from '@cofold/bood';
-import { canonicalShortcut, ContextMenu } from '@softov/scena/ui';
+import { canonicalShortcut, ContextMenu } from '../../ui/index.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { refKey, refOf, useEach, useShownHosts } from '../../bridges/hosts.js';

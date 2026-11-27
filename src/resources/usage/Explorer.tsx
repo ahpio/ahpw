@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Spinner } from '@softov/scena/ui';
+import { Note, Spinner, TextField } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
@@ -168,18 +168,18 @@ export default function UsageExplorer(): ReactElement {
   };
 
   const notice = hosts.length === 0
-    ? <p className="web-note web-explorer__empty">{t('usage/explorer/notServed')}</p>
+    ? <Note inset>{t('usage/explorer/notServed')}</Note>
     : answers === null
       ? <Spinner label={t('usage/notices/reading')} />
-      : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('usage/explorer/empty')}</p> : null;
+      : rows.length === 0 ? <Note inset>{t('usage/explorer/empty')}</Note> : null;
 
   return (
     <div className="web-spend__side">
       {period === 'range' ? (
         <div className="web-spend__range">
-          <input className="web-field" type="date" value={range.from} max={range.until} aria-label={t('usage/range/from')} onChange={(event) => { if (event.target.value !== '') scena.store.set(USAGE_RANGE, { ...range, from: event.target.value }); }} />
+          <TextField type="date" value={range.from} max={range.until} ariaLabel={t('usage/range/from')} onChange={(next) => { if (next !== '') scena.store.set(USAGE_RANGE, { ...range, from: next }); }} />
           <span aria-hidden="true">{'\u{2013}'}</span>
-          <input className="web-field" type="date" value={range.until} min={range.from} aria-label={t('usage/range/until')} onChange={(event) => { if (event.target.value !== '') scena.store.set(USAGE_RANGE, { ...range, until: event.target.value }); }} />
+          <TextField type="date" value={range.until} min={range.from} ariaLabel={t('usage/range/until')} onChange={(next) => { if (next !== '') scena.store.set(USAGE_RANGE, { ...range, until: next }); }} />
         </div>
       ) : null}
       <ExplorerList

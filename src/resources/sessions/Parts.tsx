@@ -1,6 +1,6 @@
 import { memo, useContext, useState, type MouseEvent, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button } from '@softov/scena/ui';
+import { Alert, Button, DetailList, Note, Pill, RowButton } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import type {
   ResponsePart,
@@ -13,7 +13,7 @@ import { linkClicks } from '../files/clicks.js';
 import { useChatUri, useSessionHost, WorkspaceContext } from './workspace.js';
 import { hostBridge } from '../../bridges/data.js';
 import { failed } from '../../shell/notify/index.js';
-import { CopyButton } from '../../shell/controls/CopyButton.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
 import { useAsks } from '../agent-tools/asks.js';
 import { ClientAsk } from './ClientAsk.js';
 import { Confirm } from './Confirm.js';
@@ -121,22 +121,17 @@ export function OutputView({ out }: { out: Output }): ReactElement {
     case 'file':
       return (
         <p className="web-tool__file">
-          <button
-            type="button"
-            className="web-link"
-            title={out.before === undefined && out.after === undefined ? t('sessions/tool/openFile') : t('sessions/tool/openChange')}
-            onClick={() => void (out.before === undefined && out.after === undefined
+          <Button variant="link" title={out.before === undefined && out.after === undefined ? t('sessions/tool/openFile') : t('sessions/tool/openChange')} onClick={() => void (out.before === undefined && out.after === undefined
               ? scena.commands.execute('ahp.openFile', { uri: out.file })
-              : scena.commands.execute('ahp.openDiff', { file: out.file, ...(out.before === undefined ? {} : { before: out.before }), ...(out.after === undefined ? {} : { after: out.after }) }))}
-          >
+              : scena.commands.execute('ahp.openDiff', { file: out.file, ...(out.before === undefined ? {} : { before: out.before }), ...(out.after === undefined ? {} : { after: out.after }) }))}>
             {out.path}
-          </button>
+          </Button>
           {out.added === undefined ? null : <span className="web-diff--add">+{out.added}</span>}
           {out.removed === undefined ? null : <span className="web-diff--remove">-{out.removed}</span>}
         </p>
       );
     case 'note':
-      return <p className="web-note">{out.text}</p>;
+      return <Note>{out.text}</Note>;
   }
 }
 
@@ -177,23 +172,23 @@ export function ToolCall({ call, send, live, turnId }: { call: ToolCallState; se
   const mark = t(MARK[ask === undefined ? outcome : 'approval'].label);
   return (
     <div className="web-tool" data-outcome={ask === undefined ? outcome : 'approval'}>
-      <button type="button" className="web-tool__row" aria-expanded={shown} title={mark} onClick={() => setOpen(!open)}>
+      <RowButton fit muted caret="end" expanded={shown} title={mark} onClick={() => setOpen(!open)}>
         <span className="web-tool__mark" aria-label={mark}>{KIND_ICON[kindOf(call)]}</span>
         <ToolLine line={lineOf(call)} file={file} />
         {outcome === 'failed' || outcome === 'cancelled' ? <span className="web-tool__state">{mark}</span> : null}
         {duration === undefined || duration < 1000 ? null : <span className="web-tool__time">{elapsed(duration)}</span>}
-      </button>
+      </RowButton>
       {shown ? (
         <div className="web-tool__body">
-          <dl className="web-tool__facts">
+          <DetailList inline>
             <dt>{t('sessions/tool/tool')}</dt><dd><code>{call.toolName}</code>{name === call.toolName ? null : ` (${name})`}</dd>
             <dt>{t('sessions/tool/status')}</dt><dd>{mark}</dd>
             {file === undefined ? null : (
-              <><dt>{t('sessions/tool/file')}</dt><dd><button type="button" className="web-link" onClick={() => void scena.commands.execute('ahp.openFile', { uri: file })}>{folderLabel(file)}</button></dd></>
+              <><dt>{t('sessions/tool/file')}</dt><dd><Button variant="link" onClick={() => void scena.commands.execute('ahp.openFile', { uri: file })}>{folderLabel(file)}</Button></dd></>
             )}
             {call.intention === undefined ? null : <><dt>{t('sessions/tool/why')}</dt><dd>{call.intention}</dd></>}
             {risk === undefined || risk.status !== 'complete' ? null : <><dt>{t('sessions/tool/risk')}</dt><dd>{`${t('sessions/tool/safety', { safety: risk.safety })} \u{00B7} ${risk.reason}`}</dd></>}
-          </dl>
+          </DetailList>
           {input === '' ? null : <Block title={t('sessions/tool/arguments')} text={input} />}
           {output.map((one, index) => <OutputView key={index} out={one} />)}
           {movable ? (
@@ -222,10 +217,10 @@ export function Reasoning({ text, running }: { text: string; running: boolean })
   const opening = text.replace(/[*_`#>]/g, '').replace(/\s+/g, ' ').trim();
   return (
     <div className="web-tool" data-outcome={running ? 'running' : 'thought'}>
-      <button type="button" className="web-tool__row" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <RowButton fit muted caret="end" expanded={open} onClick={() => setOpen(!open)}>
         <span className="web-tool__mark" aria-hidden="true">{EMOJIcon.thinking}</span>
         <span className="web-tool__line">{open ? t('sessions/activity/thinking') : t('sessions/tool/thinkingAbout', { text: opening })}</span>
-      </button>
+      </RowButton>
       {open ? <div className="web-tool__body web-md"><Markdown text={text} /></div> : null}
     </div>
   );
@@ -247,9 +242,7 @@ export const Part = memo(function Part({ part, send, live, turnId }: { part: Res
     case 'contentRef': {
       const uri = 'uri' in part ? String(part.uri) : '';
       return (
-        <button type="button" className="web-chip" onClick={() => void scena.commands.execute('ahp.openFile', { uri })}>
-          {`${EMOJIcon.file} ${folderLabel(uri).split('/').pop() ?? uri}`}
-        </button>
+        <Pill label={`${EMOJIcon.file} ${folderLabel(uri).split('/').pop() ?? uri}`} onClick={() => void scena.commands.execute('ahp.openFile', { uri })} />
       );
     }
     case 'reasoning':
@@ -261,7 +254,7 @@ export const Part = memo(function Part({ part, send, live, turnId }: { part: Res
     case 'error':
       return <Alert tone="danger" message={'error' in part && part.error.message !== '' ? part.error.message : t('sessions/tool/agentError')} />;
     case 'systemNotification':
-      return <p className="web-note">{'content' in part ? textOf(part.content as string) : ''}</p>;
+      return <Note>{'content' in part ? textOf(part.content as string) : ''}</Note>;
     default:
       return null;
   }

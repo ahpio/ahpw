@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n, useLabel, useLayout, useMounts, useScena } from '@softov/scena/react';
-import { Tree, type TreeNode } from '@softov/scena/ui';
+import { Button, Note, Tree, type TreeNode } from '../../ui/index.js';
 import type { Label, ResolvedMount } from '@softov/scena/types';
 
 /** A tab's title, kept current: a session renamed elsewhere is renamed here. */
@@ -28,18 +28,18 @@ export default function OpenEditors(): ReactElement {
       ...(icon === undefined ? {} : { icon }),
       data: mount,
       trailing: (
-        <button
-          type="button"
-          className="web-open-editors__close"
+        <Button
+          variant="quiet"
+          size="xs"
           title={t('folders/openEditors/close')}
-          aria-label={t('folders/openEditors/close')}
+          ariaLabel={t('folders/openEditors/close')}
           onClick={(event) => {
             event.stopPropagation();
             scena.surfaces.requestClose(mount.key);
           }}
         >
           {'✕'}
-        </button>
+        </Button>
       ),
     };
   });
@@ -48,7 +48,7 @@ export default function OpenEditors(): ReactElement {
       nodes={nodes}
       selectedKey={active}
       onSelect={(node) => scena.surfaces.focus(node.key)}
-      emptyState={<p className="web-note web-explorer__empty">{t('folders/openEditors/empty')}</p>}
+      emptyState={<Note inset>{t('folders/openEditors/empty')}</Note>}
     />
   );
 }

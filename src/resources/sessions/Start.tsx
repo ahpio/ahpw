@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button, Note } from '../../ui/index.js';
 import { AhpioMark } from '../../shell/AhpioMark.js';
 import './start.css';
 
@@ -11,7 +11,7 @@ export default function StartPage(): ReactElement {
   return (
     <div className="web-start">
       <AhpioMark size={72} />
-      <p className="web-note">{t('sessions/start/note')}</p>
+      <Note>{t('sessions/start/note')}</Note>
       <Button label={t('sessions/commands/newSession')} variant="primary" onClick={() => void scena.commands.execute('ahp.newSession')} />
     </div>
   );

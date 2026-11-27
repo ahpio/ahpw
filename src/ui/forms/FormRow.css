@@ -1,0 +1,10 @@
+.oo-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--oo-spacing-md);
+}
+
+.oo-form-row > * {
+  flex: 1;
+  min-width: 12rem;
+}

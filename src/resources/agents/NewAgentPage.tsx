@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Text } from '@softov/scena/ui';
+import { Page, Text } from '../../ui/index.js';
 import { EMOJIcon } from '../emojis.js';
 import { AgentForm } from './AgentForm.js';
 
@@ -8,9 +8,9 @@ import { AgentForm } from './AgentForm.js';
 export default function NewAgentPage({ host }: { host: string }): ReactElement {
   const { t } = useI18n();
   return (
-    <div className="web-page web-form">
+    <Page>
       <Text variant="h2" text={`${EMOJIcon.agents} ${t('agents/form/newTitle')}`} />
       <AgentForm host={host} />
-    </div>
+    </Page>
   );
 }

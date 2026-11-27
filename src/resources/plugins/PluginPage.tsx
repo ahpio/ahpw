@@ -1,25 +1,24 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, CheckBox, Text, type BadgeTone } from '@softov/scena/ui';
-import { KeptTabs } from '../../shell/view/KeptTabs.js';
+import { Alert, Badge, type BadgeTone, Button, CheckBox, DangerZone, Page, PageActions, PageHead, Text } from '../../ui/index.js';
+import { KeptTabs } from '../../ui/navigation/KeptTabs.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import type { PeopleState } from '../../bridges/people.js';
 import { availablePlugins, installedFiles, PLUGINS, pluginsReducer, restartNeeded, specEnabled, type InstalledFiles, type ListedPlugin, type PluginRow, type PluginState } from '../../bridges/plugins.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
 import { mayList, mayReload, mayRemove, mayToggle, reloadOne, removeOne, saidOf, toggleMethod, togglePlugin } from './actions.js';
 import { marketplaceFacts, PluginFacts, ReadText, TabBody, urlOf } from './ListTabs.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
 import { Options } from './Options.js';
 import { Features, installationFacts, Overview } from './Overview.js';
 import { keepPluginTabKey, pluginTab, pluginTabKey } from './state.js';
 import { mayRestart } from '../../bridges/restart.js';
 import { RESTART_HOST } from '../host/restart.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 const TONE: Record<PluginState, BadgeTone> = {
   error: 'danger',
@@ -41,8 +40,8 @@ function RemoveZone({ host, id, title }: { host: string; id: string; title: stri
   return (
     <DangerZone
       label={t('plugins/remove/button')}
-      note={t('plugins/remove/note')}
-      onClick={() => void removeOne(host, id, title, keep).then((gone) => { if (gone) scena.surfaces.close(pluginTab(host, id)); })}
+      description={t('plugins/remove/note')}
+      onConfirm={() => void removeOne(host, id, title, keep).then((gone) => { if (gone) scena.surfaces.close(pluginTab(host, id)); })}
     >
       <CheckBox label={t('plugins/remove/keep')} value={keep} onChange={setKeep} />
     </DangerZone>
@@ -112,8 +111,8 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
   );
 
   return (
-    <div className="web-page web-plugin">
-      <div className="web-page__head">
+    <Page>
+      <PageHead>
         <PageTitle
           icons={manifest?.icons}
           emoji={EMOJIcon.hostPlugins}
@@ -123,7 +122,7 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
         />
         {manifest?.description === undefined ? null : <p className="web-listed__description">{manifest.description}</p>}
         {mayToggle(offers, row) || mayReload(offers) ? (
-          <div className="web-page__actions">
+          <PageActions>
             {mayReload(offers) ? (
               <Button size="sm" label={t('plugins/actions/reimport')} {...said(saidOf(offers, PLUGINS.reload))} onClick={() => void reloadOne(host, id)} />
             ) : null}
@@ -135,9 +134,9 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
                 onClick={() => void togglePlugin(host, id, row)}
               />
             ) : null}
-          </div>
+          </PageActions>
         ) : null}
-      </div>
+      </PageHead>
       {restartNeeded(root.state) ? (
         <Alert tone="warning">
           {t('plugins/restart')}
@@ -163,6 +162,6 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
         defaultValue={pluginTabKey()}
         onChange={keepPluginTabKey}
       />
-    </div>
+    </Page>
   );
 }

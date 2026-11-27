@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button } from '../../ui/index.js';
 import { NOTIFICATIONS } from './registry.js';
 import { getNotifications } from './context.js';
 import type { Notification, NotificationAnimation, NotificationTone } from './types.js';
@@ -33,7 +33,7 @@ export function Toaster({ animation = 'slide-up' }: ToasterProps): ReactElement 
   const hidden = list.length - shown.length;
   return (
     <div className="web-toasts" role="region" aria-label={t('shell/notify/region')}>
-      {hidden > 0 ? <button type="button" className="web-toast__more" onClick={() => setExpanded(true)}>{t('shell/notify/more', { count: hidden })}</button> : null}
+      {hidden > 0 ? <Button variant="quiet" onClick={() => setExpanded(true)}>{t('shell/notify/more', { count: hidden })}</Button> : null}
       {[...shown].reverse().map((notification) => (
         <Toast key={notification.id} notification={notification} animation={notification.animation ?? animation} />
       ))}
@@ -81,12 +81,12 @@ function Toast({ notification, animation }: { notification: Notification; animat
         <span className="web-toast__icon" aria-hidden="true">{notification.icon ?? TONE_ICON[notification.tone]}</span>
         <span className="web-toast__title">{notification.title}</span>
         {notification.count > 1 ? <span className="web-toast__count" title={plural('shell/notify/raised', notification.count)}>{`\u{D7}${notification.count}`}</span> : null}
-        <button type="button" className="web-toast__close" aria-label={t('shell/notify/dismiss')} onClick={close}>{EMOJIcon.close}</button>
+        <Button variant="quiet" ariaLabel={t('shell/notify/dismiss')} onClick={close}>{EMOJIcon.close}</Button>
       </div>
       {notification.description === undefined ? null : <p className="web-toast__body">{notification.description}</p>}
       {notification.detail === undefined ? null : (
         <>
-          <button type="button" className="web-toast__link" onClick={() => setShowDetail(!showDetail)}>{showDetail ? t('shell/notify/hideDetails') : t('shell/notify/showDetails')}</button>
+          <Button variant="quiet" onClick={() => setShowDetail(!showDetail)}>{showDetail ? t('shell/notify/hideDetails') : t('shell/notify/showDetails')}</Button>
           {showDetail ? <pre className="web-toast__detail">{notification.detail}</pre> : null}
         </>
       )}
