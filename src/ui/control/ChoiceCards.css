@@ -1,0 +1,106 @@
+.oo-choice-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+  margin-top: var(--oo-spacing-xs);
+}
+
+.oo-choice-cards__card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--oo-spacing-sm);
+  width: 100%;
+  padding: var(--oo-spacing-sm);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.oo-choice-cards__card:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.oo-choice-cards__card:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--oo-color-accent) 60%, var(--oo-color-border));
+  background: none;
+}
+
+.oo-choice-cards__card[data-on='true'] {
+  border-color: var(--oo-color-accent);
+  background: color-mix(in srgb, var(--oo-color-accent) 10%, transparent);
+}
+
+.oo-choice-cards__mark {
+  flex: none;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  padding: 0;
+  border: 1.5px solid var(--oo-color-muted);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.oo-choice-cards__mark[data-many='true'] {
+  border-radius: 3px;
+}
+
+[data-on='true'] > .oo-choice-cards__mark {
+  border-color: var(--oo-color-accent);
+  background: var(--oo-color-accent);
+  box-shadow: inset 0 0 0 2px var(--oo-color-surface);
+}
+
+.oo-choice-cards__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.oo-choice-cards__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--oo-spacing-xs);
+  font-weight: 500;
+}
+
+.oo-choice-cards__key {
+  color: var(--oo-color-muted);
+  font-family: var(--oo-font-mono, monospace);
+  font-size: var(--oo-font-size-xs);
+}
+
+.oo-choice-cards__tag {
+  color: var(--oo-color-success);
+  font-size: var(--oo-font-size-xs);
+}
+
+.oo-choice-cards__hint {
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+}
+
+/* The card for an answer of one's own: its mark, then its text box across the rest. */
+.oo-choice-cards__other {
+  align-items: center;
+  cursor: default;
+}
+
+.oo-choice-cards__other > .oo-choice-cards__mark {
+  margin-top: 0;
+}
+
+.oo-choice-cards__other > :last-child {
+  flex: 1;
+  min-width: 0;
+}

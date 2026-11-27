@@ -1,11 +1,13 @@
 import { useEffect, useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner, Tree, type TreeNode } from '@softov/scena/ui';
+import { Alert, Spinner, Tree, type TreeNode } from '../../ui/index.js';
 import { ACTIVE_COMMAND, MANIFEST, MANIFEST_ERROR } from '../manifest/data.js';
 import { sectionsOf } from '../manifest/sections.js';
 import type { ManifestCommand, ProgramManifest } from '../manifest/types.js';
 import { listOf } from '../manifest/roles.js';
 import ItemExplorer from './Items.js';
+import '../computers/page.css';
+import '../../shell/explorer/explorer-list.css';
 
 /** A command's id after its group: `plugin.config.set` is listed as `config set`. */
 function labelOf(command: ManifestCommand, group: string): string {

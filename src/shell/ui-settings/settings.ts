@@ -11,7 +11,7 @@
 import type { BindingPath, Disposable, Scena } from '@softov/scena/types';
 import { getLocale, getLocaleInfo, setLocale, subscribeI18n, translate } from '@softov/scena';
 import { listThemes, THEME_ID_PATH, THEME_MODE_PATH } from '@softov/scena/styles';
-import type { JsonSchemaField } from '@softov/scena/ui';
+import type { JsonSchemaField } from '../../ui/index.js';
 import { initialLocale, LOCALES } from '../../i18n/locales.js';
 import { CONFIRM_STYLE, confirmStyle, DEFAULT_CONFIRM_STYLE, setConfirmStyle } from '../notify/confirm.js';
 import { MAIN_LAYOUTS } from '../view/layouts.js';

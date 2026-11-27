@@ -54,6 +54,7 @@ import type { BindingPath } from '@softov/scena/types';
 import { THEME_ID_KEY, THEME_MODE_KEY } from '../lib/theme-keys.js';
 import { embedder } from './embed/index.js';
 import { AhpioMark } from './AhpioMark.js';
+import './register-shell.css';
 
 /** The title bar's brand: ahpio's mark, in the activity bar's column. */
 function AppTitle(): ReactElement {

@@ -6,7 +6,7 @@
  * back, and an empty one sent as `""` keeps what it stores.
  */
 
-import type { EnumOption, JsonSchemaObject } from '@softov/scena/ui';
+import type { EnumOption, JsonSchemaObject } from '../../ui/index.js';
 import { isSecret, isSecretRef, type AdapterRow, type Capability, type ConnectorOwner, type SignInRow } from '../../bridges/connectors.js';
 import { EVERY, grantParts } from '../../bridges/grants.js';
 import { membershipParts } from '../users/memberships.js';

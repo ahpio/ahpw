@@ -21,6 +21,7 @@ import { ACTIVE_AGENT, agentTab } from './state.js';
 import { agentTitle, mergeAgents, type MergedAgent } from './merge.js';
 import { modelsLine, signInOf } from './words.js';
 import { plural } from '../../i18n/locales.js';
+import { Note } from '../../ui/index.js';
 
 /** A menu entry's tooltip, when the host says what its command does. */
 const tooltip = (said: string | undefined): { tooltip?: string } => (said === undefined ? {} : { tooltip: said });
@@ -144,7 +145,7 @@ export default function AgentExplorer(): ReactElement {
       rows={rows}
       selected={active === undefined ? null : refKey(active.host, active.provider)}
       onOpen={open}
-      notice={rows.length === 0 ? <p className="web-note web-explorer__empty">{t('agents/explorer/empty')}</p> : null}
+      notice={rows.length === 0 ? <Note inset>{t('agents/explorer/empty')}</Note> : null}
       filterLabel={t('agents/explorer/filter')}
       hostLines={multi}
     />

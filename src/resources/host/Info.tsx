@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, Badge, Button, DangerZone, type DetailItem, DetailList, ItemList, ItemRow, Listable, Note, Page, PageActions, PageHead, Row, Section, Text } from '../../ui/index.js';
 import { automationReducer, type AgentInfo, type AutomationCapabilities, type AutomationState } from '@microsoft/agent-host-protocol';
 // import { call } from '../../lib/api.js';
 import { AUTOMATIONS, ROOT, ahpPaths, hostBridge, type Connection, type HostFacts } from '../../bridges/data.js';
@@ -13,7 +13,6 @@ import { TrustedFolders } from './Trusted.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { mayRestart } from '../../bridges/restart.js';
 import { RESTART_HOST } from './restart.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
 import { AUTOMATIONS_SECTION } from '../automations/index.js';
 import { SESSIONS_SECTION } from '../sessions/index.js';
 import { useAgentIcons } from '../agents/icons.js';
@@ -24,8 +23,8 @@ import { HOST_LIST, hostNameOf } from '../../bridges/hosts.js';
 import type { ServerInfo } from '../../bridges/server-info.js';
 import { memoryWords, NO_ABOUT, type HostAbout } from '../../bridges/host-about.js';
 import './info.css';
-import { Section } from '../../shell/view/Section.js';
 import { runFacts, runsByTime } from '../automations/words.js';
+import '../automations/page.css';
 
 /** What `GET /api/status` says about the daemon process. */
 interface DaemonStatus {
@@ -89,11 +88,11 @@ function AutomationsFact({ host, caps }: { host: string; caps: AutomationCapabil
   }
   const last = entries.flatMap((entry) => runsByTime(entry).slice(0, 1).map((run) => runFacts(run).at)).sort().at(-1);
   return (
-    <button type="button" className="web-link" onClick={() => void scena.commands.execute('sidebar.activate', { section: AUTOMATIONS_SECTION })}>
+    <Button variant="link" onClick={() => void scena.commands.execute('sidebar.activate', { section: AUTOMATIONS_SECTION })}>
       {plural('host/info/automationsCount', entries.length)}
       {' \u{00B7} '}
       {last === undefined ? t('host/info/automationsNeverRan') : t('host/info/automationsLastRan', { when: when(last) })}
-    </button>
+    </Button>
   );
 }
 
@@ -103,38 +102,29 @@ function AgentRows({ host, agents }: { host: string; agents: readonly AgentInfo[
   const { t } = useI18n();
   const hosts = useMemo(() => [host], [host]);
   const iconsOf = useAgentIcons(hosts);
-  if (agents.length === 0) return <p className="web-note">{t('host/info/none')}</p>;
+  if (agents.length === 0) return <Note>{t('host/info/none')}</Note>;
   return (
-    <ul className="web-host-agents">
+    <ItemList boxed>
       {agents.map((agent) => {
         const open = (): void => void scena.commands.execute('ahp.openAgent', { host, provider: agent.provider, title: agent.displayName });
         const line = [agent.description, agent.models.length === 0 ? '' : plural('host/info/models', agent.models.length)].filter((one) => one !== '').join(' \u{00B7} ');
         return (
-          <li key={agent.provider} className="web-host-agents__row">
-            <span className="web-host-agents__icon">
-              <HostIcon icons={iconsOf(host, agent.provider)} size={24} fallback={<span aria-hidden="true">{EMOJIcon.agents}</span>} />
-            </span>
-            <span className="web-host-agents__text">
-              <span>
-                <button type="button" className="web-link web-host-agents__name" onClick={open}>{agent.displayName}</button>
-                {' '}
-                <span className="web-method">{agent.provider}</span>
-              </span>
-              {line === '' ? null : <span className="web-host-agents__line">{line}</span>}
-            </span>
-            <button
-              type="button"
-              className="web-host-agents__chat"
-              title={t('host/info/agentChatWith', { agent: agent.displayName })}
-              aria-label={t('host/info/agentChatWith', { agent: agent.displayName })}
-              onClick={() => void scena.commands.execute('ahp.newSession', { host, provider: agent.provider })}
-            >
-              <span aria-hidden="true">{EMOJIcon.sessions}</span>
-            </button>
-          </li>
+          <ItemRow
+            key={agent.provider}
+            lead={<HostIcon icons={iconsOf(host, agent.provider)} size={24} fallback={<span aria-hidden="true">{EMOJIcon.agents}</span>} />}
+            title={agent.displayName}
+            meta={agent.provider}
+            line={line}
+            onClick={open}
+            trail={(
+              <Button title={t('host/info/agentChatWith', { agent: agent.displayName })} ariaLabel={t('host/info/agentChatWith', { agent: agent.displayName })} onClick={() => void scena.commands.execute('ahp.newSession', { host, provider: agent.provider })}>
+                <span aria-hidden="true">{EMOJIcon.sessions}</span>
+              </Button>
+            )}
+          />
         );
       })}
-    </ul>
+    </ItemList>
   );
 }
 
@@ -185,9 +175,9 @@ export default function HostInfoPage({ host }: { host: string }): ReactElement {
     software.push({
       label: t('host/info/activeSessions'),
       value: (
-        <button type="button" className="web-link" onClick={() => void scena.commands.execute('sidebar.activate', { section: SESSIONS_SECTION })}>
+        <Button variant="link" onClick={() => void scena.commands.execute('sidebar.activate', { section: SESSIONS_SECTION })}>
           {`${String(facts.activeSessions)} / ${String(sessions.length)}`}
-        </button>
+        </Button>
       ),
     });
   }
@@ -212,14 +202,14 @@ export default function HostInfoPage({ host }: { host: string }): ReactElement {
 
   const terminals = facts?.terminals ?? [];
   return (
-    <div className="web-page">
-      <div className="web-page__head">
+    <Page>
+      <PageHead>
         <PageTitle emoji={EMOJIcon.host} title={title} uri={ROOT} state={<Badge tone={shown.tone} text={shownText} />} />
-        <div className="web-page__actions">
+        <PageActions>
           {connection?.status === 'connected' ? null : <Button label={t('bridges/reconnectNow')} variant="primary" onClick={() => void hostBridge(host).reconnect()} />}
           <Button label={t('host/info/settings')} onClick={() => void scena.commands.execute('ahp.openSettings', { host })} />
-        </div>
-      </div>
+        </PageActions>
+      </PageHead>
 
       <Section icon={EMOJIcon.link} title={t('host/info/connection')} />
       <DetailList items={link} columns={2} />
@@ -239,7 +229,7 @@ export default function HostInfoPage({ host }: { host: string }): ReactElement {
       {daemon.length === 0 ? null : <DetailList items={daemon} columns={2} />}
 
       <Section icon={EMOJIcon.automations} title={t('host/info/automations')} />
-      <div className="web-host-automations"><AutomationsFact host={host} caps={caps ?? null} /></div>
+      <Row align="start" gap={0}><AutomationsFact host={host} caps={caps ?? null} /></Row>
 
       <Section icon={EMOJIcon.agents} title={t('host/info/agents')} count={agents.length} />
       <AgentRows host={host} agents={agents} />
@@ -247,41 +237,42 @@ export default function HostInfoPage({ host }: { host: string }): ReactElement {
       {about.settings.length === 0 ? null : (
         <>
           <Section icon={EMOJIcon.settings} title={t('host/info/agentSettings')} />
-          <ul className="web-host-settings">
+          <ItemList boxed>
             {about.settings.map((page) => (
-              <li key={page.provider} className="web-host-settings__row">
-                <span><strong>{page.title}</strong> <span className="web-method">{page.provider}</span></span>
-                {page.description === undefined ? null : <span className="web-host-settings__description">{page.description}</span>}
-                {page.keys.length === 0 ? null : <span className="web-host-settings__keys">{page.keys.map((key) => <code key={key}>{key}</code>)}</span>}
-              </li>
+              <ItemRow
+                key={page.provider}
+                title={page.title}
+                meta={page.provider}
+                text={page.description}
+                line={page.keys.length === 0 ? null : <span className="web-host-settings__keys">{page.keys.map((key) => <code key={key}>{key}</code>)}</span>}
+              />
             ))}
-          </ul>
+          </ItemList>
         </>
       )}
 
       <TrustedFolders host={host} heading={<Section icon={EMOJIcon.folder} title={t('trust/host/title')} />} />
 
       <Section icon={EMOJIcon.terminal} title={t('host/info/terminals')} />
-      {terminals.length === 0 ? <p className="web-note">{t('host/info/noTerminals')}</p> : (
-        <table className="web-runs web-table">
-          <thead>
-            <tr><th>{t('host/info/terminalTitle')}</th><th>{t('host/info/terminalState')}</th></tr>
-          </thead>
-          <tbody>
-            {terminals.map((one) => {
-              const life = one.lifecycle as { status?: string; exitCode?: number };
-              return (
-                <tr key={one.resource}>
-                  <td>{one.title}</td>
-                  <td>{life.status !== 'exited' ? t('host/info/running') : life.exitCode === undefined ? t('host/info/exited') : t('host/info/exitedCode', { code: life.exitCode })}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      {terminals.length === 0 ? <Note>{t('host/info/noTerminals')}</Note> : (
+        <Listable<(typeof terminals)[number]>
+          items={[...terminals]}
+          getKey={(one) => one.resource}
+          columns={[
+            { key: 'title', label: t('host/info/terminalTitle'), sortable: true, render: (one) => one.title },
+            {
+              key: 'state',
+              label: t('host/info/terminalState'),
+              render: (one) => {
+                const life = one.lifecycle as { status?: string; exitCode?: number };
+                return life.status !== 'exited' ? t('host/info/running') : life.exitCode === undefined ? t('host/info/exited') : t('host/info/exitedCode', { code: life.exitCode });
+              },
+            },
+          ]}
+        />
       )}
 
-      {mayRestart(hostOffers) ? <DangerZone label={t('host/restart/button')} note={t('host/restart/note')} onClick={() => void scena.commands.execute(RESTART_HOST, { host })} /> : null}
-    </div>
+      {mayRestart(hostOffers) ? <DangerZone label={t('host/restart/button')} description={t('host/restart/note')} onConfirm={() => void scena.commands.execute(RESTART_HOST, { host })} /> : null}
+    </Page>
   );
 }

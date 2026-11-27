@@ -1,4 +1,4 @@
-import type { JsonSchemaField } from '@softov/scena/ui';
+import type { JsonSchemaField } from '../../ui/index.js';
 
 /**
  * The command surface a daemon publishes at `/api/cli-manifest`.

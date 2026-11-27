@@ -5,6 +5,8 @@ import { ActionList, type ActionListController } from '@softov/scena/ui/menu';
 import { ahpPaths } from '../bridges/data.js';
 import { useEach, useEveryHost } from '../bridges/hosts.js';
 import { terminalItems } from '../resources/terminals/rows.js';
+import { TextField } from '../ui/control/TextField.js';
+import './command-palette.css';
 
 /** The slot a command joins to be listed in the palette. */
 export const PALETTE_SLOT = 'ahp:palette';
@@ -117,13 +119,12 @@ export default function CommandPalette(): ReactElement {
   return (
     <div className="web-palette" onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
       <div className="web-palette__box" role="dialog" aria-modal="true" aria-label={t('shell/commands/palette')}>
-        <input
-          className="web-field web-palette__input"
+        <TextField
           autoFocus
           value={search}
           placeholder={commands ? t('shell/palette/placeholder') : top.title ?? t('shell/palette/placeholder')}
-          aria-label={t('shell/commands/palette')}
-          onChange={(e) => setSearch(e.currentTarget.value)}
+          ariaLabel={t('shell/commands/palette')}
+          onChange={setSearch}
           onKeyDown={onKeyDown}
         />
         <ActionList ref={ref} spec={spec} hostCtx={host} {...(depth > 1 ? { onBack: host.back } : {})} manageKeys={false} />

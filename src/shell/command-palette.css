@@ -1,0 +1,42 @@
+.web-palette {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 16px 16px;
+  background: color-mix(in srgb, var(--oo-color-bg, #000) 40%, transparent);
+}
+
+.web-palette__box {
+  display: flex;
+  flex-direction: column;
+  width: min(36rem, 100%);
+  max-height: 60vh;
+  overflow: hidden;
+  background: var(--oo-color-surface);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-md);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 30%);
+}
+
+.web-palette__box > .oo-field {
+  width: auto;
+  margin: var(--oo-spacing-sm);
+}
+
+/* The list sits inside the palette's box, so it drops its own frame. */
+
+.web-palette__box .oo-action-list {
+  min-width: 0;
+  max-width: none;
+  max-height: none;
+  min-height: 0;
+  overflow: auto;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--oo-color-border);
+  border-radius: 0;
+  box-shadow: none;
+}

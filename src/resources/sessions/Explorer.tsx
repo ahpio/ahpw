@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { droppedAt, endedOutside, openInWindow } from '@softov/scena';
 import { endOpenDrag, startOpenDrag, useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import type { AgentInfo, SessionSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths, titlePath, type Connection } from '../../bridges/data.js';
@@ -18,6 +18,7 @@ import { activityLabel, activityOf, isArchived, isRead, shows, type Activity, ty
 import { arrangeTwo, groupOf, type Group, type Grouping } from './grouping.js';
 import { sessionActs } from './acts.js';
 import { sessionKey } from './focus.js';
+import '../files/diff-page.css';
 
 const sameDay = dateFormat({ hour: '2-digit', minute: '2-digit' });
 const otherDay = dateFormat({ month: 'short', day: 'numeric' });
@@ -122,7 +123,7 @@ export default function SessionExplorer(): ReactElement {
         const changes = one.changes;
         // The counts on every row that has any, and a running row's activity under them, as ahpapp shows both.
         const counts = changes !== undefined && (changes.additions ?? 0) + (changes.deletions ?? 0) > 0
-          ? <><span className="web-diff--add">+{changes.additions ?? 0}</span> <span className="web-diff--remove">-{changes.deletions ?? 0}</span>{changes.files === undefined ? '' : ` \u{00B7} ${plural('sessions/explorer/files', changes.files)}`}</>
+          ? <><span className="web-diff--add">+{changes.additions ?? 0}</span> <Note inline tone="danger">-{changes.deletions ?? 0}</Note>{changes.files === undefined ? '' : ` \u{00B7} ${plural('sessions/explorer/files', changes.files)}`}</>
           : undefined;
         // A host clears the activity with null, since a change over JSON cannot send undefined.
         const said = one.activity ?? '';
@@ -156,7 +157,7 @@ export default function SessionExplorer(): ReactElement {
     ? <Alert tone="danger" title={t('sessions/explorer/notConnected')} message={connection.error ?? t('sessions/explorer/refused')} />
     : connection?.status !== 'connected' && sessions === undefined
       ? <Spinner label={t('sessions/explorer/connecting')} />
-      : rows.length === 0 ? <p className="web-note">{show !== 'all' || agent !== null ? t('sessions/explorer/noneShown') : archived ? t('sessions/explorer/none') : t('sessions/explorer/noneYet')}</p> : null;
+      : rows.length === 0 ? <Note>{show !== 'all' || agent !== null ? t('sessions/explorer/noneShown') : archived ? t('sessions/explorer/none') : t('sessions/explorer/noneYet')}</Note> : null;
 
   return (
     <ExplorerList

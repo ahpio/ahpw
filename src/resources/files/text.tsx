@@ -3,9 +3,11 @@ import { useI18n, useScena } from '@softov/scena/react';
 import { hostBridge } from '../../bridges/data.js';
 import { readFailure } from './save.js';
 import { folderLabel } from '../../bridges/words.js';
-import { CopyButton } from '../../shell/controls/CopyButton.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
 import { TEXT_WRAP } from '../editor/wrap.js';
 import { EMOJIcon } from '../emojis.js';
+import { Button } from '../../ui/index.js';
+import './shared-file-page.css';
 
 /** A file's text: null while it reads, `text: null` when the file is not text. */
 export type FileText = { text: string | null } | { error: string } | null;
@@ -50,5 +52,5 @@ export function useWrap(): [boolean, (wrap: boolean) => void] {
 export function WrapButton({ wrap, onChange }: { wrap: boolean; onChange: (wrap: boolean) => void }): ReactElement {
   const { t } = useI18n();
   const title = wrap ? t('files/wrapOff') : t('files/wrapOn');
-  return <button type="button" className="web-icon-button" aria-pressed={wrap} title={title} aria-label={title} onClick={() => onChange(!wrap)}>{EMOJIcon.wrap}</button>;
+  return <Button variant="subtle" shape="icon" pressed={wrap} title={title} ariaLabel={title} onClick={() => onChange(!wrap)}>{EMOJIcon.wrap}</Button>;
 }

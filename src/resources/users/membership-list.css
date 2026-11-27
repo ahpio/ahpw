@@ -1,14 +1,23 @@
-/* A team's or a project's name on a membership row, which opens its page. */
-.web-memberships__open {
+.web-memberships__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
   padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
+  list-style: none;
 }
 
-.web-memberships__open:hover,
-.web-memberships__open:focus-visible {
-  text-decoration: underline;
+.web-memberships__row {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  min-height: 2rem;
+  border-bottom: 1px solid var(--oo-color-border);
+}
+
+.web-memberships__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

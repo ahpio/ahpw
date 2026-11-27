@@ -1,12 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { ContextMenu, Modal } from '@softov/scena/ui';
+import { Button, ContextMenu, Modal, Note, Pill } from '../../ui/index.js';
 import type { BindingPath, PickerAction } from '@softov/scena/types';
 import type { MessageAttachment, SessionSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths } from '../../bridges/data.js';
 import { attachmentIcon, attachmentLabel, attachmentPath, clipboardImage, hasPreview, previewOf, type AttachmentPreviewOf } from './attachments.js';
 import { composerAt, contextItems } from './composer-commands.js';
-import { EMOJIcon } from '../emojis.js';
+import './composer.css';
+import './attached.css';
 
 /** What goes with the message, above its text, each with a way to take it off. Nothing when there is none. */
 export function Attached({ attachments, folder, onRemove }: {
@@ -20,14 +21,16 @@ export function Attached({ attachments, folder, onRemove }: {
   return (
     <div className="web-composer__attached">
       {attachments.map((one, index) => {
-        const body = <><span className="web-attachment__icon" aria-hidden="true">{attachmentIcon(one)}</span><span className="web-attachment__label">{attachmentLabel(one)}</span></>;
         return (
-          <span key={`${attachmentLabel(one)}-${index}`} className="web-attachment" title={attachmentPath(one, folder) ?? attachmentLabel(one)}>
-            {hasPreview(one) ? <button type="button" className="web-attachment__open" title={t('sessions/attachments/see', { name: attachmentLabel(one) })} onClick={() => setPreview(previewOf(one))}>{body}</button> : body}
-            <button type="button" className="web-attachment__remove" aria-label={t('sessions/attachments/remove', { name: attachmentLabel(one) })} onClick={() => onRemove(index)}>
-              {EMOJIcon.close}
-            </button>
-          </span>
+          <Pill
+            key={`${attachmentLabel(one)}-${index}`}
+            label={attachmentLabel(one)}
+            lead={<span aria-hidden="true">{attachmentIcon(one)}</span>}
+            title={attachmentPath(one, folder) ?? attachmentLabel(one)}
+            {...(hasPreview(one) ? { onClick: () => setPreview(previewOf(one)) } : {})}
+            removeLabel={t('sessions/attachments/remove', { name: attachmentLabel(one) })}
+            onRemove={() => onRemove(index)}
+          />
         );
       })}
       {preview === null ? null : <AttachmentPreview preview={preview} onClose={() => setPreview(null)} />}
@@ -40,7 +43,7 @@ export function AttachmentPreview({ preview, onClose }: { preview: AttachmentPre
   return (
     <Modal open title={preview.label} onClose={onClose}>
       <div className="web-attachment-preview">
-        <p className="web-attachment-preview__meta">{preview.meta}</p>
+        <Note small>{preview.meta}</Note>
         {preview.image === undefined ? null : <img className="web-attachment-preview__image" src={preview.image} alt={preview.label} />}
         {preview.text === undefined ? null : <pre className="web-attachment-preview__text">{preview.text}</pre>}
       </div>
@@ -112,22 +115,24 @@ export function AddButton({ host, path, onOpenChange, openNow = false, onOpened 
 
   return (
     <span ref={holder} className="web-composer__add-holder">
-      <button
+      {/* The popup closes on any mousedown outside it: kept from it, the click below closes the menu instead of opening it again. */}
+      <Button
         ref={button}
-        type="button"
-        className="web-composer__add"
-        aria-label={t('sessions/context/title')}
+        variant="tool"
+        shape="round"
+        size="xs"
+        ariaLabel={t('sessions/context/title')}
         title={t('sessions/context/title')}
-        aria-haspopup="menu"
-        aria-expanded={menu !== null}
-        // The popup closes on any mousedown outside it: kept from it, the click below closes the menu instead of opening it again.
+        hasPopup="menu"
+        expanded={menu !== null}
+        active={menu !== null}
         onMouseDown={(event) => { if (menu !== null) event.nativeEvent.stopPropagation(); }}
         onClick={() => void toggle()}
       >
         <svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true">
           <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
-      </button>
+      </Button>
       {menu === null ? null : <ContextMenu spec={{ items: menu.items }} x={menu.rect.left} y={menu.y} onClose={close} />}
     </span>
   );

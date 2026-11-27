@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, Chip } from '@softov/scena/ui';
+import { Button, Chip, Column, Note, RowButton, Text } from '../../ui/index.js';
 import type { Named } from '../../bridges/people.js';
 import { membershipOf, membershipParts, projectChoices, titled } from './memberships.js';
 import { PickTwo } from './PickTwo.js';
@@ -34,8 +34,8 @@ export function MembershipList({ memberships, primary, teams, projects, writes, 
   });
 
   return (
-    <div className="web-memberships">
-      {memberships.length === 0 ? <p className="web-note">{t('users/user/noMemberships')}</p> : (
+    <Column gap="var(--oo-spacing-sm)">
+      {memberships.length === 0 ? <Note>{t('users/user/noMemberships')}</Note> : (
         <ul className="web-memberships__list">
           {memberships.map((membership) => {
             const { team, project } = membershipParts(membership);
@@ -43,13 +43,13 @@ export function MembershipList({ memberships, primary, teams, projects, writes, 
             return (
               <li key={membership} className="web-memberships__row">
                 <span className="web-memberships__name">
-                  <button type="button" className="web-memberships__open" onClick={() => onOpen('teams', team)}>{titled(teams, team)}</button>
-                  <span className="web-memberships__scope">
+                  <RowButton fit onClick={() => onOpen('teams', team)}>{titled(teams, team)}</RowButton>
+                  <Note inline>
                     {' \u{00B7} '}
                     {project === null || project === '*'
                       ? scopeWord(project)
-                      : <button type="button" className="web-memberships__open" onClick={() => onOpen('projects', project)}>{scopeWord(project)}</button>}
-                  </span>
+                      : <RowButton fit onClick={() => onOpen('projects', project)}>{scopeWord(project)}</RowButton>}
+                  </Note>
                 </span>
                 {isPrimary || writes ? (
                   <Chip
@@ -81,8 +81,8 @@ export function MembershipList({ memberships, primary, teams, projects, writes, 
           onPick={(team, project) => onChange({ memberships: [...memberships, membershipOf({ team, project })] })}
         />
       ) : null}
-      <span className="web-input__hint">{t('users/user/primaryNote')}</span>
-    </div>
+      <Text variant="caption" muted text={t('users/user/primaryNote')} />
+    </Column>
   );
 }
 

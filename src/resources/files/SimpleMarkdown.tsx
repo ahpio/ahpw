@@ -1,12 +1,14 @@
 import type { ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import { EMOJIcon } from '../emojis.js';
 import { linkClicks } from './clicks.js';
 import { imagesFrom } from './HostImage.js';
 import { FileHead, useFileText } from './text.js';
 import './simple-markdown.css';
+import '../../shell/markdown/markdown.css';
+import './shared-file-page.css';
 
 /** The folder a file URI sits in, which its relative links start from. */
 export const folderOf = (uri: string): string => uri.replace(/\/[^/]*$/, '');
@@ -24,7 +26,7 @@ export function SimpleMarkdown({ host, uri }: { host: string; uri: string }): Re
   const head = <FileHead uri={uri} />;
   if (state === null) return <div className="web-file">{head}<Spinner label={t('files/reading')} /></div>;
   if ('error' in state) return <div className="web-file">{head}<Alert tone="danger" title={t('files/notReadable')} message={state.error} /></div>;
-  if (state.text === null) return <div className="web-file">{head}<p className="web-note">{t('files/notText')}</p></div>;
+  if (state.text === null) return <div className="web-file">{head}<Note>{t('files/notText')}</Note></div>;
   return (
     <div className="web-file">
       {head}

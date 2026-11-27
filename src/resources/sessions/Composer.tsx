@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, useChatPicker } from '@softov/scena/ui';
+import { Button, MessageBox, MessageText, Pill, RowButton, useChatPicker } from '../../ui/index.js';
 import type { HostCtx, PickerAction } from '@softov/scena/types';
 import type {
   AgentInfo,
@@ -18,7 +18,7 @@ import type {
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { folderLabel, newId } from '../../bridges/words.js';
 import type { Send } from './Parts.js';
-import { Pill, pillCloses } from './pills.js';
+import { pillCloses } from './pills.js';
 import { isArchived, ringOf } from './status.js';
 import { AgentPicker } from './AgentPicker.js';
 import { customAgents } from './custom-agents.js';
@@ -427,9 +427,9 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
   };
   // Send while nothing runs, or while a bot's chat steers with what is typed; else stop.
   const round = active === undefined || (steers && text.trim() !== '') ? (
-    <button type="button" className="web-composer__round" aria-label={t('sessions/composer/send')} title={t('sessions/composer/sendHint')} disabled={blocked || text.trim() === ''} onClick={() => submit('send')}>{EMOJIcon.send}</button>
+    <Button variant="filled" shape="round" size="md" ariaLabel={t('sessions/composer/send')} title={t('sessions/composer/sendHint')} disabled={blocked || text.trim() === ''} onClick={() => submit('send')}>{EMOJIcon.send}</Button>
   ) : (
-    <button type="button" className="web-composer__round" aria-label={t('sessions/commands/stop')} title={t('sessions/composer/stopHint')} onClick={stop}>{EMOJIcon.stop}</button>
+    <Button variant="filled" shape="round" size="md" ariaLabel={t('sessions/commands/stop')} title={t('sessions/composer/stopHint')} onClick={stop}>{EMOJIcon.stop}</Button>
   );
   // The merged banner, over the composer box and over the folded line alike.
   const mergedBanner = mergedOpen ? (
@@ -448,18 +448,18 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
       <div className="web-composer">
         {mergedBanner}
         {notice}
-        <div className="web-composer__box web-composer__folded" data-ring={ringOf(summary.status)}>
-          <button type="button" className="web-composer__add" aria-label={t('sessions/context/title')} title={t('sessions/context/title')} onClick={() => fold(false, true)}>
+        <MessageBox folded ring={ringOf(summary.status)}>
+          <Button variant="tool" shape="round" size="xs" ariaLabel={t('sessions/context/title')} title={t('sessions/context/title')} onClick={() => fold(false, true)}>
             <svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true">
               <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
-          </button>
-          <button type="button" className="web-composer__folded-line" data-draft={said === '' ? undefined : 'true'} title={t('sessions/composer/unfold')} onClick={() => fold(false)}>
+          </Button>
+          <RowButton muted={said === ''} title={t('sessions/composer/unfold')} onClick={() => fold(false)}>
             {said === '' ? `${agentName} \u{00B7} ${modelName ?? t('sessions/values/default')}` : said}
-          </button>
-          {waiting === 0 ? null : <span className="web-chip">{plural('sessions/composer/waiting', waiting)}</span>}
+          </RowButton>
+          {waiting === 0 ? null : <Pill label={plural('sessions/composer/waiting', waiting)} />}
           {round}
-        </div>
+        </MessageBox>
       </div>
     );
   }
@@ -472,7 +472,7 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
       {...settingLabels(option)}
       title={option.schema.description ?? option.schema.title}
       {...(option.schema.type === 'boolean' ? { on: (option.value ?? option.schema.default) === true } : {})}
-      {...(pickable(option.schema) ? { onOpen: () => openCommand(optionCommandId(option.key)) } : {})}
+      {...(pickable(option.schema) ? { menu: true, onClick: () => openCommand(optionCommandId(option.key)) } : {})}
     />
   );
 
@@ -484,14 +484,14 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         <ul className="web-composer__queue">
           {steering === undefined ? null : (
             <li>
-              <span className="web-chip" data-on="true">{t('sessions/composer/steering')}</span>
+              <Pill label={t('sessions/composer/steering')} on />
               <span className="web-composer__queued">{steering.message.text}</span>
               <Button label={t('sessions/composer/remove')} size="sm" onClick={() => send({ type: 'chat/pendingMessageRemoved', kind: 'steering', id: steering.id } as StateAction)} />
             </li>
           )}
           {queued.map((one, index) => (
             <li key={one.id}>
-              <span className="web-chip">{t('sessions/composer/next', { number: index + 1 })}</span>
+              <Pill label={t('sessions/composer/next', { number: index + 1 })} />
               <span className="web-composer__queued">{one.message.text}</span>
               {/* The same id and message as steering: the host moves the entry out of the queue. */}
               {active === undefined ? null : <Button label={t('sessions/composer/sendNow')} size="sm" onClick={() => send({ type: 'chat/pendingMessageSet', kind: 'steering', id: one.id, message: one.message } as StateAction)} />}
@@ -508,89 +508,100 @@ export const Composer = memo(function Composer({ host, chatUri, activeId, active
         {pullRequests.length === 0 ? null : <PullRequestPill pullRequests={pullRequests} onOpen={() => openCommand(PULL_REQUESTS_COMMAND)} />}
         {artifacts.length === 0 ? null : <ArtifactsPill kind="artifacts" count={artifacts.length} onOpen={() => openCommand(ARTIFACTS_COMMAND)} />}
         {references.length === 0 ? null : <ArtifactsPill kind="references" count={references.length} onOpen={() => openCommand(REFERENCES_COMMAND)} />}
-        <button type="button" className="web-composer__fold" aria-label={t('sessions/composer/fold')} title={t('sessions/composer/fold')} onClick={() => fold(true)}>{EMOJIcon.caretDown}</button>
+        <Button variant="quiet" size="xs" ariaLabel={t('sessions/composer/fold')} title={t('sessions/composer/fold')} onClick={() => fold(true)}>{EMOJIcon.caretDown}</Button>
       </div>
 
       {mergedBanner}
       {notice}
 
-      <div
-        className="web-composer__box"
-        data-drop={drop.dropping ?? undefined}
-        data-ring={ringOf(summary.status)}
-        {...drop.props}
-      >
-        <Attached
-          attachments={attachments}
-          folder={folder}
-          onRemove={(index) => { typed.current = true; setAttachments((held) => held.filter((_, at) => at !== index)); }}
-        />
+      <MessageBox
 
-        <div className="web-composer__bar">
-          <textarea
-            ref={area}
-            className="web-composer__text"
-            rows={1}
-            value={text}
-            aria-label={t('sessions/composer/message')}
-            placeholder={placeholder ?? (active === undefined ? t('sessions/composer/placeholder') : t('sessions/composer/placeholderRunning'))}
-            onChange={(event) => {
-              fromPill.current = undefined;
-              typed.current = true;
-              setText(event.currentTarget.value);
-              setCaret(event.currentTarget.selectionStart);
-            }}
-            onFocus={() => {
-              scena.store.set(COMPOSER_FOCUS, focus);
-              onEngage?.();
-            }}
-            onKeyUp={(event) => setCaret(event.currentTarget.selectionStart)}
-            onClick={(event) => setCaret(event.currentTarget.selectionStart)}
-            onKeyDown={(event) => {
-              // Esc on a list a pill opened takes back the command the pill typed.
-              if (event.key === 'Escape' && fromPill.current !== undefined && picker.menuVisible) {
-                event.preventDefault();
-                fromPill.current = undefined;
-                picker.closeMenu();
-                return;
-              }
-              if (picker.handleMenuKeyDown(event)) return;
-              if (event.key === 'Escape' && active !== undefined) {
-                event.preventDefault();
-                stop();
-                return;
-              }
-              if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
-                event.preventDefault();
-                submit(event.altKey ? 'steer' : 'send');
-              }
-            }}
-          />
-        </div>
+        drop={drop.dropping ?? undefined}
 
-        <div className="web-composer__foot">
-          <AddButton host={host} path={path} onOpenChange={setAdding} openNow={addOnUnfold} onOpened={() => setAddOnUnfold(false)} />
-          <input ref={files} type="file" multiple hidden onChange={(event) => { void upload(event.currentTarget.files); event.currentTarget.value = ''; }} />
-          <div className="web-composer__chips web-composer__chips--left">
+        ring={ringOf(summary.status)}
+
+        zone={drop.props}
+        top={(
+          <>
+            <Attached
+              attachments={attachments}
+              folder={folder}
+              onRemove={(index) => { typed.current = true; setAttachments((held) => held.filter((_, at) => at !== index)); }}
+            />
+          </>
+        )}
+        lead={(
+          <>
+            <AddButton host={host} path={path} onOpenChange={setAdding} openNow={addOnUnfold} onOpened={() => setAddOnUnfold(false)} />
+            <input ref={files} type="file" multiple hidden onChange={(event) => { void upload(event.currentTarget.files); event.currentTarget.value = ''; }} />
+          </>
+        )}
+        left={(
+          <>
             <AgentPicker agents={agentsOfSession} chosen={customAgent} open={() => openCommand(CUSTOM_AGENT_COMMAND)} />
             {pills.filter((option) => footerSide(option) === 'left').map(settingPill)}
-          </div>
-          <div className="web-composer__chips web-composer__chips--right">
+          </>
+        )}
+        right={(
+          <>
             {models.length === 0 ? null : (
-              <Pill {...modelLabels(modelName ?? t('sessions/values/default'))} title={t('sessions/composer/modelHint')} onOpen={() => openCommand('ahp.composer.model')} />
+              <Pill {...modelLabels(modelName ?? t('sessions/values/default'))} title={t('sessions/composer/modelHint')} menu onClick={() => openCommand('ahp.composer.model')} />
             )}
             {pills.filter((option) => footerSide(option) === 'right').map(settingPill)}
             {readout?.fraction !== undefined ? (
               <ContextRing fraction={readout.fraction} text={readout.text} {...(opensUsage ? { onOpen: onUsage } : {})} />
             ) : opensUsage ? (
-              <Pill label={t('sessions/usage/title')} title={t('sessions/usage/open')} onOpen={onUsage} />
+              <Pill label={t('sessions/usage/title')} title={t('sessions/usage/open')} menu onClick={onUsage} />
             ) : readout === null ? null : <span className="web-composer__context" title={readout.title}>{readout.text}</span>}
-          </div>
-          {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/steer')} size="sm" title={t('sessions/composer/steerHint')} disabled={blocked} onClick={() => submit('steer')} />}
-          {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/queue')} variant="primary" size="sm" title={t('sessions/composer/queueHint')} disabled={blocked} onClick={() => submit('send')} />}
-          {round}
-        </div>
-      </div>
+          </>
+        )}
+        end={(
+          <>
+            {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/steer')} size="sm" title={t('sessions/composer/steerHint')} disabled={blocked} onClick={() => submit('steer')} />}
+            {steers || active === undefined || text.trim() === '' ? null : <Button label={t('sessions/composer/queue')} variant="primary" size="sm" title={t('sessions/composer/queueHint')} disabled={blocked} onClick={() => submit('send')} />}
+            {round}
+          </>
+        )}
+      >
+        <MessageText
+          ref={area}
+          rows={1}
+          value={text}
+          aria-label={t('sessions/composer/message')}
+          placeholder={placeholder ?? (active === undefined ? t('sessions/composer/placeholder') : t('sessions/composer/placeholderRunning'))}
+          onChange={(event) => {
+            fromPill.current = undefined;
+            typed.current = true;
+            setText(event.currentTarget.value);
+            setCaret(event.currentTarget.selectionStart);
+          }}
+          onFocus={() => {
+            scena.store.set(COMPOSER_FOCUS, focus);
+            onEngage?.();
+          }}
+          onKeyUp={(event) => setCaret(event.currentTarget.selectionStart)}
+          onClick={(event) => setCaret(event.currentTarget.selectionStart)}
+          onKeyDown={(event) => {
+            // Esc on a list a pill opened takes back the command the pill typed.
+            if (event.key === 'Escape' && fromPill.current !== undefined && picker.menuVisible) {
+              event.preventDefault();
+              fromPill.current = undefined;
+              picker.closeMenu();
+              return;
+            }
+            if (picker.handleMenuKeyDown(event)) return;
+            if (event.key === 'Escape' && active !== undefined) {
+              event.preventDefault();
+              stop();
+              return;
+            }
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault();
+              submit(event.altKey ? 'steer' : 'send');
+            }
+          }}
+        />
+      </MessageBox>
     </div>
   );
 });

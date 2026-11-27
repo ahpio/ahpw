@@ -3,7 +3,7 @@ import { Markdown as ScenaMarkdown, type MarkdownBlock, type MarkdownProps } fro
 import { MermaidDiagram } from './Mermaid.js';
 import { isOpenFence } from './fences.js';
 import { quotesOf } from './quotes.js';
-import { CopyButton } from '../controls/CopyButton.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
 import './quote-copy.css';
 
 /** The quote or code block the pointer is over: where its corner is, and what it holds as markdown or code. */

@@ -1,12 +1,13 @@
 import { useState, type ReactElement, type ReactNode } from 'react';
 import { getLocale } from '@softov/scena';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Badge, Button, DetailList } from '../../ui/index.js';
 import { totalWords, type UsageEntry } from '../../bridges/usage.js';
 import { timeOf } from '../automations/words.js';
 import { EMOJIcon } from '../emojis.js';
 import { hoursWord, sourceIcon, sourceWord } from './words.js';
 import { numberFormat } from '../../i18n/locales.js';
+import './records.css';
 
 type Cost = NonNullable<UsageEntry['cost']>;
 
@@ -45,19 +46,12 @@ function costOf(record: UsageEntry): string | undefined {
 function Group({ title, fields }: { title: string; fields: [string, ReactNode | undefined][] }): ReactElement | null {
   const shown = fields.filter((field): field is [string, ReactNode] => field[1] !== undefined);
   if (shown.length === 0) return null;
-  return (
-    <section>
-      <h4>{title}</h4>
-      <dl>
-        {shown.map(([label, value]) => [<dt key={`${label}:t`}>{label}</dt>, <dd key={`${label}:d`}>{value}</dd>])}
-      </dl>
-    </section>
-  );
+  return <DetailList inline title={title} items={shown.map(([label, value]) => ({ label, value }))} />;
 }
 
-/** A chip after a value: where a cost came from, or that a record opens its turn. */
+/** A word after a value: where a cost came from, or that a record opens its turn. */
 function Chip({ text }: { text: string }): ReactElement {
-  return <span className="web-spend__chip">{text}</span>;
+  return <Badge text={text} />;
 }
 
 /**
@@ -101,9 +95,9 @@ export function UsageRecords({ host, records }: { host: string; records: readonl
         return (
           <li key={`${record.at}\u{0000}${String(at)}`} className="web-spend__record" data-open={expanded ? 'true' : undefined}>
             <div className="web-spend__row" onClick={() => toggle(at)}>
-              <button type="button" className="web-spend__caret" aria-expanded={expanded} title={t(expanded ? 'usage/record/hide' : 'usage/record/show')} onClick={(event) => { event.stopPropagation(); toggle(at); }}>
+              <Button variant="quiet" size="xs" expanded={expanded} title={t(expanded ? 'usage/record/hide' : 'usage/record/show')} onClick={(event) => { event.stopPropagation(); toggle(at); }}>
                 {expanded ? EMOJIcon.caretDown : EMOJIcon.caretRight}
-              </button>
+              </Button>
               <span className="web-spend__when">{timeOf(record.at)}</span>
               <span className="web-spend__icons">
                 <span title={`${t('usage/record/source')}: ${sourceText}`}>{sourceIcon(record.source)}</span>
@@ -156,7 +150,7 @@ export function UsageRecords({ host, records }: { host: string; records: readonl
                 ]} />
                 <Group title={t('usage/record/where')} fields={[
                   [t('usage/record/session'), record.session === undefined ? undefined : (
-                    <button type="button" className="web-spend__link" title={record.session} onClick={() => openSession(record.session!)}>{record.session}</button>
+                    <Button variant="link" title={record.session} onClick={() => openSession(record.session!)}>{record.session}</Button>
                   )],
                   [t('usage/record/chat'), record.chat === undefined ? undefined : <span title={record.chat}>{record.chat}</span>],
                   [t('usage/record/turn'), record.turn === undefined ? undefined : (

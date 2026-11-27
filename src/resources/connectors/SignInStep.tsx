@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button, CheckBox, TextField } from '@softov/scena/ui';
+import { Alert, Button, CheckBox, Link, Note, PageActions, Row, TextField } from '../../ui/index.js';
 import { awaitSignIn, finishSignIn, startSignIn, type ConnectorRow, type ConnectorWanted, type SignInRow, type SignInStarted } from '../../bridges/connectors.js';
 import { hostSaid } from '../../bridges/said.js';
-import { CopyButton } from '../../shell/controls/CopyButton.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
 import { ALERT_LEVELS } from '../../shell/view/AlertList.js';
 import { signedInOf } from './form.js';
 import './signin.css';
+import './sign-in-step.css';
 
 /**
  * The sign-in under an adapter's fields: a button labelled by the host, then a
@@ -96,49 +97,49 @@ export function SignInStep({ host, signIn, held, provider, wanted, disabled, byH
       {started === null && (signedIn !== null || kept !== undefined) ? (
         <>
           <p className="web-connector-form__signed-in">{kept?.account === undefined ? t('connectors/signIn/with', { provider }) : t('connectors/signIn/as', { account: kept.account })}</p>
-          <div className="web-connector-form__signin-start">
+          <Row gap={0}>
             <Button label={t('connectors/signIn/again')} disabled={disabled || busy} onClick={start} />
-          </div>
+          </Row>
           {signIn.flow === 'device' ? <CheckBox label={t('connectors/signIn/byHand')} value={byHand} onChange={onByHand} /> : null}
         </>
       ) : started === null ? (
         <>
-          <div className="web-connector-form__signin-start">
+          <Row gap={0}>
             <Button label={signIn.title} disabled={disabled || busy} onClick={start} />
-          </div>
+          </Row>
           {signIn.flow === 'device'
             ? <CheckBox label={t('connectors/signIn/byHand')} value={byHand} onChange={onByHand} />
-            : <p className="web-note">{t('connectors/signIn/orType')}</p>}
+            : <Note>{t('connectors/signIn/orType')}</Note>}
         </>
       ) : started.flow === 'device' ? (
         <>
           <span className="web-connector-form__label">{signIn.title}</span>
-          <p className="web-note">
+          <Note>
             {t('connectors/signIn/device')}{' '}
-            <a href={started.url} target="_blank" rel="noopener noreferrer">{t('connectors/signIn/openPage')}</a>{' '}
+            <Link href={started.url} external>{t('connectors/signIn/openPage')}</Link>{' '}
             <CopyButton text={started.url} label={t('connectors/signIn/copyLink')} />
-          </p>
+          </Note>
           <div className="web-connector-form__device-code">
             <code>{started.code}</code>
             <CopyButton text={started.code} label={t('connectors/signIn/copyCode')} />
           </div>
-          <p className="web-note">{t('connectors/signIn/waiting')}</p>
-          <div className="web-page__actions">
+          <Note>{t('connectors/signIn/waiting')}</Note>
+          <PageActions>
             <Button label={t('connectors/signIn/cancel')} onClick={end} />
-          </div>
+          </PageActions>
         </>
       ) : (
         <>
           <span className="web-connector-form__label">{signIn.title}</span>
-          <p className="web-note">
+          <Note>
             {t('connectors/signIn/step')}{' '}
-            <a href={started.url} target="_blank" rel="noopener noreferrer">{t('connectors/signIn/openAgain')}</a>
-          </p>
+            <Link href={started.url} external>{t('connectors/signIn/openAgain')}</Link>
+          </Note>
           <TextField label={t('connectors/signIn/code')} type="password" value={code} disabled={busy} onChange={setCode} />
-          <div className="web-page__actions">
+          <PageActions>
             <Button label={t('connectors/signIn/finish')} variant="primary" disabled={code === '' || busy} onClick={finish} />
             <Button label={t('connectors/signIn/cancel')} disabled={busy} onClick={end} />
-          </div>
+          </PageActions>
         </>
       )}
       {failure === null ? null : <Alert tone="danger" title={t('connectors/signIn/failed')} message={failure} />}

@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElemen
 import { createPortal } from 'react-dom';
 import { annotationsReducer, type AnnotationsState, type TextRange } from '@microsoft/agent-host-protocol';
 import { useCloseGuard, useI18n, useScena } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Button, Spinner } from '../../ui/index.js';
 import { EditorView, type ViewUpdate } from '@codemirror/view';
 import { hostBridge } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -21,6 +21,7 @@ import { commentsChannel, commentsOf, isOutdated, newComment, remove, reply, res
 import { NewComment, Thread, type ThreadActions } from './Threads.js';
 import type { FilePageProps } from './FilePage.js';
 import './shared.css';
+import './shared-file-page.css';
 
 /** The mark on a person's circle that says what they are; a guest has none. */
 /** The key of the new comment's box among the margin's threads. */
@@ -312,40 +313,40 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra =
           const title = titleOf(one);
           const mark = KIND_MARK[one.kind];
           return (
-            <button key={one.client} type="button" className="web-file__person" title={title} aria-label={title} disabled={go === undefined} onClick={go}>
+            <Button key={one.client} variant="quiet" shape="round" size="md" title={title} ariaLabel={title} disabled={go === undefined} {...(go === undefined ? {} : { onClick: go })}>
               <NameMark name={one.name} size={24} />
               {mark === undefined ? null : <span className="web-file__person-kind" aria-hidden="true">{mark}</span>}
               {one.editing ? <span className="web-file__person-editing" aria-hidden="true">{EMOJIcon.edit}</span> : null}
-            </button>
+            </Button>
           );
         })}
       </span>
       {locked ? (
         <>
           <span className="web-file__state" title={t('files/shared/locked')} aria-label={t('files/shared/locked')}>{EMOJIcon.lock}</span>
-          <button type="button" className="web-icon-button web-icon-button--primary" title={t('files/shared/edit')} aria-label={t('files/shared/edit')} onClick={() => setLocked(false)}>{EMOJIcon.edit}</button>
+          <Button variant="filled" shape="icon" title={t('files/shared/edit')} ariaLabel={t('files/shared/edit')} onClick={() => setLocked(false)}>{EMOJIcon.edit}</Button>
         </>
       ) : (
         <>
-          <button type="button" className="web-icon-button" disabled={unsent} title={unsent ? t('files/shared/saveFirst') : t('files/shared/stopEditing')} aria-label={t('files/shared/stopEditing')} onClick={() => setLocked(true)}>{EMOJIcon.lock}</button>
+          <Button variant="subtle" shape="icon" disabled={unsent} title={unsent ? t('files/shared/saveFirst') : t('files/shared/stopEditing')} ariaLabel={t('files/shared/stopEditing')} onClick={() => setLocked(true)}>{EMOJIcon.lock}</Button>
           {mode === 'live' ? (
             <span className="web-file__state" data-busy={shared?.saving === true ? 'true' : 'false'} title={shared?.saving === true ? t('files/shared/saving') : t('files/shared/saved')}>
               {shared?.saving === true ? '◌' : EMOJIcon.check}
             </span>
           ) : null}
           <span className="web-file__mode" role="group" aria-label={t('host/settings/ui/fileSaveMode/title')}>
-            <button type="button" className="web-icon-button" aria-pressed={mode === 'live'} title={t('files/shared/liveSave')} aria-label={t('files/shared/liveSave')} onClick={() => setMode('live')}>{EMOJIcon.liveSave}</button>
-            <button type="button" className="web-icon-button" aria-pressed={mode === 'manual'} title={t('files/shared/manualSave')} aria-label={t('files/shared/manualSave')} onClick={() => setMode('manual')}>{EMOJIcon.manualSave}</button>
+            <Button variant="subtle" shape="icon" pressed={mode === 'live'} title={t('files/shared/liveSave')} ariaLabel={t('files/shared/liveSave')} onClick={() => setMode('live')}>{EMOJIcon.liveSave}</Button>
+            <Button variant="subtle" shape="icon" pressed={mode === 'manual'} title={t('files/shared/manualSave')} ariaLabel={t('files/shared/manualSave')} onClick={() => setMode('manual')}>{EMOJIcon.manualSave}</Button>
           </span>
           {mode === 'manual' ? (
-            <button type="button" className="web-icon-button web-icon-button--primary" disabled={!unsent} title={t('files/shared/saveNow')} aria-label={t('files/shared/saveNow')} onClick={() => shared?.save()}>{EMOJIcon.save}</button>
+            <Button variant="filled" shape="icon" disabled={!unsent} title={t('files/shared/saveNow')} ariaLabel={t('files/shared/saveNow')} onClick={() => shared?.save()}>{EMOJIcon.save}</Button>
           ) : null}
         </>
       )}
       {alwaysWraps ? null : <WrapButton wrap={wrap} onChange={setWrap} />}
-      <button type="button" className="web-icon-button web-file__comments-toggle" aria-pressed={shown}
-        title={shown ? t('files/comments/hideAll') : t('files/comments/showAll')} aria-label={shown ? t('files/comments/hideAll') : t('files/comments/showAll')}
-        onClick={() => setShown((was) => !was)}>{EMOJIcon.comment}<span className="web-file__comments-count">{openCount}</span></button>
+      <Button variant="tool" pressed={shown}
+        title={shown ? t('files/comments/hideAll') : t('files/comments/showAll')} ariaLabel={shown ? t('files/comments/hideAll') : t('files/comments/showAll')}
+        onClick={() => setShown((was) => !was)}>{EMOJIcon.comment}<span className="web-file__comments-count">{openCount}</span></Button>
     </FileHead>
   );
 
@@ -356,9 +357,9 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra =
       {open ? null : <Spinner label={t('files/reading')} />}
       <div className="web-file__body web-file__body--editor web-file__body--comments" hidden={!open} ref={body}>
         {selection === null || draft !== null ? null : (
-          <button type="button" className="web-icon-button web-icon-button--primary web-file__add-comment" style={{ left: selection.left, top: Math.max(0, selection.top - 26) }}
-            title={t('files/comments/add')} aria-label={t('files/comments/add')} onMouseDown={(event) => event.preventDefault()}
-            onClick={() => { setFocused(null); setDraft(selection.range); setSelection(null); }}>{EMOJIcon.comment}</button>
+          <Button variant="filled" shape="icon" style={{ position: 'absolute', zIndex: 5, left: selection.left, top: Math.max(0, selection.top - 26) }}
+            title={t('files/comments/add')} ariaLabel={t('files/comments/add')} onMouseDown={(event) => event.preventDefault()}
+            onClick={() => { setFocused(null); setDraft(selection.range); setSelection(null); }}>{EMOJIcon.comment}</Button>
         )}
         <CodeEditor
           value=""
@@ -376,7 +377,7 @@ export function SharedFilePage({ host, uri, line, end, onDirty, onPlain, extra =
           <div className="web-file__float" style={{ top: Math.max(0, tops[floating.id] ?? 0) }} onKeyDown={(event) => { if (event.key === 'Escape') closeFloat(); }}>
             <div className="web-file__float-bar">
               <span>{t('files/comments/line', { line: floating.line + 1 })}</span>
-              <button type="button" className="web-icon-button" title={t('files/comments/close')} aria-label={t('files/comments/close')} onClick={closeFloat}>{EMOJIcon.collapse}</button>
+              <Button variant="subtle" shape="icon" title={t('files/comments/close')} ariaLabel={t('files/comments/close')} onClick={closeFloat}>{EMOJIcon.collapse}</Button>
             </div>
             {floating.node}
           </div>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Spinner } from '@softov/scena/ui';
+import { Alert, Button, Note, Spinner } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
@@ -130,13 +130,13 @@ export default function PluginsExplorer(): ReactElement {
     <Button size="sm" label={t('host/restart/button')} onClick={() => { for (const host of restartable) void scena.commands.execute(RESTART_HOST, { host }); }} />
   );
   const notice = hosts.length === 0
-    ? <p className="web-note web-explorer__empty">{t('plugins/explorer/notServed')}</p>
+    ? <Note inset>{t('plugins/explorer/notServed')}</Note>
     : error !== null
       ? <Alert tone="danger" title={t('plugins/notices/none')} message={error} />
       : state === undefined
         ? <Spinner label={t('plugins/notices/reading')} />
-        : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('plugins/explorer/empty')}</p>
-          : roots.states.some(restartNeeded) ? <p className="web-note web-explorer__empty web-plugins__restart">{t('plugins/restartShort')} {restart}</p> : null;
+        : rows.length === 0 ? <Note inset>{t('plugins/explorer/empty')}</Note>
+          : roots.states.some(restartNeeded) ? <Note inset>{t('plugins/restartShort')} {restart}</Note> : null;
   const selectedListed = activeListed === undefined ? undefined
     : listedEntries.find((one) => one.host === activeListed.host && one.plugin.id === activeListed.id && one.plugin.marketplace === activeListed.marketplace);
   const selected = selectedListed !== undefined ? listedKey(selectedListed)

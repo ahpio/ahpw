@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Spinner, Text } from '@softov/scena/ui';
+import { Alert, Button, DangerZone, Group, Note, Page, PageActions, Pill, RowButton, Spinner, TextField } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { mayDelete, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
@@ -10,9 +10,7 @@ import {
   type ListedUser, type Named, type PeopleState,
 } from '../../bridges/people.js';
 import { failed } from '../../shell/notify/index.js';
-import { Field } from '../../shell/view/Field.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
-import { RemovableChip } from '../../shell/view/RemovableChip.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { isRecordId } from '../users/form.js';
 import { membershipOf, membershipParts, projectChoices, teamChoices, titled } from '../users/memberships.js';
 import { scopeTitle } from '../users/MembershipList.js';
@@ -20,8 +18,8 @@ import { PickTwo } from '../users/PickTwo.js';
 import { teamTab } from './state.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './named-page.css';
 
 type Kind = 'teams' | 'projects';
 const reducers = { teams: peopleReducer('teams'), projects: peopleReducer('projects') };
@@ -110,49 +108,43 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
   };
 
   return (
-    <div className="web-page web-form">
+    <Page>
       <PageTitle
         emoji={EMOJIcon.teams}
         initials={fresh ? undefined : (record?.title || id)}
         title={fresh ? t(domain === 'teams' ? 'teams/commands/newTeam' : 'teams/commands/newProject') : (record?.title || id)}
         uri={fresh ? undefined : personUri(offers, domain, id)}
       />
-      {writes ? null : <p className="web-note">{t(writesPeople(offers, domain) ? 'teams/notices/noPermission' : 'teams/notices/readOnly')}</p>}
+      {writes ? null : <Note>{t(writesPeople(offers, domain) ? 'teams/notices/noPermission' : 'teams/notices/readOnly')}</Note>}
 
       {fresh ? (
-        <Field label={t('teams/named/id')} hint={t(`teams/${word}/idHint`)}>
-          <input className="web-field" value={shown.id} autoFocus onChange={(event) => set({ id: event.target.value })} />
-        </Field>
+        <TextField label={t('teams/named/id')} hint={t(`teams/${word}/idHint`)} value={shown.id} autoFocus onChange={(next) => set({ id: next })} />
       ) : null}
 
-      <Field label={t('teams/named/title')} hint={t('teams/named/titleHint')}>
-        <input className="web-field" value={shown.title} readOnly={!writes} onChange={(event) => set({ title: event.target.value })} />
-      </Field>
+      <TextField label={t('teams/named/title')} hint={t('teams/named/titleHint')} value={shown.title} readOnly={!writes} onChange={(next) => set({ title: next })} />
 
       {failure === null ? null : <Alert tone="danger" message={failure} />}
       {writes ? (
-        <div className="web-page__actions">
+        <PageActions>
           <Button label={t(fresh ? `teams/${word}/create` : 'teams/named/save')} variant="primary" disabled={!ready} onClick={() => void save()} />
           {fresh ? <Button label={t('teams/actions/cancel')} onClick={() => scena.surfaces.close(tab)} /> : null}
           {!fresh && dirty ? <Button label={t('teams/actions/discard')} onClick={() => setDraft(null)} /> : null}
-        </div>
+        </PageActions>
       ) : null}
 
       {fresh || !servesPeople(offers, 'users') ? null : (
-        <section className="web-people__members" aria-label={t('teams/named/members')}>
-          <Text variant="h3" text={
-            `${EMOJIcon.members} ${t('teams/named/members')}`} />
-          <p className="web-note">{t(`teams/${word}/membersHint`)}</p>
-          {users.state === undefined ? <Spinner label={t('users/notices/reading')} /> : members.length === 0 ? <p className="web-note">{t('teams/named/noMembers')}</p> : (
+        <Group title={t('teams/named/members')} icon={EMOJIcon.members}>
+          <Note>{t(`teams/${word}/membersHint`)}</Note>
+          {users.state === undefined ? <Spinner label={t('users/notices/reading')} /> : members.length === 0 ? <Note>{t('teams/named/noMembers')}</Note> : (
             <ul className="web-people__member-list">
               {members.map((member) => {
                 const user = everyone.find((one) => one.id === member.user)!;
                 return (
                   <li key={member.user} className="web-people__member">
-                    <button type="button" className="web-people__member-name" onClick={() => void scena.commands.execute('ahp.openUser', { host, id: member.user })}>{member.user}</button>
+                    <RowButton fit onClick={() => void scena.commands.execute('ahp.openUser', { host, id: member.user })}>{member.user}</RowButton>
                     <span className="web-people__chips">
                       {member.through.map((membership) => (
-                        <RemovableChip
+                        <Pill
                           key={membership}
                           label={memberWord(membership)}
                           on={user.primary === membership}
@@ -181,10 +173,10 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
               }}
             />
           ) : null}
-        </section>
+        </Group>
       )}
 
-      {fresh || !mayDelete(offers, grants, domain) ? null : <DangerZone label={t('teams/actions/delete')} onClick={() => void scena.commands.execute(domain === 'teams' ? 'ahp.deleteTeam' : 'ahp.deleteProject', { host, id })} />}
-    </div>
+      {fresh || !mayDelete(offers, grants, domain) ? null : <DangerZone label={t('teams/actions/delete')} onConfirm={() => void scena.commands.execute(domain === 'teams' ? 'ahp.deleteTeam' : 'ahp.deleteProject', { host, id })} />}
+    </Page>
   );
 }

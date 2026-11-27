@@ -1,5 +1,5 @@
 import { translate } from '@softov/scena';
-import type { JsonSchemaField, JsonSchemaObject } from '@softov/scena/ui';
+import type { JsonSchemaField, JsonSchemaObject } from '../../ui/index.js';
 import type { ManifestCommand, ManifestOption } from './types.js';
 
 /** One value a command takes, from its pattern or its options. */

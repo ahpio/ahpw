@@ -1,0 +1,32 @@
+/* The profile's Info tab: the user page's sections, under the tabs. */
+
+.web-profile__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+}
+
+/* The section's line above the next heading closes the list; with no add button under it, a row line would be a second one. */
+
+.web-profile__info .web-memberships__row:last-child {
+  border-bottom: none;
+}
+
+.web-profile__limits {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.web-profile__limit {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.web-profile__limit-name {
+  font-weight: 600;
+}

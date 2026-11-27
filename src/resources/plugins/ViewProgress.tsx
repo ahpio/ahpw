@@ -1,7 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
-import { Progress } from '@softov/scena/ui';
+import { Column, Note, Progress } from '../../ui/index.js';
 import { textOf } from './KeyValue.js';
-import './viewprogress.css';
 
 /**
  * A view's `Progress`: scena's bar as it is, with its label and its value, and
@@ -19,14 +18,14 @@ export default function ViewProgress({ label, value, max, display, child }: {
 }): ReactElement {
   const measured = typeof value === 'number' && Number.isFinite(value);
   return (
-    <div className="web-view-progress">
+    <Column gap="var(--oo-spacing-xs)">
       <Progress
         value={measured ? value : 0}
         {...(typeof max === 'number' && max > 0 ? { max } : {})}
         {...(textOf(label) === '' ? {} : { label: textOf(label) })}
         {...(measured && typeof display === 'string' ? { display } : {})}
       />
-      {child === undefined || child === null ? null : <div className="web-note">{child}</div>}
-    </div>
+      {child === undefined || child === null ? null : <Note>{child}</Note>}
+    </Column>
   );
 }

@@ -1,0 +1,10 @@
+/* Two buttons that pick in turn: a person then a project, a team then a project. */
+
+/* A person's roles: the pills, then + Add a role, on one wrapping line. */
+
+.web-role-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}

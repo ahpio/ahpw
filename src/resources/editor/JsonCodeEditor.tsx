@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { JsonEditorProps } from '@softov/scena/ui';
+import type { JsonEditorProps } from '../../ui/index.js';
 import { jsonParseLinter } from '@codemirror/lang-json';
 import { lintGutter, linter } from '@codemirror/lint';
 import CodeEditor from './CodeEditor.js';

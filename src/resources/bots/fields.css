@@ -5,7 +5,7 @@
   align-items: center;
 }
 
-.web-bot-connector__alias {
+.web-bot-connector > .oo-field:first-child {
   flex: 0 0 150px;
   max-width: 150px;
 }

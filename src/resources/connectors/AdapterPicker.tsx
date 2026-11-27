@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, Chip, TextField } from '@softov/scena/ui';
+import { Button, Chip, Note, RowButton, TextField } from '../../ui/index.js';
 import { HostIcon } from '../../shell/HostIcon.js';
 import { readChoice, writeChoice } from '../../shell/explorer/choice.js';
 import { ADAPTER_GROUPING_KEY, ADAPTER_GROUPINGS, adapterGroups, capabilityGroups, type AdapterGrouping, type Pickable } from './form.js';
@@ -89,24 +89,23 @@ export function AdapterPicker({ adapters, value, labelOf, fixed, onPick, words, 
         <TextField type="search" value={needle} placeholder={searchName} onChange={(next) => { setNeedle(next); setFocus(0); }} />
       </div>
       <div className="web-adapter-picker__list" role="listbox" aria-label={words?.label ?? t('connectors/form/adapter')}>
-        {rows.length === 0 ? <p className="web-note">{words?.none ?? t('connectors/picker/none')}</p> : groups.map((group, index) => (
+        {rows.length === 0 ? <Note>{words?.none ?? t('connectors/picker/none')}</Note> : groups.map((group, index) => (
           <div key={group.key} role="group" aria-label={group.label}>
             <div className="web-adapter-picker__group">{group.label}</div>
             {group.adapters.map((adapter, within) => {
               const at = groups.slice(0, index).reduce((n, one) => n + one.adapters.length, 0) + within;
               return (
-                <button
+                <RowButton
                   key={adapter.name}
-                  type="button"
                   role="option"
-                  aria-selected={adapter.name === value}
-                  className="web-adapter-picker__row"
-                  data-focus={at === focus ? 'true' : undefined}
+                  inset
+                  selected={adapter.name === value}
+                  focused={at === focus}
                   onMouseEnter={() => setFocus(at)}
                   onClick={() => pick(adapter.name)}
                 >
                   <AdapterLine adapter={adapter} size={28} plugin={byType ? labelOf(adapter.plugin) : undefined} />
-                </button>
+                </RowButton>
               );
             })}
           </div>

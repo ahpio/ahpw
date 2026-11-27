@@ -3,11 +3,11 @@ import { useI18n } from '@softov/scena/react';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import type { Annotation, AnnotationEntry } from '@microsoft/agent-host-protocol';
 import { NameMark } from '../../shell/NameMark.js';
-import { ContainedConfirm } from '../../shell/notify/ContainedModal.js';
 import { plural } from '../../i18n/locales.js';
 import { EMOJIcon } from '../emojis.js';
 import { authorOf, isOutdated, stampOf, textOf } from './comments.js';
 import './comments.css';
+import { Button, Modal, RowButton, TextField } from '../../ui/index.js';
 
 /** What a thread can do to its comment. */
 export interface ThreadActions {
@@ -66,11 +66,11 @@ function Writer({ placeholder, sendTitle, onSend, onCancel, multiline }: { place
   return (
     <div className={multiline === true ? 'web-thread__new' : 'web-thread__reply'}>
       {multiline === true
-        ? <textarea value={text} placeholder={placeholder} onChange={(event) => setText(event.target.value)} onKeyDown={keys} autoFocus />
-        : <input value={text} placeholder={placeholder} onChange={(event) => setText(event.target.value)} onKeyDown={keys} />}
+        ? <TextField multiline compact rows={2} value={text} placeholder={placeholder} onChange={setText} onKeyDown={keys} autoFocus />
+        : <TextField compact value={text} placeholder={placeholder} onChange={setText} onKeyDown={keys} />}
       <span className="web-thread__row">
-        {onCancel === undefined ? null : <button type="button" className="web-icon-button" title={t('files/comments/cancel')} aria-label={t('files/comments/cancel')} onClick={onCancel}>{EMOJIcon.close}</button>}
-        <button type="button" className="web-icon-button web-icon-button--primary" disabled={text.trim() === ''} title={sendTitle} aria-label={sendTitle} onClick={send}>{EMOJIcon.commentSend}</button>
+        {onCancel === undefined ? null : <Button variant="subtle" shape="icon" title={t('files/comments/cancel')} ariaLabel={t('files/comments/cancel')} onClick={onCancel}>{EMOJIcon.close}</Button>}
+        <Button variant="filled" shape="icon" disabled={text.trim() === ''} title={sendTitle} ariaLabel={sendTitle} onClick={send}>{EMOJIcon.commentSend}</Button>
       </span>
     </div>
   );
@@ -82,24 +82,37 @@ export function Thread({ annotation, focused, confirming, actions }: { annotatio
   const [first, ...replies] = annotation.entries;
   if (annotation.resolved && !focused) {
     return (
-      <button type="button" className="web-thread web-thread--folded" title={t('files/comments/show')} onClick={() => actions.focus(annotation.id)}>
+      <div className="web-thread web-thread--folded">
+        <RowButton small center title={t('files/comments/show')} onClick={() => actions.focus(annotation.id)}>
         <span aria-hidden="true">{EMOJIcon.check}</span>
         <b>{first === undefined ? '' : writerOf(first)}</b>
         <span className="web-thread__fold-text">{first === undefined ? '' : textOf(first)}</span>
         {replies.length === 0 ? null : <span className="web-thread__fold-count">· {plural('files/comments/replies', replies.length)}</span>}
-      </button>
+        </RowButton>
+      </div>
     );
   }
   const tools = (
     <span className="web-thread__tools">
-      <button type="button" className="web-icon-button" title={annotation.resolved ? t('files/comments/reopen') : t('files/comments/resolve')} aria-label={annotation.resolved ? t('files/comments/reopen') : t('files/comments/resolve')} onClick={(event) => { event.stopPropagation(); actions.resolve(annotation.id, !annotation.resolved); }}>{annotation.resolved ? EMOJIcon.reopen : EMOJIcon.check}</button>
-      <button type="button" className="web-icon-button" title={t('files/comments/delete')} aria-label={t('files/comments/delete')} onClick={(event) => { event.stopPropagation(); actions.askRemove(annotation.id); }}>{EMOJIcon.close}</button>
+      <Button variant="subtle" shape="icon" title={annotation.resolved ? t('files/comments/reopen') : t('files/comments/resolve')} ariaLabel={annotation.resolved ? t('files/comments/reopen') : t('files/comments/resolve')} onClick={(event) => { event.stopPropagation(); actions.resolve(annotation.id, !annotation.resolved); }}>{annotation.resolved ? EMOJIcon.reopen : EMOJIcon.check}</Button>
+      <Button variant="subtle" shape="icon" title={t('files/comments/delete')} ariaLabel={t('files/comments/delete')} onClick={(event) => { event.stopPropagation(); actions.askRemove(annotation.id); }}>{EMOJIcon.close}</Button>
     </span>
   );
   // The buttons sit on the first name row, open or closed; a closed thread shows them on hover.
   const question = confirming ? (
-    <ContainedConfirm title={t('files/comments/deleteAsk')} confirmLabel={t('files/comments/deleteYes')} cancelLabel={t('files/comments/cancel')} tone="danger"
-      onConfirm={() => { actions.askRemove(null); actions.remove(annotation.id); }} onCancel={() => actions.askRemove(null)} />
+    <Modal
+      open
+      contained
+      alert
+      title={t('files/comments/deleteAsk')}
+      onClose={() => actions.askRemove(null)}
+      actions={(
+        <>
+          <Button size="sm" variant="ghost" onClick={() => actions.askRemove(null)}>{t('files/comments/cancel')}</Button>
+          <Button size="sm" variant="danger" onClick={() => { actions.askRemove(null); actions.remove(annotation.id); }}>{t('files/comments/deleteYes')}</Button>
+        </>
+      )}
+    />
   ) : null;
   const entries = annotation.entries.map((entry, index) => <Entry key={entry.id} entry={entry} {...(index === 0 ? { tools } : {})} />);
   const outdated = isOutdated(annotation) ? <span className="web-thread__outdated">{t('files/comments/outdated')}</span> : null;

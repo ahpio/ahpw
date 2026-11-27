@@ -1,0 +1,9 @@
+.web-connector-form__label {
+  font-size: var(--oo-font-size-sm);
+  font-weight: 600;
+}
+
+.web-connector-form__required {
+  margin-left: 4px;
+  color: var(--oo-color-danger);
+}

@@ -1,0 +1,139 @@
+.oo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 999px;
+  background: none;
+  color: var(--oo-color-muted);
+  font: inherit;
+  font-size: var(--oo-font-size-xs);
+  line-height: 18px;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.oo-pill:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.oo-pill:not(:disabled):hover {
+  border-color: var(--oo-color-accent);
+  background: var(--oo-color-hover);
+  color: var(--oo-color-text);
+}
+
+/* A pill that only shows a value: no hover, no hand, since nothing happens on it. */
+.oo-pill[data-still='true'] {
+  cursor: default;
+}
+
+.oo-pill[data-still='true']:not([data-on='true']):hover {
+  border-color: var(--oo-color-border);
+  background: none;
+  color: var(--oo-color-muted);
+}
+
+.oo-pill[data-on='true'],
+.oo-pill[data-on='true']:hover {
+  border-color: var(--oo-color-accent);
+  background: var(--oo-color-accent);
+  color: var(--oo-color-canvas);
+}
+
+.oo-pill[data-colored='true'] {
+  color: var(--oo-color-text);
+}
+
+.oo-pill__image {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+/* A pill's narrower labels show only in a narrow `pills` container. */
+.oo-pill__short,
+.oo-pill__icon {
+  display: none;
+}
+
+@container pills (width < 40rem) {
+  .oo-pill[data-short='true'] .oo-pill__long {
+    display: none;
+  }
+
+  .oo-pill[data-short='true'] .oo-pill__short {
+    display: inline;
+  }
+}
+
+@container pills (width < 28rem) {
+  .oo-pill[data-icon='true'] .oo-pill__long,
+  .oo-pill[data-icon='true'] .oo-pill__short {
+    display: none;
+  }
+
+  .oo-pill[data-icon='true'] .oo-pill__icon {
+    display: inline;
+  }
+}
+
+/* A text box in a pill. */
+.oo-pill input {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  outline: none;
+  padding: 0;
+}
+
+.oo-pill__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.oo-pill__open:hover,
+.oo-pill__open:focus-visible {
+  background: none;
+  text-decoration: underline;
+}
+
+.oo-pill__remove {
+  margin: 0 -2px 0 2px;
+  padding: 0 2px;
+  border: none;
+  background: none;
+  color: var(--oo-color-muted);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.oo-pill__remove:hover,
+.oo-pill__remove:focus-visible {
+  background: none;
+  color: var(--oo-color-danger);
+}
+
+.oo-pill[data-on='true'] .oo-pill__remove {
+  color: inherit;
+  opacity: 0.75;
+}
+
+.oo-pill[data-on='true'] .oo-pill__remove:hover,
+.oo-pill[data-on='true'] .oo-pill__remove:focus-visible {
+  opacity: 1;
+}

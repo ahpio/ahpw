@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useCloseGuard, useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Text, useChatPicker } from '@softov/scena/ui';
+import { Alert, Button, MessageBox, MessageText, Note, Pill, Text, TextPill, useChatPicker } from '../../ui/index.js';
 import type { ListSpec, PickerAction } from '@softov/scena/types';
 import type { AgentInfo, MessageAttachment, SessionConfigPropertySchema, SessionState, StateAction } from '@microsoft/agent-host-protocol';
 import { ahpPaths, hostBridge, ROOT, windowHost, type Connection } from '../../bridges/data.js';
@@ -39,7 +39,6 @@ import { readTrayOpen, writeTrayOpen } from './new-tray.js';
 import { isApprovals, modelLabels, settingLabels } from './pill-labels.js';
 import { contextReadout, footerSide } from './footer.js';
 import { EMOJIcon } from '../emojis.js';
-import { Pill, TextPill } from './pills.js';
 import { AgentPicker } from './AgentPicker.js';
 import { customAgents } from './custom-agents.js';
 import { slashCommandsOf } from '../agents/words.js';
@@ -47,6 +46,8 @@ import { useAgentIconSrc } from '../agents/icons.js';
 import { warn } from '../../shell/notify/index.js';
 import { readLastChoice, writeLastChoice } from './last-choice.js';
 import { agentCommands, COMPOSER_FOCUS, registerHostCommands } from './host-commands.js';
+import './composer.css';
+import './new.css';
 
 /** The prefixes the new session box's picker answers to. Module level: an inline array re-renders forever. */
 const NEW_PREFIXES = ['/', '@'];
@@ -87,7 +88,8 @@ function SettingPill({ option, set, open }: { option: Option; set: (next: unknow
         {...settingLabels(option)}
         {...described}
         {...(schema.type === 'boolean' ? { on: (value ?? schema.default) === true } : {})}
-        onOpen={() => open(optionCommandId(key))}
+        menu
+        onClick={() => open(optionCommandId(key))}
       />
     );
   }
@@ -551,8 +553,8 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
   };
 
   // With every host, the host comes first, with its state while it is not connected.
-  const hostPill = multi ? <Pill label={hostNow === 'connected' ? hostName(host) : t('hosts/named', { host: hostName(host), state: t(`hosts/state/${hostNow}`) })} title={t('sessions/new/hostHint')} onOpen={() => openCommand(HOST_COMMAND)} /> : null;
-  const wherePill = <Pill label={folder.trim() === '' ? t('sessions/new/where') : whereLabel(folder, null)} title={t('sessions/new/whereHint')} onOpen={() => openCommand(WHERE_COMMAND)} />;
+  const hostPill = multi ? <Pill label={hostNow === 'connected' ? hostName(host) : t('hosts/named', { host: hostName(host), state: t(`hosts/state/${hostNow}`) })} title={t('sessions/new/hostHint')} menu onClick={() => openCommand(HOST_COMMAND)} /> : null;
+  const wherePill = <Pill label={folder.trim() === '' ? t('sessions/new/where') : whereLabel(folder, null)} title={t('sessions/new/whereHint')} menu onClick={() => openCommand(WHERE_COMMAND)} />;
   // With every host, a host with no agent still offers the Host pill, so another can be picked.
   if (agents.length === 0) return <div className="web-new">{hostPill}<Alert tone="warning" message={t('sessions/new/noAgent')} /></div>;
 
@@ -561,7 +563,7 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
   return (
     <div className="web-new">
       <Text variant="h2" text={t('sessions/commands/newSession')} />
-      {agent?.description === undefined || agent.description === '' ? null : <p className="web-note">{agent.description}</p>}
+      {agent?.description === undefined || agent.description === '' ? null : <Note>{agent.description}</Note>}
       <div className="web-composer web-new__composer">
         {/* Over the box, as in an open session: the box sits at the end of the page. */}
         {picker.pickerNode === null || adding ? null : <div className="web-composer__picker">{picker.pickerNode}</div>}
@@ -572,81 +574,91 @@ export default function NewSessionPage({ provider: offered, host: given }: { pro
             {wherePill}
             {options.filter((option) => footerSide(option) === 'left' && !isApprovals(option)).map(settingPill)}
             {resolved === null && provider !== '' ? <Pill label={t('sessions/new/readingSettings')} /> : null}
-            <Pill label={agentName} image={iconSrcOf(host, provider)} title={t('sessions/new/harnessHint')} onOpen={() => openCommand(HARNESS_COMMAND)} />
-            <button type="button" className="web-new__tray-fold" aria-expanded={true} aria-label={t('sessions/new/fold')} title={t('sessions/new/fold')} onClick={() => foldTray(false)}>
+            <Pill label={agentName} image={iconSrcOf(host, provider)} title={t('sessions/new/harnessHint')} menu onClick={() => openCommand(HARNESS_COMMAND)} />
+            <Button variant="quiet" size="xs" expanded={true} ariaLabel={t('sessions/new/fold')} title={t('sessions/new/fold')} onClick={() => foldTray(false)}>
               {'<'}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="web-composer__where web-new__tray">
-            <button type="button" className="web-chip web-new__tray-head" aria-expanded={false} title={t('sessions/new/unfold')} onClick={() => foldTray(true)}>
-              {multi ? `${hostName(host)} · ` : null}
-              {agentName}
-              {folderName === '' ? null : ` · ${folderName}`}
-            </button>
-            <button type="button" className="web-new__tray-fold" aria-expanded={false} aria-label={t('sessions/new/unfold')} title={t('sessions/new/unfold')} onClick={() => foldTray(true)}>
+            <Pill label={`${multi ? `${hostName(host)} · ` : ''}${agentName}${folderName === '' ? '' : ` · ${folderName}`}`} title={t('sessions/new/unfold')} expanded={false} onClick={() => foldTray(true)} />
+            <Button variant="quiet" size="xs" expanded={false} ariaLabel={t('sessions/new/unfold')} title={t('sessions/new/unfold')} onClick={() => foldTray(true)}>
               {'>'}
-            </button>
+            </Button>
           </div>
         )}
-        <div className="web-composer__box" data-drop={drop.dropping ?? undefined} {...drop.props}>
-          <Attached attachments={attachments} folder={where} onRemove={(index) => setAttachments((held) => held.filter((_, at) => at !== index))} />
-          <div className="web-composer__bar">
-            <textarea
-              ref={area}
-              className="web-composer__text"
-              rows={3}
-              value={text}
-              aria-label={t('sessions/new/firstMessage')}
-              placeholder={t('sessions/composer/placeholder')}
-              onChange={(event) => {
-                fromPill.current = false;
-                setText(event.currentTarget.value);
-                setCaret(event.currentTarget.selectionStart);
-              }}
-              onFocus={() => scena.store.set(COMPOSER_FOCUS, NEW_FOCUS)}
-              onKeyUp={(event) => setCaret(event.currentTarget.selectionStart)}
-              onClick={(event) => setCaret(event.currentTarget.selectionStart)}
-              onKeyDown={(event) => {
-                // Esc on a list a pill opened takes back the command the pill typed.
-                if (event.key === 'Escape' && fromPill.current && picker.menuVisible) {
-                  event.preventDefault();
-                  fromPill.current = false;
-                  picker.closeMenu();
-                  return;
-                }
-                if (picker.handleMenuKeyDown(event)) return;
-                if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
-                  event.preventDefault();
-                  void start();
-                }
-              }}
-            />
-          </div>
-          <div className="web-composer__foot">
-            <AddButton host={host} path={NEW_PATH} onOpenChange={setAdding} />
-            <input ref={files} type="file" multiple hidden onChange={(event) => { void upload(event.currentTarget.files); event.currentTarget.value = ''; }} />
-            <div className="web-composer__chips web-composer__chips--left">
+        <MessageBox
+          drop={drop.dropping ?? undefined}
+          zone={drop.props}
+          top={(
+            <>
+              <Attached attachments={attachments} folder={where} onRemove={(index) => setAttachments((held) => held.filter((_, at) => at !== index))} />
+            </>
+          )}
+          lead={(
+            <>
+              <AddButton host={host} path={NEW_PATH} onOpenChange={setAdding} />
+              <input ref={files} type="file" multiple hidden onChange={(event) => { void upload(event.currentTarget.files); event.currentTarget.value = ''; }} />
+            </>
+          )}
+          left={(
+            <>
               <AgentPicker agents={agentsOfHarness} chosen={customAgent} open={() => openCommand(CUSTOM_AGENT_COMMAND)} />
               {options.filter((option) => footerSide(option) === 'left' && isApprovals(option)).map(settingPill)}
-            </div>
-            <div className="web-composer__chips web-composer__chips--right">
+            </>
+          )}
+          right={(
+            <>
               {models.length === 0 ? null : (
-                <Pill {...modelLabels(modelName === '' ? t('sessions/values/default') : modelName)} title={t('sessions/new/modelHint')} onOpen={() => openCommand('ahp.composer.model')} />
+                <Pill {...modelLabels(modelName === '' ? t('sessions/values/default') : modelName)} title={t('sessions/new/modelHint')} menu onClick={() => openCommand('ahp.composer.model')} />
               )}
               {options.filter((option) => footerSide(option) === 'right').map(settingPill)}
               {readout === null ? null : <span className="web-composer__context" title={readout.title}>{readout.text}</span>}
-            </div>
-            <Button
-              label={busy ? t('sessions/new/starting') : text.trim() === '' && attachments.length === 0 ? t('sessions/new/create') : t('sessions/new/start')}
-              variant="primary"
-              size="sm"
-              title={t('sessions/new/startHint')}
-              disabled={busy || provider === ''}
-              onClick={() => void start()}
-            />
-          </div>
-        </div>
+            </>
+          )}
+          end={(
+            <>
+              <Button
+                label={busy ? t('sessions/new/starting') : text.trim() === '' && attachments.length === 0 ? t('sessions/new/create') : t('sessions/new/start')}
+                variant="primary"
+                size="sm"
+                title={t('sessions/new/startHint')}
+                disabled={busy || provider === ''}
+                onClick={() => void start()}
+              />
+            </>
+          )}
+        >
+          <MessageText
+            ref={area}
+            rows={3}
+            value={text}
+            aria-label={t('sessions/new/firstMessage')}
+            placeholder={t('sessions/composer/placeholder')}
+            onChange={(event) => {
+              fromPill.current = false;
+              setText(event.currentTarget.value);
+              setCaret(event.currentTarget.selectionStart);
+            }}
+            onFocus={() => scena.store.set(COMPOSER_FOCUS, NEW_FOCUS)}
+            onKeyUp={(event) => setCaret(event.currentTarget.selectionStart)}
+            onClick={(event) => setCaret(event.currentTarget.selectionStart)}
+            onKeyDown={(event) => {
+              // Esc on a list a pill opened takes back the command the pill typed.
+              if (event.key === 'Escape' && fromPill.current && picker.menuVisible) {
+                event.preventDefault();
+                fromPill.current = false;
+                picker.closeMenu();
+                return;
+              }
+              if (picker.handleMenuKeyDown(event)) return;
+              if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                event.preventDefault();
+                void start();
+              }
+            }}
+          />
+        </MessageBox>
       </div>
       <p className="web-new__tip"><kbd>{tip.keys}</kbd> {t(tip.message)}</p>
       {error === null ? null : <Alert tone="danger" title={t('sessions/new/notCreated')} message={error} />}

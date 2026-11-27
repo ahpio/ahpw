@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button, SchemaForm, type JsonSchemaObject } from '@softov/scena/ui';
+import { Alert, Blocks, Button, type JsonSchemaObject, Note, PageActions, SchemaForm } from '../../ui/index.js';
 import { setPluginOption, type PluginRow } from '../../bridges/plugins.js';
 import { hostSaid } from '../../bridges/said.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
@@ -38,7 +38,7 @@ export function Options({ host, id, row }: { host: string; id: string; row: Plug
   useEffect(() => setEdited(null), [held]);
 
   // A plugin that is off, or that did not load, carries no options schema.
-  if (Object.keys(bagOf(schema.properties)).length === 0) return <p className="web-note web-plugin__tab">{t('plugins/options/none')}</p>;
+  if (Object.keys(bagOf(schema.properties)).length === 0) return <Note>{t('plugins/options/none')}</Note>;
 
   const values = edited ?? held;
   const changed = changedKeys(held, values);
@@ -59,14 +59,14 @@ export function Options({ host, id, row }: { host: string; id: string; row: Plug
   };
 
   return (
-    <div className="web-plugin__tab">
+    <Blocks>
       <SchemaForm schema={schema} value={values} baseline={held} onChange={(next) => { setEdited(next); setSaved(false); setFailure(null); }} views={SETTINGS_VIEWS} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} fieldActions />
       {failure === null ? null : <Alert tone="danger" title={t('plugins/options/failed')} message={failure} />}
-      <div className="web-page__actions">
+      <PageActions>
         <Button label={t('plugins/options/save')} variant="primary" disabled={changed.length === 0 || busy || !jsonValid} {...(jsonValid ? {} : { title: t('host/settings/fixJson') })} onClick={() => void save()} />
         <Button label={t('plugins/options/reset')} disabled={changed.length === 0 || busy} onClick={() => { setEdited(null); setFailure(null); }} />
-        {saved && changed.length === 0 ? <span className="web-note">{t('plugins/options/saved')}</span> : null}
-      </div>
-    </div>
+        {saved && changed.length === 0 ? <Note inline>{t('plugins/options/saved')}</Note> : null}
+      </PageActions>
+    </Blocks>
   );
 }

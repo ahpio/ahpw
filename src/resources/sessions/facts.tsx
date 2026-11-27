@@ -1,19 +1,20 @@
 import type { ReactElement } from 'react';
 import type { ChatState, Customization, SessionActiveClient, SessionState, SessionSummary, TerminalState } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Badge, StatusDot, type DetailItem } from '@softov/scena/ui';
+import { Badge, Button, type DetailItem, Note, StatusDot } from '../../ui/index.js';
 import type { Scena } from '@softov/scena/types';
 import { hostBridge, type HostFacts } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { elapsed, folderLabel } from '../../bridges/words.js';
 import { plural } from '../../i18n/locales.js';
-import { CopyButton } from '../../shell/controls/CopyButton.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { foldTerminal, inFolder } from '../terminals/terminal.js';
 import { clientName, clientPlugins } from './tooling.js';
 import { tokens, totalsOf, when } from './turn.js';
 import './facts.css';
+import '../files/diff-page.css';
 
 /** A terminal, as a link that opens it, while its directory is in the session's folder. */
 function FolderTerminal({ host, uri, folder }: { host: string; uri: string; folder: string }): ReactElement | null {
@@ -22,9 +23,9 @@ function FolderTerminal({ host, uri, folder }: { host: string; uri: string; fold
   const { state } = useChannel<TerminalState>(host, uri, foldTerminal);
   if (!inFolder(state?.cwd, folder)) return null;
   return (
-    <button type="button" className="web-link" title={t('sessions/details/openTerminal')} onClick={() => void scena.commands.execute('ahp.openTerminal', { uri })}>
+    <Button variant="link" title={t('sessions/details/openTerminal')} onClick={() => void scena.commands.execute('ahp.openTerminal', { uri })}>
       {state?.title === '' || state?.title === undefined ? t('sessions/details/terminal') : state.title}
-    </button>
+    </Button>
   );
 }
 
@@ -117,9 +118,9 @@ export function sessionFacts(scena: Scena, t: (key: string, values?: Record<stri
     facts.push({
       label: t('sessions/details/folder'),
       value: (
-        <button type="button" className="web-link" title={t('sessions/details/revealFolder')} onClick={() => void scena.commands.execute('ahp.revealFolder', { host, uri: folder })}>
+        <Button variant="link" title={t('sessions/details/revealFolder')} onClick={() => void scena.commands.execute('ahp.revealFolder', { host, uri: folder })}>
           <code>{folderLabel(folder)}</code>
-        </button>
+        </Button>
       ),
     });
   }
@@ -128,9 +129,9 @@ export function sessionFacts(scena: Scena, t: (key: string, values?: Record<stri
     value: (
       <span className="web-details__list">
         {folder === undefined ? null : (hostFacts?.terminals ?? []).map((terminal) => <FolderTerminal key={terminal.resource} host={host} uri={terminal.resource} folder={folder} />)}
-        <button type="button" className="web-link" title={folder === undefined ? t('sessions/details/newTerminalHint') : t('sessions/details/newTerminalInFolder')} onClick={() => void scena.commands.execute('ahp.newTerminal', { host, ...(folder === undefined ? {} : { cwd: folder }) })}>
+        <Button variant="link" title={folder === undefined ? t('sessions/details/newTerminalHint') : t('sessions/details/newTerminalInFolder')} onClick={() => void scena.commands.execute('ahp.newTerminal', { host, ...(folder === undefined ? {} : { cwd: folder }) })}>
           {t('sessions/details/newTerminal')}
-        </button>
+        </Button>
       </span>
     ),
   });
@@ -152,7 +153,7 @@ export function sessionFacts(scena: Scena, t: (key: string, values?: Record<stri
       value: (
         <span>
           <span className="web-diff--add">+{changes.additions ?? 0}</span>{' '}
-          <span className="web-diff--remove">-{changes.deletions ?? 0}</span>
+          <Note inline tone="danger">-{changes.deletions ?? 0}</Note>
           {changes.files === undefined ? '' : ` ${plural('sessions/details/inFiles', changes.files)}`}
         </span>
       ),

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Chip, DetailList, Spinner, Text } from '@softov/scena/ui';
+import { Chip, DetailList, Group, Note, Pill, Row, Spinner } from '../../ui/index.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { readMe, type Me } from '../../bridges/me.js';
@@ -8,13 +8,14 @@ import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { PEOPLE, peopleReducer, servesPeople, type Named, type PeopleState } from '../../bridges/people.js';
 import { ownLimits, type PolicyLimits } from '../../bridges/policies.js';
 import { servesUsage, usagePeriods, type UsagePeriods } from '../../bridges/usage.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
-import { RemovableChip } from '../../shell/view/RemovableChip.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { LimitLine } from '../usage/Limits.js';
 import { totalLine } from '../usage/words.js';
 import { membershipParts, titled } from '../users/memberships.js';
 import { scopeTitle } from '../users/MembershipList.js';
 import { EMOJIcon } from '../emojis.js';
+import './info.css';
+import '../users/membership-list.css';
 
 const teamsReducer = peopleReducer('teams');
 const projectsReducer = peopleReducer('projects');
@@ -70,30 +71,27 @@ export function Info({ host }: { host: string }): ReactElement {
 
   /** A section: its icon and title over its body, a line above it, as the user page's. */
   const section = (icon: string, title: string, body: ReactElement): ReactElement => (
-    <section className="web-user__section" aria-label={title}>
-      <Text variant="h3" text={`${icon} ${title}`} />
-      {body}
-    </section>
+    <Group title={title} icon={icon}>{body}</Group>
   );
 
   return (
     <div className="web-profile__info">
       {person ? null : section(EMOJIcon.roles, t('profile/info/grants'), (
-        <div className="web-role-pills">
-          {user.grants.map((grant) => <RemovableChip key={grant} label={grant} removeLabel={grant} />)}
-        </div>
+        <Row align="center" wrap gap="var(--oo-spacing-sm)">
+          {user.grants.map((grant) => <Pill key={grant} label={grant} removeLabel={grant} />)}
+        </Row>
       ))}
 
-      {!person ? null : section(EMOJIcon.roles, t('profile/info/roles'), user.roles.length === 0 ? <p className="web-note">{t('profile/info/noRoles')}</p> : (
-        <div className="web-role-pills">
+      {!person ? null : section(EMOJIcon.roles, t('profile/info/roles'), user.roles.length === 0 ? <Note>{t('profile/info/noRoles')}</Note> : (
+        <Row align="center" wrap gap="var(--oo-spacing-sm)">
           {user.roles.map((role) => {
             const label = user.rolesFromSignIn.includes(role) ? t('profile/info/roleFromSignIn', { role }) : role;
-            return <RemovableChip key={role} label={label} removeLabel={label} />;
+            return <Pill key={role} label={label} removeLabel={label} />;
           })}
-        </div>
+        </Row>
       ))}
 
-      {!person ? null : section(EMOJIcon.teams, t('profile/info/memberships'), memberships.length === 0 ? <p className="web-note">{t('profile/info/noMemberships')}</p> : (
+      {!person ? null : section(EMOJIcon.teams, t('profile/info/memberships'), memberships.length === 0 ? <Note>{t('profile/info/noMemberships')}</Note> : (
         <ul className="web-memberships__list">
           {memberships.map((membership) => {
             const { team, project } = membershipParts(membership);
@@ -101,7 +99,7 @@ export function Info({ host }: { host: string }): ReactElement {
               <li key={membership} className="web-memberships__row">
                 <span className="web-memberships__name">
                   {titled(teamList, team)}
-                  <span className="web-memberships__scope">{` \u{00B7} ${scopeTitle(t, projectList, project)}`}</span>
+                  <Note inline>{` \u{00B7} ${scopeTitle(t, projectList, project)}`}</Note>
                 </span>
                 {user.primary === membership ? <Chip label={t('users/user/primaryMark')} state="on" disabled /> : null}
               </li>
@@ -120,7 +118,7 @@ export function Info({ host }: { host: string }): ReactElement {
       ))}
 
       {usage === undefined ? null : section(EMOJIcon.usage, t('profile/info/usage'), usage.state === 'reading' ? <Spinner label={t('profile/notices/reading')} />
-        : usage.state === 'failed' ? <p className="web-note">{t('profile/info/usageFailed', { error: usage.error })}</p> : (
+        : usage.state === 'failed' ? <Note>{t('profile/info/usageFailed', { error: usage.error })}</Note> : (
           <>
             {usage.value.map(({ pool, used }) => (
               <DetailList key={pool} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))' }} items={(['day', 'week', 'month'] as const).map((period) => ({ label: t(`usage/period/${period}`), value: totalLine(used[period]) || t('usage/explorer/nothing') }))} />
@@ -129,8 +127,8 @@ export function Info({ host }: { host: string }): ReactElement {
         ))}
 
       {limits === undefined ? null : section(EMOJIcon.policies, t('profile/info/limits'), limits.state === 'reading' ? <Spinner label={t('profile/notices/reading')} />
-        : limits.state === 'failed' ? <p className="web-note">{t('profile/info/limitsFailed', { error: limits.error })}</p>
-          : (limits.value ?? []).flatMap((policy) => policy.limits).length === 0 ? <p className="web-note">{t('profile/info/noLimits')}</p> : (
+        : limits.state === 'failed' ? <Note>{t('profile/info/limitsFailed', { error: limits.error })}</Note>
+          : (limits.value ?? []).flatMap((policy) => policy.limits).length === 0 ? <Note>{t('profile/info/noLimits')}</Note> : (
             <ul className="web-profile__limits">
               {(limits.value ?? []).flatMap((policy) => policy.limits.map((figure, at) => (
                 <li key={`${policy.id}\u{0000}${String(at)}`} className="web-profile__limit">

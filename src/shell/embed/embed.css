@@ -31,23 +31,16 @@ html.is-framed.is-maximized #root {
   height: 100%;
 }
 
-.embed-control {
-  display: grid;
-  place-items: center;
+/* The window's buttons: as tall as the bar and as wide as the system's own. */
+.embed-controls > .oo-btn {
   width: 46px;
   height: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  border-radius: 0;
   color: var(--oo-color-text);
   cursor: default;
 }
 
-.embed-control:hover {
-  background: var(--oo-color-hover);
-}
-
-.embed-control--close:hover {
+.embed-controls > .oo-btn:last-child:hover {
   background: #e81123;
   color: #ffffff;
 }
@@ -58,26 +51,20 @@ html.is-framed.is-maximized #root {
 }
 
 /* With the bar's slot, to outrank scena's `.oo-bar__slot button`, which squares a bar's buttons. */
-.oo-bar__slot .embed-host__button {
-  display: flex;
-  align-items: center;
+.oo-bar__slot .embed-host > .oo-btn {
   gap: 6px;
   /* scena's height for a button in a bar, so the bar keeps room above and below it. */
   height: var(--oo-button-bar-height-sm, 20px);
   padding: 0 8px;
   border: 1px solid transparent;
   border-radius: var(--oo-radius-md);
-  background: transparent;
   color: var(--oo-color-text);
-  font: inherit;
   font-size: 90%;
-  cursor: pointer;
 }
 
 /* As scena's select in a bar: hovered or open, it shows its edge. */
-.oo-bar__slot .embed-host__button:hover,
-.oo-bar__slot .embed-host__button[aria-expanded='true'] {
-  background: var(--oo-color-hover);
+.oo-bar__slot .embed-host > .oo-btn:hover,
+.oo-bar__slot .embed-host > .oo-btn[aria-expanded='true'] {
   border-color: var(--oo-color-border);
 }
 
@@ -100,29 +87,6 @@ html.is-framed.is-maximized #root {
   box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
 }
 
-.embed-host__item {
-  display: grid;
-  grid-template-columns: 10px auto minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.embed-host__item:hover {
-  background: var(--oo-color-hover);
-}
-
-.embed-host__item[aria-current='true'] .embed-host__name {
-  font-weight: 600;
-}
-
 /* A host's row: the host, and with every host its options at the end, shown on hover and focus. */
 .embed-host__row {
   display: flex;
@@ -130,42 +94,22 @@ html.is-framed.is-maximized #root {
   gap: 2px;
 }
 
-.embed-host__row > .embed-host__item {
+.embed-host__row > .oo-row-button {
   flex: 1;
-  min-width: 0;
 }
 
-.embed-host__more {
-  flex: none;
-  /* The glyph centred in the box, rather than on the line the inherited line height draws. */
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  line-height: 1;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--oo-color-muted);
-  font: inherit;
+.embed-host__row > .oo-btn {
   opacity: 0;
-  cursor: pointer;
 }
 
-.embed-host__row:hover .embed-host__more,
-.embed-host__more:focus-visible {
+.embed-host__row:hover > .oo-btn,
+.embed-host__row > .oo-btn:focus-visible {
   opacity: 1;
 }
 
-.embed-host__more:hover {
-  background: var(--oo-color-hover);
-  color: var(--oo-color-text);
-}
-
 /* The menu sits in the bar's slot, whose `.oo-bar__slot button` squares its buttons; two classes outrank it. */
-.embed-host__menu .embed-host__item,
-.embed-host__menu .embed-host__more {
+.embed-host__menu .oo-row-button,
+.embed-host__menu .oo-btn {
   border-radius: var(--oo-radius-md);
 }
 
@@ -176,51 +120,16 @@ html.is-framed.is-maximized #root {
   background: var(--oo-popup-border);
 }
 
-.embed-host__action {
-  color: var(--oo-color-muted);
-}
-
-.embed-host__action:hover {
-  color: var(--oo-color-text);
-}
-
-.embed-host__action > span:first-child {
-  justify-self: center;
-}
-
 .embed-host__name {
   white-space: nowrap;
 }
 
 .embed-host__url {
-  justify-self: end;
+  margin-left: auto;
   max-width: 100%;
   padding-left: 16px;
   overflow: hidden;
   color: var(--oo-color-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* The host list's dots: filled connected, half connecting, hollow down. */
-.embed-dot {
-  width: 8px;
-  height: 8px;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  flex: none;
-}
-
-.embed-dot--connected {
-  color: var(--oo-color-success);
-  background: currentColor;
-}
-
-.embed-dot--connecting {
-  color: var(--oo-color-warning);
-  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
-}
-
-.embed-dot--down {
-  color: var(--oo-color-muted);
 }

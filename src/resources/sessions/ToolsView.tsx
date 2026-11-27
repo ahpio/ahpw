@@ -1,12 +1,12 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import type { ToolDefinition } from '@microsoft/agent-host-protocol';
 import { useI18n } from '@softov/scena/react';
-import { Badge, TextField } from '@softov/scena/ui';
-import { EMOJIcon } from '../emojis.js';
+import { Badge, ItemRow, Note, ParamList, Row, Section, TextField } from '../../ui/index.js';
 import { ModesGroup } from '../agent-tools/ModesGroup.js';
 import { useActiveSession } from './active.js';
 import { searchTools, toolGroups, toolHints, toolParams, type ToolGroup } from './tooling.js';
 import './tooling.css';
+import { ToolingHead } from './ToolingHead.js';
 
 /** One tool: its title, name and first line; open, its whole description, its inputs and its hints. On the right, why it has no switch. */
 function ToolRow({ tool, open, why, onToggle }: { tool: ToolDefinition; open: boolean; why: string; onToggle: () => void }): ReactElement {
@@ -15,34 +15,23 @@ function ToolRow({ tool, open, why, onToggle }: { tool: ToolDefinition; open: bo
   const params = open ? toolParams(tool) : [];
   const hints = open ? toolHints(tool) : [];
   return (
-    <div className="web-tooling__row">
-      <button type="button" className="web-tooling__toggle" aria-expanded={open} onClick={onToggle}>
-        <span className="web-tooling__caret" aria-hidden="true">{open ? EMOJIcon.caretDown : EMOJIcon.caretRight}</span>
-        <span className="web-tooling__main">
-          <span className="web-tooling__l1">
-            <span className="web-tooling__name">{tool.title ?? tool.annotations?.title ?? tool.name}</span>
-            <code className="web-tooling__id">{tool.name}</code>
-            <span className="web-tooling__why">{why}</span>
-          </span>
-          {description === '' ? null : <span className={open ? 'web-tooling__text' : 'web-tooling__l2'}>{open ? description : description.split('\n')[0]}</span>}
-        </span>
-      </button>
+    <ItemRow
+      title={tool.title ?? tool.annotations?.title ?? tool.name}
+      meta={<code>{tool.name}</code>}
+      trail={why}
+      {...(open ? { text: description } : { line: description.split('\n')[0] })}
+      expanded={open}
+      onClick={onToggle}
+    >
       {!open || (params.length === 0 && hints.length === 0) ? null : (
         <div className="web-tooling__more">
           {params.length === 0 ? null : (
-            <dl className="web-tooling__params">
-              {params.map((param) => (
-                <div key={param.name}>
-                  <dt><code>{param.name}</code> <span>{[param.type, ...(param.required ? [t('sessions/tooling/required')] : [])].filter((part) => part !== '').join(' \u{00B7} ')}</span></dt>
-                  {param.description === '' ? null : <dd>{param.description}</dd>}
-                </div>
-              ))}
-            </dl>
+            <ParamList params={params.map((param) => ({ name: param.name, type: param.type, required: param.required, description: param.description }))} requiredLabel={t('sessions/tooling/required')} />
           )}
-          {hints.length === 0 ? null : <div className="web-tooling__hints">{hints.map((hint) => <Badge key={hint} text={hint} />)}</div>}
+          {hints.length === 0 ? null : <Row wrap gap="var(--oo-spacing-xs)">{hints.map((hint) => <Badge key={hint} text={hint} />)}</Row>}
         </div>
       )}
-    </div>
+    </ItemRow>
   );
 }
 
@@ -52,11 +41,7 @@ function Group({ group, folded, onFold, open, onOpen }: { group: ToolGroup; fold
   const why = t(group.key === 'host' ? 'sessions/tooling/always' : 'sessions/tooling/fromClient');
   return (
     <section className="web-tooling__group">
-      <button type="button" className="web-tooling__heading" aria-expanded={!folded} onClick={onFold}>
-        <span className="web-tooling__caret" aria-hidden="true">{folded ? EMOJIcon.caretRight : EMOJIcon.caretDown}</span>
-        <span>{group.title}</span>
-        <span className="web-tooling__count">{group.tools.length}</span>
-      </button>
+      <Section title={group.title} count={String(group.tools.length)} small folded={folded} onFold={onFold} />
       {folded ? null : group.tools.map((tool) => {
         const key = `${group.key}/${tool.name}`;
         return <ToolRow key={key} tool={tool} open={open.has(key)} why={why} onToggle={() => onOpen(key)} />;
@@ -80,21 +65,18 @@ export default function ToolsView(): ReactElement {
   const [folded, setFolded] = useState<ReadonlySet<string>>(new Set());
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
   const all = useMemo(() => toolGroups(session), [session]);
-  if (summary === undefined) return <p className="web-note web-tooling__empty">{t('sessions/tooling/noSession')}</p>;
+  if (summary === undefined) return <Note inset>{t('sessions/tooling/noSession')}</Note>;
   const groups = searchTools(all, query);
   const total = all.reduce((sum, group) => sum + group.tools.length, 0);
   return (
     <div className="web-tooling">
-      <div className="web-tooling__head">
-        <span className="web-tooling__title">{t('sessions/tooling/tools')} <span className="web-tooling__count">{total}</span></span>
-        <span className="web-tooling__session">{summary.title === '' ? t('sessions/untitled') : summary.title}</span>
-      </div>
+      <ToolingHead title={t('sessions/tooling/tools')} count={total} summary={summary} />
       <TextField value={query} placeholder={t('sessions/tooling/searchTools')} onChange={setQuery} />
       <ModesGroup query={query} folded={folded.has('browser')} onFold={() => setFolded((now) => flip(now, 'browser'))} />
       {groups.map((group) => (
         <Group key={group.key} group={group} folded={folded.has(group.key)} onFold={() => setFolded((now) => flip(now, group.key))} open={open} onOpen={(key) => setOpen((now) => flip(now, key))} />
       ))}
-      {total === 0 ? <p className="web-note">{t('sessions/tooling/noTools')}</p> : groups.length === 0 ? <p className="web-note">{t('sessions/tooling/noMatch')}</p> : null}
+      {total === 0 ? <Note>{t('sessions/tooling/noTools')}</Note> : groups.length === 0 ? <Note>{t('sessions/tooling/noMatch')}</Note> : null}
     </div>
   );
 }

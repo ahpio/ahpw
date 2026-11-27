@@ -1,14 +1,13 @@
 import { useState, type KeyboardEvent, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button, ChoiceCards, DetailList, Link, Note, Row, RowButton, StepDots, TextField } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import { plural } from '../../i18n/locales.js';
 import type { ChatInputAnswer, ChatInputQuestion, ChatInputRequest, StateAction } from '@microsoft/agent-host-protocol';
 import { EMPTY, allowsOther, answerWords, draftOf, encode, isChoice, optionsOf, type Draft } from './answer.js';
 import type { Send } from './Parts.js';
 import { useSessionHost } from './workspace.js';
-import { EMOJIcon } from '../emojis.js';
 import './question.css';
 
 /** What this page sent, by host and request id. Kept past the card: a finished turn draws it anew, and the host may never say. */
@@ -67,52 +66,35 @@ function QuestionForm({ question, draft, set, next }: {
   if (!isChoice(question)) {
     const number = kind === 'number' || kind === 'integer';
     return number ? (
-      <input className="web-field" type="number" autoFocus value={draft.text} onChange={(event) => set({ ...draft, text: event.target.value })} onKeyDown={enterGoesOn} />
+      <TextField type="number" autoFocus value={draft.text} onChange={(next) => set({ ...draft, text: next })} onKeyDown={enterGoesOn} />
     ) : (
-      <textarea className="web-field web-ask__text" rows={3} autoFocus value={draft.text} placeholder={t('sessions/question/yourAnswer')} onChange={(event) => set({ ...draft, text: event.target.value })} onKeyDown={enterGoesOn} />
+      <TextField multiline rows={3} autoFocus value={draft.text} placeholder={t('sessions/question/yourAnswer')} onChange={(next) => set({ ...draft, text: next })} onKeyDown={enterGoesOn} />
     );
   }
 
   return (
-    <div className="web-ask__options" role={many ? 'group' : 'radiogroup'}>
-      {optionsOf(question).map((option, index) => {
-        const on = draft.picked.includes(option.id);
-        return (
-          <button key={option.id} type="button" className="web-ask__option" role={many ? 'checkbox' : 'radio'} aria-checked={on} data-on={on} onClick={() => pick(option.id)}>
-            <span className="web-ask__mark" data-many={many} aria-hidden="true" />
-            <span className="web-ask__option-body">
-              <span className="web-ask__option-label">
-                <span className="web-ask__key">{index + 1}</span>
-                {option.label}
-                {option.recommended === true ? <span className="web-ask__tag">{t('sessions/question/recommended')}</span> : null}
-              </span>
-              {option.description === undefined ? null : <span className="web-ask__option-hint">{option.description}</span>}
-            </span>
-          </button>
-        );
-      })}
-      {allowsOther(question) ? (
-        <div className="web-ask__option web-ask__other" data-on={draft.other}>
-          <button
-            type="button"
-            className="web-ask__mark"
-            data-many={many}
-            role={many ? 'checkbox' : 'radio'}
-            aria-checked={draft.other}
-            aria-label={t('sessions/question/other')}
-            onClick={() => set({ ...draft, other: !draft.other || !many, ...(many ? {} : { picked: [] }) })}
-          />
-          <input
-            className="web-field"
-            value={draft.text}
-            placeholder={t(many ? 'sessions/question/otherPlaceholderMany' : 'sessions/question/otherPlaceholder')}
-            onFocus={() => { if (!draft.other) set({ ...draft, other: true, ...(many ? {} : { picked: [] }) }); }}
-            onChange={(event) => set({ ...draft, text: event.target.value, other: true, ...(many ? {} : { picked: [] }) })}
-            onKeyDown={enterGoesOn}
-          />
-        </div>
-      ) : null}
-    </div>
+    <ChoiceCards
+      options={optionsOf(question).map((option) => ({
+        id: option.id,
+        label: option.label,
+        ...(option.description === undefined ? {} : { hint: option.description }),
+        ...(option.recommended === true ? { tag: t('sessions/question/recommended') } : {}),
+      }))}
+      picked={draft.picked}
+      many={many}
+      numbered
+      onPick={pick}
+      {...(allowsOther(question) ? {
+        other: {
+          label: t('sessions/question/other'),
+          on: draft.other,
+          onToggle: () => set({ ...draft, other: !draft.other || !many, ...(many ? {} : { picked: [] }) }),
+          field: (
+            <TextField value={draft.text} placeholder={t(many ? 'sessions/question/otherPlaceholderMany' : 'sessions/question/otherPlaceholder')} onFocus={() => { if (!draft.other) set({ ...draft, other: true, ...(many ? {} : { picked: [] }) }); }} onChange={(next) => set({ ...draft, text: next, other: true, ...(many ? {} : { picked: [] }) })} onKeyDown={enterGoesOn} />
+          ),
+        },
+      } : {})}
+    />
   );
 }
 
@@ -161,36 +143,28 @@ export function InputRequest({ request, send, live, response }: {
     const waiting = sent !== null && response === undefined && live;
     return (
       <div className="web-ask" data-done="true">
-        <div className="web-ask__head">
+        <Row align="center" wrap gap="var(--oo-spacing-sm)">
           <span className="web-ask__title">{outcome === 'decline' ? t('sessions/question/declined') : outcome === undefined ? t('sessions/question/unanswered') : t('sessions/question/answered')}</span>
-          {waiting ? <span className="web-note">{t('sessions/question/sending')}</span> : null}
-        </div>
+          {waiting ? <Note inline>{t('sessions/question/sending')}</Note> : null}
+        </Row>
         {outcome === 'accept' ? (
-          <dl className="web-ask__summary">
-            {questions.map((one) => (
-              <div key={one.id}>
-                <dt>{one.title ?? one.message}</dt>
-                <dd>{answerWords(one, held[one.id])}</dd>
-              </div>
-            ))}
-          </dl>
+          <DetailList inline items={questions.map((one) => ({ label: one.title ?? one.message, value: answerWords(one, held[one.id]) }))} />
         ) : null}
       </div>
     );
   }
 
   const foldButton = (words: string): ReactElement => (
-    <button type="button" className="web-ask__fold" aria-expanded={!folded} title={t(folded ? 'sessions/question/unfold' : 'sessions/question/fold')} onClick={() => fold(!folded)}>
+    <RowButton fit center expanded={!folded} title={t(folded ? 'sessions/question/unfold' : 'sessions/question/fold')} onClick={() => fold(!folded)}>
       <span className="web-ask__title"><span className="web-ask__icon" aria-hidden="true">?</span>{words}</span>
-      <span className="web-ask__caret" aria-hidden="true">{folded ? EMOJIcon.caretRight : EMOJIcon.caretDown}</span>
-    </button>
+    </RowButton>
   );
   if (folded) {
     return (
       <div className="web-ask" data-folded="true">
-        <div className="web-ask__head">
+        <Row align="center" wrap gap="var(--oo-spacing-sm)">
           {foldButton(questions.length > 1 ? t('sessions/question/waitingMany', { count: questions.length }) : t('sessions/question/waiting'))}
-        </div>
+        </Row>
       </div>
     );
   }
@@ -218,27 +192,23 @@ export function InputRequest({ request, send, live, response }: {
 
   return (
     <div className="web-ask" tabIndex={-1} onKeyDown={keys}>
-      <div className="web-ask__head">
+      <Row align="center" wrap gap="var(--oo-spacing-sm)">
         {foldButton(message === undefined ? t('sessions/question/asks') : t('sessions/question/asksColon'))}
         {questions.length > 1 ? (
-          <span className="web-ask__steps" aria-label={t('sessions/question/step', { page: page + 1, total: questions.length })}>
-            {questions.map((one, index) => (
-              <button
-                key={one.id}
-                type="button"
-                className="web-ask__step"
-                data-here={index === page}
-                data-done={answers[one.id] !== undefined}
-                title={one.title ?? one.message}
-                onClick={() => setPage(index)}
-              />
-            ))}
-            <span className="web-ask__count">{t('sessions/question/count', { page: page + 1, total: questions.length })}</span>
+          <span className="web-ask__steps">
+            <StepDots
+              label={t('sessions/question/step', { page: page + 1, total: questions.length })}
+              titles={questions.map((one) => one.title ?? one.message)}
+              at={page}
+              done={questions.map((one) => answers[one.id] !== undefined)}
+              onPick={setPage}
+            />
+            <Note inline small>{t('sessions/question/count', { page: page + 1, total: questions.length })}</Note>
           </span>
         ) : null}
-      </div>
+      </Row>
       {message === undefined ? null : <div className="web-ask__message"><Markdown text={message} /></div>}
-      {request.url === undefined ? null : <a className="web-link" href={request.url} target="_blank" rel="noreferrer">{request.url}</a>}
+      {request.url === undefined ? null : <Link href={request.url} external>{request.url}</Link>}
       {question === undefined ? null : (
         <section className="web-ask__question" key={question.id}>
           {question.title === undefined ? null : <span className="web-ask__chip">{question.title}</span>}
@@ -247,7 +217,7 @@ export function InputRequest({ request, send, live, response }: {
           <QuestionForm question={question} draft={drafts[question.id] ?? EMPTY} set={(draft) => setDrafts({ ...drafts, [question.id]: draft })} next={next} />
         </section>
       )}
-      <div className="web-ask__actions">
+      <Row align="center" gap="var(--oo-spacing-sm)">
         <Button label={t('sessions/question/decline')} size="sm" onClick={() => complete('decline')} />
         <span className="web-ask__spacer" />
         {page > 0 ? <Button label={t('sessions/question/back')} size="sm" onClick={() => setPage(page - 1)} /> : null}
@@ -256,8 +226,8 @@ export function InputRequest({ request, send, live, response }: {
         ) : (
           <Button label={t('sessions/question/next')} variant="primary" size="sm" disabled={stuck} onClick={next} />
         )}
-      </div>
-      {last && missing.length > 0 && !stuck ? <p className="web-note">{plural('sessions/question/missing', missing.length)}</p> : null}
+      </Row>
+      {last && missing.length > 0 && !stuck ? <Note>{plural('sessions/question/missing', missing.length)}</Note> : null}
     </div>
   );
 }

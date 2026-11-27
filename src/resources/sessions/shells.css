@@ -1,0 +1,11 @@
+.web-shells__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-xs);
+}
+
+.web-shells__details .web-tool__pre {
+  max-height: 9rem;
+}

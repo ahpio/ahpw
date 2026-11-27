@@ -1,11 +1,11 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { getLocale } from '@softov/scena';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button, Spinner } from '@softov/scena/ui';
+import { Alert, Button, Note, Pill, Spinner } from '../../ui/index.js';
 import { hostSaid } from '../../bridges/said.js';
 import { listTokens, revokeToken, type ListedToken } from '../../bridges/tokens.js';
 import { confirm } from '../../shell/notify/index.js';
-import { RemovableChip } from '../../shell/view/RemovableChip.js';
+import './token-list.css';
 
 interface TokenListProps {
   host: string;
@@ -69,14 +69,14 @@ export function TokenList({ host, user, reads = 0, onRefused }: TokenListProps):
     }
   };
 
-  if (refused !== null) return <p className="web-note">{refused}</p>;
+  if (refused !== null) return <Note>{refused}</Note>;
   if (tokens === null) return <Spinner label={t('profile/keys/reading')} />;
   const now = Date.now();
 
   return (
     <div className="web-keys">
       {failure === null ? null : <Alert tone="danger" message={failure} />}
-      {tokens.length === 0 ? <p className="web-note">{t('profile/keys/none')}</p> : (
+      {tokens.length === 0 ? <Note>{t('profile/keys/none')}</Note> : (
         <ul className="web-keys__list">
           {tokens.map((token) => {
             const expired = token.expires !== undefined && token.expires <= now;
@@ -89,15 +89,15 @@ export function TokenList({ host, user, reads = 0, onRefused }: TokenListProps):
                   </span>
                   <span className="web-keys__grants">
                     {token.grants === undefined
-                      ? <span className="web-note">{user === undefined ? t('profile/keys/everyGrant') : t('profile/keys/everyGrantOf', { id: user })}</span>
-                      : token.grants.map((grant) => <RemovableChip key={grant} label={grant} removeLabel={grant} />)}
+                      ? <Note inline>{user === undefined ? t('profile/keys/everyGrant') : t('profile/keys/everyGrantOf', { id: user })}</Note>
+                      : token.grants.map((grant) => <Pill key={grant} label={grant} removeLabel={grant} />)}
                   </span>
-                  <span className="web-keys__when">
+                  <Note inline>
                     {t('profile/keys/made', { day: dayOf(token.created) })}
                     {' \u{00B7} '}
                     {token.expires === undefined ? t('profile/keys/neverExpires')
                       : t(expired ? 'profile/keys/expired' : 'profile/keys/expires', { day: momentOf(token.expires) })}
-                  </span>
+                  </Note>
                 </span>
                 <Button size="sm" variant="danger" label={t('profile/keys/revoke')} onClick={() => void revoke(token)} />
               </li>

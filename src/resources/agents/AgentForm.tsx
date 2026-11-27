@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, SchemaForm, Spinner, type EnumOption, type JsonSchemaObject } from '@softov/scena/ui';
+import { Alert, Blocks, Button, Column, type EnumOption, Group, type JsonSchemaObject, Note, PageActions, SchemaForm, Spinner } from '../../ui/index.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import type { AgentInfo } from '@microsoft/agent-host-protocol';
@@ -15,12 +15,13 @@ import { PEOPLE, peopleReducer, servesPeople, type ListedUser, type PeopleState 
 import { PLUGINS, pluginsReducer, type PluginRow } from '../../bridges/plugins.js';
 import { hostSaid } from '../../bridges/said.js';
 import { EMOJIcon } from '../emojis.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { meOn } from '../connectors/actions.js';
 import { ID_PATTERN, idFor, ownerChoices } from '../connectors/form.js';
 import { agentConfigForForm, agentTopSchema, agentWanted, engineSchema, startOf, topOf, type AgentTop } from './form.js';
 import { EnginePicker } from './EnginePicker.js';
 import { newAgentTab } from './state.js';
+import '../connectors/sign-in-step.css';
 
 type Bag = Record<string, unknown>;
 
@@ -143,8 +144,8 @@ export function AgentForm({ host, record }: { host: string; record?: AgentRow })
   if (enginesRead.error !== null && !editing) return <PageAlert tone="warning" title={t('agents/form/noEngines')} message={enginesRead.error} />;
   if (enginesRead.state === undefined && enginesRead.error === null) return <Spinner label={t('agents/form/reading')} />;
   if (!userRead) return <Spinner label={t('agents/form/reading')} />;
-  if (!editing && engines.length === 0) return <p className="web-note">{t('agents/form/noEngines')}</p>;
-  if (!editing && owners.length === 0) return <p className="web-note">{t('agents/form/noPut')}</p>;
+  if (!editing && engines.length === 0) return <Note>{t('agents/form/noEngines')}</Note>;
+  if (!editing && owners.length === 0) return <Note>{t('agents/form/noPut')}</Note>;
 
   const dirty = JSON.stringify(top) !== JSON.stringify(heldTop) || JSON.stringify(config) !== JSON.stringify(heldForm);
   const ready = engine !== undefined && ID_PATTERN.test(top.id) && top.name.trim() !== '' && top.owner !== '';
@@ -164,27 +165,26 @@ export function AgentForm({ host, record }: { host: string; record?: AgentRow })
   };
 
   return (
-    <div className="web-connector-form">
-      {editing && engine === undefined ? <p className="web-note">{t('agents/form/unknownEngine', { engine: record.engine })}</p> : null}
+    <Blocks>
+      {editing && engine === undefined ? <Note>{t('agents/form/unknownEngine', { engine: record.engine })}</Note> : null}
       {editing && engine === undefined ? null : (
-        <div className="web-connector-form__pick">
+        <Column gap="var(--oo-spacing-xs, 4px)">
           <span className="web-connector-form__label">{t('agents/form/engine')}{editing ? null : <span className="web-connector-form__required" aria-hidden="true">*</span>}</span>
           <EnginePicker engines={engines} value={engineName} template={template} labelOf={labelOf} fixed={editing} onPick={pickEngine} onTemplate={pickTemplate} />
-        </div>
+        </Column>
       )}
       {engine === undefined ? null : <SchemaForm schema={head} value={top as unknown as Bag} baseline={(editing ? heldTop : top) as unknown as Bag} onChange={changeTop} jsonTextRoot={false} />}
       {fields === undefined ? null : (
-        <section className="web-connector-form__adapter" aria-label={t('agents/form/settings')}>
-          <h3 className="web-connector-form__heading web-host-label"><span aria-hidden="true">{EMOJIcon.settings}</span>{t('agents/form/settings')}</h3>
+        <Group title={t('agents/form/settings')} icon={EMOJIcon.settings}>
           <SchemaForm key={`${engineName}:${template}`} schema={fields} views={SETTINGS_VIEWS} value={config} baseline={editing ? heldForm : config} onChange={(next) => { setConfig(next); setSaved(false); }} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} fieldActions />
-        </section>
+        </Group>
       )}
       {failure === null ? null : <Alert tone="danger" title={t('agents/form/failed')} message={failure} />}
-      <div className="web-page__actions">
+      <PageActions>
         <Button label={t(editing ? 'connectors/form/save' : 'agents/form/create')} variant="primary" disabled={!ready || busy || !jsonValid || (editing && !dirty)} {...(jsonValid ? {} : { title: t('host/settings/fixJson') })} onClick={save} />
         {editing ? <Button label={t('connectors/form/reset')} disabled={!dirty || busy} onClick={() => { setTop(heldTop); setConfig(heldForm); setFailure(null); }} /> : null}
-        {saved && !dirty ? <span className="web-note">{t('connectors/form/saved')}</span> : null}
-      </div>
-    </div>
+        {saved && !dirty ? <Note inline>{t('connectors/form/saved')}</Note> : null}
+      </PageActions>
+    </Blocks>
   );
 }

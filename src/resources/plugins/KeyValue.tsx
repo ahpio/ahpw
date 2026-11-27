@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 import './keyvalue.css';
+import { Note } from '../../ui/index.js';
 
 /**
  * A view's `KeyValue`: one line, its label at the start and its value at the
@@ -9,7 +10,7 @@ import './keyvalue.css';
 export default function KeyValue({ label, value, child }: { label?: unknown; value?: unknown; child?: ReactNode }): ReactElement {
   return (
     <div className="web-keyvalue">
-      <span className="web-keyvalue__label">{textOf(label)}</span>
+      <Note inline>{textOf(label)}</Note>
       <span className="web-keyvalue__value">{child === undefined || child === null ? textOf(value) : child}</span>
     </div>
   );

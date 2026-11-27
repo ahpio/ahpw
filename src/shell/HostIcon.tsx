@@ -1,9 +1,10 @@
 import { useSyncExternalStore, type ReactElement, type ReactNode } from 'react';
 import { useStore } from '@softov/scena/react';
-import { Text } from '@softov/scena/ui';
+import { Column, Row, RowButton, Text } from '../ui/index.js';
 import { resolveThemeMode, THEME_MODE_PATH, type ThemeModeChoice } from '@softov/scena/styles';
 import { pickIcon, type Icon } from '../bridges/icons.js';
 import { NameMark } from './NameMark.js';
+import './host-icon.css';
 
 /** The system's dark preference; the theme controller follows it on the document, not in the store. */
 const DARK = '(prefers-color-scheme: dark)';
@@ -74,23 +75,23 @@ export function PageTitle({ icons, emoji, initials, title, onTitle, titleHint, u
   const icon = useHostIcon(icons);
   const heading = <Text variant="h2" text={title} />;
   return (
-    <div className="web-page-title">
+    <Row align="center" gap="var(--oo-spacing-md)">
       {icon !== undefined
         ? <img className="web-host-icon web-page-title__mark" src={icon.src} width={40} height={40} alt="" draggable={false} />
         : initials !== undefined
           ? <NameMark name={initials} size={40} className="web-page-title__mark" />
           : <span className="web-page-title__mark" aria-hidden="true">{emoji}</span>}
-      <div className="web-page-title__lines">
+      <Column gap="2px">
         {onTitle === undefined ? heading : (
-          <button type="button" className="web-page-title__open" {...(titleHint === undefined ? {} : { title: titleHint })} onClick={onTitle}>{heading}</button>
+          <RowButton fit {...(titleHint === undefined ? {} : { title: titleHint })} onClick={onTitle}>{heading}</RowButton>
         )}
         {uri === undefined && state === undefined ? null : (
-          <div className="web-page-title__meta">
+          <Row align="center" wrap gap="var(--oo-spacing-sm)">
             {uri === undefined ? null : <span className="web-role__uri" {...(uriHint === undefined ? {} : { title: uriHint })}>{uri}</span>}
             {state}
-          </div>
+          </Row>
         )}
-      </div>
-    </div>
+      </Column>
+    </Row>
   );
 }

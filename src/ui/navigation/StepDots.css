@@ -1,0 +1,24 @@
+.oo-step-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.oo-step-dots__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 1px solid var(--oo-color-muted);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.oo-step-dots__dot[data-done='true'] {
+  background: var(--oo-color-muted);
+}
+
+.oo-step-dots__dot[data-here='true'] {
+  border-color: var(--oo-color-accent);
+  background: var(--oo-color-accent);
+}

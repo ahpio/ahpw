@@ -3,7 +3,7 @@ import type { PickerAction } from '@softov/scena/types';
 import type { SessionSummary, StateAction } from '@microsoft/agent-host-protocol';
 import { hostBridge } from '../../bridges/data.js';
 import { confirm, failed } from '../../shell/notify/index.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 import { EMOJIcon } from '../emojis.js';
 import { isArchived, isRead } from './status.js';
 

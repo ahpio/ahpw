@@ -1,6 +1,6 @@
 import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
 import { refKey, refOf, useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
@@ -70,12 +70,12 @@ export default function ComputerExplorer(): ReactElement {
   const error = multi ? null : errors[0] ?? null;
   const state = multi ? states.find((one) => one !== undefined) : states[0];
   const notice = hosts.length === 0
-    ? <p className="web-note web-explorer__empty">{t('computers/explorer/notServed')}</p>
+    ? <Note inset>{t('computers/explorer/notServed')}</Note>
     : error !== null
       ? <Alert tone="danger" title={t('computers/notices/none')} message={error} />
       : state === undefined
         ? <Spinner label={t('computers/notices/reading')} />
-        : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('computers/explorer/empty')}</p> : null;
+        : rows.length === 0 ? <Note inset>{t('computers/explorer/empty')}</Note> : null;
 
   return (
     <ExplorerList

@@ -5,6 +5,13 @@ import { useChannel } from '../../bridges/channel.js';
 import { SANDBOX } from '../../shell/browser/sandbox.js';
 import { EMOJIcon } from '../emojis.js';
 import { canvasKey, canvasName, canvasUriOf } from './canvases.js';
+import { Button, Link, Note, Toolbar } from '../../ui/index.js';
+import '../../shell/explorer/explorer-list.css';
+import '../../shell/browser/browser-view.css';
+import './canvas-view.css';
+
+/** The bar's controls wrap onto a second line in a narrow pane. */
+const WRAPS = { flexWrap: 'wrap' } as const;
 
 /**
  * A canvas: its page in an iframe, with the Browser view's sandbox, under a
@@ -29,32 +36,32 @@ export default function CanvasView({ host, chat, resource }: { host: string; cha
   const url = canvasUriOf(state);
   const name = canvasName(state) ?? t('canvases/tab');
   const button = (icon: string, label: string, run: () => void, disabled: boolean): ReactElement => (
-    <button type="button" className="web-explorer__action" title={label} aria-label={label} disabled={disabled} onClick={run}>
-      <span className="web-explorer__icon">{icon}</span>
-    </button>
+    <Button variant="subtle" shape="icon" title={label} ariaLabel={label} disabled={disabled} onClick={run}>
+      {icon}
+    </Button>
   );
 
   return (
     <div className="web-browser">
-      <div className="web-browser__bar">
+      <Toolbar gap="var(--oo-spacing-xs)" style={WRAPS}>
         <span className="web-canvas__name">{name}</span>
-        {state?.status === undefined || state.status === '' ? null : <span className="web-note">{state.status}</span>}
+        {state?.status === undefined || state.status === '' ? null : <Note inline>{state.status}</Note>}
         <span className="web-explorer__actions web-canvas__actions">
           {button(EMOJIcon.reload, t('common/reload'), () => setLoads((n) => n + 1), url === undefined)}
           {url === undefined ? (
             button(EMOJIcon.external, t('shell/browser/openOutside'), () => undefined, true)
           ) : (
-            <a className="web-explorer__action" href={url} target="_blank" rel="noopener noreferrer" title={t('shell/browser/openOutside')} aria-label={t('shell/browser/openOutside')}>
-              <span className="web-explorer__icon">{EMOJIcon.external}</span>
-            </a>
+            <Link href={url} external icon title={t('shell/browser/openOutside')} ariaLabel={t('shell/browser/openOutside')}>
+              {EMOJIcon.external}
+            </Link>
           )}
         </span>
-      </div>
+      </Toolbar>
       <div className="web-browser__page">
         {url === undefined ? (
           <div className="web-browser__empty">
             <p className="web-browser__emptyTitle">{t('canvases/view/unavailable')}</p>
-            <p className="web-note">{t('canvases/view/unavailableBody')}</p>
+            <Note>{t('canvases/view/unavailableBody')}</Note>
           </div>
         ) : (
           <iframe key={`${loads}:${url}`} className="web-browser__frame" src={url} title={name} sandbox={SANDBOX} referrerPolicy="strict-origin-when-cross-origin" />

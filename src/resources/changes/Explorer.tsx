@@ -1,6 +1,6 @@
 import { useMemo, useState, type MouseEvent, type ReactElement, type ReactNode } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, ContextMenu, Spinner, Tree, type TreeNode } from '@softov/scena/ui';
+import { Alert, Button, ContextMenu, Divider, Note, Panel, Segments, Spinner, Toolbar, Tree, type TreeNode } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { sessionReducer, type ChangesetOperation, type SessionState, type SessionSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths, hostBridge, summaryPath } from '../../bridges/data.js';
@@ -9,11 +9,14 @@ import { ACTIVE_SESSION, type ActiveSession } from '../sessions/state.js';
 import { openAsItems, viewersOf } from '../files/viewers.js';
 import { plural } from '../../i18n/locales.js';
 import { EMOJIcon } from '../emojis.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 import { done, failed } from '../../shell/notify/index.js';
 import { iconOf, openChange, scoped, toneOf, useChangeset } from './changeset.js';
 import { ChangesetForms } from './Forms.js';
 import { changeCopies, firstScope, folderCopies, folderTree, groupChanges, letterOf, relativeDir, scopesOf, sortChanges, type Change, type ChangeFolder, type ChangeGrouping, type ChangeSort, type CopyTexts } from './words.js';
+import '../files/diff-page.css';
+import '../../shell/explorer/explorer-list.css';
+import './explorer.css';
 
 /** How the files are drawn: one row each with its folder beside it, or under their folders. */
 type View = 'list' | 'tree';
@@ -126,23 +129,23 @@ export default function ChangesExplorer(): ReactElement {
       <span className="web-change__end">
         <span className="web-change__actions">
           {review ? (
-            <button type="button" className="web-change__action" title={t(change.reviewed ? 'changes/markNotReviewed' : 'changes/markReviewed')} aria-label={t(change.reviewed ? 'changes/markNotReviewed' : 'changes/markReviewed')} aria-pressed={change.reviewed} onClick={(event) => act(event, () => changes.review([change], !change.reviewed))}>
+            <Button variant="subtle" shape="icon" size="xs" title={t(change.reviewed ? 'changes/markNotReviewed' : 'changes/markReviewed')} ariaLabel={t(change.reviewed ? 'changes/markNotReviewed' : 'changes/markReviewed')} pressed={change.reviewed} onClick={(event) => act(event, () => changes.review([change], !change.reviewed))}>
               {EMOJIcon.check}
-            </button>
+            </Button>
           ) : null}
           {change.status === 'deleted' ? null : (
-            <button type="button" className="web-change__action" title={t('changes/openFile')} aria-label={t('changes/openFile')} onClick={(event) => act(event, () => void scena.commands.execute('ahp.openFile', { uri: change.file }))}>
+            <Button variant="subtle" shape="icon" size="xs" title={t('changes/openFile')} ariaLabel={t('changes/openFile')} onClick={(event) => act(event, () => void scena.commands.execute('ahp.openFile', { uri: change.file }))}>
               {EMOJIcon.file}
-            </button>
+            </Button>
           )}
           {fileOps.map((operation) => (
-            <button key={operation.id} type="button" className="web-change__action" title={operation.label} aria-label={operation.label} disabled={busy(operation)} onClick={(event) => act(event, () => void changes.run(operation, change))}>
+            <Button variant="subtle" shape="icon" size="xs" key={operation.id} title={operation.label} ariaLabel={operation.label} disabled={busy(operation)} onClick={(event) => act(event, () => void changes.run(operation, change))}>
               {iconOf(operation)}
-            </button>
+            </Button>
           ))}
         </span>
         <span className="web-change__counts">
-          {change.added === undefined && change.removed === undefined ? null : <><span className="web-diff--add">+{change.added ?? 0}</span> <span className="web-diff--remove">-{change.removed ?? 0}</span></>}
+          {change.added === undefined && change.removed === undefined ? null : <><span className="web-diff--add">+{change.added ?? 0}</span> <Note inline tone="danger">-{change.removed ?? 0}</Note></>}
         </span>
         <span className="web-change__letter" data-letter={letter} title={t(WORD[letter])}>{letter}</span>
       </span>
@@ -227,133 +230,119 @@ export default function ChangesExplorer(): ReactElement {
   const status = String(changes.state?.status ?? '');
   const notice = (
     <>
-      {active === undefined ? <p className="web-note web-explorer__empty">{t('changes/noSession')}</p> : null}
-      {active !== undefined && session.state !== undefined && scopes.length === 0 ? <p className="web-note web-explorer__empty">{t('changes/untracked')}</p> : null}
-      {changes.said === null ? null : <Alert tone={changes.said.tone} message={changes.said.text} />}
-      {changes.error === null ? null : <Alert tone="danger" title={t('changes/notReadable')} message={changes.error} />}
-      {changes.state?.error === undefined ? null : <Alert tone="danger" message={changes.state.error.message} />}
-      {scope !== undefined && (changes.state === undefined || status === 'computing') && changes.error === null ? <Spinner label={t('changes/computing')} /> : null}
-      {changes.state !== undefined && status !== 'computing' && files.length === 0 ? <p className="web-note web-explorer__empty">{t('changes/none')}</p> : null}
-    </>
-  );
-
-  const headButton = (icon: string, label: string, run: (event: MouseEvent<HTMLButtonElement>) => void, extra?: { on?: boolean; busy?: boolean; disabled?: boolean; tone?: string | null }): ReactElement => (
-    <button
-      key={label}
-      type="button"
-      className="web-explorer__action"
-      title={label}
-      aria-label={label}
-      aria-pressed={extra?.on}
-      data-on={extra?.on === true ? 'true' : 'false'}
-      data-busy={extra?.busy === true ? 'true' : 'false'}
-      data-tone={extra?.tone ?? undefined}
-      disabled={extra?.disabled}
-      onClick={run}
-    >
-      <span className="web-explorer__icon">{icon}</span>
-    </button>
-  );
-
-  const showAs = (next: View): void => {
-    setView(next);
-    keep(VIEW_KEY, next);
-  };
-
-  const openScopes = (event: MouseEvent<HTMLButtonElement>): void => {
-    const box = event.currentTarget.getBoundingClientRect();
-    const items: PickerAction[] = scopes.map((one) => ({
-      title: one.label,
-      icon: one.uri === scope?.uri ? EMOJIcon.check : '',
-      onSelect: (host) => { host.closeMenu(); setChosen(one.uri); },
-    }));
-    setMenu({ x: box.left, y: box.bottom, items });
-  };
-
-  const openOptions = (event: MouseEvent<HTMLButtonElement>): void => {
-    const box = event.currentTarget.getBoundingClientRect();
-    const mark = (on: boolean): { icon: string } => ({ icon: on ? EMOJIcon.check : '' });
-    const items: PickerAction[] = whole.map((operation) => {
-      const tone = toneOf(operation);
-      return {
-        title: operation.label,
-        ...(operation.description === undefined ? {} : { tooltip: operation.description }),
-        group: 'changes',
-        icon: iconOf(operation),
-        ...(tone === null ? {} : { color: tone }),
-        disabled: busy(operation),
-        onSelect: (host) => { host.closeMenu(); void changes.run(operation); },
-      };
-    });
-    items.push(
-      { title: t('changes/view/list'), group: 'view', ...mark(view === 'list'), onSelect: (host) => { host.closeMenu(); showAs('list'); } },
-      { title: t('changes/view/tree'), group: 'view', ...mark(view === 'tree'), onSelect: (host) => { host.closeMenu(); showAs('tree'); } },
+        {active === undefined ? <Note inset>{t('changes/noSession')}</Note> : null}
+        {active !== undefined && session.state !== undefined && scopes.length === 0 ? <Note inset>{t('changes/untracked')}</Note> : null}
+        {changes.said === null ? null : <Alert tone={changes.said.tone} message={changes.said.text} />}
+        {changes.error === null ? null : <Alert tone="danger" title={t('changes/notReadable')} message={changes.error} />}
+        {changes.state?.error === undefined ? null : <Alert tone="danger" message={changes.state.error.message} />}
+        {scope !== undefined && (changes.state === undefined || status === 'computing') && changes.error === null ? <Spinner label={t('changes/computing')} /> : null}
+        {changes.state !== undefined && status !== 'computing' && files.length === 0 ? <Note inset>{t('changes/none')}</Note> : null}
+      </>
     );
-    if (groupings.length > 1) {
-      for (const one of groupings) {
-        items.push({ title: t(`changes/grouping/${one}`), group: 'group', ...mark(one === grouping), onSelect: (host) => { host.closeMenu(); setPicked(one); keep(GROUPING_KEY, one); } });
+
+    const headButton = (icon: string, label: string, run: (event: MouseEvent<HTMLButtonElement>) => void, extra?: { on?: boolean; busy?: boolean; disabled?: boolean; tone?: 'blue' | 'yellow' | 'red' | null }): ReactElement => (
+      <Button variant="subtle" shape="icon" key={label} title={label} ariaLabel={label} pressed={extra?.on} busy={extra?.busy === true} tone={extra?.tone ?? undefined} disabled={extra?.disabled} onClick={run}>
+        {icon}
+      </Button>
+    );
+
+    const showAs = (next: View): void => {
+      setView(next);
+      keep(VIEW_KEY, next);
+    };
+
+    const openScopes = (event: MouseEvent<HTMLButtonElement>): void => {
+      const box = event.currentTarget.getBoundingClientRect();
+      const items: PickerAction[] = scopes.map((one) => ({
+        title: one.label,
+        icon: one.uri === scope?.uri ? EMOJIcon.check : '',
+        onSelect: (host) => { host.closeMenu(); setChosen(one.uri); },
+      }));
+      setMenu({ x: box.left, y: box.bottom, items });
+    };
+
+    const openOptions = (event: MouseEvent<HTMLButtonElement>): void => {
+      const box = event.currentTarget.getBoundingClientRect();
+      const mark = (on: boolean): { icon: string } => ({ icon: on ? EMOJIcon.check : '' });
+      const items: PickerAction[] = whole.map((operation) => {
+        const tone = toneOf(operation);
+        return {
+          title: operation.label,
+          ...(operation.description === undefined ? {} : { tooltip: operation.description }),
+          group: 'changes',
+          icon: iconOf(operation),
+          ...(tone === null ? {} : { color: tone }),
+          disabled: busy(operation),
+          onSelect: (host) => { host.closeMenu(); void changes.run(operation); },
+        };
+      });
+      items.push(
+        { title: t('changes/view/list'), group: 'view', ...mark(view === 'list'), onSelect: (host) => { host.closeMenu(); showAs('list'); } },
+        { title: t('changes/view/tree'), group: 'view', ...mark(view === 'tree'), onSelect: (host) => { host.closeMenu(); showAs('tree'); } },
+      );
+      if (groupings.length > 1) {
+        for (const one of groupings) {
+          items.push({ title: t(`changes/grouping/${one}`), group: 'group', ...mark(one === grouping), onSelect: (host) => { host.closeMenu(); setPicked(one); keep(GROUPING_KEY, one); } });
+        }
       }
-    }
-    for (const one of SORTS) {
-      items.push({ title: t(`changes/sort/${one}`), group: 'sort', ...mark(one === sort), onSelect: (host) => { host.closeMenu(); setSort(one); keep(SORT_KEY, one); } });
-    }
-    if (branches.length > 0) {
-      items.push({ title: t('changes/expandAll'), group: 'folders', icon: '', onSelect: (host) => { host.closeMenu(); setCollapsed(new Set()); } });
-      items.push({ title: t('changes/collapseAll'), group: 'folders', icon: '', onSelect: (host) => { host.closeMenu(); setCollapsed(new Set(branches)); } });
-    }
-    setMenu({ x: Math.max(0, box.right - 200), y: box.bottom, items });
-  };
+      for (const one of SORTS) {
+        items.push({ title: t(`changes/sort/${one}`), group: 'sort', ...mark(one === sort), onSelect: (host) => { host.closeMenu(); setSort(one); keep(SORT_KEY, one); } });
+      }
+      if (branches.length > 0) {
+        items.push({ title: t('changes/expandAll'), group: 'folders', icon: '', onSelect: (host) => { host.closeMenu(); setCollapsed(new Set()); } });
+        items.push({ title: t('changes/collapseAll'), group: 'folders', icon: '', onSelect: (host) => { host.closeMenu(); setCollapsed(new Set(branches)); } });
+      }
+      setMenu({ x: Math.max(0, box.right - 200), y: box.bottom, items });
+    };
 
-  const added = files.reduce((sum, one) => sum + (one.added ?? 0), 0);
-  const removed = files.reduce((sum, one) => sum + (one.removed ?? 0), 0);
+    const added = files.reduce((sum, one) => sum + (one.added ?? 0), 0);
+    const removed = files.reduce((sum, one) => sum + (one.removed ?? 0), 0);
 
-  return (
-    <div className="web-explorer web-changes">
-      <div className="web-explorer__title">
-        <span className="web-explorer__name" title={summary?.title}>{summary === undefined ? t('changes/title') : t('changes/titleOf', { title: summary.title || t('changes/untitled') })}</span>
-        {scope === undefined ? null : (
-          <span className="web-explorer__actions">
+    return (
+      <>
+      <Panel
+        title={summary === undefined ? t('changes/title') : t('changes/titleOf', { title: summary.title || t('changes/untitled') })}
+        {...(summary === undefined ? {} : { titleHint: summary.title })}
+        actions={scope === undefined ? null : (
+          <>
             {whole.map((operation) => headButton(iconOf(operation), operation.label, () => void changes.run(operation), {
               busy: busy(operation),
               disabled: busy(operation),
               tone: toneOf(operation),
             }))}
-            {whole.length === 0 ? null : <span className="web-explorer__sep" aria-hidden="true" />}
+            {whole.length === 0 ? null : <Divider axis="vertical" />}
             {headButton(EMOJIcon.reload, t('common/reload'), () => void hostBridge(at).refresh(scope.uri))}
             {headButton(EMOJIcon.more, t('changes/viewOptions'), openOptions)}
-          </span>
+          </>
         )}
-      </div>
-      {scope === undefined ? null : (
-        <div className="web-changes__bar">
-          {scopes.length > 1 ? (
-            <button type="button" className="web-changes__scope" title={scope.description ?? scope.label} aria-haspopup="menu" onClick={openScopes}>
-              {scope.label} <span aria-hidden="true">{EMOJIcon.caretDown}</span>
-            </button>
-          ) : (
-            <span className="web-changes__scope web-changes__scope--only" title={scope.description ?? scope.label}>{scope.label}</span>
-          )}
-          {files.length === 0 ? null : (
-            // A narrow pane has room for the file icon and the count; the words are its tip.
-            <span className="web-changes__totals" title={plural('changes/files', files.length)}>
-              <span aria-label={plural('changes/files', files.length)}><span aria-hidden="true">{EMOJIcon.file}</span> {files.length}</span>
-              {' '}<span className="web-diff--add">+{added}</span> <span className="web-diff--remove">{'\u{2212}'}{removed}</span>
-            </span>
-          )}
-          <span className="web-segments" role="group" aria-label={t('changes/view/showAs')}>
-            {(['list', 'tree'] as const).map((one) => (
-              <button key={one} type="button" className="web-segments__item web-segments__item--icon" aria-pressed={view === one} title={t(`changes/view/${one}`)} aria-label={t(`changes/view/${one}`)} onClick={() => showAs(one)}>
-                {one === 'list' ? EMOJIcon.log : EMOJIcon.tree}
-              </button>
-            ))}
-          </span>
-        </div>
-      )}
-      {files.length === 0 ? null : (
-        <input className="web-explorer__filter" type="search" value={filter} placeholder={t('changes/filter')} aria-label={t('changes/filter')} onChange={(event) => setFilter(event.target.value)} />
-      )}
-      <div className="web-explorer__scroll" onContextMenu={openMenu}>
-        <div className="web-explorer__notice">{notice}</div>
+        bars={scope === undefined ? null : (
+          <Toolbar>
+            {scopes.length > 1 ? (
+              <Button variant="tool" title={scope.description ?? scope.label} hasPopup="menu" onClick={openScopes}>
+                {scope.label} <span aria-hidden="true">{EMOJIcon.caretDown}</span>
+              </Button>
+            ) : (
+              <span className="web-changes__scope web-changes__scope--only" title={scope.description ?? scope.label}>{scope.label}</span>
+            )}
+            {files.length === 0 ? null : (
+              // A narrow pane has room for the file icon and the count; the words are its tip.
+              <span className="web-changes__totals" title={plural('changes/files', files.length)}>
+                <span aria-label={plural('changes/files', files.length)}><span aria-hidden="true">{EMOJIcon.file}</span> {files.length}</span>
+                {' '}<span className="web-diff--add">+{added}</span> <Note inline tone="danger">{'\u{2212}'}{removed}</Note>
+              </span>
+            )}
+            <Segments
+              label={t('changes/view/showAs')}
+              options={[{ id: 'list', label: t('changes/view/list'), icon: EMOJIcon.log }, { id: 'tree', label: t('changes/view/tree'), icon: EMOJIcon.tree }] as const}
+              value={view}
+              onChange={showAs}
+            />
+          </Toolbar>
+        )}
+        {...(files.length === 0 ? {} : { filter: { value: filter, label: t('changes/filter'), onChange: setFilter } })}
+        notice={notice}
+        onContextMenu={openMenu}
+      >
         <Tree<Change>
           nodes={nodes}
           selectedKey={selected}
@@ -372,10 +361,10 @@ export default function ChangesExplorer(): ReactElement {
             openChange(scena, at, node.data, scope?.uri, review);
           }}
         />
-        {needle !== '' && shown.length === 0 ? <p className="web-note web-explorer__empty">{t('changes/noMatch')}</p> : null}
-      </div>
+        {needle !== '' && shown.length === 0 ? <Note inset>{t('changes/noMatch')}</Note> : null}
+      </Panel>
       <ChangesetForms form={changes.form} files={files} onCommit={changes.commit} onPullRequest={changes.pullRequest} onClose={changes.closeForm} />
       {menu === null ? null : <ContextMenu spec={{ items: menu.items }} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
-    </div>
+    </>
   );
 }

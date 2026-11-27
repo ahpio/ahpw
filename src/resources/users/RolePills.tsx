@@ -1,9 +1,9 @@
 import { useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button, Note, Pill } from '../../ui/index.js';
 import { ContextMenu } from '@softov/scena/ui/menu';
-import { RemovableChip } from '../../shell/view/RemovableChip.js';
 import { textToColor } from '../../shell/NameMark.js';
+import './role-pills.css';
 
 interface RolePillsProps {
   /** The roles the person holds, in the record's order. */
@@ -30,12 +30,12 @@ export function RolePills({ held, offered, writes, onChange, onOpen }: RolePills
 
   return (
     <div ref={bar} className="web-role-pills" role="group" aria-label={t('users/user/roles')}>
-      {held.length === 0 ? <span className="web-note">{t('users/user/noRolesHeld')}</span> : held.map((role) => (
-        <RemovableChip
+      {held.length === 0 ? <Note inline>{t('users/user/noRolesHeld')}</Note> : held.map((role) => (
+        <Pill
           key={role}
           label={role}
           color={textToColor(role)}
-          onOpen={() => onOpen(role)}
+          onClick={() => onOpen(role)}
           removeLabel={t('users/user/dropRole', { role })}
           {...(writes ? { onRemove: () => onChange(held.filter((one) => one !== role)) } : {})}
         />

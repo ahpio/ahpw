@@ -1,22 +1,24 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Badge, Button, DetailList, Progress, Text, type DetailItem } from '@softov/scena/ui';
+import { Badge, Button, Column, DangerZone, type DetailItem, DetailList, Note, Page, PageActions, PageHead, Progress, Text } from '../../ui/index.js';
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { useOwnGrants } from '../../bridges/own-grants.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { timeOf } from '../automations/words.js';
 import { act, may } from './actions.js';
 import { COMPUTERS, computersReducer, computersRoot, computerUri, factsOf, standingOf, type ComputersState, type MachineFacts, type Standing } from './machines.js';
 import { sizeWords, usageOf, type Usage } from './usage.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './page.css';
+import '../sessions/usage.css';
+import '../clients/page.css';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 const TONE: Record<Standing, Tone> = { running: 'success', problem: 'danger', stopped: 'default' };
@@ -56,14 +58,14 @@ function UsageView({ usage }: { usage: Usage }): ReactElement {
   const memory = Math.round(usage.memory.percent);
   return (
     <div className="web-usage">
-      <div className="web-usage__meter">
-        <span className="web-usage__label">{usage.cpu.cores === undefined ? t('computers/usage/cpu', { percent: cpu }) : t('computers/usage/cpuOf', { percent: cpu, cores: usage.cpu.cores })}</span>
+      <Column gap="var(--oo-spacing-xs)">
+        <Note inline>{usage.cpu.cores === undefined ? t('computers/usage/cpu', { percent: cpu }) : t('computers/usage/cpuOf', { percent: cpu, cores: usage.cpu.cores })}</Note>
         <Progress value={Math.min(cpu, 100)} max={100} color={cpu >= 85 ? 'red' : cpu >= 65 ? 'orange' : 'blue'} />
-      </div>
-      <div className="web-usage__meter">
-        <span className="web-usage__label">{t('computers/usage/memory', { used: sizeWords(usage.memory.used), limit: sizeWords(usage.memory.limit), percent: memory })}</span>
+      </Column>
+      <Column gap="var(--oo-spacing-xs)">
+        <Note inline>{t('computers/usage/memory', { used: sizeWords(usage.memory.used), limit: sizeWords(usage.memory.limit), percent: memory })}</Note>
         <Progress value={Math.min(memory, 100)} max={100} color={memory >= 85 ? 'red' : memory >= 65 ? 'orange' : 'blue'} />
-      </div>
+      </Column>
       {items.length === 0 ? null : <DetailList items={items} columns={3} />}
     </div>
   );
@@ -106,23 +108,23 @@ export default function ComputerPage({ host, machine: id }: { host: string; mach
   const writable = facts.controlled && may(offers, grants, 'write');
 
   return (
-    <div className="web-page">
-      <div className="web-page__head">
+    <Page>
+      <PageHead>
         <PageTitle
           emoji={EMOJIcon.computers}
           title={id}
           uri={computerUri(computersRoot(offers), id)}
           state={<Badge tone={TONE[standing]} text={facts.oomKilled ? t('computers/standing/oom') : t(`computers/standing/${standing}`)} />}
         />
-        <div className="web-page__actions">
+        <PageActions>
           {writable ? (
             facts.running
               ? <Button label={t('computers/actions/stop')} onClick={() => void act(host, offers, id, 'stop')} />
               : <Button label={t('computers/actions/start')} variant="primary" onClick={() => void act(host, offers, id, 'start')} />
           ) : null}
           {writable && facts.running ? <Button label={t('computers/actions/restart')} onClick={() => void act(host, offers, id, 'restart')} /> : null}
-        </div>
-      </div>
+        </PageActions>
+      </PageHead>
 
       {facts.oomKilled ? <PageAlert tone="warning" message={t('computers/notices/oom')} /> : null}
 
@@ -156,7 +158,7 @@ export default function ComputerPage({ host, machine: id }: { host: string; mach
         <pre>{JSON.stringify(entry.record.status, null, 2)}</pre>
       </details>
 
-      {facts.controlled && may(offers, grants, 'delete') ? <DangerZone label={t('computers/actions/remove')} onClick={() => void act(host, offers, id, 'remove')} /> : null}
-    </div>
+      {facts.controlled && may(offers, grants, 'delete') ? <DangerZone label={t('computers/actions/remove')} onConfirm={() => void act(host, offers, id, 'remove')} /> : null}
+    </Page>
   );
 }

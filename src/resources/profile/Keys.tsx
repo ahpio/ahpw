@@ -1,13 +1,12 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Spinner } from '@softov/scena/ui';
+import { Blocks, ChoicePicker, Note, Spinner } from '../../ui/index.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { rootId, useMe } from '../../bridges/me.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { PEOPLE, peopleReducer, readOwnUser, servesPeople, type Grant, type ListedUser, type PeopleState } from '../../bridges/people.js';
 import { servesTokens } from '../../bridges/tokens.js';
-import { Field } from '../../shell/view/Field.js';
 import { MintForm } from './MintForm.js';
 import { TokenList } from './TokenList.js';
 
@@ -17,7 +16,7 @@ const usersReducer = peopleReducer('users');
 export function Keys({ host }: { host: string }): ReactElement {
   const { t } = useI18n();
   const offers = useStore<Offers>(ahpPaths(host).offers) ?? NO_OFFERS;
-  if (!servesTokens(offers)) return <div className="web-profile__keys"><p className="web-note">{t('profile/keys/notServed')}</p></div>;
+  if (!servesTokens(offers)) return <Blocks><Note>{t('profile/keys/notServed')}</Note></Blocks>;
   return rootId(offers) === undefined ? <OwnKeys host={host} offers={offers} /> : <PickedKeys host={host} offers={offers} />;
 }
 
@@ -30,7 +29,7 @@ function OwnKeys({ host, offers }: { host: string; offers: Offers }): ReactEleme
     readOwnUser(host, offers).then((user) => { if (live) setGrants(user.grants ?? []); }, () => undefined);
     return () => { live = false; };
   }, [host, offers]);
-  return <div className="web-profile__keys"><KeysOf host={host} grants={grants} /></div>;
+  return <Blocks><KeysOf host={host} grants={grants} /></Blocks>;
 }
 
 /** A person picked from the host's users, then their keys. */
@@ -40,19 +39,19 @@ function PickedKeys({ host, offers }: { host: string; offers: Offers }): ReactEl
   const [picked, setPicked] = useState('');
   const records = users.state?.records ?? [];
   const user = records.find((one) => one.id === picked)?.record;
-  if (users.error !== null) return <div className="web-profile__keys"><p className="web-note">{users.error}</p></div>;
+  if (users.error !== null) return <Blocks><Note>{users.error}</Note></Blocks>;
   return (
-    <div className="web-profile__keys">
-      {users.state !== undefined && records.length === 0 ? <p className="web-note">{t('profile/keys/noPeople')}</p> : (
-        <Field label={t('profile/keys/person')}>
-          <select className="web-field" value={user === undefined ? '' : picked} onChange={(event) => setPicked(event.target.value)}>
-            <option value="" disabled>{t('profile/keys/pickPerson')}</option>
-            {records.map((one) => <option key={one.id} value={one.id}>{one.id}</option>)}
-          </select>
-        </Field>
+    <Blocks>
+      {users.state !== undefined && records.length === 0 ? <Note>{t('profile/keys/noPeople')}</Note> : (
+        <ChoicePicker
+          label={t('profile/keys/person')}
+          options={[{ value: '', label: t('profile/keys/pickPerson'), disabled: true }, ...records.map((one) => ({ value: one.id, label: one.id }))]}
+          value={user === undefined ? '' : picked}
+          onChange={setPicked}
+        />
       )}
       {user === undefined ? null : <KeysOf key={picked} host={host} user={picked} grants={user.grants ?? []} />}
-    </div>
+    </Blocks>
   );
 }
 
@@ -66,7 +65,7 @@ export function KeysOf({ host, user, grants }: { host: string; user?: string; gr
   const whose = user === undefined ? {} : { user };
   if (me === undefined) return <Spinner label={t('profile/keys/reading')} />;
   // A host lets no key manage keys.
-  if (me?.token !== undefined) return <p className="web-note">{t('profile/keys/byKey')}</p>;
+  if (me?.token !== undefined) return <Note>{t('profile/keys/byKey')}</Note>;
   return (
     <>
       {refused ? null : <MintForm host={host} {...whose} grants={grants} onMinted={() => setReads((one) => one + 1)} />}

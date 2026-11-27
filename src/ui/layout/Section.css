@@ -1,0 +1,41 @@
+/* A section's heading: its icon in a fixed column, then its title and count. */
+.oo-section {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}
+
+.oo-section > .oo-row-button {
+  gap: var(--oo-spacing-sm);
+}
+
+.oo-section__icon {
+  width: 1.25rem;
+  text-align: center;
+}
+
+.oo-section__count {
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-muted);
+  font-weight: 400;
+}
+
+/* A panel's heading: small and bold, a little apart from what is above it. */
+.oo-section[data-small='true'] {
+  margin-top: var(--oo-spacing-sm);
+  padding: var(--oo-spacing-xs) 0;
+  font-size: var(--oo-font-size-sm);
+  font-weight: 700;
+}
+
+.oo-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+  padding-top: var(--oo-spacing-md);
+  border-top: 1px solid var(--oo-color-border);
+}
+
+.oo-group:first-child {
+  border-top: none;
+}

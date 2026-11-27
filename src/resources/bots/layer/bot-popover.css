@@ -1,0 +1,44 @@
+/* A floating bot's popover: its name, a line to say something, and its chat. */
+
+.web-bot-popover {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+  width: 320px;
+  padding: var(--oo-spacing-md);
+  border: 1px solid var(--oo-popup-border);
+  border-radius: var(--oo-radius-md);
+  background: var(--oo-popup-bg);
+  color: var(--oo-popup-fg);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
+}
+
+.web-bot-popover__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--oo-spacing-sm);
+}
+
+/* Chat ends the head. */
+
+.web-bot-popover__head > .oo-btn {
+  align-self: center;
+  margin-left: auto;
+}
+
+.web-bot-popover__labels,
+.web-bot-popover__description {
+  margin: 0;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-bot-popover__say {
+  display: flex;
+  gap: var(--oo-spacing-xs);
+}
+
+.web-bot-popover__say > .oo-field {
+  flex: 1;
+  min-width: 0;
+}

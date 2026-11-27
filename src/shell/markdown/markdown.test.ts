@@ -7,8 +7,9 @@ const SOURCES = import.meta.glob<string>('/src/**/*.{ts,tsx}', { query: '?raw', 
 describe('markdown in ahpw', () => {
   it('renders through the wrapper, so every view draws diagrams', () => {
     const direct = Object.entries(SOURCES)
-      .filter(([path]) => !path.startsWith('/src/shell/markdown/'))
-      .filter(([, text]) => /import\s*(?:type\s*)?\{[^}]*(?<![\w$])Markdown(?![\w$])[^}]*\}\s*from\s*'@softov\/scena\/ui'/.test(text))
+      // The wrapper itself, and the kit's copy of scena's field parts, whose hints draw no diagrams.
+      .filter(([path]) => !path.startsWith('/src/shell/markdown/') && path !== '/src/ui/control/_field-parts.tsx')
+      .filter(([, text]) => /import\s*(?:type\s*)?\{[^}]*(?<![\w$])Markdown(?![\w$])[^}]*\}\s*from\s*'(?:@softov\/scena\/ui|(?:\.\.?\/)+ui\/index\.js)'/.test(text))
       .map(([path]) => path);
     expect(direct).toEqual([]);
   });

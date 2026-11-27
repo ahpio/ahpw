@@ -1,6 +1,6 @@
 import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
@@ -77,12 +77,12 @@ export default function TeamsExplorer(): ReactElement {
   const error = multi ? null : teams.errors[0] ?? null;
   const read = multi ? teams.states.some((one) => one !== undefined) : teams.states[0] !== undefined;
   const notice = teamHosts.length === 0
-    ? <p className="web-note web-explorer__empty">{t('teams/explorer/notServed')}</p>
+    ? <Note inset>{t('teams/explorer/notServed')}</Note>
     : error !== null
       ? <Alert tone="danger" title={t('teams/notices/none')} message={error} />
       : !read
         ? <Spinner label={t('teams/notices/reading')} />
-        : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('teams/explorer/empty')}</p> : null;
+        : rows.length === 0 ? <Note inset>{t('teams/explorer/empty')}</Note> : null;
 
   return (
     <ExplorerList

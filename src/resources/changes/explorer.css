@@ -1,0 +1,111 @@
+.web-changes__totals {
+  flex: none;
+  margin-left: auto;
+  white-space: nowrap;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}
+
+.web-changes__scope {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: var(--oo-color-text);
+  font: inherit;
+  font-size: var(--oo-font-size-xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.web-changes__scope--only {
+  border-color: transparent;
+  padding-left: 0;
+  cursor: default;
+}
+
+.web-changes__scope:not(.web-changes__scope--only):hover {
+  background: color-mix(in srgb, var(--oo-color-accent) 14%, transparent);
+}
+
+/* Changes: one row per file, its folder dimmed beside it, counts and letter at the end until a hover shows its actions. */
+
+.web-change {
+  display: flex;
+  align-items: baseline;
+  gap: var(--oo-spacing-sm);
+  min-width: 0;
+}
+
+.web-change__name {
+  flex: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.web-change__dir {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}
+
+.web-change[data-reviewed='true'] .web-change__name {
+  color: var(--oo-color-muted);
+}
+
+.web-change[data-deleted='true'] .web-change__name {
+  text-decoration: line-through;
+}
+
+.web-change__group {
+  font-size: var(--oo-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--oo-color-muted);
+}
+
+.web-change__end {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}
+
+.web-change__counts {
+  white-space: nowrap;
+}
+
+.web-change__letter {
+  min-width: 1ch;
+  font-weight: 600;
+  text-align: center;
+}
+
+.web-change__letter[data-letter='M'] {
+  color: var(--oo-color-warning);
+}
+
+.web-change__letter[data-letter='A'],
+.web-change__letter[data-letter='U'] {
+  color: var(--oo-color-success);
+}
+
+.web-change__letter[data-letter='D'] {
+  color: var(--oo-color-danger);
+}
+
+.web-change__actions {
+  display: none;
+  gap: 2px;
+}

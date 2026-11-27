@@ -1,13 +1,13 @@
 import { Fragment, memo, useMemo, useRef, useState, type DragEvent, type ReactElement, type ReactNode } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { ContextMenu } from '@softov/scena/ui';
+import { Button, ContextMenu, Note, Panel, RowButton, StatusDot, type StatusDotTone } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import type { Icon } from '../../bridges/icons.js';
-import { EMOJIcon } from '../../resources/emojis.js';
 import { HostIcon, useHostIcon } from '../HostIcon.js';
 import { NameMark } from '../NameMark.js';
 import { HostLines } from './HostLines.js';
-import './ExplorerList.css';
+import './explorer-list.css';
+import '../host-icon.css';
 
 /** The colour of a row's dot, by meaning. */
 export type Dot = 'attention' | 'working' | 'failed' | 'fresh' | 'ok' | 'quiet' | 'off';
@@ -109,20 +109,8 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowD
   }), []);
 
   return (
-    <div className="web-explorer">
-      {filterLabel === undefined ? null : (
-        <input
-          className="web-explorer__filter"
-          type="search"
-          value={filter}
-          placeholder={filterLabel}
-          aria-label={filterLabel}
-          onChange={(event) => setFilter(event.target.value)}
-        />
-      )}
-      <div className="web-explorer__scroll">
-        {hostLines === true ? <HostLines /> : null}
-        {notice === undefined || notice === null ? null : <div className="web-explorer__notice">{notice}</div>}
+    <>
+      <Panel {...(filterLabel === undefined ? {} : { filter: { value: filter, label: filterLabel, onChange: setFilter } })} top={hostLines === true ? <HostLines /> : null} notice={notice}>
         <ul className="web-explorer__list" role="listbox" aria-label={label}>
           {shown.map((row, index) => {
             const group = row.group;
@@ -137,21 +125,19 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowD
               <Fragment key={row.key}>
                 {opens ? (
                   <li className="web-explorer__group" role="presentation">
-                    <button type="button" aria-expanded={!hidden} onClick={() => fold(group.key)}>
-                      <span className="web-explorer__fold" aria-hidden="true">{hidden ? EMOJIcon.caretRight : EMOJIcon.caretDown}</span>
+                    <RowButton expanded={!hidden} onClick={() => fold(group.key)}>
                       <HostIcon icons={group.icons} size={16} className="web-explorer__group-icon" />
                       <span className="web-explorer__group-label">{group.label}</span>
                       <span className="web-explorer__count">{count}</span>
-                    </button>
+                    </RowButton>
                   </li>
                 ) : null}
                 {subOpens && !groupHidden ? (
                   <li className="web-explorer__group web-explorer__group--sub" role="presentation">
-                    <button type="button" aria-expanded={!folded.has(sub.key)} onClick={() => fold(sub.key)}>
-                      <span className="web-explorer__fold" aria-hidden="true">{folded.has(sub.key) ? EMOJIcon.caretRight : EMOJIcon.caretDown}</span>
+                    <RowButton expanded={!folded.has(sub.key)} onClick={() => fold(sub.key)}>
                       <span className="web-explorer__group-label">{sub.label}</span>
                       <span className="web-explorer__count">{subCount}</span>
-                    </button>
+                    </RowButton>
                   </li>
                 ) : null}
                 {hidden ? null : (
@@ -161,10 +147,10 @@ export function ExplorerList({ label, rows, searchRows, selected, onOpen, onRowD
             );
           })}
         </ul>
-        {needle !== '' && shown.length === 0 ? <p className="web-note web-explorer__empty">{t('shell/explorer/noMatch')}</p> : null}
-      </div>
+        {needle !== '' && shown.length === 0 ? <Note inset>{t('shell/explorer/noMatch')}</Note> : null}
+      </Panel>
       {menu === null ? null : <ContextMenu spec={{ items: menu.items }} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
-    </div>
+    </>
   );
 }
 
@@ -215,11 +201,11 @@ const ListRow = memo(function ListRow({ row, selected, drags, acts }: { row: Row
           <span className="web-row__title" data-strong={row.strong === true ? 'true' : 'false'}>{row.title}</span>
           {row.time === undefined ? null : <span className="web-row__time">{row.time}</span>}
           {row.button === undefined ? null : (
-            <button
-              type="button"
-              className="web-row__button"
-              data-variant="primary"
+            <Button
+              variant="primary"
+              size="xs"
               disabled={row.button.busy === true}
+              busy={row.button.busy === true}
               onClick={(event) => {
                 event.stopPropagation();
                 row.button?.run();
@@ -227,22 +213,15 @@ const ListRow = memo(function ListRow({ row, selected, drags, acts }: { row: Row
               onKeyDown={(event) => event.stopPropagation()}
             >
               {row.button.label}
-            </button>
+            </Button>
           )}
           {row.action === undefined ? null : (
-            <button
-              type="button"
-              className="web-row__action"
-              title={row.action.label}
-              aria-label={row.action.label}
-              onClick={(event) => {
+            <Button variant="subtle" size="xs" tone="accent" title={row.action.label} ariaLabel={row.action.label} onClick={(event) => {
                 event.stopPropagation();
                 row.action?.run();
-              }}
-              onKeyDown={(event) => event.stopPropagation()}
-            >
+              }} onKeyDown={(event) => event.stopPropagation()}>
               {row.action.icon}
-            </button>
+            </Button>
           )}
         </span>
         {row.lines.map((line, index) => <span key={index} className="web-row__line">{line}</span>)}
@@ -251,14 +230,13 @@ const ListRow = memo(function ListRow({ row, selected, drags, acts }: { row: Row
   );
 });
 
+/** The colour of each state's dot. */
+const DOT_TONE: Record<Dot, StatusDotTone> = { attention: 'warning', working: 'default', failed: 'danger', fresh: 'accent', ok: 'success', quiet: 'default', off: 'default' };
+
 /** A row's dot, or its host icon with the dot as a badge on its corner. */
 function RowMark({ row }: { row: Row }): ReactElement {
   const icon = useHostIcon(row.icons);
-  const dot = (
-    <span className="web-row__dot" data-dot={row.dot} title={row.dotLabel} aria-label={row.dotLabel}>
-      {row.dot === 'working' ? <><i /><i /><i /><i /></> : null}
-    </span>
-  );
+  const dot = <StatusDot tone={DOT_TONE[row.dot]} outline={row.dot === 'off'} working={row.dot === 'working'} title={row.dotLabel} />;
   if (icon === undefined && row.initials === undefined && row.emoji === undefined) return dot;
   return (
     <span className="web-row__mark">

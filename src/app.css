@@ -1,0 +1,8 @@
+.web-loading {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--oo-color-muted);
+  background: var(--oo-color-canvas);
+}

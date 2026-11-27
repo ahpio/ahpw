@@ -1,12 +1,14 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, DetailList, Spinner, Text } from '@softov/scena/ui';
+import { Alert, Badge, Button, DetailList, Page, PageActions, PageHead, Spinner, Text } from '../../ui/index.js';
 import { MANIFEST, runPath, type Run } from '../manifest/data.js';
 import { itemActionsOf, itemCommandsOf, keyOf, keyValuesOf, removalQuestion, roleOf, rowsOf, rowTitle, type ItemAction } from '../manifest/roles.js';
 import type { ProgramManifest } from '../manifest/types.js';
 import { runItemAction } from './Items.js';
 import Result from './Result.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './item.css';
+import './result.css';
 
 /** A field's value as a line of text. */
 const words = (value: unknown): string => (value === null || value === undefined ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value));
@@ -49,15 +51,15 @@ export default function ItemPage({ list, kind, title }: { list?: string; kind?: 
   };
 
   return (
-    <div className="web-page">
-      <header className="web-page__head">
+    <Page>
+      <PageHead>
         <Text variant="h2" text={title ?? ''} />
         <div className="web-page__route"><Badge label={kind ?? ''} tone="info" /></div>
-      </header>
+      </PageHead>
 
       <DetailList columns={2} items={Object.entries(row).map(([name, value]) => ({ label: name, value: words(value) }))} />
 
-      <div className="web-page__actions">
+      <PageActions>
         {asking !== null ? (
           <span className="web-result__ask">
             {removalQuestion(asking.command, asking.values)}
@@ -72,7 +74,7 @@ export default function ItemPage({ list, kind, title }: { list?: string; kind?: 
             onClick={() => (action.command.effect === 'remove' && action.direct ? setAsking(action) : go(action))}
           />
         ))}
-      </div>
+      </PageActions>
       {failure === null ? null : <Alert tone="danger" message={failure} />}
 
       {get === undefined || got === undefined ? null : (
@@ -83,6 +85,6 @@ export default function ItemPage({ list, kind, title }: { list?: string; kind?: 
             : <Result value={got.data} />}
         </>
       )}
-    </div>
+    </Page>
   );
 }

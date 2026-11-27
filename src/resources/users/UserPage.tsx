@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Text } from '@softov/scena/ui';
+import { Alert, Blocks, Button, DangerZone, Group, Note, Page, PageActions, Text, TextField } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { mayDelete, mayDo, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
@@ -10,8 +10,7 @@ import {
   type ListedUser, type Named, type PeopleState, type Role, type UserFields,
 } from '../../bridges/people.js';
 import { confirm } from '../../shell/notify/index.js';
-import { Field } from '../../shell/view/Field.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { isRecordId } from './form.js';
 import { personTab } from './state.js';
 import { MembershipList } from './MembershipList.js';
@@ -20,8 +19,7 @@ import { KeysOf } from '../profile/Keys.js';
 import { servesTokens } from '../../bridges/tokens.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
 
 const usersReducer = peopleReducer('users');
 const rolesReducer = peopleReducer('roles');
@@ -89,23 +87,18 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
 
   /** A section: its icon and title over its fields, a line above it. */
   const section = (icon: string | undefined, title: string, body: ReactElement): ReactElement => (
-    <section className="web-user__section" aria-label={title}>
-      <Text variant="h3" text={icon === undefined ? title : `${icon} ${title}`} />
-      {body}
-    </section>
+    <Group title={title} icon={icon}>{body}</Group>
   );
   return (
-    <div className="web-page web-form">
+    <Page>
       <PageTitle emoji={EMOJIcon.users} initials={fresh ? undefined : id} title={fresh ? t('users/commands/newUser') : id} uri={fresh ? undefined : personUri(offers, 'users', id)} />
-      {writes ? null : <p className="web-note">{t(writesPeople(offers, 'users') ? 'users/notices/noPermission' : 'users/notices/readOnly')}</p>}
+      {writes ? null : <Note>{t(writesPeople(offers, 'users') ? 'users/notices/noPermission' : 'users/notices/readOnly')}</Note>}
 
       {fresh ? (
-        <Field label={t('users/user/id')} hint={t('users/user/idHint')}>
-          <input className="web-field" value={shown.id} autoFocus onChange={(event) => set({ id: event.target.value })} />
-        </Field>
+        <TextField label={t('users/user/id')} hint={t('users/user/idHint')} value={shown.id} autoFocus onChange={(next) => set({ id: next })} />
       ) : null}
 
-      {section(EMOJIcon.roles, t('users/user/roles'), roleIds.length === 0 ? <span className="web-input__hint">{t('users/user/noRoles')}</span> : (
+      {section(EMOJIcon.roles, t('users/user/roles'), roleIds.length === 0 ? <Text variant="caption" muted text={t('users/user/noRoles')} /> : (
         <RolePills held={shown.roles} offered={roleIds.filter((one) => !shown.roles.includes(one))} writes={writes} onChange={(roles) => set({ roles })} onOpen={(role) => void scena.commands.execute('ahp.openRole', { host, id: role })} />
       ))}
 
@@ -123,33 +116,29 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
 
       {section(EMOJIcon.signIn, t('users/user/signIn'), (
         <>
-          <Field label={t('users/user/issuer')} hint={t('users/user/issuerHint')}>
-            <input className="web-field" value={shown.issuer} readOnly={!writes} onChange={(event) => set({ issuer: event.target.value })} />
-          </Field>
-          <Field label={t('users/user/rolesFrom')} hint={t('users/user/rolesFromHint')}>
-            <input className="web-field" value={shown.rolesFrom} readOnly={!writes} onChange={(event) => set({ rolesFrom: event.target.value })} />
-          </Field>
+          <TextField label={t('users/user/issuer')} hint={t('users/user/issuerHint')} value={shown.issuer} readOnly={!writes} onChange={(next) => set({ issuer: next })} />
+          <TextField label={t('users/user/rolesFrom')} hint={t('users/user/rolesFromHint')} value={shown.rolesFrom} readOnly={!writes} onChange={(next) => set({ rolesFrom: next })} />
         </>
       ))}
 
       {failure === null ? null : <Alert tone="danger" message={failure} />}
       {writes ? (
-        <div className="web-page__actions">
+        <PageActions>
           <Button label={t(fresh ? 'users/user/create' : 'users/user/save')} variant="primary" disabled={!ready} onClick={() => void save()} />
           {fresh ? <Button label={t('users/actions/cancel')} onClick={() => scena.surfaces.close(tab)} /> : null}
           {!fresh && dirty ? <Button label={t('users/actions/discard')} onClick={() => setDraft(null)} /> : null}
-        </div>
+        </PageActions>
       ) : null}
 
       {/* After the actions: a key is made or revoked at once, not on Save. Their own keys are the person's to manage, as on their profile. */}
       {fresh || !(self || mayDo(grants, 'user:write')) || !servesTokens(offers) ? null : section(EMOJIcon.keys, t('users/user/keys'), (
-        <div className="web-profile__keys">
-          <span className="web-input__hint">{t('users/user/keysHint', { id })}</span>
+        <Blocks>
+          <Text variant="caption" muted text={t('users/user/keysHint', { id })} />
           <KeysOf host={host} {...(self ? {} : { user: id })} grants={record?.grants ?? []} />
-        </div>
+        </Blocks>
       ))}
 
-      {fresh || !mayDelete(offers, grants, 'users') ? null : <DangerZone label={t('users/actions/delete')} onClick={() => void scena.commands.execute('ahp.deleteUser', { host, id })} />}
-    </div>
+      {fresh || !mayDelete(offers, grants, 'users') ? null : <DangerZone label={t('users/actions/delete')} onConfirm={() => void scena.commands.execute('ahp.deleteUser', { host, id })} />}
+    </Page>
   );
 }

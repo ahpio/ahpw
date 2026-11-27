@@ -1,10 +1,9 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, type DetailItem, DetailList, Link, Note, Pill, Row, Text } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import type { ListedPlugin, PluginDetails } from '../../bridges/plugins.js';
-import type { KeptTab } from '../../shell/view/KeptTabs.js';
-import { RemovableChip } from '../../shell/view/RemovableChip.js';
+import type { KeptTab } from '../../ui/navigation/KeptTabs.js';
 import { categoryWord } from './Explorer.js';
 import { ProvidesList } from './ProvidesList.js';
 import { listName } from './rows.js';
@@ -76,16 +75,16 @@ export function PluginFacts({ sections, categories, resources }: { sections: Fac
       {categories.length === 0 ? null : (
         <div className="web-plugin-facts__part">
           <Text variant="h3" text={t('plugins/listed/categories')} />
-          <div className="web-plugin__tags">
-            {categories.map((category) => <RemovableChip key={category} label={categoryWord(t, category)} removeLabel={category} />)}
-          </div>
+          <Row align="center" wrap gap="var(--oo-spacing-sm)">
+            {categories.map((category) => <Pill key={category} label={categoryWord(t, category)} removeLabel={category} />)}
+          </Row>
         </div>
       )}
       {links.length === 0 ? null : (
         <div className="web-plugin-facts__part">
           <Text variant="h3" text={t('plugins/listed/resources')} />
           <ul className="web-listed__resources">
-            {links.map((one) => <li key={one.url}><a href={one.url} target="_blank" rel="noreferrer">{one.title}</a></li>)}
+            {links.map((one) => <li key={one.url}><Link href={one.url} external>{one.title}</Link></li>)}
           </ul>
         </div>
       )}
@@ -116,7 +115,7 @@ function SettingsList({ schema }: { schema: Record<string, unknown> | undefined 
   const { t } = useI18n();
   const properties = schema?.properties;
   const entries = typeof properties === 'object' && properties !== null ? Object.entries(properties as Record<string, Record<string, unknown>>) : [];
-  if (entries.length === 0) return <p className="web-note">{t('plugins/listed/noSettings')}</p>;
+  if (entries.length === 0) return <Note>{t('plugins/listed/noSettings')}</Note>;
   return (
     <DetailList
       columns={1}
@@ -161,7 +160,7 @@ export function listTabs(host: string, plugin: ListedPlugin, details: PluginDeta
         <TabBody>
           {facts}
           <Problems details={details} />
-          {details.readme === undefined ? <p className="web-note">{t('plugins/listed/noReadme')}</p> : <ReadText text={details.readme} />}
+          {details.readme === undefined ? <Note>{t('plugins/listed/noReadme')}</Note> : <ReadText text={details.readme} />}
         </TabBody>
       ),
     },
@@ -172,7 +171,7 @@ export function listTabs(host: string, plugin: ListedPlugin, details: PluginDeta
         <TabBody>
           <Text variant="h3" text={t('plugins/page/provides')} />
           <ProvidesList host={host} contracts={details.contracts} />
-          {Object.keys(details.contracts ?? {}).length === 0 ? <p className="web-note">{t('plugins/page/providesNothing')}</p> : null}
+          {Object.keys(details.contracts ?? {}).length === 0 ? <Note>{t('plugins/page/providesNothing')}</Note> : null}
           <Text variant="h3" text={t('plugins/page/settings')} />
           <SettingsList schema={details.optionsSchema} />
         </TabBody>

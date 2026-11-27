@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Spinner, Text, TextField } from '@softov/scena/ui';
+import { Alert, Blocks, Button, ChoiceCards, Page, Section, Spinner, Text, TextField } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { installPlugin, PLUGINS, writePlugin, type PluginChanged } from '../../bridges/plugins.js';
@@ -73,22 +73,20 @@ export default function NewPluginPage({ host }: { host: string }): ReactElement 
     : ID_PATTERN.test(id) && code.trim() !== '' && pkg.trim() !== '';
 
   return (
-    <div className="web-page web-form">
+    <Page>
       <Text variant="h2" text={`${EMOJIcon.hostPlugins} ${t('plugins/new/title')}`} />
-      <div className="web-connector-form web-new-plugin">
+      <Blocks>
         {canAdd && canWrite ? (
-          <div className="web-kind-templates" role="radiogroup" aria-label={t('plugins/new/how')}>
-            <span className="web-connector-form__label">{t('plugins/new/how')}</span>
-            {(['add', 'write'] as const).map((one) => (
-              <label key={one} className="web-kind-templates__choice">
-                <input type="radio" name="plugin-how" checked={how === one} disabled={busy} onChange={() => { setChosen(one); setRefused(null); }} />
-                <span className="web-kind-templates__text">
-                  <span className="web-kind-templates__title">{t(`plugins/new/${one}`)}</span>
-                  <span className="web-kind-templates__description">{t(`plugins/new/${one}Hint`)}</span>
-                </span>
-              </label>
-            ))}
-          </div>
+          <>
+            <Section title={t('plugins/new/how')} small />
+            <ChoiceCards
+              options={(['add', 'write'] as const).map((one) => ({ id: one, label: t(`plugins/new/${one}`), hint: t(`plugins/new/${one}Hint`) }))}
+              picked={how === undefined ? [] : [how]}
+              many={false}
+              disabled={busy}
+              onPick={(id) => { setChosen(id as 'add' | 'write'); setRefused(null); }}
+            />
+          </>
         ) : null}
         {how === 'add' ? (
           <TextField label={t('plugins/new/source')} required typeTag="string" hint={t('plugins/new/sourceHint')} value={source} disabled={busy} onChange={setSource} />
@@ -109,7 +107,7 @@ export default function NewPluginPage({ host }: { host: string }): ReactElement 
           />
           {busy ? <Spinner label={t('plugins/new/waiting')} /> : null}
         </div>
-      </div>
-    </div>
+      </Blocks>
+    </Page>
   );
 }

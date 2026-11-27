@@ -1,6 +1,6 @@
 import { useMemo, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Spinner } from '@softov/scena/ui';
+import { Alert, Note, Spinner } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannelOnEach } from '../../bridges/channel.js';
@@ -73,12 +73,12 @@ export default function UsersExplorer(): ReactElement {
   const error = multi ? null : users.errors[0] ?? null;
   const read = multi ? users.states.some((one) => one !== undefined) : users.states[0] !== undefined;
   const notice = userHosts.length === 0
-    ? <p className="web-note web-explorer__empty">{t('users/explorer/notServed')}</p>
+    ? <Note inset>{t('users/explorer/notServed')}</Note>
     : error !== null
       ? <Alert tone="danger" title={t('users/notices/none')} message={error} />
       : !read
         ? <Spinner label={t('users/notices/reading')} />
-        : rows.length === 0 ? <p className="web-note web-explorer__empty">{t('users/explorer/empty')}</p> : null;
+        : rows.length === 0 ? <Note inset>{t('users/explorer/empty')}</Note> : null;
 
   return (
     <ExplorerList

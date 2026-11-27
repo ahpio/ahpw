@@ -1,14 +1,15 @@
 import { useMemo, useState, type MouseEvent, type ReactElement } from 'react';
 import type { StateAction } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Button, CheckBox, ContextMenu, StatusDot, TextField } from '@softov/scena/ui';
+import { Button, CheckBox, ContextMenu, ItemRow, Note, Section, StatusDot, TextField } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { hostBridge } from '../../bridges/data.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 import { EMOJIcon } from '../emojis.js';
 import { useActiveSession } from './active.js';
 import { offWord, onAt, SCOPES, searchRows, serverGroups, withDecision, type ServerRow, type Scope } from './tooling.js';
 import './tooling.css';
+import { ToolingHead } from './ToolingHead.js';
 
 /** A row's dot, in its state's tone, with its state as the tooltip. */
 function Mark({ row }: { row: ServerRow }): ReactElement | null {
@@ -24,7 +25,7 @@ export default function McpView(): ReactElement {
   const [query, setQuery] = useState('');
   const [menu, setMenu] = useState<{ x: number; y: number; items: PickerAction[] } | null>(null);
   const all = useMemo(() => serverGroups(session?.customizations), [session?.customizations]);
-  if (summary === undefined) return <p className="web-note web-tooling__empty">{t('sessions/tooling/noSession')}</p>;
+  if (summary === undefined) return <Note inset>{t('sessions/tooling/noSession')}</Note>;
   const folder = summary.workingDirectories?.[0];
   const say = (action: Record<string, unknown>): void => hostBridge(host).dispatch(summary.resource, action as unknown as StateAction);
   const decide = (row: ServerRow, scope: Scope, enabled: boolean): void => say({ type: 'session/customizationToggled', id: row.id, enablement: withDecision(row.enablement, scope, enabled, folder) });
@@ -54,37 +55,33 @@ export default function McpView(): ReactElement {
   const total = all.reduce((sum, group) => sum + group.rows.length, 0);
   return (
     <div className="web-tooling">
-      <div className="web-tooling__head">
-        <span className="web-tooling__title">{t('sessions/tooling/servers')} <span className="web-tooling__count">{total}</span></span>
-        <span className="web-tooling__session">{summary.title === '' ? t('sessions/untitled') : summary.title}</span>
-      </div>
+      <ToolingHead title={t('sessions/tooling/servers')} count={total} summary={summary} />
       <TextField value={query} placeholder={t('sessions/tooling/searchServers')} onChange={setQuery} />
       {groups.map((group) => (
         <section key={group.key} className="web-tooling__group">
-          <h4 className="web-tooling__heading web-tooling__heading--plain">
-            <span>{group.title}</span>
-            <span className="web-tooling__count">{[group.note, String(group.rows.length)].filter((part) => part !== '').join(' \u{00B7} ')}</span>
-          </h4>
+          <Section title={group.title} count={[group.note, String(group.rows.length)].filter((part) => part !== '').join(' \u{00B7} ')} small />
           {group.rows.map((row) => (
-            <div key={row.id} className="web-tooling__row web-tooling__switchrow" data-enabled={row.enabled ? 'true' : 'false'}>
-              <span className="web-tooling__icon" aria-hidden="true">{EMOJIcon.mcpServer}</span>
-              <span className="web-tooling__main">
-                <span className="web-tooling__l1"><Mark row={row} /><span className="web-tooling__name">{row.name}</span></span>
-                <span className="web-tooling__l2" title={row.line}>{row.line}</span>
-              </span>
-              <span className="web-tooling__right">
-                <span className="web-tooling__why">{row.enabled ? row.state?.text ?? '' : offWord(row)}</span>
-                {row.enabled && row.lifecycle === 'stopped' ? <Button label={t('sessions/tooling/menu/start')} size="sm" onClick={() => start(row)} /> : null}
-                <span className="web-tooling__check" title={t(row.enabled ? 'sessions/tooling/turnOff' : 'sessions/tooling/turnOn')}>
-                  <CheckBox value={row.enabled} onChange={(next) => decide(row, 'session', next)} />
-                </span>
-                <button type="button" className="web-tooling__dots" title={t('sessions/tooling/menu/title')} aria-haspopup="menu" onClick={(event) => openMenu(event, row)}>{EMOJIcon.more}</button>
-              </span>
-            </div>
+            <ItemRow
+              key={row.id}
+              off={!row.enabled}
+              lead={<span aria-hidden="true">{EMOJIcon.mcpServer}</span>}
+              title={<><Mark row={row} />{row.name}</>}
+              line={<span title={row.line}>{row.line}</span>}
+              trail={(
+                <>
+                  {row.enabled ? row.state?.text ?? '' : offWord(row)}
+                  {row.enabled && row.lifecycle === 'stopped' ? <Button label={t('sessions/tooling/menu/start')} size="sm" onClick={() => start(row)} /> : null}
+                  <span title={t(row.enabled ? 'sessions/tooling/turnOff' : 'sessions/tooling/turnOn')}>
+                    <CheckBox value={row.enabled} onChange={(next) => decide(row, 'session', next)} />
+                  </span>
+                  <Button variant="quiet" label={EMOJIcon.more} title={t('sessions/tooling/menu/title')} ariaLabel={t('sessions/tooling/menu/title')} hasPopup="menu" onClick={(event) => openMenu(event, row)} />
+                </>
+              )}
+            />
           ))}
         </section>
       ))}
-      {total === 0 ? <p className="web-note">{t('sessions/tooling/noServers')}</p> : groups.length === 0 ? <p className="web-note">{t('sessions/tooling/noMatch')}</p> : null}
+      {total === 0 ? <Note>{t('sessions/tooling/noServers')}</Note> : groups.length === 0 ? <Note>{t('sessions/tooling/noMatch')}</Note> : null}
       {menu === null ? null : <ContextMenu spec={{ items: menu.items }} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
     </div>
   );

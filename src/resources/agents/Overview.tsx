@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Blocks, Button, type DetailItem, DetailList, Listable, Text } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import type { AgentInfo, SessionSummary } from '@microsoft/agent-host-protocol';
 import type { EngineRow, AgentRow } from '../../bridges/agents.js';
@@ -43,7 +43,7 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
       ...(engine === undefined ? [] : [{
         label: t('agents/page/facts/plugin'),
         value: offers.channels.includes(PLUGINS.scheme)
-          ? <button type="button" className="web-link" title={t('agents/page/openPlugin', { id: engine.plugin })} onClick={() => void scena.commands.execute('ahp.openPlugin', { host, id: engine.plugin })}><code>{engine.plugin}</code></button>
+          ? <Button variant="link" title={t('agents/page/openPlugin', { id: engine.plugin })} onClick={() => void scena.commands.execute('ahp.openPlugin', { host, id: engine.plugin })}><code>{engine.plugin}</code></Button>
           : <code>{engine.plugin}</code>,
       }]),
       { label: t('agents/page/facts/state'), value: t(`connectors/states/${record.state}`) },
@@ -51,7 +51,7 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
     ...(info === undefined ? [] : [
       {
         label: t('agents/page/facts/sessions'),
-        value: <button type="button" className="web-link" title={t('agents/page/showSessions')} onClick={() => void scena.commands.execute('ahp.showSessionsOf', { provider: id })}>{String(count)}</button>,
+        value: <Button variant="link" title={t('agents/page/showSessions')} onClick={() => void scena.commands.execute('ahp.showSessionsOf', { provider: id })}>{String(count)}</Button>,
       },
       { label: t('agents/page/facts/can'), value: capabilities.length === 0 ? t('agents/page/oneChat') : capabilities.join('; ') },
       ...(missing.length === 0 ? [] : [{ label: t('agents/page/customizations'), value: t('agents/customizations/noneOf', { kinds: missing.join(', ') }) }]),
@@ -60,13 +60,13 @@ export function Overview({ host, info, record, engine }: { host: string; info?: 
   const description = info?.description || record?.description || '';
 
   return (
-    <div className="web-agent__overview">
+    <Blocks>
       {description === '' ? null : <Markdown text={description} />}
       <AlertList alerts={record?.alerts ?? []} />
       <DetailList items={facts} columns={2} />
       {record?.views?.main === undefined || engine === undefined ? null : <PluginViewPanel host={host} plugin={engine.plugin} at={`agent:${record.id}`} view={record.views.main} />}
       <Served signIn={signIn} />
-    </div>
+    </Blocks>
   );
 }
 
@@ -77,16 +77,15 @@ function Served({ signIn }: { signIn: ReturnType<typeof signInOf> }): ReactEleme
   return (
     <>
       <Text variant="h3" text={t('agents/page/signIn')} />
-      <table className="web-runs web-table">
-        <thead>
-          <tr><th>{t('agents/page/columns/resource')}</th><th>{t('agents/page/columns/scopes')}</th><th /></tr>
-        </thead>
-        <tbody>
-          {signIn.map((one) => (
-            <tr key={one.name}><td>{one.name}</td><td>{one.scopes}</td><td>{t(one.required ? 'agents/page/required' : 'agents/page/optional')}</td></tr>
-          ))}
-        </tbody>
-      </table>
+      <Listable<(typeof signIn)[number]>
+        items={signIn}
+        getKey={(one) => one.name}
+        columns={[
+          { key: 'name', label: t('agents/page/columns/resource'), sortable: true, render: (one) => one.name },
+          { key: 'scopes', label: t('agents/page/columns/scopes'), render: (one) => one.scopes },
+          { key: 'required', label: '', render: (one) => t(one.required ? 'agents/page/required' : 'agents/page/optional') },
+        ]}
+      />
     </>
   );
 }

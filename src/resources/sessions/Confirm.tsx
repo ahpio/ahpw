@@ -2,13 +2,14 @@ import { useRef, useState, type ReactElement } from 'react';
 import type { StateAction, ToolCallState } from '@microsoft/agent-host-protocol';
 import type { PickerAction } from '@softov/scena/types';
 import { useI18n } from '@softov/scena/react';
-import { Button } from '@softov/scena/ui';
+import { Button, Row } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import { ContextMenu } from '@softov/scena/ui/menu';
 import { textOf } from '../../bridges/words.js';
 import { EMOJIcon } from '../emojis.js';
 import { confirmLayout } from './confirm-layout.js';
 import './confirm.css';
+import './parts.css';
 
 const PENDING_CONFIRMATION = 'pending-confirmation';
 
@@ -57,7 +58,7 @@ export function Confirm({ call, send, turnId }: { call: ToolCallState; send: (ac
   return (
     <div className="web-tool__confirm">
       {title === '' ? null : <Markdown text={title} />}
-      <div className="web-tool__actions">
+      <Row wrap gap="var(--oo-spacing-sm)">
         {options.length === 0 ? (
           <>
             <Button label={t('sessions/tool/approve')} variant="primary" onClick={() => approve()} />
@@ -74,7 +75,7 @@ export function Confirm({ call, send, turnId }: { call: ToolCallState; send: (ac
             {denials.map((option) => <Button key={option.id} label={option.label} onClick={() => deny(option.id)} />)}
           </>
         )}
-      </div>
+      </Row>
       {menu === null ? null : <ContextMenu spec={{ items, groupLabels: false }} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
     </div>
   );

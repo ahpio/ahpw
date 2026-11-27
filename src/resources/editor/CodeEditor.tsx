@@ -12,6 +12,7 @@ import {
 import { tags } from '@lezer/highlight';
 import { loadLanguage, type LanguageKey } from './languages.js';
 import { TEXT_WRAP } from './wrap.js';
+import './code-editor.css';
 
 /** What the editor shows and what it tells its owner. */
 export interface CodeEditorProps {

@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Chip, Text } from '@softov/scena/ui';
+import { Alert, Button, Chip, DangerZone, Note, Page, PageActions, Row, Text, TextField } from '../../ui/index.js';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -8,15 +8,14 @@ import { mayDelete, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { grantCatalog } from '../../bridges/grants.js';
 import { BUILT_IN_ROLES, PEOPLE, peopleReducer, personUri, putPerson, writesPeople, type PeopleState, type Role } from '../../bridges/people.js';
-import { Field } from '../../shell/view/Field.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { isRecordId, parseGrants } from './form.js';
 import { personTab } from './state.js';
 import { RoleGrants } from './RoleGrants.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { DangerZone } from '../../shell/controls/DangerZone.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import '../../shell/host-icon.css';
 
 const rolesReducer = peopleReducer('roles');
 
@@ -77,19 +76,17 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
   };
 
   return (
-    <div className="web-page web-form">
+    <Page>
       <PageTitle emoji={EMOJIcon.roles} initials={fresh ? undefined : id} title={fresh ? t('users/commands/newRole') : id} uri={fresh ? undefined : personUri(offers, 'roles', id)} />
-      {writes ? null : <p className="web-note">{t(writesPeople(offers, 'roles') ? 'users/notices/noPermission' : 'users/notices/readOnly')}</p>}
-      {builtIn === undefined ? null : <p className="web-note">{t('users/role/builtInNote')}</p>}
-      {replaces ? <p className="web-note">{t('users/role/replacesNote')}</p> : null}
+      {writes ? null : <Note>{t(writesPeople(offers, 'roles') ? 'users/notices/noPermission' : 'users/notices/readOnly')}</Note>}
+      {builtIn === undefined ? null : <Note>{t('users/role/builtInNote')}</Note>}
+      {replaces ? <Note>{t('users/role/replacesNote')}</Note> : null}
 
       {fresh ? (
-        <Field label={t('users/role/id')} hint={t('users/role/idHint')}>
-          <input className="web-field" value={shown.id} autoFocus onChange={(event) => set({ id: event.target.value })} />
-        </Field>
+        <TextField label={t('users/role/id')} hint={t('users/role/idHint')} value={shown.id} autoFocus onChange={(next) => set({ id: next })} />
       ) : null}
 
-      <div className="web-role__grants-head">
+      <Row align="center" justify="spaceBetween" gap="var(--oo-spacing-sm)">
         <Text variant="h3" text={t('users/role/grants')} />
         <span className="web-role__views">
           {(['controls', 'text'] as const).map((one) => (
@@ -104,7 +101,7 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
             />
           ))}
         </span>
-      </div>
+      </Row>
       {view === 'controls' && parsed.problems.length === 0 ? (
         <RoleGrants
           grants={parsed.grants}
@@ -117,34 +114,33 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
       ) : (
         <>
           {/* The heading above names the box; the hint says how a line is written. */}
-          <div className="web-form__field">
-            <textarea
-              aria-label={t('users/role/grants')}
-              className="web-field web-people__grants"
-              rows={Math.max(6, shown.grants.split('\n').length + 1)}
-              spellCheck={false}
-              value={shown.grants}
-              readOnly={!writes}
-              onChange={(event) => set({ grants: event.target.value })}
-            />
-            <span className="web-input__hint">{t('users/role/grantsHint')}</span>
-          </div>
+          <TextField
+            multiline
+            mono
+            spellCheck={false}
+            ariaLabel={t('users/role/grants')}
+            hint={t('users/role/grantsHint')}
+            rows={Math.max(6, shown.grants.split('\n').length + 1)}
+            value={shown.grants}
+            readOnly={!writes}
+            onChange={(next) => set({ grants: next })}
+          />
           {parsed.problems.map((problem) => (
-            <p key={problem.line} className="web-people__problem">{t('users/role/badGrant', { line: problem.line, text: problem.text })}</p>
+            <Note tone="danger" key={problem.line}>{t('users/role/badGrant', { line: problem.line, text: problem.text })}</Note>
           ))}
         </>
       )}
 
       {failure === null ? null : <Alert tone="danger" message={failure} />}
       {writes ? (
-        <div className="web-page__actions">
+        <PageActions>
           <Button label={t(fresh ? 'users/role/create' : 'users/role/save')} variant="primary" disabled={!ready} onClick={() => void save()} />
           {fresh ? <Button label={t('users/actions/cancel')} onClick={() => scena.surfaces.close(tab)} /> : null}
           {!fresh && dirty ? <Button label={t('users/actions/discard')} onClick={() => setDraft(null)} /> : null}
-        </div>
+        </PageActions>
       ) : null}
 
-      {fresh || !mayDelete(offers, grants, 'roles') || builtIn !== undefined ? null : <DangerZone label={t('users/actions/delete')} onClick={() => void scena.commands.execute('ahp.deleteRole', { host, id })} />}
-    </div>
+      {fresh || !mayDelete(offers, grants, 'roles') || builtIn !== undefined ? null : <DangerZone label={t('users/actions/delete')} onConfirm={() => void scena.commands.execute('ahp.deleteRole', { host, id })} />}
+    </Page>
   );
 }

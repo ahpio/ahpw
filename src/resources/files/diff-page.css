@@ -1,0 +1,44 @@
+.web-diff--add {
+  color: var(--oo-color-success);
+}
+
+.web-diff tr[data-kind='add'] {
+  background: color-mix(in srgb, var(--oo-color-success) 14%, transparent);
+}
+
+.web-diff tr[data-kind='del'] {
+  background: color-mix(in srgb, var(--oo-color-danger) 14%, transparent);
+}
+
+.web-diff__hunk td {
+  padding: 2px var(--oo-spacing-md);
+  color: var(--oo-color-info);
+  background: color-mix(in srgb, var(--oo-color-info) 8%, transparent);
+}
+
+.web-code {
+  border-collapse: collapse;
+  font-family: var(--oo-font-mono, monospace);
+  font-size: var(--oo-font-size-xs);
+  line-height: 1.5;
+  min-width: 100%;
+}
+
+.web-code__number {
+  padding: 0 var(--oo-spacing-sm);
+  text-align: right;
+  color: var(--oo-color-muted);
+  user-select: none;
+  vertical-align: top;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.web-code__text {
+  padding: 0 var(--oo-spacing-md) 0 var(--oo-spacing-sm);
+  white-space: pre;
+}
+
+.web-code tr[data-hit='true'] {
+  background: color-mix(in srgb, var(--oo-color-warning) 18%, transparent);
+}

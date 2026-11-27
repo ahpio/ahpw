@@ -1,20 +1,21 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, DetailList, Spinner, Text } from '@softov/scena/ui';
+import { Button, DetailList, Note, Page, Spinner, Text, TextField } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { personUri } from '../../bridges/people.js';
 import { poolOwner, usagePeriods, usageRange, usageRecords, type DayRange, type PoolOwner, type UsageEntry, type UsagePeriods, type UsageTotal } from '../../bridges/usage.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
 import { monthSoFar, USAGE_ASKED } from './state.js';
 import { UsageRecords } from './Records.js';
 import { totalLine } from './words.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import './pool-page.css';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './records.css';
 
 /** What a pool's range reads: its total and the records behind it, for the range and reload they were read for. */
 interface Ranged {
@@ -80,7 +81,7 @@ export default function UsagePoolPage({ host, pool }: { host: string; pool: stri
   const name = periods.name || pool;
 
   return (
-    <div className="web-page">
+    <Page>
       {/* A person's, team's or project's pool names it as its own page does, and opens that page. */}
       {owner === undefined ? <PageTitle emoji={EMOJIcon.usage} title={name} /> : (
         <PageTitle
@@ -92,7 +93,7 @@ export default function UsagePoolPage({ host, pool }: { host: string; pool: stri
           uriHint={pool}
         />
       )}
-      {owner === undefined ? <p className="web-note">{pool}</p> : null}
+      {owner === undefined ? <Note>{pool}</Note> : null}
       <DetailList
         items={[
           ...(embedMode() === 'multi' ? [{ label: t('common/host'), value: <HostTag host={host} />, span: true }] : []),
@@ -102,9 +103,9 @@ export default function UsagePoolPage({ host, pool }: { host: string; pool: stri
 
       <Text variant="h3" text={`${EMOJIcon.filter} ${t('usage/pool/range')}`} />
       <div className="web-spend__range">
-        <input className="web-field" type="date" value={range.from} max={range.until} aria-label={t('usage/range/from')} onChange={(event) => { if (event.target.value !== '') setRange({ ...range, from: event.target.value }); }} />
+        <TextField type="date" value={range.from} max={range.until} ariaLabel={t('usage/range/from')} onChange={(next) => { if (next !== '') setRange({ ...range, from: next }); }} />
         <span aria-hidden="true">{'\u{2013}'}</span>
-        <input className="web-field" type="date" value={range.until} min={range.from} aria-label={t('usage/range/until')} onChange={(event) => { if (event.target.value !== '') setRange({ ...range, until: event.target.value }); }} />
+        <TextField type="date" value={range.until} min={range.from} ariaLabel={t('usage/range/until')} onChange={(next) => { if (next !== '') setRange({ ...range, until: next }); }} />
         <Button variant="ghost" title={reload} onClick={() => void scena.commands.execute('usage.reload')}>
           <span className="web-spend__reload" data-busy={reading ? 'true' : 'false'} aria-hidden="true">{EMOJIcon.reload}</span>
         </Button>
@@ -113,11 +114,11 @@ export default function UsagePoolPage({ host, pool }: { host: string; pool: stri
         <>
           <p>{totalLine(ranged.total) || nothing}</p>
           <Text variant="h3" text={`${EMOJIcon.records} ${t('usage/pool/records')}`} />
-          {ranged.records.length === 0 ? <p className="web-note">{t('usage/pool/noRecords')}</p> : (
+          {ranged.records.length === 0 ? <Note>{t('usage/pool/noRecords')}</Note> : (
             <UsageRecords host={host} records={ranged.records} />
           )}
         </>
       )}
-    </div>
+    </Page>
   );
 }

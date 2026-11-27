@@ -6,10 +6,6 @@
   gap: var(--oo-spacing-sm);
 }
 
-.web-keyvalue__label {
-  color: var(--oo-color-muted);
-}
-
 .web-keyvalue__value {
   text-align: end;
   overflow-wrap: anywhere;

@@ -1,0 +1,21 @@
+/* An image a markdown file names, while it reads or when it cannot be read: its alt text, muted. */
+
+.web-md__image {
+  color: var(--oo-color-muted);
+  font-style: italic;
+}
+
+/* The agent's text with Markdown off: its line breaks kept, a long word wrapped. */
+
+.web-md--plain {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.web-md :not(pre) > code {
+  cursor: pointer;
+}
+
+.web-md :not(pre) > code:hover {
+  text-decoration: underline dotted;
+}

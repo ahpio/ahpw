@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button } from '@softov/scena/ui';
+import { Alert, Button, CheckBox, ChoicePicker, Field, Note, PageActions, TextField } from '../../ui/index.js';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { useChannel } from '../../bridges/channel.js';
 import { ROOT } from '../../bridges/data.js';
@@ -8,10 +8,10 @@ import { boundSubjects, grantCatalog, subjectsOf } from '../../bridges/grants.js
 import type { Grant } from '../../bridges/people.js';
 import { hostSaid } from '../../bridges/said.js';
 import { mintToken, type MintedToken } from '../../bridges/tokens.js';
-import { CopyButton } from '../../shell/controls/CopyButton.js';
-import { Field } from '../../shell/view/Field.js';
+import { CopyButton } from '../../ui/control/CopyButton.js';
 import { RoleGrants } from '../users/RoleGrants.js';
 import { EXPIRY_CHOICES, expiresAt, type ExpiryChoice } from './expiry.js';
+import './mint-form.css';
 
 interface MintFormProps {
   host: string;
@@ -82,7 +82,7 @@ export function MintForm({ host, user, grants, onMinted }: MintFormProps): React
     return (
       <div className="web-mint__secret" role="status">
         <strong>{t('profile/keys/mint/madeTitle', { name: minted.label ?? minted.id })}</strong>
-        <p className="web-note">{t('profile/keys/mint/once')}</p>
+        <Note>{t('profile/keys/mint/once')}</Note>
         <span className="web-mint__secret-line">
           <code className="web-mint__secret-text">{minted.secret}</code>
           <CopyButton text={minted.secret} label={t('profile/keys/mint/copy')} />
@@ -102,26 +102,16 @@ export function MintForm({ host, user, grants, onMinted }: MintFormProps): React
 
   return (
     <div className="web-mint web-form">
-      <Field label={t('profile/keys/mint/label')} hint={t('profile/keys/mint/labelHint')}>
-        <input className="web-field" value={label} autoFocus onChange={(event) => setLabel(event.target.value)} />
-      </Field>
-      <Field label={t('profile/keys/mint/expiry')}>
-        <span className="web-mint__expiry">
-          <select className="web-field" value={expiry} onChange={(event) => setExpiry(event.target.value as ExpiryChoice)}>
-            {EXPIRY_CHOICES.map((choice) => <option key={choice} value={choice}>{t(`profile/keys/mint/expiries/${choice}`)}</option>)}
-          </select>
-          {expiry === 'date' ? (
-            <input className="web-field" type="date" value={day} aria-label={t('profile/keys/mint/day')} onChange={(event) => setDay(event.target.value)} />
-          ) : null}
-        </span>
-      </Field>
-      <div className="web-form__field" role="group" aria-label={t('profile/keys/mint/grants')}>
-        <span className="web-input__label">{t('profile/keys/mint/grants')}</span>
-        <label className="web-input__row">
-          <input type="checkbox" checked={every} onChange={(event) => setEvery(event.target.checked)} />
-          <span>{user === undefined ? t('profile/keys/everyGrant') : t('profile/keys/everyGrantOf', { id: user })}</span>
-        </label>
-        {every ? null : grants.length === 0 ? <span className="web-note">{t('profile/keys/mint/noGrants')}</span> : (
+      <TextField label={t('profile/keys/mint/label')} hint={t('profile/keys/mint/labelHint')} value={label} autoFocus onChange={(next) => setLabel(next)} />
+      <span className="web-mint__expiry">
+        <ChoicePicker label={t('profile/keys/mint/expiry')} options={EXPIRY_CHOICES.map((choice) => ({ value: choice, label: t(`profile/keys/mint/expiries/${choice}`) }))} value={expiry} onChange={(next) => setExpiry(next as ExpiryChoice)} />
+        {expiry === 'date' ? (
+          <TextField type="date" value={day} ariaLabel={t('profile/keys/mint/day')} onChange={(next) => setDay(next)} />
+        ) : null}
+      </span>
+      <Field name="grants" label={t('profile/keys/mint/grants')} hint={t('profile/keys/mint/grantsHint')}>
+        <CheckBox label={user === undefined ? t('profile/keys/everyGrant') : t('profile/keys/everyGrantOf', { id: user })} value={every} onChange={setEvery} />
+        {every ? null : grants.length === 0 ? <Note inline>{t('profile/keys/mint/noGrants')}</Note> : (
           <>
             <RoleGrants
               grants={picked}
@@ -134,18 +124,17 @@ export function MintForm({ host, user, grants, onMinted }: MintFormProps): React
               emptyNote={t('profile/keys/mint/noSubject')}
               {...(addable.length === 0 ? {} : { addHint: t(`profile/keys/mint/addHint${whose}`, { id: user ?? '', subjects: addable.join(', ') }) })}
             />
-            <span className="web-note">
+            <Note inline>
               {picked.length === 0 ? t('profile/keys/mint/holdsNone') : t(`profile/keys/mint/holds${whose}`, { id: user ?? '', grants: picked.join(' ') })}
-            </span>
+            </Note>
           </>
         )}
-        <span className="web-input__hint">{t('profile/keys/mint/grantsHint')}</span>
-      </div>
+      </Field>
       {failure === null ? null : <Alert tone="danger" message={failure} />}
-      <div className="web-page__actions">
+      <PageActions>
         <Button variant="primary" label={t('profile/keys/mint/mint')} disabled={!ready} onClick={() => void mint()} />
         <Button label={t('profile/keys/mint/cancel')} onClick={reset} />
-      </div>
+      </PageActions>
     </div>
   );
 }

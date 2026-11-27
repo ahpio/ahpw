@@ -1,17 +1,16 @@
 import { useMemo, type ReactElement } from 'react';
 import type { SessionState, SessionSummary } from '@microsoft/agent-host-protocol';
 import { useI18n } from '@softov/scena/react';
-import { Card, Column, Grid, Progress, Text } from '@softov/scena/ui';
+import { Card, Column, Grid, Progress, RowButton, Text } from '../../ui/index.js';
 import { elapsed } from '../../bridges/words.js';
 import { plural } from '../../i18n/locales.js';
-import { DividedRows } from '../../shell/view/DividedRows.js';
-import { KpiCard, KpiCard2, type KpiProps } from '../../shell/view/Kpi.js';
-import { StatusRow } from '../../shell/view/StatusRow.js';
+import { DividedRows } from '../../ui/layout/DividedRows.js';
+import { KpiCard, KpiCard2, type KpiProps } from '../../ui/display/Kpi.js';
+import { StatusRow } from '../../ui/display/StatusRow.js';
 import { customizationKinds } from '../agents/kinds.js';
 import { EMOJIcon } from '../emojis.js';
 import { TOOLS_SHOWN, type SessionFigures } from './figures.js';
 import { tokens } from './turn.js';
-import './summary.css';
 
 /** How many skill names the Skills card lists before it counts the rest. */
 const SKILLS_SHOWN = 5;
@@ -85,9 +84,9 @@ export function Summary({ figures, summary, session, onTool }: { figures: Sessio
           {tools.length === 0 ? <Text text={t('sessions/info/noTools')} muted /> : (
             <Column gap={10}>
               {tools.map((line) => (
-                <button key={line.name} type="button" className="web-summary__tool" title={t('sessions/info/showCalls', { name: line.name })} onClick={() => onTool(line.name)}>
+                <RowButton key={line.name} title={t('sessions/info/showCalls', { name: line.name })} onClick={() => onTool(line.name)}>
                   <Progress label={line.name} display={toolValue(t, line)} value={line.calls} max={mostCalls} />
-                </button>
+                </RowButton>
               ))}
               {figures.tools.length > TOOLS_SHOWN ? <Text text={t('sessions/info/more', { count: figures.tools.length - TOOLS_SHOWN })} variant="caption" muted /> : null}
             </Column>

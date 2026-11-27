@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, Text } from '@softov/scena/ui';
+import { Button, Listable, Note, Text } from '../../ui/index.js';
 import { readTrust, keepTrust, trustPath, withoutAnswer, type TrustAnswers } from '../../bridges/trust.js';
 import { sendTrust } from '../../bridges/trust-ask.js';
 import { folderLabel } from '../../bridges/words.js';
@@ -36,22 +36,17 @@ export function TrustedFolders({ host, heading }: { host: string; /** Drawn in p
   return (
     <>
       {heading ?? <Text variant="h3" text={t('trust/host/title')} />}
-      <p className="web-note">{t('trust/host/hint')}</p>
-      {rows.length === 0 ? <p className="web-note">{t('trust/host/none')}</p> : (
-        <table className="web-runs web-table web-trust">
-          <thead>
-            <tr><th>{t('trust/host/folder')}</th><th>{t('trust/host/answer')}</th><th aria-label={t('trust/host/forget')} /></tr>
-          </thead>
-          <tbody>
-            {rows.map(([uri, trusted]) => (
-              <tr key={uri}>
-                <td><code>{folderLabel(uri)}</code></td>
-                <td>{t(trusted ? 'trust/host/trusted' : 'trust/host/untrusted')}</td>
-                <td className="web-trust__forget"><Button label={t('trust/host/forget')} size="sm" onClick={() => void forget(uri, trusted)} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <Note>{t('trust/host/hint')}</Note>
+      {rows.length === 0 ? <Note>{t('trust/host/none')}</Note> : (
+        <Listable<(typeof rows)[number]>
+          items={rows}
+          getKey={([uri]) => uri}
+          columns={[
+            { key: 'folder', label: t('trust/host/folder'), sortable: true, render: ([uri]) => <code>{folderLabel(uri)}</code> },
+            { key: 'answer', label: t('trust/host/answer'), render: ([, trusted]) => t(trusted ? 'trust/host/trusted' : 'trust/host/untrusted') },
+            { key: 'forget', label: '', align: 'right', render: ([uri, trusted]) => <Button label={t('trust/host/forget')} size="sm" onClick={() => void forget(uri, trusted)} /> },
+          ]}
+        />
       )}
     </>
   );

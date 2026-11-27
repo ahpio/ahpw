@@ -5,7 +5,7 @@ import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { folderLabel } from '../../bridges/words.js';
 import { plural } from '../../i18n/locales.js';
 import { confirm, done, failed } from '../../shell/notify/index.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 import { addedPath, setAdded, withFolder, withoutFolder } from './added.js';
 import { askName } from './ask.js';
 import { askFolder } from './pick.js';

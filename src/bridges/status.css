@@ -1,0 +1,33 @@
+.web-connection {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  padding: 0 var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  white-space: nowrap;
+}
+
+.web-connection__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--oo-color-warning);
+}
+
+.web-connection[data-status='connected'] .web-connection__dot {
+  background: var(--oo-color-success);
+}
+
+.web-connection[data-status='failed'] .web-connection__dot,
+.web-connection[data-status='disconnected'] .web-connection__dot {
+  background: var(--oo-color-danger);
+}
+
+.web-connection__host {
+  color: var(--oo-color-text);
+}
+
+.web-connection__uptime {
+  font-variant-numeric: tabular-nums;
+}

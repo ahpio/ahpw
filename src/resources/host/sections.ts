@@ -1,5 +1,5 @@
 import { translate } from '@softov/scena';
-import type { JsonSchemaObject, SchemaFormGroup, SchemaFormSection } from '@softov/scena/ui';
+import type { JsonSchemaObject, SchemaFormGroup, SchemaFormSection } from '../../ui/index.js';
 import { toolSettings } from '../agent-tools/registry.js';
 import { DOCK_KEYS } from '../../shell/dock/settings.js';
 

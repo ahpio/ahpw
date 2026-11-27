@@ -1,0 +1,11 @@
+/* A section after another keeps a line of space over its heading. */
+
+.web-automation-form__fields > .oo-section {
+  margin-top: var(--oo-spacing-sm);
+}
+
+/* The fields a host may lock, as after a one-time trigger ran: no box of its own, so the form lays them out as before. */
+
+.web-automation-form__fields {
+  display: contents;
+}

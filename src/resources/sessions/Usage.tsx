@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { getLocale } from '@softov/scena';
 import { useI18n } from '@softov/scena/react';
-import { DetailList, Modal, Progress, Text, Tree, type DetailItem, type TreeNode } from '@softov/scena/ui';
+import { Column, type DetailItem, DetailList, Modal, Note, Progress, Text, Tree, type TreeNode } from '../../ui/index.js';
 import {
   contextRows,
   creditsOf,
@@ -67,22 +67,22 @@ export function ContextPart({ context }: { context: ContextUsage }): ReactElemen
   const counted = rows.filter((row) => row.counts).map((row) => nodeOf(t, row, whole));
   const apart = rows.filter((row) => !row.counts).map((row) => nodeOf(t, row, whole));
   return (
-    <section className="web-usage__part">
+    <Column gap="var(--oo-spacing-sm)">
       <Text variant="h3" text={t('sessions/usage/context')} />
       <Text text={[
         t('sessions/usage/used', { used: tokens(context.total), window: tokens(whole), share: share(context.total, whole) }),
         ...(limit === undefined || limit === whole ? [] : [t('sessions/usage/limit', { limit: tokens(limit) })]),
       ].join(' \u{00B7} ')} />
       <Progress value={Math.min(context.total, whole)} max={whole} color={over ? 'red' : 'blue'} height={6} />
-      {over ? <p className="web-note">{t('sessions/usage/over')}</p> : null}
+      {over ? <Note>{t('sessions/usage/over')}</Note> : null}
       <Tree nodes={counted} />
       {apart.length === 0 ? null : (
         <>
           <Tree nodes={apart} />
-          <p className="web-note">{t('sessions/usage/deferredNote')}</p>
+          <Note>{t('sessions/usage/deferredNote')}</Note>
         </>
       )}
-    </section>
+    </Column>
   );
 }
 
@@ -113,7 +113,7 @@ function quotaItem(t: T, name: string, snapshot: QuotaSnapshot, now: number): De
       <>
         <Text text={snapshot.isUnlimitedEntitlement === true ? t('sessions/usage/unlimited') : used === undefined ? '' : t('sessions/usage/percentUsed', { percent: Math.round(used) })} />
         {used === undefined ? null : <Progress value={used} max={100} color={used >= 100 ? 'red' : used >= 80 ? 'orange' : 'blue'} height={6} />}
-        {notes.length === 0 ? null : <p className="web-note">{notes.join(' \u{00B7} ')}</p>}
+        {notes.length === 0 ? null : <Note>{notes.join(' \u{00B7} ')}</Note>}
       </>
     ),
   };
@@ -149,13 +149,13 @@ export function PlanPart({ quotas, account, now = Date.now() }: { quotas: Record
     ...(credits === undefined ? [] : [creditsItem(t, credits)]),
   ];
   return (
-    <section className="web-usage__part">
+    <Column gap="var(--oo-spacing-sm)">
       <Text variant="h3" text={t('sessions/usage/plan')} />
       {account?.subscriptionType === undefined ? null : <Text text={account.subscriptionType} />}
-      {quotas === undefined ? <p className="web-note">{t('sessions/usage/planUnknown')}</p> : null}
-      {quotas !== undefined && items.length === 0 ? <p className="web-note">{t('sessions/usage/noPlan')}</p> : null}
+      {quotas === undefined ? <Note>{t('sessions/usage/planUnknown')}</Note> : null}
+      {quotas !== undefined && items.length === 0 ? <Note>{t('sessions/usage/noPlan')}</Note> : null}
       {items.length === 0 ? null : <DetailList items={items} columns={1} />}
-    </section>
+    </Column>
   );
 }
 
@@ -166,7 +166,7 @@ export function UsageDialog({ usage, onClose }: { usage: UsageMeta; onClose: () 
   return (
     <Modal open title={t('sessions/usage/title')} onClose={onClose}>
       <div className="web-usage">
-        {usage.context === undefined ? <p className="web-note">{t('sessions/usage/noContext')}</p> : <ContextPart context={usage.context} />}
+        {usage.context === undefined ? <Note>{t('sessions/usage/noContext')}</Note> : <ContextPart context={usage.context} />}
         <PlanPart quotas={usage.quotas} account={usage.account} now={now} />
       </div>
     </Modal>

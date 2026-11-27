@@ -1,0 +1,6 @@
+/* A bot as bood draws it; the figure fills the width at its own aspect. */
+
+.web-bood {
+  flex: none;
+  pointer-events: none;
+}

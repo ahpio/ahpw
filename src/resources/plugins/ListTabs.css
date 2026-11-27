@@ -37,14 +37,6 @@
   list-style: none;
 }
 
-/* A plugin's description under its title, listed or installed. */
-.web-listed__description {
-  margin: 0;
-  color: var(--oo-color-muted);
-  font-size: var(--oo-font-size-sm);
-}
-
-
 /* A path or a URL in the facts, broken at any character so it fills its lines. */
 .web-listed__path {
   word-break: break-all;

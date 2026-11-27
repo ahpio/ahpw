@@ -1,0 +1,24 @@
+.oo-params {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+  margin: 0;
+  padding-left: var(--oo-spacing-sm);
+  border-left: 2px solid var(--oo-color-border);
+  font-size: var(--oo-font-size-sm);
+}
+
+.oo-params code {
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+}
+
+.oo-params__meta,
+.oo-params dd {
+  color: var(--oo-color-muted);
+}
+
+.oo-params dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

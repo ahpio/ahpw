@@ -9,8 +9,11 @@
   overflow-y: auto;
 }
 
-.web-usage__part {
+/* A computer's page: its use as bars, its mounts, and the runtime's own record, folded. */
+
+.web-usage {
   display: flex;
   flex-direction: column;
   gap: var(--oo-spacing-sm);
+  max-width: 480px;
 }

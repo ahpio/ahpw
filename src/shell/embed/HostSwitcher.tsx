@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { ContextMenu } from '@softov/scena/ui';
+import { Button, ContextMenu, RowButton, StatusDot } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { EMOJIcon } from '../../resources/emojis.js';
 import { ahpPaths, type Connection } from '../../bridges/data.js';
@@ -76,7 +76,7 @@ export default function HostSwitcher({ embedder }: { embedder: Embedder }): Reac
     const state = hostState(connections[at], refusals[at]);
     return state === 'connected' || state === 'connecting' ? state : 'down';
   };
-  const dotOf = (status: EmbedHostStatus) => <span className={`embed-dot embed-dot--${status}`} aria-label={t(`shell/embed/status/${status}`)} />;
+  const dotOf = (status: EmbedHostStatus) => <StatusDot tone={status === 'connected' ? 'success' : status === 'connecting' ? 'warning' : 'default'} outline={status === 'down'} title={t(`shell/embed/status/${status}`)} />;
   const dot = (id: string) => dotOf(statusOf(id));
   // With every host: the one host shown, else every host with the worst dot.
   const only = multi && filter?.length === 1 ? list.find((host) => host.id === filter[0]) ?? null : null;
@@ -93,40 +93,35 @@ export default function HostSwitcher({ embedder }: { embedder: Embedder }): Reac
 
   return (
     <div className="embed-host" ref={ref}>
-      <button type="button" className="embed-host__button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <Button variant="subtle" hasPopup="menu" expanded={open} active={open} onClick={() => setOpen(!open)}>
         {shown !== null ? dot(shown.id) : multi ? dotOf(worst) : null}
         <span className="embed-host__name">{shown?.name ?? (multi ? t('hosts/every') : '…')}</span>
         <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
           <path d="M1 2.5l3 3 3-3" fill="none" stroke="currentColor" />
         </svg>
-      </button>
+      </Button>
       {open && (
         <div className="embed-host__menu" role="menu">
           {multi ? (
-            <button type="button" role="menuitem" className="embed-host__item" aria-current={only === null} onClick={() => pick(null)}>
+            <RowButton role="menuitem" inset current={only === null} onClick={() => pick(null)}>
               {dotOf(worst)}
               <span className="embed-host__name">{t('hosts/every')}</span>
-            </button>
+            </RowButton>
           ) : null}
           {list.map((host) => (
             <div key={host.id} className="embed-host__row">
-              <button
-                type="button"
-                role="menuitem"
-                className="embed-host__item"
-                aria-current={host.id === shown?.id}
-                onClick={() => pick(host.id)}
-              >
+              <RowButton role="menuitem" inset current={host.id === shown?.id} onClick={() => pick(host.id)}>
                 {dot(host.id)}
                 <span className="embed-host__name">{host.name}</span>
                 <span className="embed-host__url" title={host.url}>{host.url.replace(/^ws:\/\//i, '')}</span>
-              </button>
+              </RowButton>
               {multi ? (
-                <button
-                  type="button"
-                  className="embed-host__more"
-                  aria-label={t('shell/embed/hostOptions', { host: host.name })}
+                <Button
+                  variant="quiet"
+                  shape="icon"
+                  ariaLabel={t('shell/embed/hostOptions', { host: host.name })}
                   title={t('shell/embed/hostOptions', { host: host.name })}
+                  hasPopup="menu"
                   onClick={(event) => {
                     // Beside the row, with the host menu still open, so the options read as that host's.
                     const box = event.currentTarget.getBoundingClientRect();
@@ -134,35 +129,19 @@ export default function HostSwitcher({ embedder }: { embedder: Embedder }): Reac
                   }}
                 >
                   {EMOJIcon.more}
-                </button>
+                </Button>
               ) : null}
             </div>
           ))}
           <div className="embed-host__line" role="separator" />
-          <button
-            type="button"
-            role="menuitem"
-            className="embed-host__item embed-host__action"
-            onClick={() => {
-              setOpen(false);
-              void embedder.manageHosts();
-            }}
-          >
+          <RowButton role="menuitem" inset muted onClick={() => { setOpen(false); void embedder.manageHosts(); }}>
             <span aria-hidden="true">☰</span>
             <span className="embed-host__name">{t('shell/embed/manageHosts')}</span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            className="embed-host__item embed-host__action"
-            onClick={() => {
-              setOpen(false);
-              void embedder.manageHosts({ add: true });
-            }}
-          >
+          </RowButton>
+          <RowButton role="menuitem" inset muted onClick={() => { setOpen(false); void embedder.manageHosts({ add: true }); }}>
             <span aria-hidden="true">+</span>
             <span className="embed-host__name">{t('shell/embed/addHost')}</span>
-          </button>
+          </RowButton>
         </div>
       )}
       {options === null ? null : <ContextMenu spec={{ items: optionsOf(options.id) }} x={options.x} y={options.y} onClose={() => setOptions(null)} />}

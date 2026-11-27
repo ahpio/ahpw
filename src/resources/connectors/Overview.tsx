@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Blocks, Button, type DetailItem, DetailList, Note, ParamList, Text } from '../../ui/index.js';
 import { receiveUrl, type AdapterRow, type Capability, type ConnectorRow } from '../../bridges/connectors.js';
 import { ahpPaths, httpRoot } from '../../bridges/data.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
@@ -9,7 +9,7 @@ import { embedMode } from '../../shell/embed/index.js';
 import { HostIcon } from '../../shell/HostIcon.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { AlertList } from '../../shell/view/AlertList.js';
-import { copyText } from '../../shell/controls/CopyButton.js';
+import { copyText } from '../../ui/control/CopyButton.js';
 import { done } from '../../shell/notify/index.js';
 import { PluginViewPanel } from '../plugins/PluginViewPanel.js';
 import { meOn, ownerWord } from './actions.js';
@@ -71,18 +71,7 @@ function CapabilityRow({ capability, url, view }: { capability: Capability; url:
         </div>
       )}
       {inputs.length === 0 ? null : (
-        <dl className="web-connector__inputs" aria-label={t('connectors/page/input')}>
-          {inputs.map((input) => (
-            <div key={input.name} className="web-connector__input">
-              <dt>
-                <code>{input.name}</code>
-                {input.required ? <span className="web-connector__required" title={t('connectors/page/required')}>*</span> : null}
-                {input.type === undefined ? null : <span className="web-connector__type">{input.type}</span>}
-              </dt>
-              {input.description === undefined ? null : <dd>{input.description}</dd>}
-            </div>
-          ))}
-        </dl>
+        <ParamList label={t('connectors/page/input')} params={inputs.map((input) => ({ name: input.name, type: input.type, required: input.required, description: input.description }))} requiredLabel={t('connectors/page/required')} />
       )}
       {view}
     </details>
@@ -114,7 +103,7 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
     { label: t('connectors/page/owner'), value: ownerWord(t, row.owner, meOn(offers)) },
     ...(plugin === undefined ? [] : [{
       label: t('connectors/page/plugin'),
-      value: <button type="button" className="web-link" onClick={() => void scena.commands.execute('ahp.openPlugin', { host, id: plugin })}>{plugin}</button>,
+      value: <Button variant="link" onClick={() => void scena.commands.execute('ahp.openPlugin', { host, id: plugin })}>{plugin}</Button>,
     }]),
   ];
   const capabilities = adapter?.capabilities ?? [];
@@ -125,12 +114,12 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
     : <PluginViewPanel host={host} plugin={plugin} at={`connector:${row.id}`} view={row.views.main} />;
 
   return (
-    <div className="web-connector__overview">
+    <Blocks>
       {adapter === undefined || adapter.description === '' ? null : <p>{adapter.description}</p>}
       <AlertList alerts={row.alerts ?? []} />
       <DetailList items={facts} columns={2} />
       <Text variant="h3" text={t('connectors/page/capabilities', { count: capabilities.length })} />
-      {capabilities.length === 0 ? <p className="web-note">{t('connectors/page/noCapabilities')}</p> : (
+      {capabilities.length === 0 ? <Note>{t('connectors/page/noCapabilities')}</Note> : (
         byType(capabilities).map((group) => (
           <section key={group.type} className="web-connector__group">
             <div className="web-connector__group-head">
@@ -151,6 +140,6 @@ export function Overview({ host, row, adapter }: { host: string; row: ConnectorR
           </section>
         ))
       )}
-    </div>
+    </Blocks>
   );
 }

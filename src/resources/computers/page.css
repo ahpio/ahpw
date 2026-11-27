@@ -1,0 +1,24 @@
+.web-method {
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+}
+
+.web-method[data-effect='remove'] {
+  color: var(--oo-color-danger);
+}
+
+.web-mounts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-mounts li {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+}

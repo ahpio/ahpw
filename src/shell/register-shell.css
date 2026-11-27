@@ -1,0 +1,15 @@
+/* The title bar's height comes from this box, not from the mark, so the mark can be smaller than the bar. */
+
+.web-title {
+  display: flex;
+  align-items: center;
+  height: 24px;
+}
+
+/* The brand holds the activity bar's column, so what comes after it starts where the sidebar does. */
+
+.oo-bar__item:has(> .oo-mount > .web-title) {
+  justify-content: center;
+  width: var(--oo-activitybar-size);
+  margin-inline: calc(-1 * var(--oo-spacing-sm)) calc(-1 * var(--oo-spacing-xs));
+}

@@ -1,7 +1,7 @@
 import { useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { getLocale } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, ContextMenu, Text } from '@softov/scena/ui';
+import { Blocks, Button, CheckBox, ChoicePicker, ContextMenu, FormRow, Note, Page, PageActions, Section, Text, TextField } from '../../ui/index.js';
 import {
   automationReducer,
   type AgentInfo,
@@ -19,8 +19,7 @@ import { useChannel } from '../../bridges/channel.js';
 import { folderLabel, newId } from '../../bridges/words.js';
 import { cronWords, definitionOf, draftOf, draftProblem, localInput, localZone, type Draft } from './words.js';
 import { oneTimeOf, type NextCapabilities } from './next.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
-import { Field } from '../../shell/view/Field.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { plural } from '../../i18n/locales.js';
 import { EMOJIcon } from '../emojis.js';
 import { confirm } from '../../shell/notify/confirm.js';
@@ -28,8 +27,8 @@ import { templatesIn, type AutomationTemplate } from './templates.js';
 import { NEW_AUTOMATION_TAB } from './state.js';
 import { SettingsBox } from './SettingsBox.js';
 import { useSessionSettings } from './session-settings.js';
-import { Section } from '../../shell/view/Section.js';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './edit.css';
 
 /** Schedules most people want, so a cron expression is something to read rather than write. */
 const PRESETS: { key: string; expression: string }[] = [
@@ -141,7 +140,7 @@ export function AutomationForm({ host, entry, header }: { host: string; entry?: 
   };
 
   return (
-    <div className="web-automation-form">
+    <Blocks>
       {header}
 
       {entry === undefined ? (
@@ -152,131 +151,114 @@ export function AutomationForm({ host, entry, header }: { host: string; entry?: 
       ) : null}
 
       <fieldset className="web-automation-form__fields" disabled={locked}>
-      <Field label={t('automations/edit/title')}>
-        <input className="web-field" value={shown.title} onChange={(event) => set({ title: event.target.value })} />
-      </Field>
+      <TextField label={t('automations/edit/title')} value={shown.title} onChange={(next) => set({ title: next })} />
 
       <Section icon={EMOJIcon.markdown} title={t('automations/page/instructions')} />
       <SettingsBox host={host} agents={agents} draft={shown} settings={settings} set={set} />
 
       <Section icon={EMOJIcon.automations} title={t('automations/page/sections/schedule')} />
-      <div className="web-form__row">
-        <Field label={t('automations/edit/schedule')}>
-          <select
-            className="web-field"
-            value={shown.once ? 'once' : preset?.expression ?? 'custom'}
-            onChange={(event) => {
-              const value = event.target.value;
-              if (value === 'once') set({ once: true, runAt: shown.runAt === '' ? tomorrow() : shown.runAt });
-              else if (value !== 'custom') set({ once: false, expression: value });
-              else set({ once: false });
-            }}
-          >
-            {PRESETS.map((one) => <option key={one.key} value={one.expression}>{t(`automations/edit/presets/${one.key}`)}</option>)}
-            {caps?.oneTime === undefined && !shown.once ? null : <option value="once">{t('automations/edit/presets/once')}</option>}
-            <option value="custom">{t('automations/edit/custom')}</option>
-          </select>
-        </Field>
+      <FormRow>
+        <ChoicePicker
+          label={t('automations/edit/schedule')}
+          options={[
+            ...PRESETS.map((one) => ({ value: one.expression, label: t(`automations/edit/presets/${one.key}`) })),
+            ...(caps?.oneTime === undefined && !shown.once ? [] : [{ value: 'once', label: t('automations/edit/presets/once') }]),
+            { value: 'custom', label: t('automations/edit/custom') },
+          ]}
+          value={shown.once ? 'once' : preset?.expression ?? 'custom'}
+          onChange={(value) => {
+            if (value === 'once') set({ once: true, runAt: shown.runAt === '' ? tomorrow() : shown.runAt });
+            else if (value !== 'custom') set({ once: false, expression: value });
+            else set({ once: false });
+          }}
+        />
         {shown.once ? (
-          <Field label={t('automations/edit/runAt')} hint={t('automations/edit/runAtHint', { zone: localZone() })}>
-            <input className="web-field" type="datetime-local" value={shown.runAt} onChange={(event) => set({ runAt: event.target.value })} />
-          </Field>
+          <TextField label={t('automations/edit/runAt')} hint={t('automations/edit/runAtHint', { zone: localZone() })} type="datetime-local" value={shown.runAt} onChange={(next) => set({ runAt: next })} />
         ) : (
-          <Field
+          <TextField
             label={t('automations/edit/cron')}
             hint={`${shown.expression.trim() === '' ? t('automations/edit/byHandHint') : cronWords(shown.expression)}${minimum === undefined ? '' : ` ${plural('automations/edit/minimum', minimum)}`}`}
-          >
-            <input className="web-field" value={shown.expression} placeholder={t('automations/edit/cronPlaceholder')} onChange={(event) => set({ expression: event.target.value })} />
-          </Field>
+            value={shown.expression}
+            placeholder={t('automations/edit/cronPlaceholder')}
+            onChange={(next) => set({ expression: next })}
+          />
         )}
-      </div>
+      </FormRow>
 
       {shown.once ? (
-        <div className="web-form__row">
-          <Field label={t('automations/edit/missedRuns')} hint={t('automations/edit/missedHint')}>
-            <select className="web-field" value={shown.misfire} onChange={(event) => set({ misfire: event.target.value === 'runOnce' ? 'runOnce' : 'skip' })}>
-              <option value="skip">{t('automations/edit/skip')}</option>
-              <option value="runOnce">{t('automations/edit/runOnce')}</option>
-            </select>
-          </Field>
-        </div>
+        <FormRow>
+          <ChoicePicker
+            label={t('automations/edit/missedRuns')}
+            hint={t('automations/edit/missedHint')}
+            options={[{ value: 'skip', label: t('automations/edit/skip') }, { value: 'runOnce', label: t('automations/edit/runOnce') }]}
+            value={shown.misfire}
+            onChange={(next) => set({ misfire: next === 'runOnce' ? 'runOnce' : 'skip' })}
+          />
+        </FormRow>
       ) : shown.expression.trim() === '' ? null : (
-        <div className="web-form__row">
-          <Field label={t('automations/edit/timeZone')}>
-            <input className="web-field" value={shown.timeZone} onChange={(event) => set({ timeZone: event.target.value })} />
-          </Field>
-          <Field label={t('automations/edit/missedRuns')} hint={t('automations/edit/missedHint')}>
-            <select className="web-field" value={shown.misfire} onChange={(event) => set({ misfire: event.target.value === 'runOnce' ? 'runOnce' : 'skip' })}>
-              <option value="skip">{t('automations/edit/skip')}</option>
-              <option value="runOnce">{t('automations/edit/runOnce')}</option>
-            </select>
-          </Field>
-        </div>
+        <FormRow>
+          <TextField label={t('automations/edit/timeZone')} value={shown.timeZone} onChange={(next) => set({ timeZone: next })} />
+          <ChoicePicker
+            label={t('automations/edit/missedRuns')}
+            hint={t('automations/edit/missedHint')}
+            options={[{ value: 'skip', label: t('automations/edit/skip') }, { value: 'runOnce', label: t('automations/edit/runOnce') }]}
+            value={shown.misfire}
+            onChange={(next) => set({ misfire: next === 'runOnce' ? 'runOnce' : 'skip' })}
+          />
+        </FormRow>
       )}
 
       {shown.once ? null : (
-      <div className="web-form__row">
-        <Field label={t('automations/edit/afterRuns')} hint={t('automations/edit/keepsOn')}>
-          <input className="web-field" type="number" min={1} step={1} value={shown.afterRuns} onChange={(event) => set({ afterRuns: event.target.value })} />
-        </Field>
-        <Field label={t('automations/edit/afterDate')} hint={t('automations/edit/keepsOn')}>
-          <input className="web-field" type="date" value={shown.afterDate} onChange={(event) => set({ afterDate: event.target.value })} />
-        </Field>
-      </div>
+      <FormRow>
+        <TextField label={t('automations/edit/afterRuns')} hint={t('automations/edit/keepsOn')} type="number" min={1} step={1} value={shown.afterRuns} onChange={(next) => set({ afterRuns: next })} />
+        <TextField label={t('automations/edit/afterDate')} hint={t('automations/edit/keepsOn')} type="date" value={shown.afterDate} onChange={(next) => set({ afterDate: next })} />
+      </FormRow>
       )}
 
       {targets.length === 0 ? null : (
         <>
           <Section icon={EMOJIcon.forward} title={t('automations/page/sections/target')} />
-          <div className="web-form__row">
-            <Field label={t('automations/edit/eachRun')} hint={t(`automations/edit/targets/${shown.target}Hint`)}>
-              <select className="web-field" value={shown.target} onChange={(event) => set({ target: event.target.value as Draft['target'] })}>
-                {targets.map((one) => <option key={one} value={one}>{t(`automations/edit/targets/${one}`)}</option>)}
-              </select>
-            </Field>
+          <FormRow>
+            <ChoicePicker label={t('automations/edit/eachRun')} hint={t(`automations/edit/targets/${shown.target}Hint`)} options={targets.map((one) => ({ value: one, label: t(`automations/edit/targets/${one}`) }))} value={shown.target} onChange={(next) => set({ target: next as Draft['target'] })} />
             {shown.target !== 'chat' ? null : (
-              <Field label={t('automations/edit/chat')}>
-                <select
-                  className="web-field"
-                  value={shown.chat}
-                  onChange={(event) => {
-                    const picked = chats.find((one) => one.chat === event.target.value);
-                    set({ chat: event.target.value, chatSession: picked?.session ?? '' });
-                  }}
-                >
-                  <option value="" disabled />
-                  {chats.map((one) => <option key={one.chat} value={one.chat}>{one.label}</option>)}
-                  {shown.chat === '' || chats.some((one) => one.chat === shown.chat) ? null : <option value={shown.chat}>{shown.chat}</option>}
-                </select>
-              </Field>
+              <ChoicePicker
+                label={t('automations/edit/chat')}
+                options={[
+                  { value: '', label: '', disabled: true },
+                  ...chats.map((one) => ({ value: one.chat, label: one.label })),
+                  ...(shown.chat === '' || chats.some((one) => one.chat === shown.chat) ? [] : [{ value: shown.chat, label: shown.chat }]),
+                ]}
+                value={shown.chat}
+                onChange={(next) => {
+                  const picked = chats.find((one) => one.chat === next);
+                  set({ chat: next, chatSession: picked?.session ?? '' });
+                }}
+              />
             )}
-          </div>
+          </FormRow>
         </>
       )}
       </fieldset>
 
       {entry === undefined ? (
-        <label className="web-input__row">
-          <input type="checkbox" checked={shown.enabled} onChange={(event) => set({ enabled: event.target.checked })} />
-          <span>{t('automations/edit/on')}</span>
-        </label>
+        <CheckBox label={t('automations/edit/on')} value={shown.enabled} onChange={(next) => set({ enabled: next })} />
       ) : null}
 
-      {locked ? <p className="web-note">{t(ranOnce ? 'automations/edit/locked' : 'automations/edit/lockedOther')}</p> : null}
-      {problem === undefined || locked ? null : <p className="web-note">{problem}</p>}
+      {locked ? <Note>{t(ranOnce ? 'automations/edit/locked' : 'automations/edit/lockedOther')}</Note> : null}
+      {problem === undefined || locked ? null : <Note>{problem}</Note>}
       {entry === undefined ? (
-        <div className="web-page__actions">
+        <PageActions>
           <Button label={t('automations/edit/create')} variant="primary" disabled={problem !== undefined} onClick={save} />
           <Button label={t('automations/edit/cancel')} onClick={() => scena.surfaces.close(NEW_AUTOMATION_TAB)} />
-        </div>
+        </PageActions>
       ) : (
-        <div className="web-page__actions">
+        <PageActions>
           <Button label={t('automations/edit/save')} variant="primary" disabled={problem !== undefined || !dirty} onClick={save} />
           <Button label={t('automations/edit/reset')} disabled={!dirty} onClick={() => { setDraft(null); setSaved(false); }} />
-          {saved && !dirty ? <span className="web-note">{t('automations/edit/saved')}</span> : null}
-        </div>
+          {saved && !dirty ? <Note inline>{t('automations/edit/saved')}</Note> : null}
+        </PageActions>
       )}
-    </div>
+    </Blocks>
   );
 }
 
@@ -294,7 +276,7 @@ export default function NewAutomationPage({ host: opened }: { host: string }): R
   if (caps?.create === undefined) return <PageAlert tone="warning" message={t('automations/edit/noCreate')} />;
 
   return (
-    <div className="web-page">
+    <Page>
       <AutomationForm
         key={host}
         host={host}
@@ -302,15 +284,11 @@ export default function NewAutomationPage({ host: opened }: { host: string }): R
           <>
             <Text variant="h2" text={t('automations/commands/new')} />
             {embedMode() === 'multi' ? (
-              <Field label={t('automations/edit/host')}>
-                <select className="web-field" value={host} onChange={(event) => { setPicked(event.target.value); writeLastHost(event.target.value); }}>
-                  {(hostList ?? []).map((one) => <option key={one.id} value={one.id}>{one.name}</option>)}
-                </select>
-              </Field>
+              <ChoicePicker label={t('automations/edit/host')} options={(hostList ?? []).map((one) => ({ value: one.id, label: one.name }))} value={host} onChange={(next) => { setPicked(next); writeLastHost(next); }} />
             ) : null}
           </>
         )}
       />
-    </div>
+    </Page>
   );
 }

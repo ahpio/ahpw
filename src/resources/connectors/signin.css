@@ -4,14 +4,6 @@
   gap: var(--oo-spacing-sm);
 }
 
-.web-connector-form__signin > .web-note {
-  margin: 0;
-}
-
-.web-connector-form__signin-start {
-  display: flex;
-}
-
 .web-connector-form__signed-in {
   margin: 0;
   color: var(--oo-color-success);

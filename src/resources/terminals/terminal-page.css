@@ -1,0 +1,26 @@
+/* The terminal fills the bottom panel; xterm sizes its rows to the box. */
+
+.web-terminal {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--oo-color-canvas);
+}
+
+.web-terminal__note {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  border-bottom: 1px solid var(--oo-color-border);
+}
+
+.web-terminal__screen {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--oo-spacing-xs) 0 0 var(--oo-spacing-sm);
+  overflow: hidden;
+}

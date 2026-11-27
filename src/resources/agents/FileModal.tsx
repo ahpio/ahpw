@@ -1,8 +1,9 @@
 import { useCallback, useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button, Modal } from '@softov/scena/ui';
+import { Alert, Button, Modal, Row } from '../../ui/index.js';
 import FilePage from '../files/FilePage.js';
 import type { FileSpot } from './words.js';
+import './file-modal.css';
 
 /**
  * A custom file in the text editor over the page. Close with unsaved text asks in the modal first.
@@ -22,14 +23,14 @@ export function FileModal({ host, spot, title, onClose }: { host: string; spot: 
       <div className="web-file-modal">
         <FilePage host={host} uri={spot.uri} line={spot.line} onDirty={onDirty} />
         {asking ? <Alert tone="warning" message={t('files/unsaved')} /> : null}
-        <div className="web-custom-detail__actions">
+        <Row justify="end" gap={0}>
           {asking
             ? <>
                 <Button label={t('agents/customizations/keepEditing')} variant="ghost" onClick={() => setAsking(false)} />
                 <Button label={t('agents/customizations/discard')} variant="danger" onClick={onClose} />
               </>
             : <Button label={t('common/close')} onClick={close} />}
-        </div>
+        </Row>
       </div>
     </Modal>
   );

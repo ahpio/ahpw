@@ -1,9 +1,8 @@
 import { useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Badge, Button, DetailList, Icon, Link, Popup } from '@softov/scena/ui';
+import { Alert, Badge, Button, DetailList, Icon, Link, Pill, Popup } from '../../ui/index.js';
 import { plural } from '../../i18n/locales.js';
 import { EMOJIcon } from '../emojis.js';
-import { Pill } from './pills.js';
 import { KIND_COLOR, PullRequestIcon } from './pull-request-icons.js';
 import { chipState, hasDetails, kindOf, plainDescription, pullRequestFacts, pullRequestName, repositoryUrl, type PullRequest } from './pull-requests.js';
 import './pull-requests.css';
@@ -51,7 +50,8 @@ export function PullRequestPill({ pullRequests, onOpen }: { pullRequests: readon
         lead={kind === undefined
           ? <Icon name={EMOJIcon.pullRequest} size={12} />
           : <PullRequestIcon kind={kind} size={12} />}
-        onOpen={() => { clearTimeout(timer.current); setAt(undefined); onOpen(); }}
+        menu
+        onClick={() => { clearTimeout(timer.current); setAt(undefined); onOpen(); }}
       />
       {hovers && at !== undefined
         ? <HoverCard pullRequest={one} under={at} onEnter={() => clearTimeout(timer.current)} onLeave={hide} onClose={() => setAt(undefined)} />

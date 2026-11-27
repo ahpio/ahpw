@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Text, type DetailItem } from '@softov/scena/ui';
+import { Alert, type DetailItem, Note, Text } from '../../ui/index.js';
 import type { PluginRow } from '../../bridges/plugins.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
@@ -39,7 +39,7 @@ export function Overview({ host, id, row, readme }: { host: string; id: string; 
       {row.problem === undefined ? null : <Alert tone={tone ?? 'warning'} message={row.problem} />}
       {row.views?.main === undefined ? null : <PluginViewPanel host={host} plugin={id} at={`plugin:${id}`} view={row.views.main} />}
       <AlertList alerts={alerts} />
-      {readme === undefined ? <p className="web-note">{t('plugins/page/noReadme')}</p> : <ReadText text={readme} />}
+      {readme === undefined ? <Note>{t('plugins/page/noReadme')}</Note> : <ReadText text={readme} />}
     </>
   );
 }
@@ -52,8 +52,8 @@ export function Features({ host, row }: { host: string; row: PluginRow }): React
   return (
     <>
       <Text variant="h3" text={t('plugins/page/provides')} />
-      {row.undeclared === true ? <p className="web-note">{t('plugins/page/undeclared')}</p>
-        : groups.length === 0 ? <p className="web-note">{t(manifest === undefined ? 'plugins/page/notLoaded' : 'plugins/page/providesNothing')}</p>
+      {row.undeclared === true ? <Note>{t('plugins/page/undeclared')}</Note>
+        : groups.length === 0 ? <Note>{t(manifest === undefined ? 'plugins/page/notLoaded' : 'plugins/page/providesNothing')}</Note>
           : <ProvidesList host={host} contracts={manifest?.contracts} />}
     </>
   );

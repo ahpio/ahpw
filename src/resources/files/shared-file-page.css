@@ -1,0 +1,64 @@
+.web-file {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.web-file__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--oo-spacing-sm);
+  flex: none;
+  padding: var(--oo-spacing-sm) var(--oo-spacing-lg);
+  border-bottom: 1px solid var(--oo-color-border);
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-file__head code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.web-file__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.web-file__doc {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: var(--oo-spacing-lg) var(--oo-spacing-xl, 24px);
+}
+
+.web-file__actions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--oo-spacing-sm);
+  margin-left: auto;
+}
+
+.web-file__body--editor {
+  overflow: hidden;
+}
+
+.web-file__dirty {
+  color: var(--oo-color-warning);
+}
+
+.web-file__dirty::before {
+  content: '● ';
+}
+
+.web-file > .oo-note {
+  padding: var(--oo-spacing-sm) var(--oo-spacing-lg);
+}
+
+/* A notice on a file page (not readable, not saved) sits in the page's margins, not against its edges. */
+
+.web-file > .oo-alert {
+  flex: none;
+  margin: var(--oo-spacing-sm) var(--oo-spacing-lg);
+}

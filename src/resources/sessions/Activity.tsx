@@ -3,9 +3,10 @@ import { useI18n } from '@softov/scena/react';
 import { elapsed } from '../../bridges/words.js';
 import { hostSpan, stepDone, stepFailed, stepWaits, summaryPieces, type Group, type Doing, type Step } from './activity-parts.js';
 import { Reasoning, ToolCall, type Send } from './Parts.js';
-import { EMOJIcon } from '../emojis.js';
 import { useAsks } from '../agent-tools/asks.js';
 import { useChatUri, useSessionHost } from './workspace.js';
+import { RowButton } from '../../ui/index.js';
+import './activity.css';
 
 /**
  * When this page first saw each step or run running, and first saw it done,
@@ -86,14 +87,13 @@ export function Activity({ group, send, turnId, hits, opened = false }: { group:
 
   return (
     <div className="web-activity" data-live={running !== undefined}>
-      <button type="button" className="web-activity__line" aria-expanded={shown} onClick={() => setOpen(!shown)}>
+      <RowButton fit faint small caret="end" expanded={shown} onClick={() => setOpen(!shown)}>
         <span>
           {line.map((piece, index) => piece.failed
             ? <span key={index} className="web-activity__failed">{piece.text}</span>
             : piece.text)}
         </span>
-        <span className="web-activity__chev" aria-hidden="true">{shown ? EMOJIcon.caretDown : EMOJIcon.caretRight}</span>
-      </button>
+      </RowButton>
       {shown ? (
         <div className="web-activity__steps">
           {group.steps.map((step, index) => {

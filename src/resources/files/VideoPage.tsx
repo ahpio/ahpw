@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { MediaFrame } from './media.js';
+import './video-page.css';
 
 /** A video file, in the browser's own player. */
 export default function VideoPage({ host, uri }: { host: string; uri?: string }): ReactElement {

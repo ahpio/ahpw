@@ -1,7 +1,7 @@
 import { useRef, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Badge, DetailList, Text, type DetailItem } from '@softov/scena/ui';
+import { Badge, Button, type DetailItem, DetailList, ItemList, ItemRow, Page, PageHead, Text } from '../../ui/index.js';
 import { useChannel } from '../../bridges/channel.js';
 import type { ChatSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths, channelPath, titlePath, type HostFacts } from '../../bridges/data.js';
@@ -13,7 +13,7 @@ import { elapsed } from '../../bridges/words.js';
 import { embedMode } from '../../shell/embed/index.js';
 import { HostTag } from '../../shell/explorer/HostLines.js';
 import { PageTitle } from '../../shell/HostIcon.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { EMOJIcon } from '../emojis.js';
 import { DangerOperations, OperationButtons } from '../operations/Buttons.js';
 import { useNow } from '../sessions/clock.js';
@@ -23,8 +23,8 @@ import {
   type ClientFacts, type ClientsState, type Reading,
 } from './rows.js';
 import { describeChannels } from './channels.js';
-import './channels.css';
-import { PageSpinner } from '../../shell/view/PageSpinner.js';
+import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './page.css';
 
 const when = dateFormat({ dateStyle: 'medium', timeStyle: 'medium' });
 
@@ -140,9 +140,9 @@ function SessionLink({ host, resource }: { host: string; resource: string }): Re
   const title = useStore<string>(titlePath(host, resource));
   return (
     <li>
-      <button type="button" className="web-link" onClick={() => void scena.commands.execute('ahp.openSession', { host, resource })}>
+      <Button variant="link" onClick={() => void scena.commands.execute('ahp.openSession', { host, resource })}>
         {title ?? resource}
-      </button>
+      </Button>
     </li>
   );
 }
@@ -163,21 +163,17 @@ function ChannelList({ host, facts }: { host: string; facts: ClientFacts }): Rea
     sessionOf: (chat) => candidates.find((_, at) => states[at]?.chats?.some((one) => one.resource === chat) === true),
   });
   return (
-    <ul className="web-channels">
+    <ItemList boxed>
       {entries.map(({ uri, title, description, open }) => (
-        <li key={uri} className="web-channels__row">
-          {open === undefined
-            ? <span className="web-channels__title">{title}</span>
-            : (
-              <button type="button" className="web-link web-channels__title" onClick={() => void scena.commands.execute(open.command, open.args)}>
-                {title}
-              </button>
-            )}
-          <span className="web-channels__uri">{uri}</span>
-          {description === undefined ? null : <span className="web-channels__description">{description}</span>}
-        </li>
+        <ItemRow
+          key={uri}
+          title={title}
+          meta={<code>{uri}</code>}
+          text={description}
+          {...(open === undefined ? {} : { onClick: () => void scena.commands.execute(open.command, open.args) })}
+        />
       ))}
-    </ul>
+    </ItemList>
   );
 }
 
@@ -208,11 +204,11 @@ export default function ClientPage({ host, client: id }: { host: string; client?
       : <Badge tone="success" text={t('clients/explorer/connected')} />;
 
   return (
-    <div className="web-page">
-      <div className="web-page__head">
+    <Page>
+      <PageHead>
         <PageTitle emoji={EMOJIcon.clients} title={titleOf(facts)} uri={`${CLIENTS}${id}`} state={badge} />
         <OperationButtons place={place} operations={operations} />
-      </div>
+      </PageHead>
 
       <DetailList items={factsList(host, facts)} columns={2} />
 
@@ -236,6 +232,6 @@ export default function ClientPage({ host, client: id }: { host: string; client?
       </Folded>
 
       <DangerOperations place={place} operations={operations} />
-    </div>
+    </Page>
   );
 }

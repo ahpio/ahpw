@@ -1,13 +1,13 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, SchemaForm, Text, type JsonSchemaObject } from '@softov/scena/ui';
+import { Alert, Blocks, Button, Group, type JsonSchemaObject, Page, PageActions, SchemaForm, Text } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
 import { useOwnGrants } from '../../bridges/own-grants.js';
 import { useServingHosts } from '../../bridges/served.js';
 import { embedMode } from '../../shell/embed/index.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import { writeLastHost } from '../sessions/last-host.js';
@@ -75,9 +75,9 @@ export default function NewComputerPage({ host: opened }: { host: string }): Rea
   };
 
   return (
-    <div className="web-page web-form">
+    <Page>
       <Text variant="h2" text={`${EMOJIcon.computers} ${t('computers/commands/new')}`} />
-      <div className="web-connector-form">
+      <Blocks>
         <SchemaForm
           schema={head}
           value={top}
@@ -86,17 +86,16 @@ export default function NewComputerPage({ host: opened }: { host: string }): Rea
           jsonTextRoot={false}
         />
         {Object.keys(fields.properties ?? {}).length === 0 ? null : (
-          <section className="web-connector-form__adapter" aria-label={t('computers/new/settings')}>
-            <h3 className="web-connector-form__heading web-host-label"><span aria-hidden="true">{EMOJIcon.settings}</span>{t('computers/new/settings')}</h3>
+          <Group title={t('computers/new/settings')} icon={EMOJIcon.settings}>
             <SchemaForm key={host} schema={fields} views={SETTINGS_VIEWS} value={answers} onChange={setAnswers} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} />
-          </section>
+          </Group>
         )}
-      </div>
+      </Blocks>
       {failure === null ? null : <Alert tone="danger" message={failure} />}
-      <div className="web-page__actions">
+      <PageActions>
         <Button label={t('computers/new/create')} variant="primary" disabled={problem !== undefined || busy || !jsonValid} {...(jsonValid ? {} : { title: t('host/settings/fixJson') })} onClick={create} />
         <Button label={t('computers/new/cancel')} onClick={() => scena.surfaces.close('computer:new')} />
-      </div>
-    </div>
+      </PageActions>
+    </Page>
   );
 }

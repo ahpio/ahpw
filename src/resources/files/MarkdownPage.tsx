@@ -3,12 +3,13 @@ import { createPortal } from 'react-dom';
 import { useI18n, useScena } from '@softov/scena/react';
 import { livePreview } from '../editor/livePreview.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
-import { PageAlert } from '../../shell/view/PageAlert.js';
+import { PageAlert } from '../../ui/display/PageAlert.js';
 import { openHref } from './clicks.js';
 import { HostImage, imagesFrom } from './HostImage.js';
 import { FileUrls } from './media.js';
 import { SharedFilePage } from './SharedFilePage.js';
 import { folderOf, SimpleMarkdown } from './SimpleMarkdown.js';
+import '../../shell/markdown/markdown.css';
 
 /**
  * A Markdown file as a page people edit live: the shared editor with the live

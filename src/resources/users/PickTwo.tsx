@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactElement } from 'react';
-import { Button } from '@softov/scena/ui';
+import { Button } from '../../ui/index.js';
 import { ContextMenu } from '@softov/scena/ui/menu';
+import './pick-two.css';
 
 /** One entry of a pick menu: what it means, and how it reads. */
 export interface Pick<T> {

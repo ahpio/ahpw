@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { Avatar } from '@softov/scena/ui';
+import { Avatar } from '../ui/index.js';
 
 /**
  * A colour for a name: the first three letters pick the hue, and each letter

@@ -1,0 +1,64 @@
+/* Copied from scena `ui/display/DetailList.css`. */
+.oo-detail-list {
+  display: grid;
+  gap: var(--oo-spacing-md);
+  margin: 0;
+}
+.oo-detail-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.oo-detail-list__item--span {
+  grid-column: 1 / -1;
+}
+.oo-detail-list__label {
+  font-size: var(--oo-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--oo-color-muted);
+}
+.oo-detail-list__value {
+  margin: 0;
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-text);
+  overflow-wrap: anywhere;
+}
+
+/* ahpw extension: each label beside its value, in two columns. */
+.oo-detail-list[data-inline='true'] {
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 2px var(--oo-spacing-md);
+}
+
+.oo-detail-list[data-inline='true'] > .oo-detail-list__item {
+  display: contents;
+}
+
+.oo-detail-list[data-inline='true'] > dt {
+  color: var(--oo-color-muted);
+}
+
+.oo-detail-list[data-inline='true'] > dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.oo-detail-list[data-inline='true'] .oo-detail-list__label {
+  font-size: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.oo-detail-list[data-inline='true'] .oo-detail-list__value {
+  font-size: inherit;
+}
+
+.oo-detail-list__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}

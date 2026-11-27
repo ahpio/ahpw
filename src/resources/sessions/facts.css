@@ -58,3 +58,10 @@
 .web-details__plugin[data-differs='true'] .web-details__muted {
   color: var(--oo-color-warning);
 }
+
+.web-details__list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}

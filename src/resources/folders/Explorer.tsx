@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, ContextMenu, Spinner, Tree, type TreeNode } from '@softov/scena/ui';
+import { Alert, ContextMenu, Note, Panel, Spinner, Tree, type TreeNode } from '../../ui/index.js';
 import type { DirectoryEntry, SessionSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths, hostBridge, ROOT, type Connection } from '../../bridges/data.js';
 import { useHostNames, useShownHosts } from '../../bridges/hosts.js';
@@ -73,8 +73,8 @@ export default function FolderExplorer(): ReactElement {
   };
 
   return (
-    <div className="web-explorer">
-      <div className="web-explorer__scroll" onContextMenu={openPanelMenu}>
+    <>
+      <Panel onContextMenu={openPanelMenu}>
         {multi ? <HostLines /> : null}
         {hosts.map((host) => (
           <HostFolders
@@ -85,9 +85,9 @@ export default function FolderExplorer(): ReactElement {
             onSelected={(key) => setSelected(key === null ? null : { host, key })}
           />
         ))}
-      </div>
+      </Panel>
       {menu === null ? null : <ContextMenu spec={{ items: panelItems }} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
-    </div>
+    </>
   );
 }
 
@@ -254,7 +254,7 @@ export function HostFolders({ host, named, selected, onSelected, rooted }: {
         draggable: true,
         data: { host, uri, directory: true },
         children,
-        ...(trailing === undefined ? {} : { trailing: <span className="web-folders__tag">{trailing}</span> }),
+        ...(trailing === undefined ? {} : { trailing: <Note inline small>{trailing}</Note> }),
       };
     };
     const top = roots.map((root) => folder(root.uri, nameOf(root.uri), root.isDefault ? t('folders/explorer/default') : undefined));
@@ -279,7 +279,7 @@ export function HostFolders({ host, named, selected, onSelected, rooted }: {
       // Reached only off the rows, whose menus stop here: no select is on its way.
       onContextMenu={() => { byMenu.current = false; }}
     >
-      {named === null && roots.length === 0 ? <p className="web-note web-explorer__empty">{t('folders/explorer/empty')}</p> : null}
+      {named === null && roots.length === 0 ? <Note inset>{t('folders/explorer/empty')}</Note> : null}
       <Tree<DraggedHostFile>
         nodes={nodes}
         selectedKey={selected}

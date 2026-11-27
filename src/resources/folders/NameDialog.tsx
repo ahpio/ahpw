@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Button, TextField } from '@softov/scena/ui';
+import { Button, Modal, TextField } from '../../ui/index.js';
 import { NAME_REQUEST, nameCheck, settleName, type NameRequest } from './ask.js';
 
 /** The open name question, over the page, drawn like the confirm dialog. */
@@ -17,22 +17,15 @@ export function NameDialog(): ReactElement | null {
  */
 function NameCard({ request }: { request: NameRequest }): ReactElement {
   const { t } = useI18n();
-  const card = useRef<HTMLFormElement>(null);
+  const box = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState(request.value);
   const [problem, setProblem] = useState<string | null>(null);
 
   useEffect(() => {
-    const box = card.current?.querySelector('input');
-    box?.focus();
+    box.current?.focus();
     const dot = request.value.lastIndexOf('.');
-    box?.setSelectionRange(0, dot > 0 ? dot : request.value.length);
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key !== 'Escape') return;
-      event.stopPropagation();
-      settleName(null);
-    };
-    window.addEventListener('keydown', onKey, true);
-    return () => window.removeEventListener('keydown', onKey, true);
+    box.current?.setSelectionRange(0, dot > 0 ? dot : request.value.length);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const send = (): void => {
@@ -41,34 +34,28 @@ function NameCard({ request }: { request: NameRequest }): ReactElement {
     else setProblem(found);
   };
   return (
-    <div className="web-confirm" onClick={() => settleName(null)}>
-      <form
-        ref={card}
-        className="web-confirm__card"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="web-name-title"
-        onClick={(event) => event.stopPropagation()}
-        onSubmit={(event) => {
-          event.preventDefault();
-          send();
-        }}
-      >
-        <h2 id="web-name-title" className="web-confirm__title">{request.title}</h2>
-        <TextField
-          label={request.label}
-          value={value}
-          {...(problem === null ? {} : { error: problem })}
-          onChange={(next) => {
-            setValue(next);
-            setProblem(null);
-          }}
-        />
-        <div className="web-confirm__buttons">
-          <Button type="button" size="sm" variant="ghost" onClick={() => settleName(null)}>{t('folders/ask/cancel')}</Button>
+    <Modal
+      open
+      title={request.title}
+      onClose={() => settleName(null)}
+      onSubmit={send}
+      actions={(
+        <>
+          <Button size="sm" variant="ghost" onClick={() => settleName(null)}>{t('folders/ask/cancel')}</Button>
           <Button type="submit" size="sm" variant="primary">{request.confirmLabel}</Button>
-        </div>
-      </form>
-    </div>
+        </>
+      )}
+    >
+      <TextField
+        inputRef={box}
+        label={request.label}
+        value={value}
+        {...(problem === null ? {} : { error: problem })}
+        onChange={(next) => {
+          setValue(next);
+          setProblem(null);
+        }}
+      />
+    </Modal>
   );
 }

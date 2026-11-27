@@ -1,0 +1,11 @@
+.web-page__route {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  flex-wrap: wrap;
+}
+
+.web-page__route code {
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+}
