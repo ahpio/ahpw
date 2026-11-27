@@ -15,6 +15,7 @@ import { SIGNED_IN, TOKEN_PROVIDER_ID, restoreSession, tokenProvider } from './p
 // Registers the languages before the first paint.
 import './i18n/messages.js';
 import './sign-in.css';
+import './app.css';
 
 // v2: each tab names its host; a v1 layout's tabs do not, so it is not restored.
 const layoutStorage = createLocalStorageLayoutStorage({ key: hostKey('ahpd-web.layout.v2') });

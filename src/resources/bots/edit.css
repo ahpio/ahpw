@@ -1,0 +1,10 @@
+.web-bot-look__pickers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  min-width: 0;
+}
+
+.web-bot-look__pickers > .oo-field {
+  max-width: 16rem;
+}

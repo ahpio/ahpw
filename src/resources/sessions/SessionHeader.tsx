@@ -1,6 +1,6 @@
 import { useEffect, useState, type MouseEvent, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, ContextMenu } from '../../ui/index.js';
+import { Button, ContextMenu, Note, Row } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import type { ChatState, SessionState, SessionSummary, TerminalState } from '@microsoft/agent-host-protocol';
 import { ahpPaths, hostBridge, type HostFacts } from '../../bridges/data.js';
@@ -16,6 +16,7 @@ import { sessionActs } from './acts.js';
 import { sessionKey } from './focus.js';
 import { SESSIONS_PINS, togglePin } from './pins.js';
 import { otherClients } from './tooling.js';
+import '../files/diff-page.css';
 
 /**
  * The session's terminals: the ones it holds by claim, and the others whose
@@ -142,12 +143,12 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
   ]);
 
   return (
-    <div className="web-chat__tools">
+    <Row align="center" wrap gap="var(--oo-spacing-xs)">
       {changes?.files === undefined || changes.files === 0 ? null : (
         <Button variant="tool" title={plural('sessions/header/files', changes.files)} onClick={() => run('ahp.showRight.changes:explorer')}>
           <span>{`${EMOJIcon.file} ${String(changes.files)}`}</span>
           <span className="web-diff--add">+{changes.additions ?? 0}</span>
-          <span className="web-diff--remove">{'\u{2212}'}{changes.deletions ?? 0}</span>
+          <Note inline tone="danger">{'\u{2212}'}{changes.deletions ?? 0}</Note>
         </Button>
       )}
       {others.length === 0 || info === undefined ? null : (
@@ -199,6 +200,6 @@ export function SessionHeaderTools({ host, summary, session, chat, chatUri, onCh
         {EMOJIcon.more}
       </Button>
       {menu === null ? null : <ContextMenu spec={{ items: menu.items }} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
-    </div>
+    </Row>
   );
 }

@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { ContextMenu, Pill } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
+import './menu-pill.css';
 
 /** One choice of a pill's menu. */
 export interface PillChoice {

@@ -3,6 +3,7 @@ import { useI18n } from '@softov/scena/react';
 import { Button, Note, Pill } from '../../ui/index.js';
 import { ContextMenu } from '@softov/scena/ui/menu';
 import { textToColor } from '../../shell/NameMark.js';
+import './role-pills.css';
 
 interface RolePillsProps {
   /** The roles the person holds, in the record's order. */

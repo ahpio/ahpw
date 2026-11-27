@@ -1,0 +1,23 @@
+.web-attachment-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: min(32rem, 80vw);
+}
+
+.web-attachment-preview__image {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.web-attachment-preview__text {
+  max-height: 70vh;
+  margin: 0;
+  overflow: auto;
+  font-family: var(--oo-font-mono, monospace);
+  font-size: var(--oo-font-size-xs);
+  white-space: pre-wrap;
+}

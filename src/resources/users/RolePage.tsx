@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Chip, DangerZone, Note, Page, PageActions, Text, TextField } from '../../ui/index.js';
+import { Alert, Button, Chip, DangerZone, Note, Page, PageActions, Row, Text, TextField } from '../../ui/index.js';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -15,6 +15,7 @@ import { RoleGrants } from './RoleGrants.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import '../../shell/host-icon.css';
 
 const rolesReducer = peopleReducer('roles');
 
@@ -85,7 +86,7 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
         <TextField label={t('users/role/id')} hint={t('users/role/idHint')} value={shown.id} autoFocus onChange={(next) => set({ id: next })} />
       ) : null}
 
-      <div className="web-role__grants-head">
+      <Row align="center" justify="spaceBetween" gap="var(--oo-spacing-sm)">
         <Text variant="h3" text={t('users/role/grants')} />
         <span className="web-role__views">
           {(['controls', 'text'] as const).map((one) => (
@@ -100,7 +101,7 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
             />
           ))}
         </span>
-      </div>
+      </Row>
       {view === 'controls' && parsed.problems.length === 0 ? (
         <RoleGrants
           grants={parsed.grants}
@@ -125,7 +126,7 @@ export default function RolePage({ host, person: id }: { host: string; person?: 
             onChange={(next) => set({ grants: next })}
           />
           {parsed.problems.map((problem) => (
-            <p key={problem.line} className="web-people__problem">{t('users/role/badGrant', { line: problem.line, text: problem.text })}</p>
+            <Note tone="danger" key={problem.line}>{t('users/role/badGrant', { line: problem.line, text: problem.text })}</Note>
           ))}
         </>
       )}

@@ -24,6 +24,7 @@ import {
 } from './rows.js';
 import { describeChannels } from './channels.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './page.css';
 
 const when = dateFormat({ dateStyle: 'medium', timeStyle: 'medium' });
 

@@ -1,0 +1,32 @@
+/* A value as a tree, as a browser's console draws an object: keys tinted, each kind of leaf its own colour. */
+.oo-json,
+.oo-json__children {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--oo-font-mono, monospace);
+  font-size: var(--oo-font-size-xs);
+  line-height: 1.6;
+}
+
+.oo-json__children {
+  padding-left: 1.1rem;
+}
+
+.oo-json__row {
+  overflow-wrap: anywhere;
+}
+
+.oo-json__key {
+  color: var(--oo-color-accent);
+}
+
+.oo-json__preview {
+  color: var(--oo-color-muted);
+}
+
+.oo-json__leaf[data-kind='string'] { color: var(--oo-color-success); }
+.oo-json__leaf[data-kind='number'] { color: var(--oo-color-info); }
+.oo-json__leaf[data-kind='boolean'] { color: var(--oo-color-warning); }
+.oo-json__leaf[data-kind='null'],
+.oo-json__leaf[data-kind='undefined'] { color: var(--oo-color-muted); }

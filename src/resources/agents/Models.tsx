@@ -7,6 +7,7 @@ type ModelInfo = AgentInfo['models'][number];
 import { plural } from '../../i18n/locales.js';
 import { matchesModel } from './model-search.js';
 import { limitsOf } from './words.js';
+import './models.css';
 
 /** The policy states a person reads, under `agents/page/policy/<state>`; an enabled model says nothing. */
 const POLICY = new Set(['disabled', 'unconfigured']);

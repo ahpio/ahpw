@@ -56,6 +56,8 @@ import { askOf, opens, type Origins, type Source } from './origin.js';
 import { useNow } from './clock.js';
 import { sessionUsage } from '../../bridges/usage-meta.js';
 import { hasUsage, UsageDialog } from './Usage.js';
+import './page.css';
+import './composer.css';
 
 /** How a turn ended, as the key of its words, when it did not end well. */
 const ENDED: Record<string, string> = { cancelled: 'sessions/turn/stopped', error: 'sessions/turn/failed' };
@@ -232,11 +234,11 @@ function OlderTurns({ host, chatUri, cursor, note }: { host: string; chatUri: st
       .finally(() => setBusy(false));
   };
   return (
-    <div className="web-chat__older">
+    <Row align="center" justify="center" gap="var(--oo-spacing-sm)">
       <Button label={busy ? t('sessions/chat/loading') : t('sessions/chat/older')} disabled={busy} onClick={load} />
       {note === undefined ? null : <Note inline>{note}</Note>}
       {error === null ? null : <Note inline>{error}</Note>}
-    </div>
+    </Row>
   );
 }
 

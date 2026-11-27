@@ -16,6 +16,7 @@ import { ExplorerList, type Row } from '../../shell/explorer/ExplorerList.js';
 import { ACTIVE_POOL, monthSoFar, USAGE_ASKED, USAGE_GROUP, USAGE_PERIOD, USAGE_RANGE } from './state.js';
 import { limitsRows, type LimitAnswer } from './Limits.js';
 import { kindWord, totalLine } from './words.js';
+import './records.css';
 
 /** One listed line: a pool, or a group of records summed by a key. `pool` is what opens, when there is one. */
 interface Item {

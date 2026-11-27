@@ -9,6 +9,7 @@ import { EMOJIcon } from '../emojis.js';
 import { useActiveSession } from './active.js';
 import { offWord, onAt, SCOPES, searchRows, serverGroups, withDecision, type ServerRow, type Scope } from './tooling.js';
 import './tooling.css';
+import { ToolingHead } from './ToolingHead.js';
 
 /** A row's dot, in its state's tone, with its state as the tooltip. */
 function Mark({ row }: { row: ServerRow }): ReactElement | null {
@@ -54,10 +55,7 @@ export default function McpView(): ReactElement {
   const total = all.reduce((sum, group) => sum + group.rows.length, 0);
   return (
     <div className="web-tooling">
-      <div className="web-tooling__head">
-        <span className="web-tooling__title">{t('sessions/tooling/servers')} <span className="web-tooling__count">{total}</span></span>
-        <span className="web-tooling__session">{summary.title === '' ? t('sessions/untitled') : summary.title}</span>
-      </div>
+      <ToolingHead title={t('sessions/tooling/servers')} count={total} summary={summary} />
       <TextField value={query} placeholder={t('sessions/tooling/searchServers')} onChange={setQuery} />
       {groups.map((group) => (
         <section key={group.key} className="web-tooling__group">

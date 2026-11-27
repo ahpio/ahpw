@@ -22,6 +22,7 @@ import { PageTitle } from '../../shell/HostIcon.js';
 import { policyTab } from './state.js';
 import { limitWord, usedWord } from './words.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './policy-page.css';
 
 /** What a new row starts as: everybody, allowed every model; the person names it and narrows it. */
 const FRESH: Record<string, unknown> = { id: '', scope: 'all', kind: 'model', effect: 'allow', match: {} };

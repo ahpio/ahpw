@@ -116,3 +116,11 @@
   color: var(--oo-color-text);
   overflow-wrap: anywhere;
 }
+
+/* A line of text with the host's icon before it. */
+
+.web-host-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

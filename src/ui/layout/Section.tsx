@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { Text } from '@softov/scena/ui';
 import { RowButton } from '../control/RowButton.js';
 import './Section.css';
@@ -20,14 +20,25 @@ export interface SectionProps {
 export function Section({ title, icon, count, small, folded, onFold }: SectionProps): ReactElement {
   const content = (
     <>
-      {icon === undefined ? null : <span className="web-section__icon" aria-hidden="true">{icon}</span>}
-      {small === true ? <span className="web-section__title">{title}</span> : <Text variant="h3" text={title} />}
-      {count === undefined ? null : <span className="web-section__count">{typeof count === 'number' ? `(${String(count)})` : count}</span>}
+      {icon === undefined ? null : <span className="oo-section__icon" aria-hidden="true">{icon}</span>}
+      {small === true ? <span className="oo-section__title">{title}</span> : <Text variant="h3" text={title} />}
+      {count === undefined ? null : <span className="oo-section__count">{typeof count === 'number' ? `(${String(count)})` : count}</span>}
     </>
   );
   return (
     <div className="oo-section" data-small={small === true ? 'true' : undefined}>
       {onFold === undefined ? content : <RowButton expanded={folded !== true} center onClick={onFold}>{content}</RowButton>}
     </div>
+  );
+}
+
+// ahpw component: a part of a page under its section heading, with a line
+// above it to set it off from the part before; the first part has no line.
+export function Group({ title, icon, children }: { title: string; icon?: string | undefined; children: ReactNode }): ReactElement {
+  return (
+    <section className="oo-group" aria-label={title}>
+      <Section title={title} {...(icon === undefined ? {} : { icon })} />
+      {children}
+    </section>
   );
 }

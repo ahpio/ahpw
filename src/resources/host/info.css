@@ -5,8 +5,3 @@
   margin-top: var(--oo-spacing-xs);
   font-size: var(--oo-font-size-xs);
 }
-
-.web-host-automations {
-  display: flex;
-  align-items: flex-start;
-}

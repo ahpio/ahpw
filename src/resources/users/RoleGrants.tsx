@@ -1,6 +1,6 @@
 import { useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, Chip, type ChipState, Note, RowButton } from '../../ui/index.js';
+import { Button, Chip, type ChipState, Column, Note, Row, RowButton } from '../../ui/index.js';
 import { ContextMenu } from '@softov/scena/ui/menu';
 import {
   boundInfo, boundSubjects, dropSubject, EVERY, GRANT_GROUPS, groupOf, heldBy, operationState, reached, splittable, subjectInfo, subjectsOf, toggleGroup, toggleOperation,
@@ -67,7 +67,7 @@ function SubjectCard({ subject, info: whole, known, grants, onChange, onDrop, re
   };
   return (
     <section className="web-grant" aria-label={every ? t('users/role/everySubject') : info.title}>
-      <header className="web-grant__head">
+      <Row align="center" gap="var(--oo-spacing-sm)">
         <RowButton expanded={open} onClick={() => setOpen(!open)}>
           <span className="web-grant__subject">{subject}</span>
           <span className="web-grant__title">
@@ -100,13 +100,13 @@ function SubjectCard({ subject, info: whole, known, grants, onChange, onDrop, re
             <span role="img" aria-label={t('users/role/dropSubject', { subject })}>{'\u{2715}'}</span>
           </Button>
         )}
-      </header>
+      </Row>
       {open ? (
         <div className="web-grant__body">
           {every ? <Note>{t('users/role/everySubjectHint')}</Note> : info.description === '' ? null : <Note>{info.description}</Note>}
           {every ? null : rows.map(({ label, operations }) => (
             <div key={label} className="web-grant__row">
-              <span className="web-grant__label">{label}</span>
+              <Note inline>{label}</Note>
               <span className="web-grant__chips">
                 {operations.map((operation) => {
                   const { state, by } = operationState(grants, subject, operation, info);
@@ -143,7 +143,7 @@ export function RoleGrants({ grants, catalog, shown, onChange, onShow, readOnly,
   const subjects = subjectsOf(grants, catalog, shown);
   const addable = (bound === undefined ? [EVERY, ...Object.keys(catalog)] : boundSubjects(bound, catalog)).filter((subject) => !subjects.includes(subject));
   return (
-    <div className="web-grants">
+    <Column gap="var(--oo-spacing-sm)">
       <div className="web-grants__legend" aria-hidden="true">
         {(['on', 'implied', 'off'] as const).map((state) => (
           <span key={state} className="oo-chip" data-state={state}>{t(`users/role/legend/${state}`)}</span>
@@ -196,6 +196,6 @@ export function RoleGrants({ grants, catalog, shown, onChange, onShow, readOnly,
           onClose={() => setMenu(null)}
         />
       )}
-    </div>
+    </Column>
   );
 }

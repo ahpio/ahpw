@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Chip, DetailList, Note, Pill, Row, Spinner, Text } from '../../ui/index.js';
+import { Chip, DetailList, Group, Note, Pill, Row, Spinner } from '../../ui/index.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { readMe, type Me } from '../../bridges/me.js';
@@ -14,6 +14,8 @@ import { totalLine } from '../usage/words.js';
 import { membershipParts, titled } from '../users/memberships.js';
 import { scopeTitle } from '../users/MembershipList.js';
 import { EMOJIcon } from '../emojis.js';
+import './info.css';
+import '../users/membership-list.css';
 
 const teamsReducer = peopleReducer('teams');
 const projectsReducer = peopleReducer('projects');
@@ -69,10 +71,7 @@ export function Info({ host }: { host: string }): ReactElement {
 
   /** A section: its icon and title over its body, a line above it, as the user page's. */
   const section = (icon: string, title: string, body: ReactElement): ReactElement => (
-    <section className="web-user__section" aria-label={title}>
-      <Text variant="h3" text={`${icon} ${title}`} />
-      {body}
-    </section>
+    <Group title={title} icon={icon}>{body}</Group>
   );
 
   return (
@@ -100,7 +99,7 @@ export function Info({ host }: { host: string }): ReactElement {
               <li key={membership} className="web-memberships__row">
                 <span className="web-memberships__name">
                   {titled(teamList, team)}
-                  <span className="web-memberships__scope">{` \u{00B7} ${scopeTitle(t, projectList, project)}`}</span>
+                  <Note inline>{` \u{00B7} ${scopeTitle(t, projectList, project)}`}</Note>
                 </span>
                 {user.primary === membership ? <Chip label={t('users/user/primaryMark')} state="on" disabled /> : null}
               </li>

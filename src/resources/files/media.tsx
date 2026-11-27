@@ -6,6 +6,8 @@ import { readFailure } from './save.js';
 import { mediaTypeOf } from './icons.js';
 import { FileHead } from './text.js';
 import { PageAlert } from '../../ui/display/PageAlert.js';
+import './shared-file-page.css';
+import './media.css';
 
 /** Past this size a file is not read, because it arrives whole over the connection. */
 export const MAX_BYTES = 64 * 1024 * 1024;

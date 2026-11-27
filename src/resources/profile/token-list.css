@@ -1,0 +1,47 @@
+/* A person's keys: one row each, what it is on the left and Revoke on the right. */
+
+.web-keys__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.web-keys__row {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-md);
+  padding: var(--oo-spacing-sm) 0;
+  border-bottom: 1px solid var(--oo-color-border);
+}
+
+.web-keys__row[data-expired='true'] .web-keys__main {
+  opacity: 0.6;
+}
+
+.web-keys__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.web-keys__name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--oo-spacing-sm);
+  font-weight: 600;
+}
+
+.web-keys__id {
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+  font-weight: 400;
+  color: var(--oo-color-muted);
+}
+
+.web-keys__grants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}

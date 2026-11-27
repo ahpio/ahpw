@@ -21,3 +21,84 @@
 .web-composer__where > .oo-btn:last-child {
   margin-left: auto;
 }
+
+.web-composer {
+  position: relative;
+  flex: none;
+  padding: 0 var(--oo-chat-composer-gutter, 0) var(--oo-spacing-md);
+}
+
+/* Where the session runs: its folder and its agent, above the box. */
+
+.web-composer__where {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.web-composer__picker {
+  position: absolute;
+  bottom: 100%;
+  left: var(--oo-chat-composer-gutter, 0);
+  right: var(--oo-chat-composer-gutter, 0);
+  z-index: 50;
+  overflow: hidden;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-md);
+  margin-bottom: var(--oo-spacing-xs);
+  background: var(--oo-popup-bg, var(--oo-color-raised));
+  box-shadow: 0 -6px 20px rgb(0 0 0 / 0.22);
+  animation: web-slide-up 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .web-composer__picker {
+    animation: none;
+  }
+}
+
+.web-composer__attached {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 8px 0;
+}
+
+.web-composer__context {
+  padding: 0 4px;
+  color: var(--oo-color-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Holds the `+` and its menu; takes no room in the footer. */
+
+.web-composer__add-holder {
+  display: contents;
+}
+
+.web-composer__queue {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--oo-spacing-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+}
+
+.web-composer__queue li {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-composer__queued {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

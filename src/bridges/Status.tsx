@@ -8,6 +8,7 @@ import { elapsed } from './words.js';
 import { EMOJIcon } from '../resources/emojis.js';
 import { plural, dateFormat } from '../i18n/locales.js';
 import { Button } from '../ui/index.js';
+import './status.css';
 
 /** The connection's state, as its word under `bridges/state`. */
 const WORDS: Record<Connection['status'], string> = {

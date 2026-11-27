@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Alert, Button, CheckBox, Link, Note, PageActions, TextField } from '../../ui/index.js';
+import { Alert, Button, CheckBox, Link, Note, PageActions, Row, TextField } from '../../ui/index.js';
 import { awaitSignIn, finishSignIn, startSignIn, type ConnectorRow, type ConnectorWanted, type SignInRow, type SignInStarted } from '../../bridges/connectors.js';
 import { hostSaid } from '../../bridges/said.js';
 import { CopyButton } from '../../ui/control/CopyButton.js';
 import { ALERT_LEVELS } from '../../shell/view/AlertList.js';
 import { signedInOf } from './form.js';
 import './signin.css';
+import './sign-in-step.css';
 
 /**
  * The sign-in under an adapter's fields: a button labelled by the host, then a
@@ -96,16 +97,16 @@ export function SignInStep({ host, signIn, held, provider, wanted, disabled, byH
       {started === null && (signedIn !== null || kept !== undefined) ? (
         <>
           <p className="web-connector-form__signed-in">{kept?.account === undefined ? t('connectors/signIn/with', { provider }) : t('connectors/signIn/as', { account: kept.account })}</p>
-          <div className="web-connector-form__signin-start">
+          <Row gap={0}>
             <Button label={t('connectors/signIn/again')} disabled={disabled || busy} onClick={start} />
-          </div>
+          </Row>
           {signIn.flow === 'device' ? <CheckBox label={t('connectors/signIn/byHand')} value={byHand} onChange={onByHand} /> : null}
         </>
       ) : started === null ? (
         <>
-          <div className="web-connector-form__signin-start">
+          <Row gap={0}>
             <Button label={signIn.title} disabled={disabled || busy} onClick={start} />
-          </div>
+          </Row>
           {signIn.flow === 'device'
             ? <CheckBox label={t('connectors/signIn/byHand')} value={byHand} onChange={onByHand} />
             : <Note>{t('connectors/signIn/orType')}</Note>}

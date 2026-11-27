@@ -3,6 +3,7 @@ import { useI18n } from '@softov/scena/react';
 import { MediaFrame } from './media.js';
 import { percentOf } from './zoom.js';
 import { Button } from '../../ui/index.js';
+import './image-page.css';
 
 /** The zoom as a percentage, as wide for 5% as for 400%, so the buttons beside it stay put. */
 const PERCENT: CSSProperties = { minWidth: '3.5em', fontVariantNumeric: 'tabular-nums' };

@@ -11,6 +11,7 @@ import { mintToken, type MintedToken } from '../../bridges/tokens.js';
 import { CopyButton } from '../../ui/control/CopyButton.js';
 import { RoleGrants } from '../users/RoleGrants.js';
 import { EXPIRY_CHOICES, expiresAt, type ExpiryChoice } from './expiry.js';
+import './mint-form.css';
 
 interface MintFormProps {
   host: string;

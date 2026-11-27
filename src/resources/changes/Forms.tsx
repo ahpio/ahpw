@@ -1,11 +1,12 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, CheckBox, Modal, Note, Spinner, TextField } from '../../ui/index.js';
+import { Button, CheckBox, Modal, Note, Row, Spinner, TextField } from '../../ui/index.js';
 import { plural } from '../../i18n/locales.js';
 import { textOf } from '../../bridges/words.js';
 import type { ChangesetForm } from './changeset.js';
 import type { PullRequestDraft } from './followup.js';
 import type { Change } from './words.js';
+import './forms.css';
 
 /** What a commit takes: the staged files, or every change when none is staged. */
 function takes(files: readonly Change[]): string {
@@ -25,10 +26,10 @@ function CommitForm({ form, files, onCommit, onClose }: { form: Extract<Changese
         <TextField label={t('changes/commit/message')} multiline rows={4} value={message} placeholder={t('changes/commit/placeholder')} onChange={setMessage} />
         <Note>{takes(files)}</Note>
         {question === '' ? null : <Note>{question}</Note>}
-        <div className="web-changeset-form__actions">
+        <Row justify="end" gap="var(--oo-spacing-sm)">
           <Button label={t('changes/cancel')} variant="ghost" onClick={onClose} />
           <Button label={form.operation.label} variant="primary" disabled={!ready} onClick={() => onCommit(message.trim())} />
-        </div>
+        </Row>
       </div>
     </Modal>
   );
@@ -61,12 +62,12 @@ function PullRequestForm({ form, onCreate, onClose }: { form: Extract<ChangesetF
             ? t('changes/pr/cannotCreate')
             : t('changes/pr/explain')}
         </Note>
-        <div className="web-changeset-form__actions">
+        <Row justify="end" gap="var(--oo-spacing-sm)">
           <Button label={t('changes/cancel')} variant="ghost" onClick={onClose} />
           {form.create === null ? null : (
             <Button label={form.create.label} variant="primary" disabled={!ready} onClick={() => onCreate({ ...form.draft, title: title.trim(), description }, isDraft)} />
           )}
-        </div>
+        </Row>
       </div>
     </Modal>
   );

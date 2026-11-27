@@ -28,6 +28,7 @@ import { NEW_AUTOMATION_TAB } from './state.js';
 import { SettingsBox } from './SettingsBox.js';
 import { useSessionSettings } from './session-settings.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './edit.css';
 
 /** Schedules most people want, so a cron expression is something to read rather than write. */
 const PRESETS: { key: string; expression: string }[] = [

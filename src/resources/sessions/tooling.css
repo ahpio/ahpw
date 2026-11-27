@@ -7,34 +7,10 @@
   min-width: 0;
 }
 
-.web-tooling__head {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: var(--oo-spacing-xs);
-}
-
-.web-tooling__title {
-  font-weight: 700;
-}
-
-.web-tooling__session,
-.web-tooling__count {
-  color: var(--oo-color-muted);
-  font-size: var(--oo-font-size-sm);
-  font-weight: 400;
-}
-
 /* An open tool's inputs and hints, under its row. */
 .web-tooling__more {
   display: flex;
   flex-direction: column;
   gap: var(--oo-spacing-xs);
   padding: 0 0 var(--oo-spacing-sm) calc(12px + var(--oo-spacing-sm));
-}
-
-.web-tooling__hints {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--oo-spacing-xs);
 }

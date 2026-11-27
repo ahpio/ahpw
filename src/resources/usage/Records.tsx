@@ -7,6 +7,7 @@ import { timeOf } from '../automations/words.js';
 import { EMOJIcon } from '../emojis.js';
 import { hoursWord, sourceIcon, sourceWord } from './words.js';
 import { numberFormat } from '../../i18n/locales.js';
+import './records.css';
 
 type Cost = NonNullable<UsageEntry['cost']>;
 

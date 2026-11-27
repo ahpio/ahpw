@@ -15,6 +15,7 @@ import { totalLine } from './words.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import './pool-page.css';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './records.css';
 
 /** What a pool's range reads: its total and the records behind it, for the range and reload they were read for. */
 interface Ranged {

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, ContextMenu, Page, PageActions, PageHead } from '../../ui/index.js';
+import { Button, ContextMenu, Note, Page, PageActions, PageHead } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
@@ -105,7 +105,7 @@ export default function ListedPluginPage({ host, plugin: id, marketplace }: { ho
           title={title}
           uri={`${listName(marketplace)} \u{00B7} ${details.version}`}
         />
-        {entry.description === undefined ? null : <p className="web-listed__description">{entry.description}</p>}
+        {entry.description === undefined ? null : <Note>{entry.description}</Note>}
         {mayInstall(offers) ? (
           <PageActions>
             <Button

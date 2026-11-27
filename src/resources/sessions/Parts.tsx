@@ -1,6 +1,6 @@
 import { memo, useContext, useState, type MouseEvent, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, DetailList, Note, Pill, RowButton } from '../../ui/index.js';
+import { Alert, Button, DetailList, Note, Pill, Row, RowButton } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import type {
   ResponsePart,
@@ -21,6 +21,9 @@ import { InputRequest } from './Question.js';
 import { durationOf, fileOf, inputText, kindOf, lineOf, MOVE_CALL, movableOf, outcomeOf, outputOf, segmentsOf, type Outcome, type Output, type ToolKind } from './tool.js';
 import { EMOJIcon } from '../emojis.js';
 import { SESSION_MARKDOWN, TOOLS_EXPANDED } from './view-settings.js';
+import './parts.css';
+import '../files/diff-page.css';
+import '../../shell/markdown/markdown.css';
 
 /** Sends one action on the chat this transcript shows. */
 export type Send = (action: StateAction) => void;
@@ -127,7 +130,7 @@ export function OutputView({ out }: { out: Output }): ReactElement {
             {out.path}
           </Button>
           {out.added === undefined ? null : <span className="web-diff--add">+{out.added}</span>}
-          {out.removed === undefined ? null : <span className="web-diff--remove">-{out.removed}</span>}
+          {out.removed === undefined ? null : <Note inline tone="danger">-{out.removed}</Note>}
         </p>
       );
     case 'note':
@@ -192,17 +195,17 @@ export function ToolCall({ call, send, live, turnId }: { call: ToolCallState; se
           {input === '' ? null : <Block title={t('sessions/tool/arguments')} text={input} />}
           {output.map((one, index) => <OutputView key={index} out={one} />)}
           {movable ? (
-            <div className="web-tool__actions">
+            <Row wrap gap="var(--oo-spacing-sm)">
               <Button label={t('sessions/tool/runInBackground')} disabled={asking} onClick={() => void moveOn()} />
-            </div>
+            </Row>
           ) : null}
           {live && ask !== undefined ? <ClientAsk ask={ask} /> : null}
           {live && call.status === PENDING_CONFIRMATION ? <Confirm call={call} send={send} turnId={turnId} /> : null}
           {live && call.status === PENDING_RESULT_CONFIRMATION ? (
-            <div className="web-tool__actions">
+            <Row wrap gap="var(--oo-spacing-sm)">
               <Button label={t('sessions/tool/acceptResult')} variant="primary" onClick={() => send({ type: 'chat/toolCallResultConfirmed', turnId, toolCallId: call.toolCallId, approved: true } as StateAction)} />
               <Button label={t('sessions/tool/reject')} onClick={() => send({ type: 'chat/toolCallResultConfirmed', turnId, toolCallId: call.toolCallId, approved: false } as StateAction)} />
-            </div>
+            </Row>
           ) : null}
         </div>
       ) : null}

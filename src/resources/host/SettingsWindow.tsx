@@ -7,6 +7,7 @@ import SettingsPage from './Settings.js';
 import { OpenIn } from './OpenIn.js';
 import { settingsKey } from './place.js';
 import { Button } from '../../ui/index.js';
+import './settings-window.css';
 
 /** Where the window sits and how big it is, in CSS pixels. */
 interface Box {

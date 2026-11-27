@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { translate } from '@softov/scena';
 import { useI18n, useStore } from '@softov/scena/react';
-import { Badge, Button, DangerZone, type DetailItem, DetailList, Page, PageActions, PageHead, Progress, Text } from '../../ui/index.js';
+import { Badge, Button, Column, DangerZone, type DetailItem, DetailList, Note, Page, PageActions, PageHead, Progress, Text } from '../../ui/index.js';
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
@@ -16,6 +16,9 @@ import { sizeWords, usageOf, type Usage } from './usage.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './page.css';
+import '../sessions/usage.css';
+import '../clients/page.css';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 const TONE: Record<Standing, Tone> = { running: 'success', problem: 'danger', stopped: 'default' };
@@ -55,14 +58,14 @@ function UsageView({ usage }: { usage: Usage }): ReactElement {
   const memory = Math.round(usage.memory.percent);
   return (
     <div className="web-usage">
-      <div className="web-usage__meter">
-        <span className="web-usage__label">{usage.cpu.cores === undefined ? t('computers/usage/cpu', { percent: cpu }) : t('computers/usage/cpuOf', { percent: cpu, cores: usage.cpu.cores })}</span>
+      <Column gap="var(--oo-spacing-xs)">
+        <Note inline>{usage.cpu.cores === undefined ? t('computers/usage/cpu', { percent: cpu }) : t('computers/usage/cpuOf', { percent: cpu, cores: usage.cpu.cores })}</Note>
         <Progress value={Math.min(cpu, 100)} max={100} color={cpu >= 85 ? 'red' : cpu >= 65 ? 'orange' : 'blue'} />
-      </div>
-      <div className="web-usage__meter">
-        <span className="web-usage__label">{t('computers/usage/memory', { used: sizeWords(usage.memory.used), limit: sizeWords(usage.memory.limit), percent: memory })}</span>
+      </Column>
+      <Column gap="var(--oo-spacing-xs)">
+        <Note inline>{t('computers/usage/memory', { used: sizeWords(usage.memory.used), limit: sizeWords(usage.memory.limit), percent: memory })}</Note>
         <Progress value={Math.min(memory, 100)} max={100} color={memory >= 85 ? 'red' : memory >= 65 ? 'orange' : 'blue'} />
-      </div>
+      </Column>
       {items.length === 0 ? null : <DetailList items={items} columns={3} />}
     </div>
   );

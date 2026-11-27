@@ -1,0 +1,6 @@
+.web-video {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  background: #000;
+}

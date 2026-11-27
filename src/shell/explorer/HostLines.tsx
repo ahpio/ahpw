@@ -4,6 +4,7 @@ import { Button } from '../../ui/index.js';
 import { ahpPaths, type Connection } from '../../bridges/data.js';
 import { fixHost, hostFix, hostState } from '../../bridges/host-state.js';
 import { useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
+import './host-lines.css';
 
 /** A host's dot and name, as the panels show the host they are on. */
 export function HostTag({ host }: { host: string }): ReactElement {

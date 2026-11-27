@@ -5,6 +5,7 @@ import { folderUri } from '../../bridges/words.js';
 import { childFolders, expandHome, parentPath, splitPath } from './folder-path.js';
 import { FOLDER_REQUEST, settleFolder, type FolderRequest } from './pick.js';
 import { Button, Modal, TextField } from '../../ui/index.js';
+import './folder-picker.css';
 
 /** The open folder question, at the top of the page as VS Code's "Add Folder to Workspace". */
 export function FolderPicker(): ReactElement | null {

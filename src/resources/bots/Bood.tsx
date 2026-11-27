@@ -7,6 +7,7 @@ import {
 } from '@cofold/bood';
 import { mountBood, type BoodView } from '@cofold/bood/dom';
 import { boodBody, colorOf, gazeAt } from './look.js';
+import './bood.css';
 
 /** A bot as bood draws it: ahpd's body and colour, with every bot's face, dot eyes and no brows or mouth. */
 export function botScene(body: string, color: string | undefined, mood: BoodMood, scheme: 'dark' | 'light', width: number): BoodScene {

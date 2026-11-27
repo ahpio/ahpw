@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Blocks, Button, type JsonSchemaObject, Page, PageActions, SchemaForm, Text } from '../../ui/index.js';
+import { Alert, Blocks, Button, Group, type JsonSchemaObject, Page, PageActions, SchemaForm, Text } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useHostNames, useShownHosts } from '../../bridges/hosts.js';
 import { NO_OFFERS, type Offers } from '../../bridges/offers.js';
@@ -86,10 +86,9 @@ export default function NewComputerPage({ host: opened }: { host: string }): Rea
           jsonTextRoot={false}
         />
         {Object.keys(fields.properties ?? {}).length === 0 ? null : (
-          <section className="web-connector-form__adapter" aria-label={t('computers/new/settings')}>
-            <h3 className="web-connector-form__heading web-host-label"><span aria-hidden="true">{EMOJIcon.settings}</span>{t('computers/new/settings')}</h3>
+          <Group title={t('computers/new/settings')} icon={EMOJIcon.settings}>
             <SchemaForm key={host} schema={fields} views={SETTINGS_VIEWS} value={answers} onChange={setAnswers} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} />
-          </section>
+          </Group>
         )}
       </Blocks>
       {failure === null ? null : <Alert tone="danger" message={failure} />}

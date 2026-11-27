@@ -1,11 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, ContextMenu, Modal, Pill } from '../../ui/index.js';
+import { Button, ContextMenu, Modal, Note, Pill } from '../../ui/index.js';
 import type { BindingPath, PickerAction } from '@softov/scena/types';
 import type { MessageAttachment, SessionSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths } from '../../bridges/data.js';
 import { attachmentIcon, attachmentLabel, attachmentPath, clipboardImage, hasPreview, previewOf, type AttachmentPreviewOf } from './attachments.js';
 import { composerAt, contextItems } from './composer-commands.js';
+import './composer.css';
+import './attached.css';
 
 /** What goes with the message, above its text, each with a way to take it off. Nothing when there is none. */
 export function Attached({ attachments, folder, onRemove }: {
@@ -41,7 +43,7 @@ export function AttachmentPreview({ preview, onClose }: { preview: AttachmentPre
   return (
     <Modal open title={preview.label} onClose={onClose}>
       <div className="web-attachment-preview">
-        <p className="web-attachment-preview__meta">{preview.meta}</p>
+        <Note small>{preview.meta}</Note>
         {preview.image === undefined ? null : <img className="web-attachment-preview__image" src={preview.image} alt={preview.label} />}
         {preview.text === undefined ? null : <pre className="web-attachment-preview__text">{preview.text}</pre>}
       </div>

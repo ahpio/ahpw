@@ -46,6 +46,8 @@ import { useAgentIconSrc } from '../agents/icons.js';
 import { warn } from '../../shell/notify/index.js';
 import { readLastChoice, writeLastChoice } from './last-choice.js';
 import { agentCommands, COMPOSER_FOCUS, registerHostCommands } from './host-commands.js';
+import './composer.css';
+import './new.css';
 
 /** The prefixes the new session box's picker answers to. Module level: an inline array re-renders forever. */
 const NEW_PREFIXES = ['/', '@'];

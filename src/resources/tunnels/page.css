@@ -1,0 +1,14 @@
+/* A tunnel's address, as a link with its copy button. */
+
+.web-tunnel__url {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+  min-width: 0;
+  font-family: var(--oo-font-mono, monospace);
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-tunnel__url a {
+  overflow-wrap: anywhere;
+}

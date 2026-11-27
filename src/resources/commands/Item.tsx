@@ -7,6 +7,8 @@ import type { ProgramManifest } from '../manifest/types.js';
 import { runItemAction } from './Items.js';
 import Result from './Result.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './item.css';
+import './result.css';
 
 /** A field's value as a line of text. */
 const words = (value: unknown): string => (value === null || value === undefined ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value));

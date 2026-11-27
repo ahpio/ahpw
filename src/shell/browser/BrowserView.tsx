@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, ContextMenu, Link, Note, TextField } from '../../ui/index.js';
+import { Button, ContextMenu, Link, Note, TextField, Toolbar } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { EMOJIcon } from '../../resources/emojis.js';
 import { copyText } from '../../ui/control/CopyButton.js';
@@ -8,6 +8,11 @@ import { embedder, type EmbedBounds, type EmbedNavigation } from '../embed/index
 import { addressOf } from './address.js';
 import { SANDBOX } from './sandbox.js';
 import { back, canBack, canForward, current, follow, forward, go, NO_VISITS, visit, type Visits } from './history.js';
+import '../explorer/explorer-list.css';
+import './browser-view.css';
+
+/** The bar's controls wrap onto a second line in a narrow pane. */
+const WRAPS = { flexWrap: 'wrap' } as const;
 
 /** Where the last address is kept, so the view opens on it the next time. */
 const LAST_KEY = 'ahpw.browser.last';
@@ -193,7 +198,7 @@ export default function BrowserView(): ReactElement {
 
   return (
     <div className="web-browser">
-      <div className="web-browser__bar">
+      <Toolbar gap="var(--oo-spacing-xs)" style={WRAPS}>
         <span className="web-explorer__actions">
           {button(EMOJIcon.back, t('shell/browser/back'), goBack, !backable)}
           {button(EMOJIcon.forward, t('shell/browser/forward'), goForward, !forwardable)}
@@ -226,7 +231,7 @@ export default function BrowserView(): ReactElement {
             </Link>
           )}
         </span>
-      </div>
+      </Toolbar>
       {refused ? <Note tone="danger" role="alert">{t('shell/browser/refused')}</Note> : null}
       <div className="web-browser__page" ref={box}>
         {shown === undefined ? (

@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { getLocale } from '@softov/scena';
 import { useI18n } from '@softov/scena/react';
-import { type DetailItem, DetailList, Modal, Note, Progress, Text, Tree, type TreeNode } from '../../ui/index.js';
+import { Column, type DetailItem, DetailList, Modal, Note, Progress, Text, Tree, type TreeNode } from '../../ui/index.js';
 import {
   contextRows,
   creditsOf,
@@ -67,7 +67,7 @@ export function ContextPart({ context }: { context: ContextUsage }): ReactElemen
   const counted = rows.filter((row) => row.counts).map((row) => nodeOf(t, row, whole));
   const apart = rows.filter((row) => !row.counts).map((row) => nodeOf(t, row, whole));
   return (
-    <section className="web-usage__part">
+    <Column gap="var(--oo-spacing-sm)">
       <Text variant="h3" text={t('sessions/usage/context')} />
       <Text text={[
         t('sessions/usage/used', { used: tokens(context.total), window: tokens(whole), share: share(context.total, whole) }),
@@ -82,7 +82,7 @@ export function ContextPart({ context }: { context: ContextUsage }): ReactElemen
           <Note>{t('sessions/usage/deferredNote')}</Note>
         </>
       )}
-    </section>
+    </Column>
   );
 }
 
@@ -149,13 +149,13 @@ export function PlanPart({ quotas, account, now = Date.now() }: { quotas: Record
     ...(credits === undefined ? [] : [creditsItem(t, credits)]),
   ];
   return (
-    <section className="web-usage__part">
+    <Column gap="var(--oo-spacing-sm)">
       <Text variant="h3" text={t('sessions/usage/plan')} />
       {account?.subscriptionType === undefined ? null : <Text text={account.subscriptionType} />}
       {quotas === undefined ? <Note>{t('sessions/usage/planUnknown')}</Note> : null}
       {quotas !== undefined && items.length === 0 ? <Note>{t('sessions/usage/noPlan')}</Note> : null}
       {items.length === 0 ? null : <DetailList items={items} columns={1} />}
-    </section>
+    </Column>
   );
 }
 

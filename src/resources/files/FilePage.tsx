@@ -8,6 +8,7 @@ import { changedOnHost, refusesWrite, shownText } from './save.js';
 import { FileHead, useFileText, useWrap, WrapButton } from './text.js';
 import { PageAlert } from '../../ui/display/PageAlert.js';
 import { SharedFilePage } from './SharedFilePage.js';
+import './shared-file-page.css';
 
 /** Why the last save did not land, and whether the host refuses this file's writes. */
 interface SaveFailure {

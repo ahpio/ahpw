@@ -12,6 +12,8 @@ import { activityOf } from '../../sessions/status.js';
 import { Bood } from '../Bood.js';
 import { colorOf } from '../look.js';
 import { chatItems, type BotMark, type ChatFile, type ChatItem } from './mark.js';
+import '../../../shell/markdown/markdown.css';
+import './bot-chat.css';
 
 /** A file in a bot's reply: a row that saves it on this computer. */
 function FileRow({ host, file }: { host: string; file: ChatFile }): ReactElement {
@@ -30,7 +32,7 @@ function FileRow({ host, file }: { host: string; file: ChatFile }): ReactElement
         <span aria-hidden="true">{EMOJIcon.download}</span>
         <span className="web-botchat__file-name">{file.name}</span>
       </Button>
-      {failure === null ? null : <p className="web-botchat__failure">{failure}</p>}
+      {failure === null ? null : <Note tone="danger" small>{failure}</Note>}
     </>
   );
 }

@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react';
 import { useI18n } from '@softov/scena/react';
-import { Button, Chip, Note, RowButton, Text } from '../../ui/index.js';
+import { Button, Chip, Column, Note, RowButton, Text } from '../../ui/index.js';
 import type { Named } from '../../bridges/people.js';
 import { membershipOf, membershipParts, projectChoices, titled } from './memberships.js';
 import { PickTwo } from './PickTwo.js';
+import './membership-list.css';
 
 interface MembershipListProps {
   memberships: readonly string[];
@@ -33,7 +34,7 @@ export function MembershipList({ memberships, primary, teams, projects, writes, 
   });
 
   return (
-    <div className="web-memberships">
+    <Column gap="var(--oo-spacing-sm)">
       {memberships.length === 0 ? <Note>{t('users/user/noMemberships')}</Note> : (
         <ul className="web-memberships__list">
           {memberships.map((membership) => {
@@ -43,12 +44,12 @@ export function MembershipList({ memberships, primary, teams, projects, writes, 
               <li key={membership} className="web-memberships__row">
                 <span className="web-memberships__name">
                   <RowButton fit onClick={() => onOpen('teams', team)}>{titled(teams, team)}</RowButton>
-                  <span className="web-memberships__scope">
+                  <Note inline>
                     {' \u{00B7} '}
                     {project === null || project === '*'
                       ? scopeWord(project)
                       : <RowButton fit onClick={() => onOpen('projects', project)}>{scopeWord(project)}</RowButton>}
-                  </span>
+                  </Note>
                 </span>
                 {isPrimary || writes ? (
                   <Chip
@@ -81,7 +82,7 @@ export function MembershipList({ memberships, primary, teams, projects, writes, 
         />
       ) : null}
       <Text variant="caption" muted text={t('users/user/primaryNote')} />
-    </div>
+    </Column>
   );
 }
 

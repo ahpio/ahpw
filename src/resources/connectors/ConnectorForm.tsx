@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Blocks, Button, type JsonSchemaObject, Note, PageActions, SchemaForm, Spinner } from '../../ui/index.js';
+import { Alert, Blocks, Button, Column, Group, type JsonSchemaObject, Note, PageActions, SchemaForm, Spinner } from '../../ui/index.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -19,6 +19,7 @@ import { AdapterPicker } from './AdapterPicker.js';
 import { adapterSchema, configForForm, configForPut, configForSignIn, ID_PATTERN, idFor, ownerChoices, signInFills, topSchema, type TopValues } from './form.js';
 import { SignInStep } from './SignInStep.js';
 import { newConnectorTab } from './state.js';
+import './sign-in-step.css';
 
 type Bag = Record<string, unknown>;
 
@@ -151,14 +152,13 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
         <Note>{connector.adapter === undefined ? t('connectors/page/noAdapter') : t('connectors/page/unknownAdapter', { adapter: connector.adapter })}</Note>
       ) : null}
       {/* A new form has nothing to go back to; a made one goes back to what the host holds. */}
-      <div className="web-connector-form__pick">
+      <Column gap="var(--oo-spacing-xs, 4px)">
         <span className="web-connector-form__label">{t('connectors/form/adapter')}{editing ? null : <span className="web-connector-form__required" aria-hidden="true">*</span>}</span>
         <AdapterPicker adapters={adapters} value={top.adapter} labelOf={labelOf} fixed={editing} onPick={(name) => changeTop({ ...top, adapter: name } as unknown as Bag)} />
-      </div>
+      </Column>
       {!editing && adapter === undefined ? null : <SchemaForm schema={head} value={top as unknown as Bag} baseline={(editing ? heldTop : top) as unknown as Bag} onChange={changeTop} jsonTextRoot={false} />}
       {fields === undefined ? null : (
-        <section className="web-connector-form__adapter" aria-label={t('connectors/form/settings')}>
-          <h3 className="web-connector-form__heading web-host-label"><span aria-hidden="true">{EMOJIcon.settings}</span>{t('connectors/form/settings')}</h3>
+        <Group title={t('connectors/form/settings')} icon={EMOJIcon.settings}>
           <SchemaForm key={top.adapter} schema={fields} views={SETTINGS_VIEWS} value={config} baseline={heldConfig} onChange={(next) => { setConfig(next); setSaved(false); }} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} fieldActions />
           {adapter!.signIn === undefined ? null : (
             <SignInStep
@@ -175,7 +175,7 @@ export function ConnectorForm({ host, connector }: { host: string; connector?: C
               onDone={(row) => { if (!editing) afterPut(row); }}
             />
           )}
-        </section>
+        </Group>
       )}
       {failure === null ? null : <Alert tone="danger" title={t('connectors/form/failed')} message={failure} />}
       <PageActions>

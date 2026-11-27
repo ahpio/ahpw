@@ -1,0 +1,7 @@
+/* The instructions keep four lines, so the box reads as a message to write. */
+
+/* A pill that opens a menu: its menu is placed under it, and a long description is cut, so the menu stays the width of a pill's list. */
+
+.web-menu-pill {
+  display: inline-flex;
+}

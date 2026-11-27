@@ -12,6 +12,7 @@ import { keepSettingsTab, settingsTab, type SettingsPlace } from './place.js';
 import { PageAlert } from '../../ui/display/PageAlert.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { yamlView } from '../editor/yamlView.js';
+import './settings.css';
 
 /**
  * A host's unsaved edits and the view last chosen on each tab, kept while the

@@ -11,3 +11,7 @@
 .oo-note[data-tone='danger'] {
   color: var(--oo-color-danger);
 }
+
+.oo-note[data-small='true'] {
+  font-size: var(--oo-font-size-xs);
+}

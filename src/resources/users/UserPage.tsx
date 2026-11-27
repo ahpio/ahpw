@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Blocks, Button, DangerZone, Note, Page, PageActions, Text, TextField } from '../../ui/index.js';
+import { Alert, Blocks, Button, DangerZone, Group, Note, Page, PageActions, Text, TextField } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { mayDelete, mayDo, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
@@ -87,10 +87,7 @@ export default function UserPage({ host, person: id }: { host: string; person?: 
 
   /** A section: its icon and title over its fields, a line above it. */
   const section = (icon: string | undefined, title: string, body: ReactElement): ReactElement => (
-    <section className="web-user__section" aria-label={title}>
-      <Text variant="h3" text={icon === undefined ? title : `${icon} ${title}`} />
-      {body}
-    </section>
+    <Group title={title} icon={icon}>{body}</Group>
   );
   return (
     <Page>

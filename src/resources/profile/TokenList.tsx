@@ -5,6 +5,7 @@ import { Alert, Button, Note, Pill, Spinner } from '../../ui/index.js';
 import { hostSaid } from '../../bridges/said.js';
 import { listTokens, revokeToken, type ListedToken } from '../../bridges/tokens.js';
 import { confirm } from '../../shell/notify/index.js';
+import './token-list.css';
 
 interface TokenListProps {
   host: string;
@@ -91,12 +92,12 @@ export function TokenList({ host, user, reads = 0, onRefused }: TokenListProps):
                       ? <Note inline>{user === undefined ? t('profile/keys/everyGrant') : t('profile/keys/everyGrantOf', { id: user })}</Note>
                       : token.grants.map((grant) => <Pill key={grant} label={grant} removeLabel={grant} />)}
                   </span>
-                  <span className="web-keys__when">
+                  <Note inline>
                     {t('profile/keys/made', { day: dayOf(token.created) })}
                     {' \u{00B7} '}
                     {token.expires === undefined ? t('profile/keys/neverExpires')
                       : t(expired ? 'profile/keys/expired' : 'profile/keys/expires', { day: momentOf(token.expires) })}
-                  </span>
+                  </Note>
                 </span>
                 <Button size="sm" variant="danger" label={t('profile/keys/revoke')} onClick={() => void revoke(token)} />
               </li>

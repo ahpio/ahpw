@@ -25,6 +25,9 @@ import { settingLabels } from '../sessions/pill-labels.js';
 import { useSessionSettings } from './session-settings.js';
 import { AUTOMATION_SECTION, automationTabKey, keepAutomationTabKey, type AutomationAsk } from './state.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import '../computers/page.css';
+import './settings-box.css';
+import './page.css';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 

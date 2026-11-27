@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, DangerZone, Note, Page, PageActions, Pill, RowButton, Spinner, Text, TextField } from '../../ui/index.js';
+import { Alert, Button, DangerZone, Group, Note, Page, PageActions, Pill, RowButton, Spinner, TextField } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { mayDelete, mayPut, useOwnGrants } from '../../bridges/own-grants.js';
@@ -19,6 +19,7 @@ import { teamTab } from './state.js';
 import { EMOJIcon } from '../emojis.js';
 import { PageTitle } from '../../shell/HostIcon.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './named-page.css';
 
 type Kind = 'teams' | 'projects';
 const reducers = { teams: peopleReducer('teams'), projects: peopleReducer('projects') };
@@ -132,9 +133,7 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
       ) : null}
 
       {fresh || !servesPeople(offers, 'users') ? null : (
-        <section className="web-people__members" aria-label={t('teams/named/members')}>
-          <Text variant="h3" text={
-            `${EMOJIcon.members} ${t('teams/named/members')}`} />
+        <Group title={t('teams/named/members')} icon={EMOJIcon.members}>
           <Note>{t(`teams/${word}/membersHint`)}</Note>
           {users.state === undefined ? <Spinner label={t('users/notices/reading')} /> : members.length === 0 ? <Note>{t('teams/named/noMembers')}</Note> : (
             <ul className="web-people__member-list">
@@ -174,7 +173,7 @@ export default function NamedPage({ host, domain, person: id }: { host: string; 
               }}
             />
           ) : null}
-        </section>
+        </Group>
       )}
 
       {fresh || !mayDelete(offers, grants, domain) ? null : <DangerZone label={t('teams/actions/delete')} onConfirm={() => void scena.commands.execute(domain === 'teams' ? 'ahp.deleteTeam' : 'ahp.deleteProject', { host, id })} />}

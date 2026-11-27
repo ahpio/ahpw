@@ -9,6 +9,7 @@ import { newId } from '../../../bridges/words.js';
 import { messageOf } from '../../sessions/Composer.js';
 import { EMOJIcon } from '../../emojis.js';
 import { BOTS, readBotChat, sendsTalks, servesBotChats, startBotChat, type BotRecord, type BotsState } from '../catalogue.js';
+import './bot-popover.css';
 
 /**
  * A floating bot, opened: its name, which opens the bot, what it is for, a
@@ -77,7 +78,7 @@ export function BotPopover({ host, bot, x, y, onClose }: { host: string; bot: Bo
         )}
       </div>
       {bot.description === undefined ? null : <p className="web-bot-popover__description">{bot.description}</p>}
-      {failure !== null ? <p className="web-bot-popover__failure">{failure}</p>
+      {failure !== null ? <Note tone="danger">{failure}</Note>
         : chatSession === undefined ? <Spinner label={t('bots/chat/opening')} />
           : !canChat ? <Note>{t('bots/chat/noHost')}</Note> : (
         <form className="web-bot-popover__say" onSubmit={(event) => { event.preventDefault(); void send(); }}>

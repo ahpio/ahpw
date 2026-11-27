@@ -17,6 +17,7 @@ import { EMOJIcon } from '../emojis.js';
 import { DangerOperations, OperationButtons } from '../operations/Buttons.js';
 import { factsOf, kindSchema, settingRows, statusKey, TUNNELS, tunnelsReducer, type TunnelFacts, type TunnelsState } from './tunnels.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './page.css';
 
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 const TONE: Record<ReturnType<typeof statusKey>, Tone> = { busy: 'info', running: 'success', error: 'danger', stopped: 'default', disabled: 'default' };

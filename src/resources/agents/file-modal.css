@@ -1,0 +1,10 @@
+/* A customization file being edited over the page. */
+
+.web-file-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+  width: min(100ch, calc(90vw - 2 * var(--oo-spacing-md)));
+  max-width: 100%;
+  height: min(70vh, 48rem);
+}

@@ -9,14 +9,16 @@ export interface NoteProps {
   // Inside a line of text, as a span.
   inline?: boolean;
   tone?: 'danger';
+  // The extra small font size.
+  small?: boolean;
   role?: string;
   title?: string;
 }
 
-export function Note({ children, inset, inline, tone, role, title }: NoteProps) {
+export function Note({ children, inset, inline, tone, small, role, title }: NoteProps) {
   const Tag = inline === true ? 'span' : 'p';
   return (
-    <Tag className="oo-note" data-inset={inset === true ? 'true' : undefined} data-tone={tone} role={role} title={title}>
+    <Tag className="oo-note" data-inset={inset === true ? 'true' : undefined} data-tone={tone} data-small={small === true ? 'true' : undefined} role={role} title={title}>
       {children}
     </Tag>
   );

@@ -254,7 +254,7 @@ export function HostFolders({ host, named, selected, onSelected, rooted }: {
         draggable: true,
         data: { host, uri, directory: true },
         children,
-        ...(trailing === undefined ? {} : { trailing: <span className="web-folders__tag">{trailing}</span> }),
+        ...(trailing === undefined ? {} : { trailing: <Note inline small>{trailing}</Note> }),
       };
     };
     const top = roots.map((root) => folder(root.uri, nameOf(root.uri), root.isDefault ? t('folders/explorer/default') : undefined));

@@ -1,0 +1,16 @@
+.web-record summary {
+  cursor: pointer;
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-muted);
+}
+
+.web-record pre {
+  margin: var(--oo-spacing-sm) 0 0;
+  padding: var(--oo-spacing-sm);
+  overflow: auto;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-color-surface);
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+}

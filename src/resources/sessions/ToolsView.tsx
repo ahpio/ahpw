@@ -1,11 +1,12 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import type { ToolDefinition } from '@microsoft/agent-host-protocol';
 import { useI18n } from '@softov/scena/react';
-import { Badge, ItemRow, Note, ParamList, Section, TextField } from '../../ui/index.js';
+import { Badge, ItemRow, Note, ParamList, Row, Section, TextField } from '../../ui/index.js';
 import { ModesGroup } from '../agent-tools/ModesGroup.js';
 import { useActiveSession } from './active.js';
 import { searchTools, toolGroups, toolHints, toolParams, type ToolGroup } from './tooling.js';
 import './tooling.css';
+import { ToolingHead } from './ToolingHead.js';
 
 /** One tool: its title, name and first line; open, its whole description, its inputs and its hints. On the right, why it has no switch. */
 function ToolRow({ tool, open, why, onToggle }: { tool: ToolDefinition; open: boolean; why: string; onToggle: () => void }): ReactElement {
@@ -27,7 +28,7 @@ function ToolRow({ tool, open, why, onToggle }: { tool: ToolDefinition; open: bo
           {params.length === 0 ? null : (
             <ParamList params={params.map((param) => ({ name: param.name, type: param.type, required: param.required, description: param.description }))} requiredLabel={t('sessions/tooling/required')} />
           )}
-          {hints.length === 0 ? null : <div className="web-tooling__hints">{hints.map((hint) => <Badge key={hint} text={hint} />)}</div>}
+          {hints.length === 0 ? null : <Row wrap gap="var(--oo-spacing-xs)">{hints.map((hint) => <Badge key={hint} text={hint} />)}</Row>}
         </div>
       )}
     </ItemRow>
@@ -69,10 +70,7 @@ export default function ToolsView(): ReactElement {
   const total = all.reduce((sum, group) => sum + group.tools.length, 0);
   return (
     <div className="web-tooling">
-      <div className="web-tooling__head">
-        <span className="web-tooling__title">{t('sessions/tooling/tools')} <span className="web-tooling__count">{total}</span></span>
-        <span className="web-tooling__session">{summary.title === '' ? t('sessions/untitled') : summary.title}</span>
-      </div>
+      <ToolingHead title={t('sessions/tooling/tools')} count={total} summary={summary} />
       <TextField value={query} placeholder={t('sessions/tooling/searchTools')} onChange={setQuery} />
       <ModesGroup query={query} folded={folded.has('browser')} onFold={() => setFolded((now) => flip(now, 'browser'))} />
       {groups.map((group) => (

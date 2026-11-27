@@ -1,0 +1,5 @@
+.web-pick-two {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--oo-spacing-sm);
+}

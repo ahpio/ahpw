@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, ChoicePicker, FormRow, Note, Page, PageActions, Swatches, Text, TextField } from '../../ui/index.js';
+import { Alert, Button, ChoicePicker, FormRow, Note, Page, PageActions, Row, Swatches, Text, TextField } from '../../ui/index.js';
 import { ahpPaths } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
 import { useEach, useHostNames, useShownHosts } from '../../bridges/hosts.js';
@@ -18,6 +18,7 @@ import { BOT_PROVIDER, BOTS, BOTS_SCHEME, botsIn, botsReducer, editBot, makeBot,
 import { connectorsValid, draftOf, recordBody, renamedFor, type BotDraft } from './draft.js';
 import { BOT_BODIES, COLOR_HEX, knowsBody, slugOf } from './look.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './edit.css';
 
 /** How many slugs a new bot tries, since a host never gives a deleted bot's slug again. */
 const SLUG_TRIES = 5;
@@ -125,7 +126,7 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
     <Page>
       <Text variant="h2" text={fresh ? t('bots/commands/new') : t('bots/editTitle', { name: bot!.name })} />
 
-      <div className="web-bot-look">
+      <Row align="center" gap="var(--oo-spacing-lg)">
         <Bood body={shown.body} color={shown.color} width={120} />
         <div className="web-bot-look__pickers">
           <Swatches
@@ -144,7 +145,7 @@ export function BotForm({ host: opened, slug, onDone }: { host: string; slug?: s
           <TextField value={shown.body} ariaLabel={t('bots/edit/bodyName')} placeholder={t('bots/edit/bodyName')} onChange={(next) => set({ body: next, name: renamedFor(shown.name, shown.body, next) })} />
           {shown.body.trim() === '' || knowsBody(shown.body) ? null : <Note>{t('bots/edit/bodyUnknown')}</Note>}
         </div>
-      </div>
+      </Row>
 
       {fresh && embedMode() === 'multi' && hosts.length > 1 ? (
         <ChoicePicker label={t('bots/edit/host')} options={hosts.map((one) => ({ value: one, label: hostName(one) }))} value={host} onChange={(next) => { setHost(next); writeLastHost(next); set({ owner: '' }); }} />

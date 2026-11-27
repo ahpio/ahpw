@@ -3,6 +3,7 @@ import { useI18n } from '@softov/scena/react';
 import { EMOJIcon } from '../emojis.js';
 import { MediaFrame } from './media.js';
 import { Button, Note } from '../../ui/index.js';
+import './audio-page.css';
 
 const BARS = 64;
 

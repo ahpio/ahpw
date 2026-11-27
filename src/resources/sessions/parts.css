@@ -1,0 +1,111 @@
+.web-tool[data-outcome='thought'] .web-tool__mark {
+  color: var(--oo-color-muted);
+}
+
+.web-tool {
+  font-size: var(--oo-font-size-sm);
+  min-width: 0;
+}
+
+.web-tool__ref {
+  color: var(--oo-color-accent);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+
+.web-tool__ref:hover,
+.web-tool__ref:focus-visible {
+  text-decoration-style: solid;
+}
+
+.web-tool__mark {
+  flex: none;
+  width: 1rem;
+  text-align: center;
+  color: var(--oo-color-success);
+}
+
+.web-tool[data-outcome='approval'] .web-tool__mark,
+.web-tool[data-outcome='review'] .web-tool__mark,
+.web-tool[data-outcome='sign-in'] .web-tool__mark {
+  color: var(--oo-color-warning);
+}
+
+.web-tool[data-outcome='failed'] .web-tool__mark,
+.web-tool[data-outcome='failed'] .web-tool__state {
+  color: var(--oo-color-danger);
+}
+
+.web-tool[data-outcome='cancelled'] .web-tool__mark,
+.web-tool[data-outcome='preparing'] .web-tool__mark {
+  color: var(--oo-color-muted);
+}
+
+.web-tool[data-outcome='running'] .web-tool__mark {
+  color: var(--oo-color-info);
+  animation: web-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .web-tool[data-outcome='running'] .web-tool__mark {
+    animation: none;
+  }
+}
+
+.web-tool__line {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--oo-font-mono, monospace);
+  font-size: var(--oo-font-size-xs);
+}
+
+.web-tool + .web-tool {
+  margin-top: calc(2px - var(--oo-spacing-sm));
+}
+
+.web-tool__state,
+.web-tool__time {
+  flex: none;
+  font-size: var(--oo-font-size-xs);
+}
+
+.web-tool__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+  margin: 2px 0 var(--oo-spacing-sm) calc(0.5rem - 1px);
+  padding: var(--oo-spacing-xs) 0 var(--oo-spacing-xs) calc(0.5rem + var(--oo-spacing-sm));
+  border-left: 1px solid var(--oo-color-border);
+}
+
+.web-tool__block-head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.web-tool__pre {
+  margin: var(--oo-spacing-xs) 0 0;
+  padding: var(--oo-spacing-sm);
+  max-height: 18rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--oo-font-mono, monospace);
+  font-size: var(--oo-font-size-xs);
+  background: var(--oo-color-canvas);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+}
+
+.web-tool__file {
+  display: flex;
+  gap: var(--oo-spacing-sm);
+  margin: 0;
+}

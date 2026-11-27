@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Blocks, Button, type EnumOption, type JsonSchemaObject, Note, PageActions, SchemaForm, Spinner } from '../../ui/index.js';
+import { Alert, Blocks, Button, Column, type EnumOption, Group, type JsonSchemaObject, Note, PageActions, SchemaForm, Spinner } from '../../ui/index.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import type { AgentInfo } from '@microsoft/agent-host-protocol';
@@ -21,6 +21,7 @@ import { ID_PATTERN, idFor, ownerChoices } from '../connectors/form.js';
 import { agentConfigForForm, agentTopSchema, agentWanted, engineSchema, startOf, topOf, type AgentTop } from './form.js';
 import { EnginePicker } from './EnginePicker.js';
 import { newAgentTab } from './state.js';
+import '../connectors/sign-in-step.css';
 
 type Bag = Record<string, unknown>;
 
@@ -167,17 +168,16 @@ export function AgentForm({ host, record }: { host: string; record?: AgentRow })
     <Blocks>
       {editing && engine === undefined ? <Note>{t('agents/form/unknownEngine', { engine: record.engine })}</Note> : null}
       {editing && engine === undefined ? null : (
-        <div className="web-connector-form__pick">
+        <Column gap="var(--oo-spacing-xs, 4px)">
           <span className="web-connector-form__label">{t('agents/form/engine')}{editing ? null : <span className="web-connector-form__required" aria-hidden="true">*</span>}</span>
           <EnginePicker engines={engines} value={engineName} template={template} labelOf={labelOf} fixed={editing} onPick={pickEngine} onTemplate={pickTemplate} />
-        </div>
+        </Column>
       )}
       {engine === undefined ? null : <SchemaForm schema={head} value={top as unknown as Bag} baseline={(editing ? heldTop : top) as unknown as Bag} onChange={changeTop} jsonTextRoot={false} />}
       {fields === undefined ? null : (
-        <section className="web-connector-form__adapter" aria-label={t('agents/form/settings')}>
-          <h3 className="web-connector-form__heading web-host-label"><span aria-hidden="true">{EMOJIcon.settings}</span>{t('agents/form/settings')}</h3>
+        <Group title={t('agents/form/settings')} icon={EMOJIcon.settings}>
           <SchemaForm key={`${engineName}:${template}`} schema={fields} views={SETTINGS_VIEWS} value={config} baseline={editing ? heldForm : config} onChange={(next) => { setConfig(next); setSaved(false); }} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} fieldActions />
-        </section>
+        </Group>
       )}
       {failure === null ? null : <Alert tone="danger" title={t('agents/form/failed')} message={failure} />}
       <PageActions>

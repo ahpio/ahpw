@@ -21,6 +21,7 @@ import { commentsChannel, commentsOf, isOutdated, newComment, remove, reply, res
 import { NewComment, Thread, type ThreadActions } from './Threads.js';
 import type { FilePageProps } from './FilePage.js';
 import './shared.css';
+import './shared-file-page.css';
 
 /** The mark on a person's circle that says what they are; a guest has none. */
 /** The key of the new comment's box among the margin's threads. */

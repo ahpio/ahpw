@@ -6,6 +6,8 @@ import type { Icon } from '../../bridges/icons.js';
 import { HostIcon, useHostIcon } from '../HostIcon.js';
 import { NameMark } from '../NameMark.js';
 import { HostLines } from './HostLines.js';
+import './explorer-list.css';
+import '../host-icon.css';
 
 /** The colour of a row's dot, by meaning. */
 export type Dot = 'attention' | 'working' | 'failed' | 'fresh' | 'ok' | 'quiet' | 'off';

@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { RowButton } from '../control/RowButton.js';
+import './JsonTree.css';
 
 /** How many characters a closed object's preview takes before it ends in `…`. */
 const PREVIEW_ROOM = 60;
@@ -37,24 +38,24 @@ const leafKind = (value: unknown): string => (value === null ? 'null' : typeof v
 function Node({ name, value, depth }: { name: string | null; value: unknown; depth: number }): ReactElement {
   // The top level opens; below it a branch waits to be opened, as a console does.
   const [open, setOpen] = useState(depth === 0);
-  const label = name === null ? null : <span className="web-json__key">{name}</span>;
+  const label = name === null ? null : <span className="oo-json__key">{name}</span>;
   if (!isBranch(value)) {
     return (
-      <li className="web-json__row">
+      <li className="oo-json__row">
         {label}{label === null ? null : ': '}
-        <span className="web-json__leaf" data-kind={leafKind(value)}>{leafText(value)}</span>
+        <span className="oo-json__leaf" data-kind={leafKind(value)}>{leafText(value)}</span>
       </li>
     );
   }
   const entries = Array.isArray(value) ? value.map((one, at) => [String(at), one] as const) : Object.entries(value);
   return (
-    <li className="web-json__row">
+    <li className="oo-json__row">
       <RowButton fit expanded={open} onClick={() => setOpen(!open)}>
         {label}{label === null ? null : ': '}
-        <span className="web-json__preview">{previewOf(value)}</span>
+        <span className="oo-json__preview">{previewOf(value)}</span>
       </RowButton>
       {open ? (
-        <ul className="web-json__children">
+        <ul className="oo-json__children">
           {entries.map(([key, one]) => <Node key={key} name={key} value={one} depth={depth + 1} />)}
         </ul>
       ) : null}
@@ -65,7 +66,7 @@ function Node({ name, value, depth }: { name: string | null; value: unknown; dep
 /** A value as a tree to open branch by branch, as a browser's console draws an object. */
 export function JsonTree({ value }: { value: unknown }): ReactElement {
   return (
-    <ul className="web-json">
+    <ul className="oo-json">
       <Node name={null} value={value} depth={0} />
     </ul>
   );

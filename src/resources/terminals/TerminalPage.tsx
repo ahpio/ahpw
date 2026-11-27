@@ -8,6 +8,7 @@ import '@xterm/xterm/css/xterm.css';
 import type { StateAction } from '@microsoft/agent-host-protocol';
 import { ahpPaths, channelErrorPath, channelPath, hostBridge, type HostFacts } from '../../bridges/data.js';
 import { clientClaim, deltaOf, foldTerminal, holderOf, joinParts, normalizeState } from './terminal.js';
+import './terminal-page.css';
 
 /** A CSS custom property's value on an element, or the fallback. */
 function cssVar(element: HTMLElement, name: string, fallback: string): string {

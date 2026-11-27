@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, Button, DangerZone, type DetailItem, DetailList, ItemList, ItemRow, Listable, Note, Page, PageActions, PageHead, Section, Text } from '../../ui/index.js';
+import { Alert, Badge, Button, DangerZone, type DetailItem, DetailList, ItemList, ItemRow, Listable, Note, Page, PageActions, PageHead, Row, Section, Text } from '../../ui/index.js';
 import { automationReducer, type AgentInfo, type AutomationCapabilities, type AutomationState } from '@microsoft/agent-host-protocol';
 // import { call } from '../../lib/api.js';
 import { AUTOMATIONS, ROOT, ahpPaths, hostBridge, type Connection, type HostFacts } from '../../bridges/data.js';
@@ -24,6 +24,7 @@ import type { ServerInfo } from '../../bridges/server-info.js';
 import { memoryWords, NO_ABOUT, type HostAbout } from '../../bridges/host-about.js';
 import './info.css';
 import { runFacts, runsByTime } from '../automations/words.js';
+import '../automations/page.css';
 
 /** What `GET /api/status` says about the daemon process. */
 interface DaemonStatus {
@@ -228,7 +229,7 @@ export default function HostInfoPage({ host }: { host: string }): ReactElement {
       {daemon.length === 0 ? null : <DetailList items={daemon} columns={2} />}
 
       <Section icon={EMOJIcon.automations} title={t('host/info/automations')} />
-      <div className="web-host-automations"><AutomationsFact host={host} caps={caps ?? null} /></div>
+      <Row align="start" gap={0}><AutomationsFact host={host} caps={caps ?? null} /></Row>
 
       <Section icon={EMOJIcon.agents} title={t('host/info/agents')} count={agents.length} />
       <AgentRows host={host} agents={agents} />

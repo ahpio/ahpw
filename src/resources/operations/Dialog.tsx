@@ -1,12 +1,13 @@
 import { useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, Modal, Note, SchemaForm } from '../../ui/index.js';
+import { Alert, Button, Modal, Note, Row, SchemaForm } from '../../ui/index.js';
 import { askFirst, invokeOperation, labelOf, startingInput } from '../../bridges/operations.js';
 import { hostSaid } from '../../bridges/said.js';
 import { adapterSchema, configForForm, configForPut } from '../connectors/form.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { SETTINGS_VIEWS } from '../editor/yamlView.js';
 import { OPERATION_DIALOG, openMade, refusedTitle, type OpenDialog } from './run.js';
+import '../changes/forms.css';
 
 type Bag = Record<string, unknown>;
 
@@ -51,10 +52,10 @@ function OperationForm({ open, onClose }: { open: OpenDialog; onClose: () => voi
         {open.operation.description === undefined ? null : <Note>{open.operation.description}</Note>}
         <SchemaForm schema={schema} value={value} onChange={setValue} views={SETTINGS_VIEWS} jsonEditor={JsonCodeEditor} onJsonValidChange={setJsonValid} />
         {failure === null ? null : <Alert tone="danger" title={refusedTitle(open.operation)} message={failure} />}
-        <div className="web-changeset-form__actions">
+        <Row justify="end" gap="var(--oo-spacing-sm)">
           <Button label={t('operations/cancel')} variant="ghost" onClick={onClose} />
           <Button label={label} variant="primary" disabled={busy || !jsonValid} {...(jsonValid ? {} : { title: t('host/settings/fixJson') })} onClick={() => void send()} />
-        </div>
+        </Row>
       </div>
     </Modal>
   );

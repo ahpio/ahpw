@@ -1,11 +1,12 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button } from '../../ui/index.js';
+import { Button, Row } from '../../ui/index.js';
 import { NOTIFICATIONS } from './registry.js';
 import { getNotifications } from './context.js';
 import type { Notification, NotificationAnimation, NotificationTone } from './types.js';
 import { EMOJIcon } from '../../resources/emojis.js';
 import { plural } from '../../i18n/locales.js';
+import './toaster.css';
 
 /** Each tone's default icon. */
 const TONE_ICON: Record<NotificationTone, string> = {
@@ -77,12 +78,12 @@ function Toast({ notification, animation }: { notification: Notification; animat
       onFocus={enter}
       onBlur={leave}
     >
-      <div className="web-toast__head">
+      <Row align="center" gap="var(--oo-spacing-sm)">
         <span className="web-toast__icon" aria-hidden="true">{notification.icon ?? TONE_ICON[notification.tone]}</span>
         <span className="web-toast__title">{notification.title}</span>
         {notification.count > 1 ? <span className="web-toast__count" title={plural('shell/notify/raised', notification.count)}>{`\u{D7}${notification.count}`}</span> : null}
         <Button variant="quiet" ariaLabel={t('shell/notify/dismiss')} onClick={close}>{EMOJIcon.close}</Button>
-      </div>
+      </Row>
       {notification.description === undefined ? null : <p className="web-toast__body">{notification.description}</p>}
       {notification.detail === undefined ? null : (
         <>
@@ -91,11 +92,11 @@ function Toast({ notification, animation }: { notification: Notification; animat
         </>
       )}
       {notification.actions === undefined || notification.actions.length === 0 ? null : (
-        <div className="web-toast__actions">
+        <Row wrap gap="var(--oo-spacing-xs)">
           {notification.actions.map((action) => (
             <Button key={action.command} type="button" size="sm" variant="ghost" onClick={() => run(action)}>{action.label}</Button>
           ))}
-        </div>
+        </Row>
       )}
     </div>
   );

@@ -9,6 +9,7 @@ import { HostImage, imagesFrom } from './HostImage.js';
 import { FileUrls } from './media.js';
 import { SharedFilePage } from './SharedFilePage.js';
 import { folderOf, SimpleMarkdown } from './SimpleMarkdown.js';
+import '../../shell/markdown/markdown.css';
 
 /**
  * A Markdown file as a page people edit live: the shared editor with the live

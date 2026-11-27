@@ -1,0 +1,20 @@
+/* A model's limits as icons and sizes; each one's full words show on hover. */
+
+.web-limits {
+  display: inline-flex;
+  gap: var(--oo-spacing-md);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.web-limits > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: default;
+}
+
+.web-limits > span > [aria-hidden] {
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}

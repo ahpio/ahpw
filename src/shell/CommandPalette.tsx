@@ -6,6 +6,7 @@ import { ahpPaths } from '../bridges/data.js';
 import { useEach, useEveryHost } from '../bridges/hosts.js';
 import { terminalItems } from '../resources/terminals/rows.js';
 import { TextField } from '../ui/control/TextField.js';
+import './command-palette.css';
 
 /** The slot a command joins to be listed in the palette. */
 export const PALETTE_SLOT = 'ahp:palette';

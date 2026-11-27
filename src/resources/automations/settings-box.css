@@ -1,0 +1,39 @@
+.web-automation__message {
+  padding: var(--oo-spacing-sm) var(--oo-spacing-md);
+  border-left: 2px solid var(--oo-color-border);
+}
+
+/* The session each run starts, drawn as the new session box: no gutter of its own, as the form gives one. */
+
+.web-automation__box {
+  padding: 0;
+}
+
+.web-automation__box > .oo-note {
+  margin: var(--oo-spacing-xs) 0 0;
+}
+
+/* An agent's icon before its name, and a badge after a model. */
+
+.web-automation__agent {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+}
+
+.web-automation__agent img {
+  width: 16px;
+  height: 16px;
+}
+
+/* What makes the runs fail, said under the box. */
+
+.web-automation__warning {
+  margin: var(--oo-spacing-xs) 0 0;
+  color: var(--oo-color-warning);
+  font-size: var(--oo-font-size-sm);
+}
+
+.web-automation__warn {
+  color: var(--oo-color-warning);
+}

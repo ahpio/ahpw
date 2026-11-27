@@ -7,6 +7,8 @@ import { linkClicks } from './clicks.js';
 import { imagesFrom } from './HostImage.js';
 import { FileHead, useFileText } from './text.js';
 import './simple-markdown.css';
+import '../../shell/markdown/markdown.css';
+import './shared-file-page.css';
 
 /** The folder a file URI sits in, which its relative links start from. */
 export const folderOf = (uri: string): string => uri.replace(/\/[^/]*$/, '');

@@ -203,7 +203,7 @@ export function InputRequest({ request, send, live, response }: {
               done={questions.map((one) => answers[one.id] !== undefined)}
               onPick={setPage}
             />
-            <span className="web-ask__count">{t('sessions/question/count', { page: page + 1, total: questions.length })}</span>
+            <Note inline small>{t('sessions/question/count', { page: page + 1, total: questions.length })}</Note>
           </span>
         ) : null}
       </Row>
@@ -217,7 +217,7 @@ export function InputRequest({ request, send, live, response }: {
           <QuestionForm question={question} draft={drafts[question.id] ?? EMPTY} set={(draft) => setDrafts({ ...drafts, [question.id]: draft })} next={next} />
         </section>
       )}
-      <div className="web-ask__actions">
+      <Row align="center" gap="var(--oo-spacing-sm)">
         <Button label={t('sessions/question/decline')} size="sm" onClick={() => complete('decline')} />
         <span className="web-ask__spacer" />
         {page > 0 ? <Button label={t('sessions/question/back')} size="sm" onClick={() => setPage(page - 1)} /> : null}
@@ -226,7 +226,7 @@ export function InputRequest({ request, send, live, response }: {
         ) : (
           <Button label={t('sessions/question/next')} variant="primary" size="sm" disabled={stuck} onClick={next} />
         )}
-      </div>
+      </Row>
       {last && missing.length > 0 && !stuck ? <Note>{plural('sessions/question/missing', missing.length)}</Note> : null}
     </div>
   );

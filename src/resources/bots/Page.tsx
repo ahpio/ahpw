@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Button, DangerZone, type DetailItem, DetailList, Page, PageActions, Text } from '../../ui/index.js';
+import { Button, Column, DangerZone, type DetailItem, DetailList, Note, Page, PageActions, Row, Text } from '../../ui/index.js';
 import type { AgentInfo } from '@microsoft/agent-host-protocol';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths } from '../../bridges/data.js';
@@ -16,6 +16,8 @@ import { refKey } from '../../bridges/hosts.js';
 import { BOT_CHAT_OPENING, BOT_EDIT_ASKED } from './state.js';
 import { BotForm } from './Edit.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import '../computers/page.css';
+import './page.css';
 
 /** One bot: its figure, what it is for, whose it is, and its chat; Edit swaps the page for its form. */
 export default function BotPage({ host, slug }: { host: string; slug?: string }): ReactElement {
@@ -60,17 +62,17 @@ export default function BotPage({ host, slug }: { host: string; slug?: string })
 
   return (
     <Page>
-      <div className="web-bot">
+      <Row align="center" gap="var(--oo-spacing-lg)">
         <Bood body={bot.body} color={bot.color} width={120} />
-        <div className="web-bot__words">
+        <Column gap="var(--oo-spacing-sm)">
           <Text variant="h2" text={bot.name} />
-          {(bot.description ?? '').trim() === '' ? null : <p className="web-bot__description">{bot.description}</p>}
+          {(bot.description ?? '').trim() === '' ? null : <Note>{bot.description}</Note>}
           <PageActions>
             <Button label={t(opening ? 'bots/chat/opening' : 'bots/actions/chat')} variant="primary" disabled={opening} onClick={() => run('ahp.chatWithBot')} />
             {edits ? <Button label={t('bots/actions/edit')} onClick={() => setEditing(true)} /> : null}
           </PageActions>
-        </div>
-      </div>
+        </Column>
+      </Row>
       <DetailList items={facts} columns={2} />
       {(bot.instructions ?? '').trim() === '' ? null : (
         <>

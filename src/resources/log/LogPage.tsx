@@ -8,7 +8,11 @@ import { everyHost } from '../../bridges/hosts.js';
 import { clock, filterLog, LOG_LEVELS, LOG_SCOPES, lineText, logText, piecesOf, useLog, type LogEntry, type LogLevel, type LogScope } from './log.js';
 import { EMOJIcon } from '../emojis.js';
 import { copyText } from '../../ui/control/CopyButton.js';
-import { Button, Link, Note, Pill, TextField } from '../../ui/index.js';
+import { Button, Link, Note, Pill, TextField, Toolbar } from '../../ui/index.js';
+import './log-page.css';
+
+/** The bar's controls wrap onto a second line in a narrow pane. */
+const WRAPS = { flexWrap: 'wrap' } as const;
 
 const MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 const FOLLOW_KEY = MAC ? 'log/follow/mac' : 'log/follow/other';
@@ -61,7 +65,7 @@ const Row = memo(function Row({ entry, open, onToggle }: { entry: LogEntry; open
     <div className="web-log__row" data-open={open || undefined} data-level={entry.level}>
       <div className="web-log__line" role="button" tabIndex={0} aria-expanded={open} onClick={() => onToggle(entry.id)} onKeyDown={(event) => { if (event.key === 'Enter') onToggle(entry.id); }}>
         <span className="web-log__caret">{open ? EMOJIcon.caretDown : EMOJIcon.caretRight}</span>
-        <span className="web-log__time">{clock(entry.at)}</span>
+        <Note inline>{clock(entry.at)}</Note>
         <span className="web-log__level">{entry.level.toUpperCase()}</span>
         <span className="web-log__scope" data-scope={entry.scope}><span>{t(`log/scopes/${entry.scope}`)}</span></span>
         <span className="web-log__text">{words}</span>
@@ -118,7 +122,7 @@ export default function LogPage(): ReactElement {
 
   return (
     <div className="web-log">
-      <div className="web-log__bar">
+      <Toolbar gap="var(--oo-spacing-xs)" style={WRAPS}>
         <Pill label={t('log/all')} on={scopes.length === 0} onClick={() => setScopes([])} />
         {LOG_SCOPES.map((scope) => (
           <Pill key={scope} label={t(`log/scopes/${scope}`)} lead={<span className="web-log__dot" data-scope={scope} />} on={scopes.includes(scope)} onClick={() => pick(scope)} />
@@ -127,7 +131,7 @@ export default function LogPage(): ReactElement {
         <Pill label={t('log/minLevel', { level: scopes.includes('traffic') ? 'debug' : minLevel })} title={t('log/levelTip')} disabled={scopes.includes('traffic')} onClick={nextLevel} />
         <TextField type="search" weight={1} placeholder={t('log/filter')} value={query} onChange={setQuery} />
         <Button variant="quiet" size="xs" title={t('log/copyShown')} onClick={() => copy(logText(shown))}>{EMOJIcon.copy}</Button>
-      </div>
+      </Toolbar>
       <div className="web-log__list" ref={list}>
         {shown.length === 0 ? <Note>{t(all.length === 0 ? 'log/empty' : 'log/noMatch')}</Note> : null}
         {shown.map((entry) => <Row key={entry.id} entry={entry} open={opened.has(entry.id)} onToggle={toggle} />)}

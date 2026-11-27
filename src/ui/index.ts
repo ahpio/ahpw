@@ -20,7 +20,7 @@ export { Swatches, type Swatch, type SwatchesProps } from './control/Swatches.js
 export { ChoiceCards, type ChoiceCard, type ChoiceCardsProps } from './control/ChoiceCards.js';
 export { StepDots, type StepDotsProps } from './navigation/StepDots.js';
 export { Link, type LinkProps } from './navigation/Link.js';
-export { Section, type SectionProps } from './layout/Section.js';
+export { Group, Section, type SectionProps } from './layout/Section.js';
 export { Blocks, Page, PageActions, PageHead } from './layout/Page.js';
 export { Panel, type PanelProps } from './layout/Panel.js';
 export { ChatView, type ChatViewProps } from './layout/ChatView.js';

@@ -9,7 +9,9 @@ import { stepMatches, type StepFilter } from './filter.js';
 import type { RawStep, RawTurn, StepKind } from './raw.js';
 import { durationOf, fileOf, inputText, kindOf, outcomeOf, outputOf, startedOf } from './tool.js';
 import { tokens, when } from './turn.js';
-import { Button, DetailList, Note, RowButton, Segments } from '../../ui/index.js';
+import { Button, Column, DetailList, Note, RowButton, Segments } from '../../ui/index.js';
+import './parts.css';
+import './raw-view.css';
 
 /** The icon of each step that is not a tool call; a call takes its kind's. */
 const STEP_ICON: Record<Exclude<StepKind, 'tool'>, string> = {
@@ -217,7 +219,7 @@ export function RawView({ turns, filter, spawned, onOpenChat }: {
     return { turn, hits, steps: filter === null || filter.highlight ? turn.steps : turn.steps.filter((step) => hits.has(step)) };
   }).filter((one) => one.steps.length > 0);
   return (
-    <div className="web-raw">
+    <Column gap="var(--oo-spacing-lg)">
       {shown.length === 0 ? <Note>{t('sessions/raw/none')}</Note> : shown.map(({ turn, steps, hits }) => (
         <section key={turn.id} className="web-raw__turn">
           <TurnHead turn={turn} view={view} setView={setView} />
@@ -226,6 +228,6 @@ export function RawView({ turns, filter, spawned, onOpenChat }: {
           </ol>
         </section>
       ))}
-    </div>
+    </Column>
   );
 }

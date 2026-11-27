@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import type { ChatState, Customization, SessionActiveClient, SessionState, SessionSummary, TerminalState } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Badge, Button, type DetailItem, StatusDot } from '../../ui/index.js';
+import { Badge, Button, type DetailItem, Note, StatusDot } from '../../ui/index.js';
 import type { Scena } from '@softov/scena/types';
 import { hostBridge, type HostFacts } from '../../bridges/data.js';
 import { useChannel } from '../../bridges/channel.js';
@@ -14,6 +14,7 @@ import { foldTerminal, inFolder } from '../terminals/terminal.js';
 import { clientName, clientPlugins } from './tooling.js';
 import { tokens, totalsOf, when } from './turn.js';
 import './facts.css';
+import '../files/diff-page.css';
 
 /** A terminal, as a link that opens it, while its directory is in the session's folder. */
 function FolderTerminal({ host, uri, folder }: { host: string; uri: string; folder: string }): ReactElement | null {
@@ -152,7 +153,7 @@ export function sessionFacts(scena: Scena, t: (key: string, values?: Record<stri
       value: (
         <span>
           <span className="web-diff--add">+{changes.additions ?? 0}</span>{' '}
-          <span className="web-diff--remove">-{changes.deletions ?? 0}</span>
+          <Note inline tone="danger">-{changes.deletions ?? 0}</Note>
           {changes.files === undefined ? '' : ` ${plural('sessions/details/inFiles', changes.files)}`}
         </span>
       ),

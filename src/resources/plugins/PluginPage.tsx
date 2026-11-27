@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { rootReducer, type RootState } from '@microsoft/agent-host-protocol';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, type BadgeTone, Button, CheckBox, DangerZone, Page, PageActions, PageHead, Text } from '../../ui/index.js';
+import { Alert, Badge, type BadgeTone, Button, CheckBox, DangerZone, Note, Page, PageActions, PageHead, Text } from '../../ui/index.js';
 import { KeptTabs } from '../../ui/navigation/KeptTabs.js';
 import { useChannel } from '../../bridges/channel.js';
 import { ahpPaths, ROOT } from '../../bridges/data.js';
@@ -120,7 +120,7 @@ export default function PluginPage({ host, plugin: id }: { host: string; plugin:
           uri={uri}
           state={<Badge tone={TONE[row.state]} text={t(`plugins/states/${row.state}`)} />}
         />
-        {manifest?.description === undefined ? null : <p className="web-listed__description">{manifest.description}</p>}
+        {manifest?.description === undefined ? null : <Note>{manifest.description}</Note>}
         {mayToggle(offers, row) || mayReload(offers) ? (
           <PageActions>
             {mayReload(offers) ? (

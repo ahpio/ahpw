@@ -6,6 +6,7 @@ import { Reasoning, ToolCall, type Send } from './Parts.js';
 import { useAsks } from '../agent-tools/asks.js';
 import { useChatUri, useSessionHost } from './workspace.js';
 import { RowButton } from '../../ui/index.js';
+import './activity.css';
 
 /**
  * When this page first saw each step or run running, and first saw it done,

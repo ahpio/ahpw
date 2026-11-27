@@ -1,0 +1,98 @@
+/* How an opened step reads, as words: the one shown bright, the others dimmed, a slash between. */
+
+.web-raw__views {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  font-size: var(--oo-font-size-xs);
+}
+
+/* The copy icon closes the row, set apart from the views. */
+
+.web-raw__views > :last-child {
+  margin-left: var(--oo-spacing-sm);
+}
+
+/* A step's object as a tree, in the code block's box, taller since it opens a branch at a time. */
+
+.web-raw__tree {
+  max-height: 28rem;
+  overflow: auto;
+  padding: var(--oo-spacing-sm);
+  background: var(--oo-color-canvas);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+}
+
+.web-raw__turn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+}
+
+.web-raw__turn-title {
+  font-weight: 600;
+}
+
+.web-raw__steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--oo-color-border);
+}
+
+.web-raw__step {
+  border-bottom: 1px solid var(--oo-color-border);
+}
+
+.web-raw__n {
+  flex: none;
+  min-width: 2.5ch;
+  text-align: right;
+  color: var(--oo-color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.web-raw__icon {
+  flex: none;
+  width: 1.2em;
+  text-align: center;
+  color: var(--oo-color-muted);
+}
+
+/* A step's number and icon say who it is: what was sent, a call, the agent's words. */
+
+.web-raw__step[data-kind='message'] :is(.web-raw__n, .web-raw__icon) {
+  color: var(--oo-color-blue);
+}
+
+.web-raw__step[data-kind='tool'] :is(.web-raw__n, .web-raw__icon) {
+  color: var(--oo-color-yellow);
+}
+
+.web-raw__step:is([data-kind='text'], [data-kind='reasoning']) :is(.web-raw__n, .web-raw__icon) {
+  color: var(--oo-color-purple);
+}
+
+.web-raw__step[data-kind='message'] .web-raw__line {
+  font-weight: 600;
+}
+
+.web-raw__state,
+.web-raw__time {
+  flex: none;
+  color: var(--oo-color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.web-raw__step[data-outcome='failed'] .web-raw__state,
+.web-raw__step[data-outcome='cancelled'] .web-raw__state {
+  color: var(--oo-color-danger);
+}
+
+.web-raw__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+  padding: var(--oo-spacing-xs) 0 var(--oo-spacing-sm) calc(2.5ch + 1.2em + 2 * var(--oo-spacing-sm));
+}

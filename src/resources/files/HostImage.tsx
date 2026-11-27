@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { fileLink } from './link.js';
 import { useFileUrl, type FileUrls } from './media.js';
+import '../../shell/markdown/markdown.css';
 
 /**
  * An image a markdown file names. A web or data src is drawn as written; a

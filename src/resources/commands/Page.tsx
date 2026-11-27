@@ -11,6 +11,8 @@ import { PageAlert } from '../../ui/display/PageAlert.js';
 import { JsonCodeEditor } from '../editor/JsonCodeEditor.js';
 import { dateFormat } from '../../i18n/locales.js';
 import { PageSpinner } from '../../ui/display/PageSpinner.js';
+import './item.css';
+import './result.css';
 
 /** What a command's effect looks like on its badge. */
 const EFFECT_TONE: Record<string, 'info' | 'success' | 'warning' | 'danger'> = { read: 'info', add: 'success', change: 'warning', remove: 'danger' };

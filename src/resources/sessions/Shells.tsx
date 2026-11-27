@@ -13,6 +13,7 @@ import { DetailList, Pill } from '../../ui/index.js';
 import { statusOf, type Shell } from './shell-list.js';
 import { stripAnsi } from './tool.js';
 import { when } from './turn.js';
+import './shells.css';
 
 /** The composer pill that counts a chat's background shells and opens their list. */
 export function ShellsPill({ count, onOpen }: { count: number; onOpen: () => void }): ReactElement {

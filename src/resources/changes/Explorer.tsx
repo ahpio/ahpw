@@ -1,6 +1,6 @@
 import { useMemo, useState, type MouseEvent, type ReactElement, type ReactNode } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Button, ContextMenu, Divider, Note, Panel, Segments, Spinner, Tree, type TreeNode } from '../../ui/index.js';
+import { Alert, Button, ContextMenu, Divider, Note, Panel, Segments, Spinner, Toolbar, Tree, type TreeNode } from '../../ui/index.js';
 import type { PickerAction } from '@softov/scena/types';
 import { sessionReducer, type ChangesetOperation, type SessionState, type SessionSummary } from '@microsoft/agent-host-protocol';
 import { ahpPaths, hostBridge, summaryPath } from '../../bridges/data.js';
@@ -14,6 +14,9 @@ import { done, failed } from '../../shell/notify/index.js';
 import { iconOf, openChange, scoped, toneOf, useChangeset } from './changeset.js';
 import { ChangesetForms } from './Forms.js';
 import { changeCopies, firstScope, folderCopies, folderTree, groupChanges, letterOf, relativeDir, scopesOf, sortChanges, type Change, type ChangeFolder, type ChangeGrouping, type ChangeSort, type CopyTexts } from './words.js';
+import '../files/diff-page.css';
+import '../../shell/explorer/explorer-list.css';
+import './explorer.css';
 
 /** How the files are drawn: one row each with its folder beside it, or under their folders. */
 type View = 'list' | 'tree';
@@ -142,7 +145,7 @@ export default function ChangesExplorer(): ReactElement {
           ))}
         </span>
         <span className="web-change__counts">
-          {change.added === undefined && change.removed === undefined ? null : <><span className="web-diff--add">+{change.added ?? 0}</span> <span className="web-diff--remove">-{change.removed ?? 0}</span></>}
+          {change.added === undefined && change.removed === undefined ? null : <><span className="web-diff--add">+{change.added ?? 0}</span> <Note inline tone="danger">-{change.removed ?? 0}</Note></>}
         </span>
         <span className="web-change__letter" data-letter={letter} title={t(WORD[letter])}>{letter}</span>
       </span>
@@ -313,7 +316,7 @@ export default function ChangesExplorer(): ReactElement {
           </>
         )}
         bars={scope === undefined ? null : (
-          <div className="web-changes__bar">
+          <Toolbar>
             {scopes.length > 1 ? (
               <Button variant="tool" title={scope.description ?? scope.label} hasPopup="menu" onClick={openScopes}>
                 {scope.label} <span aria-hidden="true">{EMOJIcon.caretDown}</span>
@@ -325,7 +328,7 @@ export default function ChangesExplorer(): ReactElement {
               // A narrow pane has room for the file icon and the count; the words are its tip.
               <span className="web-changes__totals" title={plural('changes/files', files.length)}>
                 <span aria-label={plural('changes/files', files.length)}><span aria-hidden="true">{EMOJIcon.file}</span> {files.length}</span>
-                {' '}<span className="web-diff--add">+{added}</span> <span className="web-diff--remove">{'\u{2212}'}{removed}</span>
+                {' '}<span className="web-diff--add">+{added}</span> <Note inline tone="danger">{'\u{2212}'}{removed}</Note>
               </span>
             )}
             <Segments
@@ -334,7 +337,7 @@ export default function ChangesExplorer(): ReactElement {
               value={view}
               onChange={showAs}
             />
-          </div>
+          </Toolbar>
         )}
         {...(files.length === 0 ? {} : { filter: { value: filter, label: t('changes/filter'), onChange: setFilter } })}
         notice={notice}

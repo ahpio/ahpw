@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { useI18n, useScena } from '@softov/scena/react';
-import { Badge, Button, DetailList, ItemRow, Note, Section, Spinner, StatusDot, TextField } from '../../ui/index.js';
+import { Badge, Button, Column, DetailList, ItemRow, Note, Section, Spinner, StatusDot, TextField } from '../../ui/index.js';
 import { Markdown } from '../../shell/markdown/Markdown.js';
 import { EMOJIcon } from '../emojis.js';
 import { CopyButton } from '../../ui/control/CopyButton.js';
@@ -13,6 +13,7 @@ import { kindTitle, searchKind, type KindItem, type KindTab } from './kinds.js';
 import { customFileTitle, newCustomFile, openCustomFile } from './custom-files.js';
 import { FileModal } from './FileModal.js';
 import './customizations.css';
+import '../../shell/markdown/markdown.css';
 
 /** A dot and its words, or a spinner while a container loads. */
 function stateMark(state: StateWord | undefined): ReactElement | null {
@@ -49,7 +50,7 @@ function ItemPane({ host, item, back, onBack, onEdit }: { host: string; item: Ki
   const open = item.open;
   const markdown = open !== undefined && (extOf(open.uri) === 'md' || extOf(open.uri) === 'markdown');
   return (
-    <div className="web-custom-item">
+    <Column gap="var(--oo-spacing-sm)">
       <Button variant="link" onClick={onBack}>‹ {back}</Button>
       <div className="web-custom-item__head">
         <h3 className="web-custom-item__name">{item.label}</h3>
@@ -64,10 +65,10 @@ function ItemPane({ host, item, back, onBack, onEdit }: { host: string; item: Ki
         </div>
       </div>
       <p className="web-custom-item__path">{item.plugin === undefined ? item.path : `${item.plugin} · ${item.path}`}</p>
-      {item.flags.length === 0 ? null : <p className="web-custom-item__flags">{item.flags.join(' · ')}</p>}
+      {item.flags.length === 0 ? null : <Note small>{item.flags.join(' · ')}</Note>}
       {markdown || (item.description === '' && item.line === '') ? null : <p>{item.description === '' ? item.line : item.description}</p>}
       {markdown ? <FileBody host={host} uri={open.uri} /> : null}
-    </div>
+    </Column>
   );
 }
 

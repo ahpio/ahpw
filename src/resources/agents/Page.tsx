@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { useI18n, useScena, useStore } from '@softov/scena/react';
-import { Alert, Badge, type BadgeTone, Blocks, Button, DangerZone, Page, PageActions, PageHead } from '../../ui/index.js';
+import { Alert, Badge, type BadgeTone, Blocks, Button, DangerZone, Page, PageActions, PageHead, Row } from '../../ui/index.js';
 import { KeptTabs } from '../../ui/navigation/KeptTabs.js';
 import type { AgentInfo } from '@microsoft/agent-host-protocol';
 import { ENGINES, AGENTS, enginesReducer, agentsReducer, servesEngines, servesAgents, type EngineRow, type AgentRow } from '../../bridges/agents.js';
@@ -47,9 +47,9 @@ function Check({ host, record }: { host: string; record: AgentRow }): ReactEleme
     void checkOne(host, record).finally(() => setBusy(false));
   };
   return (
-    <div className="web-agent__check">
+    <Row align="center" wrap gap="8px">
       <Button size="sm" label={t('agents/actions/check')} disabled={busy} onClick={check} />
-    </div>
+    </Row>
   );
 }
 

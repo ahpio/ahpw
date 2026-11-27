@@ -16,6 +16,9 @@ import { whereLabel, wheresOf } from '../sessions/where.js';
 import { MenuPill, type PillChoice } from './MenuPill.js';
 import type { SessionSettings } from './session-settings.js';
 import type { Draft } from './words.js';
+import '../sessions/composer.css';
+import './settings-box.css';
+import '../sessions/new.css';
 
 /** The choices of a setting that is a list or a switch. */
 function settingChoices(option: Option, pick: (value: unknown) => void, words: { on: string; off: string }): PillChoice[] {

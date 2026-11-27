@@ -6,6 +6,8 @@ import { readFailure } from './save.js';
 import { folderLabel } from '../../bridges/words.js';
 import { countChanges, diffLines, hunkHeader } from './diff.js';
 import { iconOf, scoped, useChangeset } from '../changes/changeset.js';
+import './diff-page.css';
+import './shared-file-page.css';
 
 /** Read one side of an edit; a side that does not exist is empty. */
 const side = async (host: string, uri: string | undefined): Promise<string | null> => (uri === undefined ? '' : (await hostBridge(host).readText(uri)).text);
@@ -48,7 +50,7 @@ export default function DiffPage({ host, file, before, after, changeset, change,
       <code>{path}</code>
       {sides !== null && !('error' in sides) ? (
         <span>
-          <span className="web-diff--add">+{counts.added}</span> <span className="web-diff--remove">-{counts.removed}</span>
+          <span className="web-diff--add">+{counts.added}</span> <Note inline tone="danger">-{counts.removed}</Note>
           {before === undefined ? ` \u{00B7} ${t('files/diff/newFile')}` : after === undefined ? ` \u{00B7} ${t('files/diff/deleted')}` : ''}
         </span>
       ) : null}

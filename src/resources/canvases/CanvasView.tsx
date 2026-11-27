@@ -5,7 +5,13 @@ import { useChannel } from '../../bridges/channel.js';
 import { SANDBOX } from '../../shell/browser/sandbox.js';
 import { EMOJIcon } from '../emojis.js';
 import { canvasKey, canvasName, canvasUriOf } from './canvases.js';
-import { Button, Link, Note } from '../../ui/index.js';
+import { Button, Link, Note, Toolbar } from '../../ui/index.js';
+import '../../shell/explorer/explorer-list.css';
+import '../../shell/browser/browser-view.css';
+import './canvas-view.css';
+
+/** The bar's controls wrap onto a second line in a narrow pane. */
+const WRAPS = { flexWrap: 'wrap' } as const;
 
 /**
  * A canvas: its page in an iframe, with the Browser view's sandbox, under a
@@ -37,7 +43,7 @@ export default function CanvasView({ host, chat, resource }: { host: string; cha
 
   return (
     <div className="web-browser">
-      <div className="web-browser__bar">
+      <Toolbar gap="var(--oo-spacing-xs)" style={WRAPS}>
         <span className="web-canvas__name">{name}</span>
         {state?.status === undefined || state.status === '' ? null : <Note inline>{state.status}</Note>}
         <span className="web-explorer__actions web-canvas__actions">
@@ -50,7 +56,7 @@ export default function CanvasView({ host, chat, resource }: { host: string; cha
             </Link>
           )}
         </span>
-      </div>
+      </Toolbar>
       <div className="web-browser__page">
         {url === undefined ? (
           <div className="web-browser__empty">

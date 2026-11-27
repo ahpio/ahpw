@@ -7,6 +7,7 @@ import { CopyButton } from '../../ui/control/CopyButton.js';
 import { TEXT_WRAP } from '../editor/wrap.js';
 import { EMOJIcon } from '../emojis.js';
 import { Button } from '../../ui/index.js';
+import './shared-file-page.css';
 
 /** A file's text: null while it reads, `text: null` when the file is not text. */
 export type FileText = { text: string | null } | { error: string } | null;
