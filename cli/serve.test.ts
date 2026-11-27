@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CLIENT, DEFAULT_HOST, DEFAULT_PORT, settingsOf, warningsOf } from './serve.js';
+import { DEFAULT_CLIENT, DEFAULT_HOST, DEFAULT_PORT, pageUrl, settingsOf, warningsOf } from './serve.js';
 
-const files: Record<string, string> = { '/tok': ' from-file\n' };
+const files: Record<string, string> = { '/tok': ' from-file\n', '/cert.pem': 'CERT', '/key.pem': 'KEY' };
 const read = (path: string): string => {
   const text = files[path];
   if (text === undefined) throw new Error('ENOENT');
@@ -59,6 +59,25 @@ describe('settingsOf', () => {
     expect(() => settingsOf({ connect: 'ws://h:1/?tkn=t', token: 'u' }, {}, {}, read)).toThrow('tkn');
   });
 
+  it('reads the TLS certificate and key, from the file or a flag over it', () => {
+    expect(settingsOf({ connect: 'ws://h:1' }, { tlsCert: '/cert.pem', tlsKey: '/key.pem' }, {}, read).tls).toEqual({ cert: 'CERT', key: 'KEY' });
+    expect(settingsOf({ connect: 'ws://h:1', tlsKey: '/key.pem' }, { tlsCert: '/cert.pem' }, {}, read).tls).toEqual({ cert: 'CERT', key: 'KEY' });
+    expect(settingsOf({ connect: 'ws://h:1' }, {}, {}, read).tls).toBeUndefined();
+  });
+
+  it('refuses a certificate without its key, and a missing file', () => {
+    expect(() => settingsOf({ connect: 'ws://h:1', tlsCert: '/cert.pem' }, {}, {}, read)).toThrow('go together');
+    expect(() => settingsOf({ connect: 'ws://h:1' }, { tlsKey: '/key.pem' }, {}, read)).toThrow('go together');
+    expect(() => settingsOf({ connect: 'ws://h:1', tlsCert: '/none.pem', tlsKey: '/key.pem' }, {}, {}, read)).toThrow('No TLS certificate at /none.pem');
+  });
+
+  it('takes a domain in lower case, and refuses one with a scheme, a port or a path', () => {
+    expect(settingsOf({ connect: 'ws://h:1' }, { domain: 'Ahpw.Example.com' }, {}, read).domain).toBe('ahpw.example.com');
+    for (const domain of ['https://ahpw.example.com', 'ahpw.example.com:443', 'ahpw.example.com/x', ' ']) {
+      expect(() => settingsOf({ connect: 'ws://h:1' }, { domain }, {}, read)).toThrow('not a host name');
+    }
+  });
+
   it('refuses a configuration key it does not know, or of the wrong kind', () => {
     expect(() => settingsOf({ connect: 'ws://h:1' }, { colour: 'red' }, {}, read)).toThrow('colour');
     expect(() => settingsOf({ connect: 'ws://h:1' }, { port: '80' }, {}, read)).toThrow('port');
@@ -95,5 +114,20 @@ describe('warningsOf', () => {
     expect(warningsOf({ ...base, host: '0.0.0.0', token: 't' })[0]).toContain('with the token');
     expect(warningsOf({ ...base, connect: new URL('ws://10.0.0.2:1'), token: 't' })[0]).toContain('cleartext');
     expect(warningsOf({ ...base, connect: new URL('ws://10.0.0.2:1') })).toEqual([]);
+  });
+
+  it('says nothing of plain http when it serves https, and still warns of the token', () => {
+    const tls = { cert: 'CERT', key: 'KEY' };
+    expect(warningsOf({ ...base, host: '0.0.0.0', tls })).toEqual([]);
+    expect(warningsOf({ ...base, host: '0.0.0.0', tls, token: 't' })).toEqual(['ahpw: 0.0.0.0 is open to the network. Anyone who reaches it uses the AHP server with the token ahpw adds.']);
+  });
+});
+
+describe('pageUrl', () => {
+  it('names the page at its scheme and domain, without a standard port', () => {
+    expect(pageUrl('0.0.0.0', 5190)).toBe('http://127.0.0.1:5190/');
+    expect(pageUrl('0.0.0.0', 5190, true, 'ahpw.example.com')).toBe('https://ahpw.example.com:5190/');
+    expect(pageUrl('0.0.0.0', 443, true, 'ahpw.example.com')).toBe('https://ahpw.example.com/');
+    expect(pageUrl('::1', 5190)).toBe('http://[::1]:5190/');
   });
 });

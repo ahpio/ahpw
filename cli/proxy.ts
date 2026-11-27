@@ -15,19 +15,27 @@ function addressed(hostname: string): boolean {
   return bare === 'localhost' || isIP(bare) !== 0;
 }
 
+/** How the page is served: over https or not, and the name it is reached by besides an address. */
+export interface PageServed {
+  secure?: boolean | undefined;
+  /** A host name, in lower case. */
+  domain?: string | undefined;
+}
+
 /**
  * Whether a socket comes from a page this server sent.
  *
- * The `Origin` must be this server as the browser reached it, and that must be
- * an address or `localhost`, so a page on another name that resolves here
- * cannot open the socket. A request with no `Origin` is not from a page and is
- * refused too.
+ * The `Origin` must be this server as the browser reached it, in the scheme it
+ * serves, and that must be an address, `localhost` or the configured domain,
+ * so a page on another name that resolves here cannot open the socket. A
+ * request with no `Origin` is not from a page and is refused too.
  */
-export function originAllowed(origin: string | undefined, host: string | undefined): boolean {
+export function originAllowed(origin: string | undefined, host: string | undefined, served: PageServed = {}): boolean {
   if (origin === undefined || host === undefined) return false;
-  if (origin !== `http://${host}`) return false;
+  if (origin !== `${served.secure === true ? 'https' : 'http'}://${host}`) return false;
   try {
-    return addressed(new URL(origin).hostname);
+    const name = new URL(origin).hostname;
+    return addressed(name) || (served.domain !== undefined && name === served.domain);
   } catch {
     return false;
   }
@@ -61,14 +69,14 @@ const refuse = (socket: Duplex, status: string): void => {
  * two sockets are piped: the daemon's `101` and every frame after it pass
  * through unread.
  */
-export function socketProxy(upstream: URL, token: string | undefined): (request: IncomingMessage, socket: Duplex, head: Buffer) => void {
+export function socketProxy(upstream: URL, token: string | undefined, served: PageServed = {}): (request: IncomingMessage, socket: Duplex, head: Buffer) => void {
   const secure = upstream.protocol === 'wss:';
   const port = Number(upstream.port === '' ? (secure ? 443 : 80) : upstream.port);
   const hostname = upstream.hostname.replace(/^\[|\]$/g, '');
   return (request, socket, head) => {
     const url = request.url ?? '/';
     if (new URL(url, 'http://page').pathname !== SOCKET_PATH) return refuse(socket, '404 Not Found');
-    if (!originAllowed(request.headers.origin, request.headers.host)) return refuse(socket, '403 Forbidden');
+    if (!originAllowed(request.headers.origin, request.headers.host, served)) return refuse(socket, '403 Forbidden');
 
     const lines = [`GET ${upstreamPath(upstream, url, token)} HTTP/1.1`, `host: ${upstream.host}`];
     for (const name of HANDSHAKE) {
