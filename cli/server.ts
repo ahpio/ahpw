@@ -1,8 +1,10 @@
 import { createServer, type IncomingMessage, type Server } from 'node:http';
+import { createServer as createSecureServer } from 'node:https';
 import type { Duplex } from 'node:stream';
 import { toNodeListener } from '@cofold/remote';
 import { staticRoute } from '../plugin/static.js';
 import { socketProxy } from './proxy.js';
+import type { Tls } from './tls.js';
 
 /** What the page reads to learn that this server adds the token, so it asks for none. */
 export const SERVER_FILE = '/ahpw.json';
@@ -17,6 +19,10 @@ export interface WebServerOptions {
   token?: string | undefined;
   /** What the page tells the AHP server it is, sent in `ahpw.json`. Absent, the page's own default. */
   client?: { name: string; title: string } | undefined;
+  /** The certificate and key to serve https with. Absent, plain http. */
+  tls?: Tls | undefined;
+  /** The name the page is reached by, whose page may open the socket as an address's may. */
+  domain?: string | undefined;
 }
 
 /** The server, and how to stop it with every socket it carries. */
@@ -36,8 +42,9 @@ export function createWebServer(options: WebServerOptions): WebServer {
     if (new URL(request.url).pathname !== SERVER_FILE) return await files(request);
     return new Response(about, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
   };
-  const server = createServer(toNodeListener(route));
-  const proxy = socketProxy(options.upstream, options.token);
+  const listener = toNodeListener(route);
+  const server: Server = options.tls === undefined ? createServer(listener) : createSecureServer({ cert: options.tls.cert, key: options.tls.key }, listener);
+  const proxy = socketProxy(options.upstream, options.token, { secure: options.tls !== undefined, domain: options.domain });
   const carried = new Set<Duplex>();
   server.on('upgrade', (request: IncomingMessage, socket: Duplex, head: Buffer) => {
     carried.add(socket);

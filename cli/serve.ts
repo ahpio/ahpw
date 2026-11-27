@@ -1,9 +1,9 @@
 import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
 import { ArgumentError, ConfigurationError, type Command, type Field, type Registry } from '@cofold/commands';
 import { resolveConfig } from '@cofold/config';
 import { createWebServer } from './server.js';
+import { domainOf, expand, tlsOf, type Tls } from './tls.js';
 
 /** The port the page is served on unless one is named. */
 export const DEFAULT_PORT = 5190;
@@ -59,6 +59,21 @@ export const serveFields = {
     description: `The title the AHP server's client list shows for the page. Default ${DEFAULT_CLIENT}.`,
     cli: { value: 'TITLE' },
   },
+  tlsCert: {
+    type: 'string',
+    description: 'Serve https with this certificate, a PEM file. Needs --tls-key.',
+    cli: { value: 'PATH' },
+  },
+  tlsKey: {
+    type: 'string',
+    description: 'The private key of --tls-cert, a PEM file.',
+    cli: { value: 'PATH' },
+  },
+  domain: {
+    type: 'string',
+    description: 'The name the page is reached by, as the certificate names it. A page there may open the socket.',
+    cli: { value: 'NAME' },
+  },
 } satisfies Record<string, Field>;
 
 /** What `serve` runs with, after the flags and the file are folded. */
@@ -72,14 +87,15 @@ export interface Settings {
   open: boolean;
   /** What the page tells the AHP server it is. */
   client: { name: string; title: string };
+  /** The certificate and key, when the page is served over https. */
+  tls?: Tls;
+  /** The name the page is reached by, besides an address or `localhost`. */
+  domain?: string;
 }
 
 const KINDS: Readonly<Record<keyof typeof serveFields, string>> = {
-  connect: 'string', token: 'string', tokenFile: 'string', host: 'string', port: 'number', open: 'boolean', clientName: 'string', clientTitle: 'string',
+  connect: 'string', token: 'string', tokenFile: 'string', host: 'string', port: 'number', open: 'boolean', clientName: 'string', clientTitle: 'string', tlsCert: 'string', tlsKey: 'string', domain: 'string',
 };
-
-/** `~` at the start of a path, as a shell would read it. A config file has no shell. */
-const expand = (path: string): string => (path === '~' || path.startsWith('~/') ? homedir() + path.slice(1) : path);
 
 /** The variables `serve` reads, below the file. */
 export const ENVIRONMENT = { url: 'AHPD_URL', host: 'AHPD_HOST', token: 'AHPD_TOKEN' } as const;
@@ -160,6 +176,8 @@ export function settingsOf(flags: Readonly<Record<string, unknown>>, file: Reado
 
   const port = (merged.port as number | undefined) ?? DEFAULT_PORT;
   if (port < 0 || port > 65_535) throw new ArgumentError(`--port is not a port: ${port}.`);
+  const tls = tlsOf(merged.tlsCert, merged.tlsKey, (message) => new ArgumentError(message), (path) => read(path));
+  const domain = domainOf(merged.domain, (message) => new ArgumentError(message));
   return {
     connect,
     ...(token === undefined ? {} : { token }),
@@ -167,6 +185,8 @@ export function settingsOf(flags: Readonly<Record<string, unknown>>, file: Reado
     port,
     open: merged.open === true,
     client: { name: textOr(merged.clientName, DEFAULT_CLIENT), title: textOr(merged.clientTitle, DEFAULT_CLIENT) },
+    ...(tls === undefined ? {} : { tls }),
+    ...(domain === undefined ? {} : { domain }),
   };
 }
 
@@ -179,8 +199,11 @@ const loopback = (host: string): boolean => host === 'localhost' || host === '::
 /** What to say before serving, when something is reachable that a person may not expect. */
 export function warningsOf(settings: Settings): string[] {
   const said: string[] = [];
-  if (!loopback(settings.host)) {
-    said.push(`ahpw: ${settings.host} is reached over plain http and ws.${settings.token === undefined ? '' : ' Anyone who reaches it uses the AHP server with the token ahpw adds.'}`);
+  const shared = settings.token === undefined ? '' : ' Anyone who reaches it uses the AHP server with the token ahpw adds.';
+  if (!loopback(settings.host) && settings.tls === undefined) {
+    said.push(`ahpw: ${settings.host} is reached over plain http and ws.${shared}`);
+  } else if (!loopback(settings.host) && shared !== '') {
+    said.push(`ahpw: ${settings.host} is open to the network.${shared}`);
   }
   if (settings.token !== undefined && settings.connect.protocol === 'ws:' && !loopback(settings.connect.hostname.replace(/^\[|\]$/g, ''))) {
     said.push(`ahpw: the token travels in cleartext to ${settings.connect.host}.`);
@@ -188,10 +211,12 @@ export function warningsOf(settings: Settings): string[] {
   return said;
 }
 
-/** The page's address as a browser would type it. */
-const pageUrl = (host: string, port: number): string => {
-  const shown = host === '0.0.0.0' || host === '::' ? '127.0.0.1' : host;
-  return `http://${shown.includes(':') ? `[${shown}]` : shown}:${port}/`;
+/** The page's address as a browser would type it: at the domain when there is one. */
+export const pageUrl = (host: string, port: number, secure = false, domain?: string): string => {
+  const shown = domain ?? (host === '0.0.0.0' || host === '::' ? '127.0.0.1' : host);
+  const scheme = secure ? 'https' : 'http';
+  const standard = port === (secure ? 443 : 80);
+  return `${scheme}://${shown.includes(':') ? `[${shown}]` : shown}${standard ? '' : `:${port}`}/`;
 };
 
 /** Opens `url` in the desktop's browser, and says nothing when there is none. */
@@ -221,13 +246,13 @@ export const declareServe = (registry: Registry<object>, app: string): Command =
     const settings = settingsOf(context.input, file.values as Record<string, unknown>, process.env);
     for (const line of warningsOf(settings)) process.stderr.write(`${line}\n`);
 
-    const { server, stop } = createWebServer({ app, upstream: settings.connect, token: settings.token, client: settings.client });
+    const { server, stop } = createWebServer({ app, upstream: settings.connect, token: settings.token, client: settings.client, tls: settings.tls, domain: settings.domain });
     await new Promise<void>((resolve, reject) => {
       server.once('error', reject);
       server.listen(settings.port, settings.host, () => resolve());
     });
     const bound = server.address();
-    const url = pageUrl(settings.host, typeof bound === 'object' && bound !== null ? bound.port : settings.port);
+    const url = pageUrl(settings.host, typeof bound === 'object' && bound !== null ? bound.port : settings.port, settings.tls !== undefined, settings.domain);
     process.stderr.write(`ahpw: serving ${url}, connected to ${settings.connect.origin}${settings.connect.pathname === '/' ? '' : settings.connect.pathname}.\n`);
     if (settings.open) openBrowser(url);
 

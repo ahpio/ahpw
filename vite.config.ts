@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { Alias, Plugin } from 'vite';
+import type { Alias, Plugin, ServerOptions } from 'vite';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import { resolveConfig } from '@cofold/config';
+import { domainOf, tlsOf } from './cli/tls.js';
 
 /** The daemon `pnpm dev` talks to. Its config needs `"http": true`. */
 const daemon = process.env['AHPD_URL'] ?? 'http://127.0.0.1:9187';
@@ -56,6 +58,24 @@ const serverFacts: Plugin = {
   },
 };
 
+/**
+ * `tlsCert`, `tlsKey` and `domain` from `~/.config/ahpw/config.json`, the keys
+ * `ahpw serve` takes, so `pnpm dev` serves https at that name too.
+ *
+ * A page on plain http at anything but `localhost` is not a secure context,
+ * and there the browser has no `navigator.locks`, which the agent tools need.
+ * Vite refuses a Host it does not know, so the domain is one it allows.
+ * Not read under vitest, which serves no page.
+ */
+function devServing(): Pick<ServerOptions, 'https' | 'allowedHosts'> {
+  if (process.env['VITEST'] !== undefined) return {};
+  const values = resolveConfig({ name: 'ahpw' }).values;
+  const fail = (message: string): Error => new Error(`ahpw config: ${message}`);
+  const tls = tlsOf(values['tlsCert'], values['tlsKey'], fail);
+  const domain = domainOf(values['domain'], fail);
+  return { ...(tls === undefined ? {} : { https: tls }), ...(domain === undefined ? {} : { allowedHosts: [domain] }) };
+}
+
 export default defineConfig({
   plugins: [react(), serverFacts],
   define: { __AHPW_VERSION__: JSON.stringify(version) },
@@ -80,6 +100,7 @@ export default defineConfig({
   server: {
     host: '127.0.0.1',
     port: 5180,
+    ...devServing(),
     // A key starting with ^ is a pattern. Plain '/ahp' was a prefix, so it also
     // sent '/ahpw.svg' (the favicon then) to the daemon, and the page had no icon.
     proxy: {

@@ -97,8 +97,25 @@ Then open `http://127.0.0.1:5190/`.
 | `--open` | Open the page in a browser |
 | `--client-name NAME` | The name the server's client list shows for the page, default `ahpw` |
 | `--client-title TITLE` | The title the server's client list shows for the page, default `ahpw` |
+| `--tls-cert PATH` | Serve https with this certificate, a PEM file. Needs `--tls-key` |
+| `--tls-key PATH` | The private key of `--tls-cert`, a PEM file |
+| `--domain NAME` | The name the page is reached by, as the certificate names it |
 
 A `tkn=` in the `--connect` URL counts as the token.
+
+### https
+
+A browser holds some features back from a page on plain `http`, unless the page is at `localhost`. One of them is `navigator.locks`, which an agent needs to run ahpw's commands, so on `http://192.168.0.4:5190` the agent gets no ahpw tools. Serve https instead, with a certificate for the name you open the page at:
+
+```json
+{
+  "tlsCert": "~/.config/ahpw/cert.pem",
+  "tlsKey": "~/.config/ahpw/key.pem",
+  "domain": "ahpw.example.com"
+}
+```
+
+`domain` is what lets a page at that name open the socket. Without it, only a page at an IP address or `localhost` may. `pnpm dev` reads the same three keys.
 
 ### Config file and environment
 
@@ -125,7 +142,7 @@ A flag beats the file, and the file beats the environment.
 ### Security
 
 - The server binds `127.0.0.1` by default. Anyone who reaches it uses the AHP server with your token, so it warns when `--host` opens it up.
-- It takes a socket only from a page it served, at an IP address or `localhost`.
+- It takes a socket only from a page it served, at an IP address, `localhost` or the `domain` you set.
 - It warns when the token goes in cleartext (`ws://`) to another machine.
 
 ---
@@ -150,6 +167,8 @@ pnpm dev
 ```
 
 `pnpm dev` serves on `http://127.0.0.1:5180`. It proxies `/api` and the socket (at `/ahp`) to `AHPD_URL`, default `http://127.0.0.1:9187`. The daemon needs `"http": true`.
+
+With `tlsCert` and `tlsKey` in `~/.config/ahpw/config.json`, `pnpm dev` serves https, and `domain` is a name Vite answers at. See [https](#https).
 
 ```sh
 AHPD_URL=http://127.0.0.1:9187 pnpm dev            # another daemon
