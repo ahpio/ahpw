@@ -1,5 +1,43 @@
+import type { BindingPath, Scena } from '@softov/scena/types';
+import { chatChoice } from '../sessions/view-settings.js';
+import { broadcastBus, windowLocks, type WindowLocks } from './window-locks.js';
+
 /** The browser's locks, or undefined where it has none: they need https or localhost. */
 export const browserLocks = (): LockManager | undefined => (typeof navigator === 'undefined' ? undefined : navigator.locks);
+
+/** Whether this page is one the browser holds Web Locks back from: plain http, away from `localhost`. */
+export const insecurePage = (): boolean => typeof window !== 'undefined' && window.isSecureContext === false;
+
+/**
+ * Whether the agent gets this browser's commands on a page with no Web Locks,
+ * as `ui.agentToolsWithoutHttps` sets it. Off unless a person turns it on: the
+ * windows' own locks can let two windows run one call.
+ */
+export const WITHOUT_HTTPS = chatChoice('$/agentTools/withoutHttps' as BindingPath, 'ahpw.agentToolsWithoutHttps', ['off', 'on'], 'off');
+
+let shared: WindowLocks | undefined;
+
+/** The windows' own locks, made once for the page and let go as it goes. */
+function ownLocks(): WindowLocks {
+  if (shared !== undefined) return shared;
+  const made = windowLocks(broadcastBus('ahpw.agentTools.locks'));
+  window.addEventListener('pagehide', () => made.hide());
+  window.addEventListener('pageshow', (event) => { if (event.persisted) made.show(); });
+  shared = made;
+  return made;
+}
+
+/**
+ * The locks the agent tools run on: the browser's, or, where it has none and
+ * a person turned `ui.agentToolsWithoutHttps` on, the windows' own. Undefined
+ * otherwise, and then the page offers the agent nothing.
+ */
+export function agentLocks(scena: Scena): LockManager | undefined {
+  const own = browserLocks();
+  if (own !== undefined) return own;
+  if (WITHOUT_HTTPS.read(scena.store) !== 'on' || typeof BroadcastChannel === 'undefined') return undefined;
+  return ownLocks() as unknown as LockManager;
+}
 
 /** This window's hold on a session's calls. */
 export interface SessionLock {

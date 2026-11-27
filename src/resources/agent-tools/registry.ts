@@ -4,6 +4,7 @@ import { askAt } from './asks.js';
 import { chatChoice, type ChatChoice } from '../sessions/view-settings.js';
 import type { UiKey, UiSetting } from '../../shell/ui-settings/settings.js';
 import type { InputSchema } from './check.js';
+import { insecurePage, WITHOUT_HTTPS } from './lock.js';
 
 /** A command that can be served to the agent as a tool. */
 export interface ToolMark {
@@ -95,8 +96,21 @@ export function commandTitle(scena: Scena, id: string): string {
   return (typeof title === 'function' ? title() : title) ?? id;
 }
 
-/** Each mark's mode as a UI setting, `ui.agentTools.<command>`. */
-export const toolSettings = (): UiSetting[] => ordered().map((one) => ({
+/** `ui.agentToolsWithoutHttps`: whether the agent gets the commands on a page with no Web Locks. */
+const withoutHttps: UiSetting = {
+  key: 'ui.agentToolsWithoutHttps',
+  values: () => WITHOUT_HTTPS.values,
+  usual: () => WITHOUT_HTTPS.usual,
+  title: () => translate('sessions/agentTools/withoutHttps/title'),
+  description: () => translate('sessions/agentTools/withoutHttps/description'),
+  label: (value) => translate(`sessions/agentTools/withoutHttps/${value}`),
+  read: (scena) => WITHOUT_HTTPS.read(scena.store),
+  apply: (scena, value) => WITHOUT_HTTPS.set(scena.store, value),
+  watch: (scena, changed) => scena.store.subscribe(WITHOUT_HTTPS.path, changed),
+};
+
+/** Each mark's mode as a UI setting, `ui.agentTools.<command>`, after `ui.agentToolsWithoutHttps` on a page that needs it. */
+export const toolSettings = (): UiSetting[] => [...(insecurePage() ? [withoutHttps] : []), ...ordered().map((one): UiSetting => ({
   key: `ui.agentTools.${one.id}` as UiKey,
   values: () => MODES,
   usual: () => one.choice.usual,
@@ -106,4 +120,4 @@ export const toolSettings = (): UiSetting[] => ordered().map((one) => ({
   read: (scena) => one.choice.read(scena.store),
   apply: (scena, value) => one.choice.set(scena.store, value),
   watch: (scena, changed) => scena.store.subscribe(one.choice.path, changed),
-}));
+}))];
