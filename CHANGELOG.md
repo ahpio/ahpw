@@ -16,6 +16,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **The Clients, Computers, Connectors, Plugins, Policies, Teams and Tunnels entries show only to a person who may open them**. The lists and pages of users, roles, teams, projects, policies, bots, computers, tunnels and clients offer only the changes the person may make.
 - **A tab's scrollbar shows while the pointer is over it**, on every tab that scrolls and on a chat with a bot, as on a session.
 - **A new session opens where its New session page is.** Moved to the right sidebar, the page is replaced there by the session it starts. The page itself opens where Interface > Session says, as a session does; the dock's menu still offers both places.
+- **Pages draw from one set of components.** Buttons, fields, notes, sections, lists and dialogs come from `src/ui`, copied from scena, and each view's CSS sits beside its component. `app.css` keeps only the page-wide styles.
+- **A field's hint shows above its control**, as in scena, not below it.
+- **The connector, agent and computer settings title their sections as the other pages do**, with a line above and an icon before the title.
+- **The browser, canvas, log and changes bars are scena toolbars**, with the toolbar's background and height.
 
 ### Fixed
 
@@ -23,6 +27,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - A new bot offers only the hosts where the person may make one.
 - **A tab shows one scrollbar.** The scrollbar of a tab behind it, such as a long Tools list, was drawn over the shown one.
 - **Escape closes the floating settings** when nothing has the focus, as after switching a tab inside them. It closed them only while a control inside had the focus.
+- **A list in a popup keeps a readable width**, such as the agent picker of an automation. It took the full width.
+- **The danger zone of an automation, plugin or connector stands apart from the form above it**, and lines up with it.
 
 ## [0.9.0] - 2026-11-20
 
