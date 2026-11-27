@@ -117,6 +117,8 @@ A browser holds some features back from a page on plain `http`, unless the page 
 
 `domain` is what lets a page at that name open the socket. Without it, only a page at an IP address or `localhost` may. `pnpm dev` reads the same three keys.
 
+Without https, a page on plain http shows **Without https** among the agent tools, in the Tools panel and the Interface settings (`ui.agentToolsWithoutHttps`). It is off by default. On, the browser's windows agree among themselves over a `BroadcastChannel` which one runs an agent's calls. That is not atomic, so with two windows open on one session, a call that arrives as you switch between them can run in both.
+
 ### Config file and environment
 
 Every option can go in `~/.config/ahpw/config.json`, without the dashes:

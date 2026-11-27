@@ -2333,7 +2333,13 @@
       "alwaysAllowHint": "Executa este comando sem perguntar, neste navegador.",
       "deny": "Negar",
       "browser": "Este navegador",
-      "on": "{on} de {all} ligados"
+      "on": "{on} de {all} ligados",
+      "withoutHttps": {
+        "title": "Sem https",
+        "description": "Esta página usa http sem criptografia, então o navegador não consegue garantir que só uma das janelas rode a chamada de um agente, e o agente não recebe nenhum destes comandos. Ligado, as janelas combinam entre si. Com duas janelas abertas em uma sessão, uma chamada pode rodar nas duas.",
+        "off": "Desligado",
+        "on": "Ligado"
+      }
     }
   },
   "host": {

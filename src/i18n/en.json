@@ -2333,7 +2333,13 @@
       "alwaysAllowHint": "Runs this command without asking, in this browser.",
       "deny": "Deny",
       "browser": "This browser",
-      "on": "{on} of {all} on"
+      "on": "{on} of {all} on",
+      "withoutHttps": {
+        "title": "Without https",
+        "description": "This page is on plain http, so the browser cannot make sure only one of its windows runs an agent's call, and the agent gets none of these commands. On, the windows agree among themselves instead. With two windows open on one session, a call can then run in both.",
+        "off": "Off",
+        "on": "On"
+      }
     }
   },
   "host": {

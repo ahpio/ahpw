@@ -3,7 +3,7 @@ import type { SessionState } from '@microsoft/agent-host-protocol';
 import { useScena, useStore } from '@softov/scena/react';
 import { ahpPaths, hostBridge } from '../../bridges/data.js';
 import { announcement } from './announce.js';
-import { browserLocks, sessionLock, type SessionLock } from './lock.js';
+import { agentLocks, sessionLock, WITHOUT_HTTPS, type SessionLock } from './lock.js';
 import { makeRunner, type Runner } from './runner.js';
 import { marksOn, modesNow, watchModes } from './registry.js';
 
@@ -23,6 +23,10 @@ export function useAgentTools(host: string, resource: string | undefined, sessio
     const watch = watchModes(scena, changed);
     return () => watch.dispose();
   }, () => modesNow(scena));
+  const withoutHttps = useSyncExternalStore((changed) => {
+    const watch = scena.store.subscribe(WITHOUT_HTTPS.path, changed);
+    return () => watch.dispose();
+  }, () => WITHOUT_HTTPS.read(scena.store));
   const connection = useStore<{ status?: string; generation?: number }>(ahpPaths(host).connection);
   const own = connection?.status === 'connected' ? hostBridge(host).clientId() : undefined;
   const loaded = session !== undefined;
@@ -32,16 +36,17 @@ export function useAgentTools(host: string, resource: string | undefined, sessio
   // On each connection too: a host that restarted knows no client.
   useEffect(() => {
     const now = latest.current.session;
-    // Where the browser has no locks, two windows would both run a call, so none is offered.
-    if (resource === undefined || own === undefined || now === undefined || browserLocks() === undefined) return;
-    const action = announcement(own, marksOn(scena).length > 0, now);
+    if (resource === undefined || own === undefined || now === undefined) return;
+    // Where the browser has no locks, two windows would both run a call, so nothing is offered unless a person
+    // turned on the windows' own; turned off again, the tools are taken back.
+    const action = announcement(own, marksOn(scena).length > 0 && agentLocks(scena) !== undefined, now);
     if (action !== undefined) hostBridge(host).dispatch(resource, action);
-  }, [scena, host, resource, own, connection?.generation, modes, loaded]);
+  }, [scena, host, resource, own, connection?.generation, modes, loaded, withoutHttps]);
 
   const lock = useRef<SessionLock | undefined>(undefined);
   const runner = useRef<Runner | undefined>(undefined);
   useEffect(() => {
-    const locks = browserLocks();
+    const locks = agentLocks(scena);
     if (resource === undefined || locks === undefined) return undefined;
     const made = makeRunner(scena, locks, host, {
       resource,
@@ -63,7 +68,7 @@ export function useAgentTools(host: string, resource: string | undefined, sessio
       lock.current = undefined;
       runner.current = undefined;
     };
-  }, [scena, host, resource]);
+  }, [scena, host, resource, withoutHttps]);
 
   const needed = session?.inputNeeded;
   useEffect(() => {
