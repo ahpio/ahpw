@@ -680,7 +680,11 @@
 /* A pill that opens a menu: its menu is placed under it, and a long description is cut, so the menu stays the width of a pill's list. */
 .web-menu-pill {
   display: inline-flex;
-  --oo-action-list-max-width: min(28rem, calc(100vw - 2rem));
+}
+
+/* A menu opens in a popup on the page's body, so it is held to a readable width there: a long description is cut instead of widening it. */
+.oo-popup .oo-action-list {
+  max-width: min(28rem, calc(100vw - 2rem));
 }
 
 /* An agent's icon before its name, and a badge after a model. */
